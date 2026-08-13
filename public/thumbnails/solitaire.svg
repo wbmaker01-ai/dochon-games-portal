@@ -1,0 +1,72 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 400 400" width="100%" height="100%">
+  <defs>
+    <!-- Royal Dark Theatre Backdrop -->
+    <radialGradient id="solitaireBg" x1="50%" y1="30%" r="85%">
+      <stop offset="0%" stop-color="#3A0007"/>
+      <stop offset="50%" stop-color="#1A0003"/>
+      <stop offset="100%" stop-color="#0A0002"/>
+    </radialGradient>
+
+    <!-- Golden Royal Crown & Text Gradient -->
+    <linearGradient id="royalGold" x1="0%" y1="0%" x2="0%" y2="100%">
+      <stop offset="0%" stop-color="#FFF756"/>
+      <stop offset="40%" stop-color="#FFD166"/>
+      <stop offset="80%" stop-color="#FFB703"/>
+      <stop offset="100%" stop-color="#D4AF37"/>
+    </linearGradient>
+    <linearGradient id="goldCardBorder" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#FFE600"/><stop offset="50%" stop-color="#FFB703"/><stop offset="100%" stop-color="#9A7B06"/>
+    </linearGradient>
+
+    <filter id="royalGlow" x="-30%" y="-30%" width="160%" height="160%">
+      <feDropShadow dx="0" dy="8" stdDeviation="8" flood-color="#FFD166" flood-opacity="0.35"/>
+      <feDropShadow dx="0" dy="4" stdDeviation="4" flood-color="#000000" flood-opacity="0.8"/>
+    </filter>
+  </defs>
+
+  <rect width="400" height="400" rx="36" fill="url(#solitaireBg)"/>
+
+  <!-- Golden Stage Light Rays & Sparkles -->
+  <circle cx="200" cy="180" r="140" fill="#FFD166" opacity="0.12" filter="blur(30px)"/>
+  <polygon points="80,90 84,100 94,104 84,108 80,118 76,108 66,104 76,100" fill="#FFD166"/>
+  <polygon points="320,110 324,120 334,124 324,128 320,138 316,128 306,124 316,120" fill="#FFD166"/>
+
+  <!-- 3D Glowing Royal Gold Playing Cards (King & Queen) -->
+  <g transform="translate(135, 175) rotate(-14)" filter="url(#royalGlow)">
+    <!-- King Card -->
+    <rect x="0" y="0" width="105" height="155" rx="14" fill="#1C0A00" stroke="url(#goldCardBorder)" stroke-width="4"/>
+    <rect x="6" y="6" width="93" height="143" rx="10" fill="none" stroke="#FFD166" stroke-width="1.5" stroke-dasharray="4,2"/>
+    <text x="20" y="32" font-family="'Outfit', serif" font-weight="900" font-size="24" fill="url(#royalGold)">K</text>
+    <text x="20" y="52" font-family="'Outfit', serif" font-size="20" fill="#D90429">♠</text>
+    <!-- King Emblem Crown Center -->
+    <circle cx="52" cy="78" r="24" fill="#FFD166" opacity="0.2"/>
+    <path d="M38,88 L42,68 L52,78 L62,68 L66,88 Z" fill="url(#royalGold)"/>
+  </g>
+
+  <g transform="translate(200, 160) rotate(12)" filter="url(#royalGlow)">
+    <!-- Queen Card -->
+    <rect x="0" y="0" width="105" height="155" rx="14" fill="#1C0A00" stroke="url(#goldCardBorder)" stroke-width="4"/>
+    <rect x="6" y="6" width="93" height="143" rx="10" fill="none" stroke="#FFD166" stroke-width="4"/>
+    <rect x="6" y="6" width="93" height="143" rx="10" fill="none" stroke="#FFD166" stroke-width="1.5" stroke-dasharray="4,2"/>
+    <text x="20" y="32" font-family="'Outfit', serif" font-weight="900" font-size="24" fill="url(#royalGold)">Q</text>
+    <text x="20" y="52" font-family="'Outfit', serif" font-size="20" fill="#D90429">♥</text>
+    <!-- Queen Heart Emblem -->
+    <circle cx="52" cy="78" r="24" fill="#FF4D6D" opacity="0.25"/>
+    <path d="M52,90 C32,70 32,58 44,54 C50,52 52,58 52,58 C52,58 54,52 60,54 C72,58 72,70 52,90 Z" fill="#FF0054"/>
+  </g>
+
+  <!-- Gorgeous 3D Royal Gold Header Text "SOLITAIRE" (Matches Solitaire Reference) -->
+  <g filter="url(#royalGlow)">
+    <text x="200" y="62" font-family="'Outfit', 'Times New Roman', serif" font-weight="900" font-size="42" fill="url(#royalGold)" stroke="#2B0500" stroke-width="6" stroke-linejoin="round" text-anchor="middle" letter-spacing="3">
+      SOLITAIRE
+    </text>
+    <text x="200" y="62" font-family="'Outfit', 'Times New Roman', serif" font-weight="900" font-size="42" fill="url(#royalGold)" text-anchor="middle" letter-spacing="3">
+      SOLITAIRE
+    </text>
+    <text x="200" y="85" font-family="'Outfit', sans-serif" font-weight="800" font-size="12" fill="#FFD166" text-anchor="middle" letter-spacing="4">
+      ROYAL COLLECTION
+    </text>
+  </g>
+
+  <rect x="4" y="4" width="392" height="392" rx="32" fill="none" stroke="url(#royalGold)" stroke-width="6" opacity="0.4"/>
+</svg>
