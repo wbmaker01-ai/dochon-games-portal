@@ -638,3 +638,170 @@ body {
 .game-modal-close-btn:hover {
   transform: scale(1.05) !important;
 }
+
+/* ------------------------------------------------------------- */
+/* CUTE ARCADE TOUCH D-PAD & ACTION BUTTONS (BULLETPROOF PLAIN CSS) */
+/* ------------------------------------------------------------- */
+
+.arcade-action-bar {
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  gap: 12px !important;
+  flex-wrap: wrap !important;
+  margin-top: 14px !important;
+}
+
+.btn-arcade-purple {
+  background: linear-gradient(135deg, #6366F1 0%, #8B5CF6 100%) !important;
+  color: #FFFFFF !important;
+  border: 1.5px solid #A5B4FC !important;
+  padding: 10px 18px !important;
+  border-radius: 16px !important;
+  font-size: 13px !important;
+  font-weight: 900 !important;
+  cursor: pointer !important;
+  display: inline-flex !important;
+  align-items: center !important;
+  gap: 6px !important;
+  box-shadow: 0 6px 16px rgba(99, 102, 241, 0.4) !important;
+  transition: transform 0.15s ease !important;
+}
+.btn-arcade-purple:active {
+  transform: scale(0.94) !important;
+}
+
+.btn-arcade-emerald {
+  background: linear-gradient(135deg, #10B981 0%, #14B8A6 100%) !important;
+  color: #FFFFFF !important;
+  border: 1.5px solid #6EE7B7 !important;
+  padding: 10px 18px !important;
+  border-radius: 16px !important;
+  font-size: 13px !important;
+  font-weight: 900 !important;
+  cursor: pointer !important;
+  display: inline-flex !important;
+  align-items: center !important;
+  gap: 6px !important;
+  box-shadow: 0 6px 16px rgba(16, 185, 129, 0.4) !important;
+  transition: transform 0.15s ease !important;
+}
+.btn-arcade-emerald:active {
+  transform: scale(0.94) !important;
+}
+
+.btn-arcade-amber {
+  background: linear-gradient(135deg, #F59E0B 0%, #F97316 100%) !important;
+  color: #0F172A !important;
+  border: 1.5px solid #FDE047 !important;
+  padding: 10px 18px !important;
+  border-radius: 16px !important;
+  font-size: 13px !important;
+  font-weight: 900 !important;
+  cursor: pointer !important;
+  display: inline-flex !important;
+  align-items: center !important;
+  gap: 6px !important;
+  box-shadow: 0 6px 16px rgba(245, 158, 11, 0.4) !important;
+  transition: transform 0.15s ease !important;
+}
+.btn-arcade-amber:active {
+  transform: scale(0.94) !important;
+}
+
+/* D-PAD CONTROL PANEL */
+.dpad-panel {
+  display: flex !important;
+  flex-direction: column !important;
+  align-items: center !important;
+  background: rgba(15, 23, 42, 0.95) !important;
+  padding: 14px 18px !important;
+  border-radius: 28px !important;
+  border: 3px solid #FBBF24 !important;
+  box-shadow: 0 12px 30px rgba(0, 0, 0, 0.6), 0 0 25px rgba(251, 191, 36, 0.25) !important;
+  margin-top: 14px !important;
+}
+
+.dpad-title {
+  font-size: 11px !important;
+  font-weight: 900 !important;
+  color: #FBBF24 !important;
+  letter-spacing: 1px !important;
+  margin-bottom: 10px !important;
+  display: flex !important;
+  align-items: center !important;
+  gap: 4px !important;
+}
+
+/* 3x3 GRID LAYOUT */
+.dpad-grid-3x3 {
+  display: grid !important;
+  grid-template-columns: repeat(3, 64px) !important;
+  grid-template-rows: repeat(3, 64px) !important;
+  gap: 8px !important;
+  align-items: center !important;
+  justify-items: center !important;
+}
+
+.dpad-btn {
+  width: 64px !important;
+  height: 64px !important;
+  border-radius: 18px !important;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  cursor: pointer !important;
+  user-select: none !important;
+  touch-action: manipulation !important;
+  transition: transform 0.1s ease !important;
+  box-shadow: 0 6px 14px rgba(0, 0, 0, 0.5) !important;
+}
+.dpad-btn:active {
+  transform: scale(0.88) !important;
+}
+
+.dpad-btn-up {
+  grid-column: 2 !important;
+  grid-row: 1 !important;
+  background: linear-gradient(180deg, #FDE047 0%, #F59E0B 100%) !important;
+  color: #0F172A !important;
+  border: 2.5px solid #FEF08A !important;
+}
+
+.dpad-btn-left {
+  grid-column: 1 !important;
+  grid-row: 2 !important;
+  background: linear-gradient(180deg, #5EEAD4 0%, #0D9488 100%) !important;
+  color: #0F172A !important;
+  border: 2.5px solid #99F6E4 !important;
+}
+
+.dpad-btn-center {
+  grid-column: 2 !important;
+  grid-row: 2 !important;
+  width: 40px !important;
+  height: 40px !important;
+  border-radius: 50% !important;
+  background-color: #030712 !important;
+  border: 2px solid #334155 !important;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  font-size: 16px !important;
+}
+
+.dpad-btn-right {
+  grid-column: 3 !important;
+  grid-row: 2 !important;
+  background: linear-gradient(180deg, #F472B6 0%, #E11D48 100%) !important;
+  color: #FFFFFF !important;
+  border: 2.5px solid #FBCFE8 !important;
+}
+
+.dpad-btn-down {
+  grid-column: 2 !important;
+  grid-row: 3 !important;
+  background: linear-gradient(180deg, #FB923C 0%, #EA580C 100%) !important;
+  color: #FFFFFF !important;
+  border: 2.5px solid #FFEDD5 !important;
+}
