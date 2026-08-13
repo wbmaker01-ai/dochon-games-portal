@@ -560,3 +560,81 @@ body {
   transform: translateY(-2px);
   filter: brightness(1.1);
 }
+
+/* ------------------------------------------------------------- */
+/* GAME OVERLAY POPUP MODAL (BULLETPROOF PLAIN CSS) */
+/* ------------------------------------------------------------- */
+
+.game-overlay {
+  position: fixed !important;
+  top: 0 !important;
+  left: 0 !important;
+  right: 0 !important;
+  bottom: 0 !important;
+  width: 100vw !important;
+  height: 100vh !important;
+  z-index: 99999 !important;
+  background-color: rgba(3, 7, 18, 0.88) !important;
+  backdrop-filter: blur(14px) !important;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  padding: 12px !important;
+  overflow-x: hidden !important;
+  overflow-y: auto !important;
+}
+
+.game-modal-box {
+  position: relative !important;
+  width: 100% !important;
+  max-width: 880px !important;
+  max-height: 96vh !important;
+  background: linear-gradient(150deg, #0F172A 0%, #1E1B4B 50%, #090D16 100%) !important;
+  border: 3.5px solid #FBBF24 !important;
+  border-radius: 24px !important;
+  box-shadow: 0 25px 60px rgba(0, 0, 0, 0.95), 0 0 40px rgba(251, 191, 36, 0.3) !important;
+  color: #FFFFFF !important;
+  display: flex !important;
+  flex-direction: column !important;
+  margin: auto !important;
+  overflow: hidden !important;
+}
+
+.game-modal-header {
+  display: flex !important;
+  align-items: center !important;
+  justify-content: space-between !important;
+  padding: 12px 20px !important;
+  background-color: #030712 !important;
+  border-bottom: 2px solid rgba(251, 191, 36, 0.4) !important;
+  flex-shrink: 0 !important;
+}
+
+.game-modal-body {
+  padding: 12px !important;
+  overflow-y: auto !important;
+  flex: 1 !important;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+}
+
+.game-modal-close-btn {
+  background: linear-gradient(135deg, #EF4444 0%, #DC2626 100%) !important;
+  color: #FFFFFF !important;
+  border: 1.5px solid #F87171 !important;
+  padding: 6px 14px !important;
+  border-radius: 12px !important;
+  font-size: 13px !important;
+  font-weight: 900 !important;
+  cursor: pointer !important;
+  display: flex !important;
+  align-items: center !important;
+  gap: 6px !important;
+  box-shadow: 0 4px 12px rgba(239, 68, 68, 0.5) !important;
+  transition: transform 0.15s ease !important;
+}
+
+.game-modal-close-btn:hover {
+  transform: scale(1.05) !important;
+}

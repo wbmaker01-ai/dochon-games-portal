@@ -167,30 +167,40 @@ export default function App() {
 
       {/* 4. Responsive Overlay Popup Modal (Safe Closing: Only Close Button Exits) */}
       {activeGame && (
-        <div className="fixed inset-0 z-[100] bg-slate-950/90 backdrop-blur-md flex items-center justify-center p-2 sm:p-4 overflow-y-auto">
-          <div className="relative w-full max-w-4xl max-h-[96vh] flex flex-col bg-slate-900/95 border-2 border-amber-500/60 rounded-2xl shadow-2xl overflow-hidden my-auto">
+        <div className="game-overlay">
+          <div className="game-modal-box">
             {/* Modal Header Bar */}
-            <div className="flex items-center justify-between px-4 py-2.5 bg-slate-950 border-b border-amber-500/30 shrink-0">
-              <div className="flex items-center gap-2">
-                <span className="text-base sm:text-lg font-black text-amber-400">
+            <div className="game-modal-header">
+              <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                <span style={{ fontSize: '1.05rem', fontWeight: 900, color: '#FBBF24' }}>
                   {activeGame === 'pacman' ? '🕹️ 도촌 팩맨 (DOCHON PAC-MAN)' : '🦖 도촌 공룡 달리기'}
                 </span>
-                <span className="text-[10px] bg-amber-400/20 text-amber-300 border border-amber-400/40 px-2 py-0.5 rounded-full font-extrabold uppercase hidden sm:inline-block">
+                <span style={{
+                  backgroundColor: 'rgba(251, 191, 36, 0.2)',
+                  color: '#FBBF24',
+                  border: '1px solid rgba(251, 191, 36, 0.5)',
+                  padding: '2px 8px',
+                  borderRadius: '9999px',
+                  fontSize: '10px',
+                  fontWeight: 900,
+                  textTransform: 'uppercase'
+                }}>
                   Dochon Arcade
                 </span>
               </div>
 
               <button
                 onClick={() => setActiveGame(null)}
-                className="text-slate-200 hover:text-white bg-red-600/80 hover:bg-red-600 px-3.5 py-1.5 rounded-xl transition flex items-center gap-1.5 text-xs font-black shadow-md border border-red-500/50"
+                className="game-modal-close-btn"
                 title="게임 종료 및 닫기"
               >
-                <X className="w-4 h-4 text-white" /> 닫기
+                <X style={{ width: '16px', height: '16px', color: '#FFFFFF' }} />
+                <span>닫기</span>
               </button>
             </div>
 
             {/* Modal Game Content Area */}
-            <div className="p-2 sm:p-4 overflow-y-auto flex-1 flex items-center justify-center">
+            <div className="game-modal-body">
               {activeGame === 'pacman' && (
                 <PacManGame onScoreSubmitted={() => openInPageLeaderboardModal('pacman')} />
               )}
