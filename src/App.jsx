@@ -33,10 +33,10 @@ export default function App() {
       <header className="portal-header">
         <div className="portal-title-box">
           <h1 className="text-2xl sm:text-3xl font-black tracking-tight text-white flex items-center justify-center gap-2">
-            DOCHON <span className="text-amber-400">GAMES</span>
+            DOCHON GAMES <span className="text-amber-400">PORTAL</span>
           </h1>
           <p className="text-[11px] text-slate-400 font-bold tracking-widest uppercase mt-0.5">
-            도촌초등학교·중학교 게임 종합 포털
+            도촌초등학교 게임 종합 포털
           </p>
         </div>
 
@@ -175,7 +175,7 @@ export default function App() {
         </div>
       )}
 
-      {/* 5. Leaderboard Modal */}
+      {/* 5. Leaderboard Popup Window Modal */}
       <LeaderboardModal
         isOpen={isLeaderboardOpen}
         onClose={() => setIsLeaderboardOpen(false)}
@@ -184,7 +184,7 @@ export default function App() {
 
       {/* 6. Centered Footer */}
       <footer className="portal-footer">
-        <p className="font-bold text-slate-400">도촌초등학교·중학교 게임 포털</p>
+        <p className="font-bold text-slate-400">도촌초등학교 게임 포털</p>
         <p className="text-[11px] text-slate-600 mt-1">
           Google Games 타일 방식 모방 · 비영리 교육용 확장 포털
         </p>
