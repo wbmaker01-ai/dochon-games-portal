@@ -1,5 +1,5 @@
-import React, { useState } from 'react';
-import PacManGame from './components/games/PacManGame';
+import React, { useState, useEffect } from 'react';
+import PacManGame from './components/games/pacman/PacManGame';
 import DinoGame from './components/games/DinoGame';
 import GameCard from './components/GameCard';
 import LeaderboardModal from './components/LeaderboardModal';
@@ -12,6 +12,16 @@ export default function App() {
   const [leaderboardTab, setLeaderboardTab] = useState('pacman');
   const [filterCategory, setFilterCategory] = useState('ALL');
   const [searchQuery, setSearchQuery] = useState('');
+
+  // Lock body scroll when a game modal is active (No ESC key exit to prevent accidental loss of gameplay progress)
+  useEffect(() => {
+    if (activeGame) {
+      document.body.style.overflow = 'hidden';
+      return () => {
+        document.body.style.overflow = '';
+      };
+    }
+  }, [activeGame]);
 
   const filterGame = (game) => {
     const matchesCategory = filterCategory === 'ALL' || game.category === filterCategory;
@@ -40,7 +50,7 @@ export default function App() {
           </p>
         </div>
 
-        {/* Search Bar & Pure In-Page Modal Button (No External Window Icon) */}
+        {/* Search Bar & Pure In-Page Modal Button */}
         <div className="portal-search-row">
           <div className="portal-search-input">
             <Search className="w-4 h-4 text-slate-400 mr-2 shrink-0" />
@@ -155,23 +165,39 @@ export default function App() {
         )}
       </main>
 
-      {/* 4. Game Modal Frame */}
+      {/* 4. Responsive Overlay Popup Modal (Safe Closing: Only Close Button Exits) */}
       {activeGame && (
-        <div className="fixed inset-0 z-50 bg-black/95 backdrop-blur-md flex items-center justify-center p-4 overflow-y-auto">
-          <div className="relative w-full max-w-4xl my-auto">
-            <button
-              onClick={() => setActiveGame(null)}
-              className="absolute -top-12 right-0 text-white bg-slate-800 hover:bg-slate-700 p-2.5 rounded-full transition flex items-center gap-1 text-xs font-black px-4 shadow-xl"
-            >
-              <X className="w-5 h-5" /> 닫기 (Esc)
-            </button>
+        <div className="fixed inset-0 z-[100] bg-slate-950/90 backdrop-blur-md flex items-center justify-center p-2 sm:p-4 overflow-y-auto">
+          <div className="relative w-full max-w-4xl max-h-[96vh] flex flex-col bg-slate-900/95 border-2 border-amber-500/60 rounded-2xl shadow-2xl overflow-hidden my-auto">
+            {/* Modal Header Bar */}
+            <div className="flex items-center justify-between px-4 py-2.5 bg-slate-950 border-b border-amber-500/30 shrink-0">
+              <div className="flex items-center gap-2">
+                <span className="text-base sm:text-lg font-black text-amber-400">
+                  {activeGame === 'pacman' ? '🕹️ 도촌 팩맨 (DOCHON PAC-MAN)' : '🦖 도촌 공룡 달리기'}
+                </span>
+                <span className="text-[10px] bg-amber-400/20 text-amber-300 border border-amber-400/40 px-2 py-0.5 rounded-full font-extrabold uppercase hidden sm:inline-block">
+                  Dochon Arcade
+                </span>
+              </div>
 
-            {activeGame === 'pacman' && (
-              <PacManGame onScoreSubmitted={() => openInPageLeaderboardModal('pacman')} />
-            )}
-            {activeGame === 'dino' && (
-              <DinoGame onScoreSubmitted={() => openInPageLeaderboardModal('dino')} />
-            )}
+              <button
+                onClick={() => setActiveGame(null)}
+                className="text-slate-200 hover:text-white bg-red-600/80 hover:bg-red-600 px-3.5 py-1.5 rounded-xl transition flex items-center gap-1.5 text-xs font-black shadow-md border border-red-500/50"
+                title="게임 종료 및 닫기"
+              >
+                <X className="w-4 h-4 text-white" /> 닫기
+              </button>
+            </div>
+
+            {/* Modal Game Content Area */}
+            <div className="p-2 sm:p-4 overflow-y-auto flex-1 flex items-center justify-center">
+              {activeGame === 'pacman' && (
+                <PacManGame onScoreSubmitted={() => openInPageLeaderboardModal('pacman')} />
+              )}
+              {activeGame === 'dino' && (
+                <DinoGame onScoreSubmitted={() => openInPageLeaderboardModal('dino')} />
+              )}
+            </div>
           </div>
         </div>
       )}
