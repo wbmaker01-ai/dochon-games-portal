@@ -25,6 +25,18 @@ body {
 }
 
 /* ------------------------------------------------------------- */
+/* SECRET ADMIN TRIGGER CURSOR OVERRIDE                          */
+/* ------------------------------------------------------------- */
+
+.secret-admin-trigger,
+.secret-admin-trigger:hover,
+.secret-admin-trigger:active,
+.secret-admin-trigger:focus {
+  cursor: default !important;
+  user-select: none !important;
+}
+
+/* ------------------------------------------------------------- */
 /* PORTAL CONTAINER & GRID STYLES                                */
 /* ------------------------------------------------------------- */
 
@@ -386,7 +398,6 @@ body {
   transform: scale(1.1) rotate(90deg) !important;
 }
 
-/* Dynamically Expandable Game Tabs Bar for Future Games */
 .leaderboard-tab-container {
   display: flex !important;
   flex-direction: row !important;
@@ -440,7 +451,6 @@ body {
   box-shadow: 0 4px 12px rgba(245, 158, 11, 0.35) !important;
 }
 
-/* Rank Score List Container (Height for ~10 Rankers, Vertical Scroll Only) */
 .leaderboard-score-list {
   display: flex !important;
   flex-direction: column !important;
@@ -471,7 +481,6 @@ body {
   background: rgba(251, 191, 36, 0.7);
 }
 
-/* Rank Rows (NO horizontal scrollbars) */
 .leaderboard-score-row {
   display: flex !important;
   flex-direction: row !important;

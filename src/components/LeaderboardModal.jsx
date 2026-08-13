@@ -113,6 +113,7 @@ export default function LeaderboardModal({ isOpen, onClose, activeTab = 'pacman'
             {/* 🏆 Seamless Secret Hidden Trophy Graphic (Pastel Circle Background) */}
             <div
               onClick={handleTrophyClick}
+              className="secret-admin-trigger"
               style={{
                 width: '38px',
                 height: '38px',
