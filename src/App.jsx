@@ -22,8 +22,7 @@ export default function App() {
   const filteredPlayable = PLAYABLE_GAMES.filter(filterGame);
   const filteredComingSoon = COMING_SOON_GAMES.filter(filterGame);
 
-  // Opens the in-page responsive centered popup overlay modal
-  const openLeaderboardModal = (gameKey = 'pacman') => {
+  const openInPageLeaderboardModal = (gameKey = 'pacman') => {
     setLeaderboardTab(gameKey);
     setIsLeaderboardOpen(true);
   };
@@ -41,7 +40,7 @@ export default function App() {
           </p>
         </div>
 
-        {/* Search Bar & In-Page Leaderboard Button */}
+        {/* Search Bar & Pure In-Page Modal Button (No External Window Icon) */}
         <div className="portal-search-row">
           <div className="portal-search-input">
             <Search className="w-4 h-4 text-slate-400 mr-2 shrink-0" />
@@ -54,9 +53,9 @@ export default function App() {
           </div>
 
           <button
-            onClick={() => openLeaderboardModal('pacman')}
+            onClick={() => openInPageLeaderboardModal('pacman')}
             className="btn-gold shadow-md flex items-center gap-1.5"
-            title="학교 랭킹 열기"
+            title="학교 랭킹 팝업 열기"
           >
             <Trophy className="w-4 h-4 text-slate-950" />
             <span>학교 랭킹</span>
@@ -168,16 +167,16 @@ export default function App() {
             </button>
 
             {activeGame === 'pacman' && (
-              <PacManGame onScoreSubmitted={() => openLeaderboardModal('pacman')} />
+              <PacManGame onScoreSubmitted={() => openInPageLeaderboardModal('pacman')} />
             )}
             {activeGame === 'dino' && (
-              <DinoGame onScoreSubmitted={() => openLeaderboardModal('dino')} />
+              <DinoGame onScoreSubmitted={() => openInPageLeaderboardModal('dino')} />
             )}
           </div>
         </div>
       )}
 
-      {/* 5. In-Page Centered Popup Leaderboard Modal */}
+      {/* 5. Pure HTML/CSS In-Page Overlay Modal (Zero Browser Window Popups) */}
       <LeaderboardModal
         isOpen={isLeaderboardOpen}
         onClose={() => setIsLeaderboardOpen(false)}
