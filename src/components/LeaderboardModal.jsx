@@ -2,15 +2,8 @@ import React, { useState, useEffect } from 'react';
 import { getLeaderboardFromDB, updateScoreInDB, deleteScoreFromDB } from '../utils/leaderboardApi';
 import { Trophy, X, Crown, Medal, Zap, RefreshCw, Sparkles, Star, Heart, Lock, Edit2, Trash2, Check, LogOut, ShieldAlert } from 'lucide-react';
 
-// Precomputed SHA-256 Hash of Password '8582'
-const ADMIN_PASSWORD_HASH = 'd7a8581e28fa0313f8c85351a99d45e546170d740c2688849b29c9103e65ebcf';
-
-async function sha256(message) {
-  const msgUint8 = new TextEncoder().encode(message);
-  const hashBuffer = await crypto.subtle.digest('SHA-256', msgUint8);
-  const hashArray = Array.from(new Uint8Array(hashBuffer));
-  return hashArray.map(b => b.toString(16).padStart(2, '0')).join('');
-}
+// Obfuscated Base64 hash for password '8582'
+const ENCODED_PASS = 'ODU4Mg=='; // btoa('8582')
 
 export default function LeaderboardModal({ isOpen, onClose, activeTab = 'pacman' }) {
   const [currentTab, setCurrentTab] = useState(activeTab);
@@ -47,7 +40,7 @@ export default function LeaderboardModal({ isOpen, onClose, activeTab = 'pacman'
     setLoading(false);
   };
 
-  // Secret Hidden Button Trigger on Trophy Icon
+  // Secret Hidden Button Trigger on Trophy Icon (No button card styling, looks seamless)
   const handleTrophyClick = () => {
     if (isAdminMode) return;
     setPasswordInput('');
@@ -55,17 +48,17 @@ export default function LeaderboardModal({ isOpen, onClose, activeTab = 'pacman'
     setShowPasswordPrompt(true);
   };
 
-  // Verify Admin Password Hash
-  const handlePasswordSubmit = async (e) => {
+  // Verify Admin Password
+  const handlePasswordSubmit = (e) => {
     e.preventDefault();
-    const inputHash = await sha256(passwordInput.trim());
-    if (inputHash === ADMIN_PASSWORD_HASH) {
+    const cleanInput = String(passwordInput).trim();
+    if (cleanInput === '8582' || btoa(cleanInput) === ENCODED_PASS) {
       setIsAdminMode(true);
       setShowPasswordPrompt(false);
       setPasswordInput('');
       setPasswordError('');
     } else {
-      setPasswordError('❌ 암호가 올바르지 않습니다. (비밀번호 힌트: 4자리)');
+      setPasswordError('❌ 암호가 올바르지 않습니다. (비밀번호: 4자리)');
     }
   };
 
@@ -104,7 +97,7 @@ export default function LeaderboardModal({ isOpen, onClose, activeTab = 'pacman'
       {/* Colorful 3D Candy Pop Container Box */}
       <div className="leaderboard-modal-box">
         
-        {/* Vibrant Red Close Button (Top-Right) */}
+        {/* Vibrant Red Close Button (Top-Right Only, No Bottom Button) */}
         <button
           onClick={onClose}
           className="leaderboard-close-btn"
@@ -113,35 +106,50 @@ export default function LeaderboardModal({ isOpen, onClose, activeTab = 'pacman'
           <X className="w-5 h-5" />
         </button>
 
-        {/* Playful Header with Hidden Secret Admin Trophy Button */}
+        {/* Header with Seamless Hidden Trophy Secret Button */}
         <div className="flex flex-col items-center justify-center text-center gap-1.5 pt-1">
           <div className="flex items-center justify-center gap-2">
-            {/* Hidden Secret Trigger Button */}
-            <button
+            
+            {/* 🏆 Seamless Secret Hidden Trophy Icon (Pastel Circle Background) */}
+            <div
               onClick={handleTrophyClick}
-              className="p-2 bg-gradient-to-tr from-amber-400 to-yellow-300 rounded-2xl shadow-lg border-2 border-white rotate-3 cursor-pointer hover:scale-110 active:scale-95 transition-transform"
-              title="도촌 관리자 전용 비밀 버튼"
+              className="w-10 h-10 rounded-full bg-amber-400/20 text-amber-400 border border-amber-400/40 flex items-center justify-center cursor-pointer hover:scale-105 active:scale-95 transition-transform shrink-0"
+              title="도촌초등학교 명예의 전당"
             >
-              <Trophy className="w-7 h-7 text-amber-950 fill-amber-900" />
-            </button>
+              <Trophy className="w-6 h-6 text-amber-400 fill-amber-400/40" />
+            </div>
+
             <h2 className="text-2xl md:text-3xl font-black tracking-tight text-white drop-shadow-md">
               도촌초등학교 <span className="text-amber-300">명예의 전당</span>
             </h2>
-            <Sparkles className="w-6 h-6 text-yellow-300 animate-bounce" />
+
+            {/* Sparkles Icon inside Pastel Yellow Circle */}
+            <div className="w-7 h-7 rounded-full bg-yellow-400/20 text-yellow-300 border border-yellow-400/40 flex items-center justify-center shrink-0 animate-pulse">
+              <Sparkles className="w-4 h-4 text-yellow-300" />
+            </div>
           </div>
 
           <div className="flex items-center justify-center gap-2 text-xs">
-            <span className="bg-pink-500/30 text-pink-200 border border-pink-400/50 px-2.5 py-0.5 rounded-full text-[11px] font-black flex items-center gap-1 shadow-sm">
-              <Heart className="w-3 h-3 text-pink-400 fill-pink-400" /> 도촌어린이 랭킹
+            {/* Heart Icon inside Pastel Pink Circle */}
+            <span className="bg-pink-500/20 text-pink-200 border border-pink-400/40 px-2.5 py-1 rounded-full text-[11px] font-black flex items-center gap-1.5 shadow-sm">
+              <div className="w-4 h-4 rounded-full bg-pink-500/40 flex items-center justify-center shrink-0">
+                <Heart className="w-2.5 h-2.5 text-pink-300 fill-pink-300" />
+              </div>
+              <span>도촌어린이 랭킹</span>
             </span>
-            <span className="bg-emerald-500/30 text-emerald-200 border border-emerald-400/50 px-2.5 py-0.5 rounded-full text-[11px] font-black flex items-center gap-1 shadow-sm">
-              <RefreshCw className="w-3 h-3 text-emerald-400 animate-spin" /> 실시간 클라우드 DB
+
+            {/* Refresh Icon inside Pastel Emerald Circle */}
+            <span className="bg-emerald-500/20 text-emerald-200 border border-emerald-400/40 px-2.5 py-1 rounded-full text-[11px] font-black flex items-center gap-1.5 shadow-sm">
+              <div className="w-4 h-4 rounded-full bg-emerald-500/40 flex items-center justify-center shrink-0">
+                <RefreshCw className="w-2.5 h-2.5 text-emerald-300 animate-spin" />
+              </div>
+              <span>실시간 클라우드 DB</span>
             </span>
           </div>
 
-          {/* Admin Mode Badge Header */}
+          {/* Admin Mode Active Banner */}
           {isAdminMode && (
-            <div className="mt-2 w-full bg-gradient-to-r from-red-600/90 to-rose-600/90 border-2 border-red-400 text-white px-4 py-1.5 rounded-2xl text-xs font-black flex items-center justify-between shadow-lg animate-pulse">
+            <div className="mt-2 w-full bg-gradient-to-r from-red-600/90 to-rose-600/90 border-2 border-red-400 text-white px-4 py-2 rounded-2xl text-xs font-black flex items-center justify-between shadow-lg animate-pulse">
               <span className="flex items-center gap-1.5">
                 <ShieldAlert className="w-4 h-4 text-yellow-300" />
                 🔐 관리자 모드 (수정 및 삭제 권한 활성화됨)
@@ -183,7 +191,7 @@ export default function LeaderboardModal({ isOpen, onClose, activeTab = 'pacman'
           </button>
         </div>
 
-        {/* Leaderboard Score List with Admin Edit & Delete Controls */}
+        {/* Leaderboard Score List with Pastel Circle Background Icons */}
         <div className="flex flex-col gap-2.5 max-h-[300px] md:max-h-[340px] overflow-y-auto pr-1">
           {loading && scores.length === 0 ? (
             <div className="py-8 text-center text-amber-300 text-xs font-bold flex items-center justify-center gap-2 bg-slate-900/50 rounded-2xl border border-slate-700">
@@ -207,8 +215,11 @@ export default function LeaderboardModal({ isOpen, onClose, activeTab = 'pacman'
                 nameColor = 'text-amber-950 font-black';
                 scoreColor = 'text-amber-900 font-black';
                 rankBadge = (
-                  <div className="flex items-center gap-1 bg-amber-500 text-white px-2 py-0.5 rounded-full text-xs font-black shadow-md border border-white shrink-0">
-                    <Crown className="w-4 h-4 text-yellow-200 fill-yellow-200" /> 1등
+                  <div className="flex items-center gap-1.5 bg-amber-500 text-white px-2.5 py-1 rounded-full text-xs font-black shadow-md border border-white shrink-0">
+                    <div className="w-5 h-5 rounded-full bg-yellow-300/40 flex items-center justify-center shrink-0">
+                      <Crown className="w-3.5 h-3.5 text-yellow-200 fill-yellow-200" />
+                    </div>
+                    <span>1등</span>
                   </div>
                 );
               } else if (rank === 2) {
@@ -216,8 +227,11 @@ export default function LeaderboardModal({ isOpen, onClose, activeTab = 'pacman'
                 nameColor = 'text-sky-950 font-black';
                 scoreColor = 'text-sky-900 font-black';
                 rankBadge = (
-                  <div className="flex items-center gap-1 bg-sky-500 text-white px-2 py-0.5 rounded-full text-xs font-black shadow-md border border-white shrink-0">
-                    <Medal className="w-4 h-4 text-sky-100" /> 2등
+                  <div className="flex items-center gap-1.5 bg-sky-500 text-white px-2.5 py-1 rounded-full text-xs font-black shadow-md border border-white shrink-0">
+                    <div className="w-5 h-5 rounded-full bg-sky-200/40 flex items-center justify-center shrink-0">
+                      <Medal className="w-3.5 h-3.5 text-sky-100" />
+                    </div>
+                    <span>2등</span>
                   </div>
                 );
               } else if (rank === 3) {
@@ -225,13 +239,16 @@ export default function LeaderboardModal({ isOpen, onClose, activeTab = 'pacman'
                 nameColor = 'text-rose-950 font-black';
                 scoreColor = 'text-rose-900 font-black';
                 rankBadge = (
-                  <div className="flex items-center gap-1 bg-rose-500 text-white px-2 py-0.5 rounded-full text-xs font-black shadow-md border border-white shrink-0">
-                    <Medal className="w-4 h-4 text-rose-100" /> 3등
+                  <div className="flex items-center gap-1.5 bg-rose-500 text-white px-2.5 py-1 rounded-full text-xs font-black shadow-md border border-white shrink-0">
+                    <div className="w-5 h-5 rounded-full bg-rose-200/40 flex items-center justify-center shrink-0">
+                      <Medal className="w-3.5 h-3.5 text-rose-100" />
+                    </div>
+                    <span>3등</span>
                   </div>
                 );
               } else {
                 rankBadge = (
-                  <div className="w-6 h-6 rounded-full bg-slate-800 text-slate-300 flex items-center justify-center text-xs font-extrabold border border-slate-600 shrink-0">
+                  <div className="w-7 h-7 rounded-full bg-slate-800 text-slate-300 flex items-center justify-center text-xs font-extrabold border border-slate-600 shrink-0">
                     {rank}
                   </div>
                 );
@@ -298,8 +315,11 @@ export default function LeaderboardModal({ isOpen, onClose, activeTab = 'pacman'
                       </div>
 
                       <div className="flex items-center gap-2 shrink-0">
-                        <div className="flex items-center gap-1 bg-black/20 px-3 py-1 rounded-xl border border-white/20">
-                          <Zap className={`w-4 h-4 ${rank <= 3 ? scoreColor : 'text-amber-400'}`} />
+                        <div className="flex items-center gap-1.5 bg-black/20 px-3 py-1 rounded-xl border border-white/20">
+                          {/* Score Zap Icon inside Pastel Circle */}
+                          <div className="w-5 h-5 rounded-full bg-amber-400/20 flex items-center justify-center shrink-0">
+                            <Zap className={`w-3.5 h-3.5 ${rank <= 3 ? scoreColor : 'text-amber-400'}`} />
+                          </div>
                           <span className={`text-base md:text-lg font-black ${scoreColor}`}>
                             {item.score.toLocaleString()} <span className="text-[11px] font-bold opacity-80">점</span>
                           </span>
@@ -333,10 +353,13 @@ export default function LeaderboardModal({ isOpen, onClose, activeTab = 'pacman'
           )}
         </div>
 
-        {/* Footer Text (Cleaned up, no '닫기' button at bottom) */}
+        {/* Footer Text (Cleaned up, no bottom close button) */}
         <div className="pt-2 border-t border-slate-700/80 flex items-center justify-center">
-          <span className="text-xs font-extrabold text-amber-200 flex items-center gap-1">
-            <Star className="w-3.5 h-3.5 text-yellow-400 fill-yellow-400" /> 도촌초등학교 게임 명예의 전당
+          <span className="text-xs font-extrabold text-amber-200 flex items-center gap-1.5">
+            <div className="w-5 h-5 rounded-full bg-yellow-400/20 flex items-center justify-center shrink-0">
+              <Star className="w-3.5 h-3.5 text-yellow-300 fill-yellow-300" />
+            </div>
+            <span>도촌초등학교 게임 명예의 전당</span>
           </span>
         </div>
       </div>
@@ -344,10 +367,10 @@ export default function LeaderboardModal({ isOpen, onClose, activeTab = 'pacman'
       {/* Secret Password Prompt Overlay Modal */}
       {showPasswordPrompt && (
         <div className="fixed inset-0 z-[100000] bg-black/90 backdrop-blur-md flex items-center justify-center p-4">
-          <div className="bg-[#1C1F24] border-4 border-amber-400 rounded-3xl p-6 w-full max-w-sm text-center shadow-2xl flex flex-col gap-4 animate-in zoom-in-95">
+          <div className="bg-[#1E1B4B] border-4 border-[#FFD166] rounded-3xl p-6 w-full max-w-sm text-center shadow-2xl flex flex-col gap-4 animate-in zoom-in-95">
             <div className="flex flex-col items-center gap-2">
-              <div className="p-3 bg-amber-400/20 text-amber-400 rounded-2xl border border-amber-400/50">
-                <Lock className="w-8 h-8" />
+              <div className="w-12 h-12 rounded-full bg-amber-400/20 text-amber-400 border border-amber-400/50 flex items-center justify-center shadow-lg">
+                <Lock className="w-6 h-6 text-amber-300" />
               </div>
               <h3 className="text-xl font-black text-white">🔐 관리자 암호 인증</h3>
               <p className="text-xs text-slate-300">
@@ -361,7 +384,7 @@ export default function LeaderboardModal({ isOpen, onClose, activeTab = 'pacman'
                 placeholder="관리자 암호 (4자리)"
                 value={passwordInput}
                 onChange={(e) => setPasswordInput(e.target.value)}
-                className="px-4 py-3 bg-slate-900 border-2 border-slate-700 rounded-2xl text-center text-white font-black text-lg focus:outline-none focus:border-amber-400 tracking-widest"
+                className="px-4 py-3 bg-slate-900 border-2 border-amber-400/60 rounded-2xl text-center text-amber-300 font-black text-xl focus:outline-none focus:border-amber-400 tracking-widest"
                 autoFocus
                 required
               />
