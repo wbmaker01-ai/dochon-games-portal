@@ -60,7 +60,7 @@ export default function LeaderboardModal({ isOpen, onClose, activeTab = 'pacman'
     }
   };
 
-  // Admin Edit Handler
+  // Admin Edit Handler (Optimistic UI Update + Cloud DB Sync)
   const startEditing = (item) => {
     setEditingId(item.id);
     setEditName(item.name);
@@ -73,16 +73,35 @@ export default function LeaderboardModal({ isOpen, onClose, activeTab = 'pacman'
     setEditScore('');
   };
 
-  const saveEditing = async (id) => {
+  const saveEditing = async (id, e) => {
+    if (e) e.preventDefault();
     if (!editName.trim() || isNaN(editScore)) return;
-    await updateScoreInDB(currentTab, id, editName, editScore);
+
+    const updatedName = editName.trim();
+    const updatedScore = Number(editScore);
+
+    // 1. Optimistic UI update immediately
+    setScores(prev => {
+      const newList = prev.map(item => String(item.id) === String(id) ? { ...item, name: updatedName, score: updatedScore } : item);
+      newList.sort((a, b) => b.score - a.score);
+      return newList;
+    });
+
     setEditingId(null);
+
+    // 2. Perform DB update & reload
+    await updateScoreInDB(currentTab, id, updatedName, updatedScore);
     await loadScores();
   };
 
-  // Admin Delete Handler
-  const handleDelete = async (id, name) => {
+  // Admin Delete Handler (Optimistic UI Update + Cloud DB Sync)
+  const handleDelete = async (id, name, e) => {
+    if (e) e.preventDefault();
     if (window.confirm(`[관리자 경고] '${name}' 학생의 기록을 정말 삭제하시겠습니까?\n삭제된 데이터는 Cloud DB에서 영구 삭제됩니다.`)) {
+      // 1. Optimistic UI delete immediately
+      setScores(prev => prev.filter(item => String(item.id) !== String(id)));
+      
+      // 2. Perform DB deletion & reload
       await deleteScoreFromDB(currentTab, id);
       await loadScores();
     }
@@ -241,7 +260,7 @@ export default function LeaderboardModal({ isOpen, onClose, activeTab = 'pacman'
           )}
         </div>
 
-        {/* Future-Proof Dynamic Game Tab Bar (Dynamically populated from PLAYABLE_GAMES) */}
+        {/* Future-Proof Dynamic Game Tab Bar */}
         <div className="leaderboard-tab-container">
           {PLAYABLE_GAMES.map(game => {
             const isActive = currentTab === game.id;
@@ -263,7 +282,7 @@ export default function LeaderboardModal({ isOpen, onClose, activeTab = 'pacman'
           })}
         </div>
 
-        {/* Leaderboard Score List (Fits ~10 Rankers, Vertical Scroll Only, ZERO Horizontal Scrollbar) */}
+        {/* Leaderboard Score List */}
         <div className="leaderboard-score-list">
           {loading && scores.length === 0 ? (
             <div style={{ padding: '30px', textAlign: 'center', color: '#FBBF24', fontSize: '12px', fontWeight: 700 }}>
@@ -331,7 +350,7 @@ export default function LeaderboardModal({ isOpen, onClose, activeTab = 'pacman'
               return (
                 <div key={item.id || idx} className={`leaderboard-score-row ${rowClass}`}>
                   {isEditingThis ? (
-                    <div style={{ display: 'flex', flexDirection: 'column', gap: '6px', width: '100%', padding: '6px', backgroundColor: '#0F172A', borderRadius: '12px' }}>
+                    <form onSubmit={(e) => saveEditing(item.id, e)} style={{ display: 'flex', flexDirection: 'column', gap: '6px', width: '100%', padding: '6px', backgroundColor: '#0F172A', borderRadius: '12px' }}>
                       <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '11px', fontWeight: 800, color: '#FBBF24' }}>
                         <span>✏️ 기록 수정</span>
                         <span>ID: {item.id}</span>
@@ -342,23 +361,26 @@ export default function LeaderboardModal({ isOpen, onClose, activeTab = 'pacman'
                           value={editName}
                           onChange={(e) => setEditName(e.target.value)}
                           style={{ flex: 1, padding: '4px 8px', backgroundColor: '#1E293B', border: '1px solid #475569', borderRadius: '6px', color: '#FFFFFF', fontSize: '12px' }}
+                          autoFocus
+                          required
                         />
                         <input
                           type="number"
                           value={editScore}
                           onChange={(e) => setEditScore(e.target.value)}
                           style={{ width: '80px', padding: '4px 8px', backgroundColor: '#1E293B', border: '1px solid #475569', borderRadius: '6px', color: '#FBBF24', fontSize: '12px', textAlign: 'right' }}
+                          required
                         />
                       </div>
                       <div style={{ display: 'flex', justifyContent: 'flex-end', gap: '6px' }}>
-                        <button onClick={() => saveEditing(item.id)} style={{ backgroundColor: '#10B981', color: '#FFFFFF', border: 'none', padding: '4px 10px', borderRadius: '6px', fontSize: '11px', fontWeight: 800, cursor: 'pointer' }}>
+                        <button type="submit" style={{ backgroundColor: '#10B981', color: '#FFFFFF', border: 'none', padding: '4px 10px', borderRadius: '6px', fontSize: '11px', fontWeight: 800, cursor: 'pointer' }}>
                           저장
                         </button>
-                        <button onClick={cancelEditing} style={{ backgroundColor: '#475569', color: '#FFFFFF', border: 'none', padding: '4px 10px', borderRadius: '6px', fontSize: '11px', cursor: 'pointer' }}>
+                        <button type="button" onClick={cancelEditing} style={{ backgroundColor: '#475569', color: '#FFFFFF', border: 'none', padding: '4px 10px', borderRadius: '6px', fontSize: '11px', cursor: 'pointer' }}>
                           취소
                         </button>
                       </div>
-                    </div>
+                    </form>
                   ) : (
                     <>
                       {/* Left Side: Rank Badge + Name */}
@@ -399,7 +421,7 @@ export default function LeaderboardModal({ isOpen, onClose, activeTab = 'pacman'
                             <button onClick={() => startEditing(item)} style={{ backgroundColor: '#2563EB', color: '#FFFFFF', border: 'none', padding: '4px 8px', borderRadius: '6px', cursor: 'pointer' }} title="수정">
                               <Edit2 style={{ width: '12px', height: '12px' }} />
                             </button>
-                            <button onClick={() => handleDelete(item.id, item.name)} style={{ backgroundColor: '#E11D48', color: '#FFFFFF', border: 'none', padding: '4px 8px', borderRadius: '6px', cursor: 'pointer' }} title="삭제">
+                            <button onClick={(e) => handleDelete(item.id, item.name, e)} style={{ backgroundColor: '#E11D48', color: '#FFFFFF', border: 'none', padding: '4px 8px', borderRadius: '6px', cursor: 'pointer' }} title="삭제">
                               <Trash2 style={{ width: '12px', height: '12px' }} />
                             </button>
                           </div>

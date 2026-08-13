@@ -27,7 +27,7 @@ export async function getLeaderboardFromDB(gameKey = 'pacman') {
         list.sort((a, b) => b.score - a.score);
         
         // Save copy to localStorage for offline fallback
-        localStorage.setItem(`dochon_leaderboard_${gameKey}`, JSON.stringify(list.slice(0, 10)));
+        localStorage.setItem(`dochon_leaderboard_${gameKey}`, JSON.stringify(list));
         return list;
       }
     }
@@ -76,13 +76,29 @@ export async function submitScoreToDB(gameKey, name, score) {
  * Update an existing score record in the Cloud DB (Admin Feature)
  */
 export async function updateScoreInDB(gameKey, id, name, score) {
+  const updatedName = String(name).trim();
+  const updatedScore = Number(score) || 0;
+
+  // 1. Update localStorage fallback copy immediately
+  try {
+    const stored = localStorage.getItem(`dochon_leaderboard_${gameKey}`);
+    let list = stored ? JSON.parse(stored) : getLocalLeaderboardFallback(gameKey);
+    const index = list.findIndex(item => String(item.id) === String(id));
+    if (index !== -1) {
+      list[index].name = updatedName;
+      list[index].score = updatedScore;
+      localStorage.setItem(`dochon_leaderboard_${gameKey}`, JSON.stringify(list));
+    }
+  } catch (e) {}
+
+  // 2. Update Cloud DB
   try {
     const res = await fetch(`${DB_API_URL}/${gameKey}/${id}.json`, {
       method: 'PATCH',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({
-        name: name.trim(),
-        score: Number(score)
+        name: updatedName,
+        score: updatedScore
       })
     });
 
@@ -101,6 +117,15 @@ export async function updateScoreInDB(gameKey, id, name, score) {
  * Delete a score record from the Cloud DB (Admin Feature)
  */
 export async function deleteScoreFromDB(gameKey, id) {
+  // 1. Update localStorage fallback copy immediately
+  try {
+    const stored = localStorage.getItem(`dochon_leaderboard_${gameKey}`);
+    let list = stored ? JSON.parse(stored) : getLocalLeaderboardFallback(gameKey);
+    list = list.filter(item => String(item.id) !== String(id));
+    localStorage.setItem(`dochon_leaderboard_${gameKey}`, JSON.stringify(list));
+  } catch (e) {}
+
+  // 2. Delete from Cloud DB
   try {
     const res = await fetch(`${DB_API_URL}/${gameKey}/${id}.json`, {
       method: 'DELETE'
@@ -151,5 +176,5 @@ function saveLocalLeaderboardFallback(gameKey, entry) {
   const current = getLocalLeaderboardFallback(gameKey);
   const updated = [...current, { ...entry, id: `local_${Date.now()}` }];
   updated.sort((a, b) => b.score - a.score);
-  localStorage.setItem(`dochon_leaderboard_${gameKey}`, JSON.stringify(updated.slice(0, 10)));
+  localStorage.setItem(`dochon_leaderboard_${gameKey}`, JSON.stringify(updated));
 }
