@@ -402,6 +402,7 @@ body {
 /* Rank Cards with Vibrant Colors for Elementary Students */
 .leaderboard-score-row {
   display: flex !important;
+  flex-direction: row !important;
   align-items: center !important;
   justify-content: space-between !important;
   padding: 12px 16px !important;
@@ -438,12 +439,49 @@ body {
   box-shadow: 0 4px 14px rgba(225, 29, 72, 0.3) !important;
 }
 
-/* 4th & 5th Ranks: Mint & Lavender Cards */
+/* 4th & 5th Ranks: Lavender Cards */
 .leaderboard-score-row.rank-other {
   background: rgba(255, 255, 255, 0.12) !important;
   border: 2px solid rgba(255, 255, 255, 0.2) !important;
   color: #FFFFFF !important;
   backdrop-filter: blur(4px) !important;
+}
+
+/* ------------------------------------------------------------- */
+/* PASTEL CIRCLE BACKGROUND ICON BADGES (PLAIN CSS)              */
+/* ------------------------------------------------------------- */
+
+.icon-circle {
+  width: 38px;
+  height: 38px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  box-shadow: 0 3px 8px rgba(0, 0, 0, 0.2);
+}
+
+.icon-circle-md {
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.2);
+}
+
+.icon-circle-sm {
+  width: 24px;
+  height: 24px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.15);
 }
 
 /* Footer Centering */
