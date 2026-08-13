@@ -333,6 +333,85 @@ body {
   width: 100%;
 }
 
+/* ------------------------------------------------------------- */
+/* BULLETPROOF PLAIN CSS CENTERED POPUP OVERLAY MODAL             */
+/* ------------------------------------------------------------- */
+
+.leaderboard-overlay {
+  position: fixed !important;
+  top: 0 !important;
+  left: 0 !important;
+  right: 0 !important;
+  bottom: 0 !important;
+  width: 100vw !important;
+  height: 100vh !important;
+  z-index: 99999 !important;
+  background-color: rgba(0, 0, 0, 0.85) !important;
+  backdrop-filter: blur(8px) !important;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  padding: 16px !important;
+  overflow-y: auto !important;
+}
+
+.leaderboard-modal-box {
+  position: relative !important;
+  width: 100% !important;
+  max-width: 480px !important;
+  background-color: #1C1F24 !important;
+  border: 2px solid #FFD166 !important;
+  border-radius: 24px !important;
+  padding: 24px !important;
+  box-shadow: 0 25px 60px rgba(0, 0, 0, 0.9), 0 0 35px rgba(255, 209, 102, 0.25) !important;
+  color: #FFFFFF !important;
+  display: flex !important;
+  flex-direction: column !important;
+  gap: 16px !important;
+  margin: auto !important;
+  text-align: center !important;
+}
+
+.leaderboard-close-btn {
+  position: absolute !important;
+  top: 14px !important;
+  right: 14px !important;
+  width: 36px !important;
+  height: 36px !important;
+  border-radius: 50% !important;
+  background-color: #2A2D32 !important;
+  color: #94A3B8 !important;
+  border: 1px solid rgba(255, 255, 255, 0.15) !important;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  cursor: pointer !important;
+  font-size: 18px !important;
+  font-weight: bold !important;
+  transition: all 0.2s ease !important;
+}
+
+.leaderboard-close-btn:hover {
+  background-color: #3F434A !important;
+  color: #FFFFFF !important;
+}
+
+.leaderboard-score-row {
+  display: flex !important;
+  align-items: center !important;
+  justify-content: space-between !important;
+  padding: 12px 16px !important;
+  background-color: #25282E !important;
+  border-radius: 16px !important;
+  border: 1px solid rgba(255, 255, 255, 0.08) !important;
+  margin-bottom: 8px !important;
+}
+
+.leaderboard-score-row.rank-1 {
+  background: rgba(255, 209, 102, 0.15) !important;
+  border-color: rgba(255, 209, 102, 0.6) !important;
+}
+
 /* Footer Centering */
 .portal-footer {
   width: 100%;

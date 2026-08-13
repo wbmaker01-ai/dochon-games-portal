@@ -29,14 +29,14 @@ export default function LeaderboardModal({ isOpen, onClose, activeTab = 'pacman'
   if (!isOpen) return null;
 
   return (
-    <div className="fixed inset-0 z-50 bg-black/85 backdrop-blur-md flex items-center justify-center p-4 overflow-y-auto">
-      {/* Responsive In-Page Centered Popup Window Modal */}
-      <div className="relative w-full max-w-lg bg-[#1C1F24] border-2 border-amber-400/50 rounded-3xl p-5 md:p-6 text-white shadow-2xl flex flex-col gap-4 animate-in zoom-in-95 duration-200 my-auto">
+    <div className="leaderboard-overlay">
+      {/* Centered Modal Card Box */}
+      <div className="leaderboard-modal-box">
         
         {/* Large Touch-Friendly Close Button */}
         <button
           onClick={onClose}
-          className="absolute top-4 right-4 text-slate-400 hover:text-white bg-slate-800/80 hover:bg-slate-700 p-2.5 rounded-full transition flex items-center justify-center shadow-lg"
+          className="leaderboard-close-btn"
           title="닫기"
         >
           <X className="w-5 h-5" />
@@ -84,7 +84,7 @@ export default function LeaderboardModal({ isOpen, onClose, activeTab = 'pacman'
         </div>
 
         {/* Leaderboard Score List */}
-        <div className="flex flex-col gap-2.5 max-h-[300px] md:max-h-[340px] overflow-y-auto pr-1">
+        <div className="flex flex-col gap-2 max-h-[300px] md:max-h-[340px] overflow-y-auto pr-1">
           {loading && scores.length === 0 ? (
             <div className="py-8 text-center text-slate-400 text-xs font-semibold flex items-center justify-center gap-2">
               <RefreshCw className="w-4 h-4 animate-spin text-amber-400" />
@@ -98,17 +98,13 @@ export default function LeaderboardModal({ isOpen, onClose, activeTab = 'pacman'
             scores.map((item, idx) => {
               const rank = idx + 1;
               let rankBadge = null;
-              let cardBg = 'bg-[#25282E] border-slate-700/50';
 
               if (rank === 1) {
                 rankBadge = <Crown className="w-5 h-5 text-amber-400 fill-amber-400 shrink-0" />;
-                cardBg = 'bg-amber-400/10 border-amber-400/60';
               } else if (rank === 2) {
                 rankBadge = <Medal className="w-5 h-5 text-slate-300 shrink-0" />;
-                cardBg = 'bg-slate-800/80 border-slate-600/50';
               } else if (rank === 3) {
                 rankBadge = <Medal className="w-5 h-5 text-amber-700 shrink-0" />;
-                cardBg = 'bg-amber-900/20 border-amber-800/50';
               } else {
                 rankBadge = <span className="w-5 text-center text-xs font-bold text-slate-500">{rank}</span>;
               }
@@ -116,7 +112,7 @@ export default function LeaderboardModal({ isOpen, onClose, activeTab = 'pacman'
               return (
                 <div
                   key={item.id || idx}
-                  className={`flex items-center justify-between px-4 py-3 rounded-2xl border ${cardBg} transition-all`}
+                  className={`leaderboard-score-row ${rank === 1 ? 'rank-1' : ''}`}
                 >
                   <div className="flex items-center gap-3">
                     {rankBadge}
@@ -147,7 +143,7 @@ export default function LeaderboardModal({ isOpen, onClose, activeTab = 'pacman'
           <span className="text-[11px] text-slate-500">도촌초등학교 게임 명예의 전당</span>
           <button
             onClick={onClose}
-            className="px-4 py-1.5 bg-slate-800 hover:bg-slate-700 text-white rounded-xl text-xs font-bold transition"
+            className="px-5 py-2 bg-amber-400 hover:bg-amber-300 text-slate-950 rounded-xl text-xs font-black transition shadow-md"
           >
             닫기 (Close)
           </button>
