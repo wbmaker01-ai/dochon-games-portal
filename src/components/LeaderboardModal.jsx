@@ -122,7 +122,8 @@ export default function LeaderboardModal({ isOpen, onClose, activeTab = 'pacman'
                 display: 'flex',
                 alignItems: 'center',
                 justifyContent: 'center',
-                cursor: 'pointer',
+                cursor: 'default',
+                userSelect: 'none',
                 flexShrink: 0
               }}
               title="도촌초등학교 명예의 전당"
