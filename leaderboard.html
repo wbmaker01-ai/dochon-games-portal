@@ -1,0 +1,225 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>도촌초등학교 명예의 전당 | 별도 랭킹 창</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@600;800;900&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --dochon-gold: #FFD166;
+      --bg-dark: #141619;
+      --bg-card: #1C1F24;
+      --font-family: 'Outfit', Pretendard, system-ui, sans-serif;
+    }
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      background-color: var(--bg-dark);
+      color: #FFFFFF;
+      font-family: var(--font-family);
+      padding: 20px;
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      text-align: center;
+    }
+    .header {
+      margin-bottom: 20px;
+    }
+    .title {
+      font-size: 22px;
+      font-weight: 900;
+      color: #FFFFFF;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+    }
+    .title span { color: var(--dochon-gold); }
+    .subtitle {
+      font-size: 12px;
+      color: #94A3B8;
+      margin-top: 4px;
+      font-weight: 600;
+    }
+    .tabs {
+      display: flex;
+      gap: 8px;
+      background-color: #262A30;
+      padding: 6px;
+      border-radius: 16px;
+      width: 100%;
+      max-width: 440px;
+      margin-bottom: 20px;
+      border: 1px solid rgba(255, 255, 255, 0.1);
+    }
+    .tab-btn {
+      flex: 1;
+      padding: 10px;
+      border: none;
+      border-radius: 12px;
+      background: transparent;
+      color: #94A3B8;
+      font-weight: 800;
+      font-size: 13px;
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+    .tab-btn.active {
+      background-color: var(--dochon-gold);
+      color: #0F172A;
+      box-shadow: 0 4px 12px rgba(255, 209, 102, 0.3);
+    }
+    .score-list {
+      width: 100%;
+      max-width: 440px;
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+      flex: 1;
+    }
+    .score-item {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 14px 18px;
+      background-color: var(--bg-card);
+      border-radius: 16px;
+      border: 1px solid rgba(255, 255, 255, 0.08);
+    }
+    .rank-1 {
+      background: rgba(255, 209, 102, 0.12);
+      border-color: rgba(255, 209, 102, 0.5);
+    }
+    .rank-badge {
+      font-size: 16px;
+      font-weight: 900;
+      width: 28px;
+      text-align: center;
+    }
+    .player-info {
+      display: flex;
+      flex-direction: column;
+      text-align: left;
+      flex: 1;
+      margin-left: 10px;
+    }
+    .player-name {
+      font-size: 14px;
+      font-weight: 800;
+      color: #FFFFFF;
+    }
+    .player-date {
+      font-size: 11px;
+      color: #64748B;
+    }
+    .player-score {
+      font-size: 16px;
+      font-weight: 900;
+      color: var(--dochon-gold);
+    }
+    .empty-msg {
+      padding: 40px 0;
+      color: #64748B;
+      font-size: 13px;
+    }
+    .footer-btn {
+      margin-top: 20px;
+      background-color: #2A2D32;
+      color: #FFFFFF;
+      border: 1px solid rgba(255, 255, 255, 0.2);
+      padding: 10px 24px;
+      border-radius: 12px;
+      font-weight: 800;
+      font-size: 13px;
+      cursor: pointer;
+    }
+    .footer-btn:hover { background-color: #3F434A; }
+  </style>
+</head>
+<body>
+
+  <div class="header">
+    <div class="title">🏆 도촌초등학교 <span>명예의 전당</span></div>
+    <div class="subtitle">별도 창으로 실행된 게임 실시간 순위 리더보드</div>
+  </div>
+
+  <div class="tabs">
+    <button id="tab-pacman" class="tab-btn active" onclick="switchTab('pacman')">🟡 도촌 팩맨</button>
+    <button id="tab-dino" class="tab-btn" onclick="switchTab('dino')">🦖 도촌 공룡</button>
+  </div>
+
+  <div id="score-container" class="score-list"></div>
+
+  <button class="footer-btn" onclick="window.close()">창 닫기 (Close Window)</button>
+
+  <script>
+    let currentTab = 'pacman';
+
+    function getLeaderboard(gameKey) {
+      try {
+        const stored = localStorage.getItem(`dochon_leaderboard_${gameKey}`);
+        if (stored) return JSON.parse(stored);
+      } catch (e) {}
+      
+      if (gameKey === 'pacman') {
+        return [
+          { id: 1, name: '김도촌 (5A)', score: 12400, date: '2026-08-12' },
+          { id: 2, name: '이슬기 (4B)', score: 9800, date: '2026-08-12' },
+          { id: 3, name: '박민준 (6C)', score: 8500, date: '2026-08-11' },
+          { id: 4, name: '최하은 (3A)', score: 6200, date: '2026-08-10' },
+          { id: 5, name: '정우진 (5B)', score: 4900, date: '2026-08-09' }
+        ];
+      } else {
+        return [
+          { id: 1, name: '박민준 (6C)', score: 3450, date: '2026-08-12' },
+          { id: 2, name: '김도촌 (5A)', score: 2890, date: '2026-08-12' },
+          { id: 3, name: '윤서연 (4A)', score: 2100, date: '2026-08-11' },
+          { id: 4, name: '강현우 (6A)', score: 1750, date: '2026-08-10' }
+        ];
+      }
+    }
+
+    function renderScores() {
+      const container = document.getElementById('score-container');
+      const list = getLeaderboard(currentTab);
+
+      if (list.length === 0) {
+        container.innerHTML = '<div class="empty-msg">등록된 기록이 없습니다.</div>';
+        return;
+      }
+
+      container.innerHTML = list.map((item, idx) => {
+        const rank = idx + 1;
+        let badge = rank;
+        if (rank === 1) badge = '👑';
+        else if (rank === 2) badge = '🥈';
+        else if (rank === 3) badge = '🥉';
+
+        return `
+          <div class="score-item ${rank === 1 ? 'rank-1' : ''}">
+            <div class="rank-badge">${badge}</div>
+            <div class="player-info">
+              <div class="player-name">${item.name}</div>
+              <div class="player-date">${item.date}</div>
+            </div>
+            <div class="player-score">${item.score.toLocaleString()} 점</div>
+          </div>
+        `;
+      }).join('');
+    }
+
+    function switchTab(tab) {
+      currentTab = tab;
+      document.getElementById('tab-pacman').classList.toggle('active', tab === 'pacman');
+      document.getElementById('tab-dino').classList.toggle('active', tab === 'dino');
+      renderScores();
+    }
+
+    renderScores();
+  </script>
+</body>
+</html>
