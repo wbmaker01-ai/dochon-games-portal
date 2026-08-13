@@ -28,7 +28,7 @@ export async function getLeaderboardFromDB(gameKey = 'pacman') {
         
         // Save copy to localStorage for offline fallback
         localStorage.setItem(`dochon_leaderboard_${gameKey}`, JSON.stringify(list.slice(0, 10)));
-        return list.slice(0, 10);
+        return list;
       }
     }
   } catch (err) {
@@ -67,6 +67,51 @@ export async function submitScoreToDB(gameKey, name, score) {
     }
   } catch (err) {
     console.error('[Backend DB] Failed to push to Cloud Database, saved locally:', err);
+  }
+
+  return false;
+}
+
+/**
+ * Update an existing score record in the Cloud DB (Admin Feature)
+ */
+export async function updateScoreInDB(gameKey, id, name, score) {
+  try {
+    const res = await fetch(`${DB_API_URL}/${gameKey}/${id}.json`, {
+      method: 'PATCH',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        name: name.trim(),
+        score: Number(score)
+      })
+    });
+
+    if (res.ok) {
+      console.log(`[Backend DB] Score ${id} successfully updated in Cloud Database.`);
+      return true;
+    }
+  } catch (err) {
+    console.error('[Backend DB] Failed to update score in Cloud Database:', err);
+  }
+
+  return false;
+}
+
+/**
+ * Delete a score record from the Cloud DB (Admin Feature)
+ */
+export async function deleteScoreFromDB(gameKey, id) {
+  try {
+    const res = await fetch(`${DB_API_URL}/${gameKey}/${id}.json`, {
+      method: 'DELETE'
+    });
+
+    if (res.ok) {
+      console.log(`[Backend DB] Score ${id} successfully deleted from Cloud Database.`);
+      return true;
+    }
+  } catch (err) {
+    console.error('[Backend DB] Failed to delete score from Cloud Database:', err);
   }
 
   return false;
