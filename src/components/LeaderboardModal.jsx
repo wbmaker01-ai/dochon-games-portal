@@ -56,7 +56,7 @@ export default function LeaderboardModal({ isOpen, onClose, activeTab = 'pacman'
       setPasswordInput('');
       setPasswordError('');
     } else {
-      setPasswordError('❌ 암호가 올바르지 않습니다. (비밀번호: 8582)');
+      setPasswordError('❌ 관리자 암호가 올바르지 않습니다.');
     }
   };
 
@@ -462,7 +462,7 @@ export default function LeaderboardModal({ isOpen, onClose, activeTab = 'pacman'
             <form onSubmit={handlePasswordSubmit} style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
               <input
                 type="password"
-                placeholder="관리자 암호 (8582)"
+                placeholder="관리자 암호"
                 value={passwordInput}
                 onChange={(e) => setPasswordInput(e.target.value)}
                 style={{
