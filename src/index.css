@@ -334,30 +334,32 @@ body {
   width: 100vw !important;
   height: 100vh !important;
   z-index: 99999 !important;
-  background-color: rgba(10, 15, 30, 0.8) !important;
+  background-color: rgba(10, 15, 30, 0.82) !important;
   backdrop-filter: blur(12px) !important;
   display: flex !important;
   align-items: center !important;
   justify-content: center !important;
   padding: 16px !important;
+  overflow-x: hidden !important;
   overflow-y: auto !important;
 }
 
 .leaderboard-modal-box {
   position: relative !important;
   width: 100% !important;
-  max-width: 500px !important;
+  max-width: 520px !important;
   background: linear-gradient(150deg, #1A1C2E 0%, #251F47 50%, #16192B 100%) !important;
-  border: 3px solid #FBBF24 !important;
+  border: 3.5px solid #FBBF24 !important;
   border-radius: 28px !important;
   padding: 24px 20px !important;
-  box-shadow: 0 25px 60px rgba(0, 0, 0, 0.9), 0 0 30px rgba(251, 191, 36, 0.3) !important;
+  box-shadow: 0 25px 60px rgba(0, 0, 0, 0.9), 0 0 35px rgba(251, 191, 36, 0.35) !important;
   color: #FFFFFF !important;
   display: flex !important;
   flex-direction: column !important;
   gap: 14px !important;
   margin: auto !important;
   text-align: center !important;
+  overflow-x: hidden !important;
 }
 
 .leaderboard-close-btn {
@@ -384,15 +386,103 @@ body {
   transform: scale(1.1) rotate(90deg) !important;
 }
 
-/* Rank Rows */
+/* Dynamically Expandable Game Tabs Bar for Future Games */
+.leaderboard-tab-container {
+  display: flex !important;
+  flex-direction: row !important;
+  align-items: center !important;
+  justify-content: flex-start !important;
+  gap: 8px !important;
+  background-color: rgba(15, 23, 42, 0.85) !important;
+  padding: 8px 10px !important;
+  border-radius: 18px !important;
+  border: 1.5px solid rgba(255, 255, 255, 0.15) !important;
+  width: 100% !important;
+  overflow-x: auto !important;
+  overflow-y: hidden !important;
+  scrollbar-width: thin !important;
+  scrollbar-color: rgba(251, 191, 36, 0.4) transparent !important;
+}
+
+.leaderboard-tab-container::-webkit-scrollbar {
+  height: 4px;
+}
+
+.leaderboard-tab-container::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.leaderboard-tab-container::-webkit-scrollbar-thumb {
+  background: rgba(251, 191, 36, 0.4);
+  border-radius: 9999px;
+}
+
+.leaderboard-tab-chip {
+  flex: 0 0 auto !important;
+  padding: 8px 16px !important;
+  border-radius: 14px !important;
+  font-size: 13px !important;
+  font-weight: 900 !important;
+  border: none !important;
+  cursor: pointer !important;
+  display: flex !important;
+  align-items: center !important;
+  gap: 6px !important;
+  white-space: nowrap !important;
+  transition: all 0.2s ease !important;
+  background: transparent;
+  color: #94A3B8;
+}
+
+.leaderboard-tab-chip.active {
+  background: linear-gradient(135deg, #FBBF24 0%, #F59E0B 100%) !important;
+  color: #78350F !important;
+  box-shadow: 0 4px 12px rgba(245, 158, 11, 0.35) !important;
+}
+
+/* Rank Score List Container (Height for ~10 Rankers, Vertical Scroll Only) */
+.leaderboard-score-list {
+  display: flex !important;
+  flex-direction: column !important;
+  gap: 8px !important;
+  max-height: 480px !important;
+  overflow-x: hidden !important;
+  overflow-y: auto !important;
+  padding-right: 4px !important;
+  scrollbar-width: thin !important;
+  scrollbar-color: rgba(251, 191, 36, 0.4) rgba(255, 255, 255, 0.05) !important;
+}
+
+.leaderboard-score-list::-webkit-scrollbar {
+  width: 6px;
+}
+
+.leaderboard-score-list::-webkit-scrollbar-track {
+  background: rgba(255, 255, 255, 0.05);
+  border-radius: 9999px;
+}
+
+.leaderboard-score-list::-webkit-scrollbar-thumb {
+  background: rgba(251, 191, 36, 0.4);
+  border-radius: 9999px;
+}
+
+.leaderboard-score-list::-webkit-scrollbar-thumb:hover {
+  background: rgba(251, 191, 36, 0.7);
+}
+
+/* Rank Rows (NO horizontal scrollbars) */
 .leaderboard-score-row {
   display: flex !important;
   flex-direction: row !important;
   align-items: center !important;
   justify-content: space-between !important;
-  padding: 12px 16px !important;
+  padding: 10px 14px !important;
   border-radius: 18px !important;
-  margin-bottom: 8px !important;
+  margin-bottom: 2px !important;
+  width: 100% !important;
+  box-sizing: border-box !important;
+  overflow-x: hidden !important;
   transition: transform 0.2s ease !important;
 }
 

@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { getLeaderboardFromDB, updateScoreInDB, deleteScoreFromDB } from '../utils/leaderboardApi';
+import { PLAYABLE_GAMES } from '../data/gamesData';
 import { Trophy, X, Crown, Medal, Zap, RefreshCw, Sparkles, Star, Heart, Lock, Edit2, Trash2, Check, LogOut, ShieldAlert } from 'lucide-react';
 
 export default function LeaderboardModal({ isOpen, onClose, activeTab = 'pacman' }) {
@@ -91,7 +92,7 @@ export default function LeaderboardModal({ isOpen, onClose, activeTab = 'pacman'
 
   return (
     <div className="leaderboard-overlay">
-      {/* Premium Pastel Candy Pop Container Box */}
+      {/* Premium Pastel Candy Pop Container Box (Zero Horizontal Scrollbar) */}
       <div className="leaderboard-modal-box">
         
         {/* Vibrant Red Close Button (Top-Right Only) */}
@@ -142,7 +143,7 @@ export default function LeaderboardModal({ isOpen, onClose, activeTab = 'pacman'
               border: '1.5px solid rgba(253, 224, 71, 0.6)',
               display: 'flex',
               alignItems: 'center',
-              justifyContent: 'center',
+              justify: 'center',
               flexShrink: 0
             }}>
               <Sparkles style={{ width: '18px', height: '18px', color: '#FDE047' }} />
@@ -238,66 +239,30 @@ export default function LeaderboardModal({ isOpen, onClose, activeTab = 'pacman'
           )}
         </div>
 
-        {/* Colorful Game Tab Switcher */}
-        <div style={{
-          display: 'flex',
-          flexDirection: 'row',
-          alignItems: 'center',
-          justifyContent: 'center',
-          gap: '8px',
-          backgroundColor: 'rgba(15, 23, 42, 0.8)',
-          padding: '6px',
-          borderRadius: '16px',
-          border: '1.5px solid rgba(255, 255, 255, 0.15)',
-          width: '100%'
-        }}>
-          <button
-            onClick={() => setCurrentTab('pacman')}
-            style={{
-              flex: 1,
-              padding: '8px',
-              borderRadius: '12px',
-              fontSize: '13px',
-              fontWeight: 900,
-              border: 'none',
-              cursor: 'pointer',
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'center',
-              gap: '6px',
-              background: currentTab === 'pacman' ? 'linear-gradient(135deg, #FBBF24, #F59E0B)' : 'transparent',
-              color: currentTab === 'pacman' ? '#78350F' : '#94A3B8',
-              boxShadow: currentTab === 'pacman' ? '0 4px 10px rgba(245, 158, 11, 0.3)' : 'none'
-            }}
-          >
-            <span>🟡 도촌 팩맨</span>
-          </button>
+        {/* Future-Proof Dynamic Game Tab Bar (Dynamically populated from PLAYABLE_GAMES) */}
+        <div className="leaderboard-tab-container">
+          {PLAYABLE_GAMES.map(game => {
+            const isActive = currentTab === game.id;
+            let iconEmoji = '🕹️';
+            if (game.id === 'pacman') iconEmoji = '🟡';
+            if (game.id === 'dino') iconEmoji = '🦖';
 
-          <button
-            onClick={() => setCurrentTab('dino')}
-            style={{
-              flex: 1,
-              padding: '8px',
-              borderRadius: '12px',
-              fontSize: '13px',
-              fontWeight: 900,
-              border: 'none',
-              cursor: 'pointer',
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'center',
-              gap: '6px',
-              background: currentTab === 'dino' ? 'linear-gradient(135deg, #34D399, #10B981)' : 'transparent',
-              color: currentTab === 'dino' ? '#064E3B' : '#94A3B8',
-              boxShadow: currentTab === 'dino' ? '0 4px 10px rgba(16, 185, 129, 0.3)' : 'none'
-            }}
-          >
-            <span>🦖 도촌 공룡</span>
-          </button>
+            return (
+              <button
+                key={game.id}
+                onClick={() => setCurrentTab(game.id)}
+                className={`leaderboard-tab-chip ${isActive ? 'active' : ''}`}
+                style={game.id === 'dino' && isActive ? { background: 'linear-gradient(135deg, #34D399, #10B981)', color: '#064E3B' } : {}}
+              >
+                <span>{iconEmoji}</span>
+                <span>{game.title}</span>
+              </button>
+            );
+          })}
         </div>
 
-        {/* Leaderboard Score List */}
-        <div style={{ display: 'flex', flexDirection: 'column', gap: '8px', maxHeight: '320px', overflowY: 'auto' }}>
+        {/* Leaderboard Score List (Fits ~10 Rankers, Vertical Scroll Only, ZERO Horizontal Scrollbar) */}
+        <div className="leaderboard-score-list">
           {loading && scores.length === 0 ? (
             <div style={{ padding: '30px', textAlign: 'center', color: '#FBBF24', fontSize: '12px', fontWeight: 700 }}>
               <RefreshCw style={{ width: '16px', height: '16px', display: 'inline-block', marginRight: '6px' }} />
@@ -320,8 +285,8 @@ export default function LeaderboardModal({ isOpen, onClose, activeTab = 'pacman'
                 nameColor = '#78350F';
                 scoreColor = '#78350F';
                 rankBadge = (
-                  <div style={{ display: 'flex', flexDirection: 'row', alignItems: 'center', gap: '4px', backgroundColor: '#F59E0B', color: '#FFFFFF', padding: '2px 8px', borderRadius: '9999px', fontSize: '11px', fontWeight: 900 }}>
-                    <div style={{ width: '16px', height: '16px', borderRadius: '50%', backgroundColor: 'rgba(255,255,255,0.3)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                  <div style={{ display: 'flex', flexDirection: 'row', alignItems: 'center', gap: '4px', backgroundColor: '#F59E0B', color: '#FFFFFF', padding: '2px 8px', borderRadius: '9999px', fontSize: '11px', fontWeight: 900, flexShrink: 0 }}>
+                    <div style={{ width: '16px', height: '16px', borderRadius: '50%', backgroundColor: 'rgba(255,255,255,0.3)', display: 'flex', alignItems: 'center', justify: 'center' }}>
                       <Crown style={{ width: '10px', height: '10px', color: '#FFFFFF', fill: '#FFFFFF' }} />
                     </div>
                     <span>1등</span>
@@ -332,8 +297,8 @@ export default function LeaderboardModal({ isOpen, onClose, activeTab = 'pacman'
                 nameColor = '#0C4A6E';
                 scoreColor = '#0C4A6E';
                 rankBadge = (
-                  <div style={{ display: 'flex', flexDirection: 'row', alignItems: 'center', gap: '4px', backgroundColor: '#0284C7', color: '#FFFFFF', padding: '2px 8px', borderRadius: '9999px', fontSize: '11px', fontWeight: 900 }}>
-                    <div style={{ width: '16px', height: '16px', borderRadius: '50%', backgroundColor: 'rgba(255,255,255,0.3)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                  <div style={{ display: 'flex', flexDirection: 'row', alignItems: 'center', gap: '4px', backgroundColor: '#0284C7', color: '#FFFFFF', padding: '2px 8px', borderRadius: '9999px', fontSize: '11px', fontWeight: 900, flexShrink: 0 }}>
+                    <div style={{ width: '16px', height: '16px', borderRadius: '50%', backgroundColor: 'rgba(255,255,255,0.3)', display: 'flex', alignItems: 'center', justify: 'center' }}>
                       <Medal style={{ width: '10px', height: '10px', color: '#FFFFFF' }} />
                     </div>
                     <span>2등</span>
@@ -344,8 +309,8 @@ export default function LeaderboardModal({ isOpen, onClose, activeTab = 'pacman'
                 nameColor = '#881337';
                 scoreColor = '#881337';
                 rankBadge = (
-                  <div style={{ display: 'flex', flexDirection: 'row', alignItems: 'center', gap: '4px', backgroundColor: '#E11D48', color: '#FFFFFF', padding: '2px 8px', borderRadius: '9999px', fontSize: '11px', fontWeight: 900 }}>
-                    <div style={{ width: '16px', height: '16px', borderRadius: '50%', backgroundColor: 'rgba(255,255,255,0.3)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                  <div style={{ display: 'flex', flexDirection: 'row', alignItems: 'center', gap: '4px', backgroundColor: '#E11D48', color: '#FFFFFF', padding: '2px 8px', borderRadius: '9999px', fontSize: '11px', fontWeight: 900, flexShrink: 0 }}>
+                    <div style={{ width: '16px', height: '16px', borderRadius: '50%', backgroundColor: 'rgba(255,255,255,0.3)', display: 'flex', alignItems: 'center', justify: 'center' }}>
                       <Medal style={{ width: '10px', height: '10px', color: '#FFFFFF' }} />
                     </div>
                     <span>3등</span>
@@ -353,7 +318,7 @@ export default function LeaderboardModal({ isOpen, onClose, activeTab = 'pacman'
                 );
               } else {
                 rankBadge = (
-                  <div style={{ width: '24px', height: '24px', borderRadius: '50%', backgroundColor: '#334155', color: '#94A3B8', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '11px', fontWeight: 900 }}>
+                  <div style={{ width: '24px', height: '24px', borderRadius: '50%', backgroundColor: '#334155', color: '#94A3B8', display: 'flex', alignItems: 'center', justify: 'center', fontSize: '11px', fontWeight: 900, flexShrink: 0 }}>
                     {rank}
                   </div>
                 );
@@ -395,10 +360,10 @@ export default function LeaderboardModal({ isOpen, onClose, activeTab = 'pacman'
                   ) : (
                     <>
                       {/* Left Side: Rank Badge + Name */}
-                      <div style={{ display: 'flex', flexDirection: 'row', alignItems: 'center', gap: '10px' }}>
+                      <div style={{ display: 'flex', flexDirection: 'row', alignItems: 'center', gap: '8px', minWidth: 0, flex: 1 }}>
                         {rankBadge}
-                        <div style={{ display: 'flex', flexDirection: 'column', textAlign: 'left' }}>
-                          <span style={{ fontSize: '14px', fontWeight: 900, color: nameColor }}>
+                        <div style={{ display: 'flex', flexDirection: 'column', textAlign: 'left', minWidth: 0 }}>
+                          <span style={{ fontSize: '13px', fontWeight: 900, color: nameColor, whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
                             {item.name}
                           </span>
                           <span style={{ fontSize: '10px', opacity: 0.7 }}>
@@ -407,8 +372,8 @@ export default function LeaderboardModal({ isOpen, onClose, activeTab = 'pacman'
                         </div>
                       </div>
 
-                      {/* Right Side: Score Pill with Circle Zap & Trophy Icons */}
-                      <div style={{ display: 'flex', flexDirection: 'row', alignItems: 'center', gap: '6px' }}>
+                      {/* Right Side: Score Pill with Circle Zap Icon */}
+                      <div style={{ display: 'flex', flexDirection: 'row', alignItems: 'center', gap: '6px', flexShrink: 0 }}>
                         <div style={{
                           display: 'flex',
                           flexDirection: 'row',
@@ -419,10 +384,10 @@ export default function LeaderboardModal({ isOpen, onClose, activeTab = 'pacman'
                           borderRadius: '12px',
                           border: '1px solid rgba(255, 255, 255, 0.2)'
                         }}>
-                          <div style={{ width: '18px', height: '18px', borderRadius: '50%', backgroundColor: 'rgba(245, 158, 11, 0.3)', display: 'flex', alignItems: 'center', justify: 'center' }}>
+                          <div style={{ width: '16px', height: '16px', borderRadius: '50%', backgroundColor: 'rgba(245, 158, 11, 0.3)', display: 'flex', alignItems: 'center', justify: 'center' }}>
                             <Zap style={{ width: '10px', height: '10px', color: scoreColor, fill: scoreColor }} />
                           </div>
-                          <span style={{ fontSize: '15px', fontWeight: 900, color: scoreColor }}>
+                          <span style={{ fontSize: '14px', fontWeight: 900, color: scoreColor }}>
                             {item.score.toLocaleString()} <span style={{ fontSize: '10px', fontWeight: 600 }}>점</span>
                           </span>
                         </div>
@@ -447,7 +412,7 @@ export default function LeaderboardModal({ isOpen, onClose, activeTab = 'pacman'
         </div>
 
         {/* Footer (No bottom Close button, 1-line horizontal text with circle icons) */}
-        <div style={{ paddingTop: '8px', borderTop: '1px solid rgba(255, 255, 255, 0.1)', display: 'flex', flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: '6px' }}>
+        <div style={{ paddingTop: '8px', borderTop: '1px solid rgba(255, 255, 255, 0.1)', display: 'flex', flexDirection: 'row', alignItems: 'center', justify: 'center', gap: '6px' }}>
           <div style={{ width: '18px', height: '18px', borderRadius: '50%', backgroundColor: 'rgba(253, 224, 71, 0.3)', display: 'flex', alignItems: 'center', justify: 'center' }}>
             <Star style={{ width: '10px', height: '10px', color: '#FDE047', fill: '#FDE047' }} />
           </div>
