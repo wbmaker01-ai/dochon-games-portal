@@ -1,0 +1,52 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 400 400" width="100%" height="100%">
+  <defs>
+    <linearGradient id="wildSunset" x1="0%" y1="0%" x2="0%" y2="100%">
+      <stop offset="0%" stop-color="#FF7B00"/>
+      <stop offset="40%" stop-color="#FF0054"/>
+      <stop offset="80%" stop-color="#7209B7"/>
+      <stop offset="100%" stop-color="#150050"/>
+    </linearGradient>
+    <radialGradient id="sunGlow2" cx="50%" cy="50%" r="50%">
+      <stop offset="0%" stop-color="#FFEA00"/>
+      <stop offset="70%" stop-color="#FF7B00" stop-opacity="0.8"/>
+      <stop offset="100%" stop-color="#FF7B00" stop-opacity="0"/>
+    </radialGradient>
+    <filter id="ponyShadow" x="-20%" y="-20%" width="140%" height="140%">
+      <feDropShadow dx="3" dy="8" stdDeviation="6" flood-color="#000000" flood-opacity="0.6"/>
+    </filter>
+  </defs>
+
+  <rect width="400" height="400" fill="url(#wildSunset)"/>
+
+  <!-- Sun -->
+  <circle cx="200" cy="180" r="110" fill="url(#sunGlow2)"/>
+
+  <!-- Desert Cacti & Hills -->
+  <path d="M-20,270 Q100,220 220,260 T420,250 L420,400 L-20,400 Z" fill="#1A0933" filter="url(#ponyShadow)"/>
+
+  <!-- Flying Mail Envelope -->
+  <g transform="translate(240, 110) rotate(-15)" filter="url(#ponyShadow)">
+    <rect x="0" y="0" width="55" height="38" rx="6" fill="#FFFFFF" stroke="#FF7B00" stroke-width="2"/>
+    <path d="M0,0 L27,20 L55,0" fill="none" stroke="#FF7B00" stroke-width="2"/>
+    <circle cx="42" cy="26" r="6" fill="#D90429"/>
+  </g>
+
+  <!-- Horse Rider Silhouette -->
+  <g transform="translate(130, 180)" fill="#0B031A" filter="url(#ponyShadow)">
+    <!-- Horse Body -->
+    <ellipse cx="60" cy="50" rx="45" ry="22"/>
+    <!-- Neck & Head -->
+    <path d="M85,45 Q105,20 115,10 Q125,12 120,25 Q105,45 95,55 Z"/>
+    <!-- Cowboy Hat -->
+    <path d="M55,10 Q65,-10 75,10 Z"/>
+    <ellipse cx="65" cy="10" rx="20" ry="4"/>
+    <!-- Rider Body -->
+    <path d="M50,20 Q65,15 65,42 Q45,45 50,20 Z"/>
+    <!-- Galloping Legs -->
+    <path d="M25,60 L5,85 M35,60 L20,85 M85,60 L105,85 M95,60 L120,80" stroke="#0B031A" stroke-width="6" stroke-linecap="round"/>
+  </g>
+
+  <!-- Title Badge Banner -->
+  <rect x="40" y="325" width="320" height="52" rx="16" fill="rgba(15, 23, 42, 0.85)" stroke="#FF7B00" stroke-width="2" filter="url(#ponyShadow)"/>
+  <text x="200" y="361" font-family="'Outfit', sans-serif" font-weight="900" font-size="22" fill="#FFFFFF" text-anchor="middle">포니 익스프레스 (Pony)</text>
+</svg>

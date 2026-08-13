@@ -1,0 +1,47 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 400 400" width="100%" height="100%">
+  <defs>
+    <radialGradient id="spaceBg" x1="50%" y1="50%" r="70%">
+      <stop offset="0%" stop-color="#03045E"/>
+      <stop offset="60%" stop-color="#023E8A"/>
+      <stop offset="100%" stop-color="#0077B6"/>
+    </radialGradient>
+    <linearGradient id="goldFoil" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#FFF756"/>
+      <stop offset="50%" stop-color="#FFD166"/>
+      <stop offset="100%" stop-color="#FFB703"/>
+    </linearGradient>
+    <filter id="moonShadow" x="-20%" y="-20%" width="140%" height="140%">
+      <feDropShadow dx="3" dy="8" stdDeviation="6" flood-color="#000000" flood-opacity="0.6"/>
+    </filter>
+  </defs>
+
+  <rect width="400" height="400" fill="url(#spaceBg)"/>
+
+  <!-- Stars -->
+  <circle cx="80" cy="70" r="2" fill="#FFFFFF"/>
+  <circle cx="310" cy="90" r="3" fill="#FFF756"/>
+  <circle cx="340" cy="220" r="2" fill="#FFFFFF"/>
+  <circle cx="60" cy="240" r="2.5" fill="#FFF756"/>
+
+  <!-- 3D Glowing Crescent Moon -->
+  <g filter="url(#moonShadow)">
+    <path d="M240,70 A75,75 0 1,0 280,185 A90,90 0 1,1 240,70 Z" fill="url(#goldFoil)"/>
+  </g>
+
+  <!-- 3D Playing Cards -->
+  <g transform="translate(130, 160) rotate(-12)" filter="url(#moonShadow)">
+    <rect x="0" y="0" width="80" height="120" rx="10" fill="#1D3557" stroke="url(#goldFoil)" stroke-width="3"/>
+    <circle cx="40" cy="60" r="20" fill="#E63946"/>
+    <polygon points="40,46 45,56 55,60 45,64 40,74 35,64 25,60 35,56" fill="#FFFFFF"/>
+  </g>
+
+  <g transform="translate(195, 150) rotate(14)" filter="url(#moonShadow)">
+    <rect x="0" y="0" width="80" height="120" rx="10" fill="#457B9D" stroke="url(#goldFoil)" stroke-width="3"/>
+    <circle cx="40" cy="60" r="20" fill="url(#goldFoil)"/>
+    <polygon points="40,46 45,56 55,60 45,64 40,74 35,64 25,60 35,56" fill="#1D3557"/>
+  </g>
+
+  <!-- Title Badge Banner -->
+  <rect x="50" y="325" width="300" height="52" rx="16" fill="rgba(15, 23, 42, 0.85)" stroke="#FFD166" stroke-width="2" filter="url(#moonShadow)"/>
+  <text x="200" y="361" font-family="'Outfit', sans-serif" font-weight="900" font-size="24" fill="#FFFFFF" text-anchor="middle">반달 (Half Moon)</text>
+</svg>

@@ -1,0 +1,58 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 400 400" width="100%" height="100%">
+  <defs>
+    <radialGradient id="cinemaSpot" cx="50%" cy="40%" r="60%">
+      <stop offset="0%" stop-color="#FF5400"/>
+      <stop offset="60%" stop-color="#9E0059"/>
+      <stop offset="100%" stop-color="#390099"/>
+    </radialGradient>
+    <linearGradient id="bucketStripes" x1="0%" y1="0%" x2="100%" y2="0%">
+      <stop offset="0%" stop-color="#D90429"/>
+      <stop offset="50%" stop-color="#EF233C"/>
+      <stop offset="100%" stop-color="#8D0801"/>
+    </linearGradient>
+    <radialGradient id="pop3d" cx="30%" cy="30%" r="70%">
+      <stop offset="0%" stop-color="#FFFFFF"/>
+      <stop offset="50%" stop-color="#FFEA00"/>
+      <stop offset="100%" stop-color="#FFB703"/>
+    </radialGradient>
+    <filter id="popShadow" x="-20%" y="-20%" width="140%" height="140%">
+      <feDropShadow dx="3" dy="8" stdDeviation="6" flood-color="#000000" flood-opacity="0.5"/>
+    </filter>
+  </defs>
+
+  <rect width="400" height="400" fill="url(#cinemaSpot)"/>
+
+  <!-- Cinema Stage Glow -->
+  <ellipse cx="200" cy="310" rx="140" ry="30" fill="#FF5400" opacity="0.3" filter="blur(20px)"/>
+
+  <!-- 3D Popcorn Bucket -->
+  <g filter="url(#popShadow)">
+    <path d="M115,160 L140,310 L260,310 L285,160 Z" fill="#FFFFFF"/>
+    <path d="M140,160 L152,310 L182,310 L172,160 Z" fill="url(#bucketStripes)"/>
+    <path d="M213,160 L223,310 L248,310 L260,160 Z" fill="url(#bucketStripes)"/>
+
+    <!-- Bucket Lip -->
+    <ellipse cx="200" cy="160" rx="85" ry="14" fill="#E2E8F0" stroke="#CBD5E1" stroke-width="2"/>
+  </g>
+
+  <!-- 3D Popping Popcorn Kernels -->
+  <g filter="url(#popShadow)">
+    <!-- Back Cluster -->
+    <circle cx="160" cy="140" r="22" fill="url(#pop3d)"/>
+    <circle cx="200" cy="120" r="28" fill="url(#pop3d)"/>
+    <circle cx="240" cy="140" r="24" fill="url(#pop3d)"/>
+
+    <!-- Flying Kernels -->
+    <circle cx="140" cy="90" r="18" fill="url(#pop3d)"/>
+    <circle cx="260" cy="80" r="20" fill="url(#pop3d)"/>
+    <circle cx="200" cy="65" r="22" fill="url(#pop3d)"/>
+  </g>
+
+  <!-- Motion Stars -->
+  <polygon points="120,60 123,66 130,68 123,70 120,76 117,70 110,68 117,66" fill="#FFEA00"/>
+  <polygon points="280,50 283,56 290,58 283,60 280,66 277,60 270,58 277,56" fill="#FFFFFF"/>
+
+  <!-- Title Badge Banner -->
+  <rect x="50" y="325" width="300" height="52" rx="16" fill="rgba(15, 23, 42, 0.85)" stroke="#FF5400" stroke-width="2" filter="url(#popShadow)"/>
+  <text x="200" y="361" font-family="'Outfit', sans-serif" font-weight="900" font-size="24" fill="#FFFFFF" text-anchor="middle">팝콘 (Popcorn)</text>
+</svg>
