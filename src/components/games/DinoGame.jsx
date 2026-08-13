@@ -1,6 +1,7 @@
 import React, { useEffect, useRef, useState } from 'react';
 import { soundFx } from '../../utils/audio';
 import { saveScore, getHighScore } from '../../utils/leaderboard';
+import { submitScoreToDB } from '../../utils/leaderboardApi';
 import { Play, Pause, RotateCcw, Volume2, VolumeX, Trophy, ArrowUp, ArrowDown, Sparkles } from 'lucide-react';
 import confetti from 'canvas-confetti';
 
@@ -318,10 +319,10 @@ export default function DinoGame({ onScoreSubmitted }) {
     return () => cancelAnimationFrame(animationFrameId);
   }, [gameState]);
 
-  const handleScoreSubmit = (e) => {
+  const handleScoreSubmit = async (e) => {
     e.preventDefault();
     if (!studentName.trim()) return;
-    saveScore('dino', studentName, score);
+    await submitScoreToDB('dino', studentName, score);
     setSubmitted(true);
     if (onScoreSubmitted) onScoreSubmitted();
   };

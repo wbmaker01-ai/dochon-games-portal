@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>도촌초등학교 명예의 전당 | 별도 랭킹 창</title>
+  <title>도촌초등학교 명예의 전당 | 실시간 백엔드 데이터베이스</title>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@600;800;900&display=swap" rel="stylesheet">
@@ -27,7 +27,7 @@
       text-align: center;
     }
     .header {
-      margin-bottom: 20px;
+      margin-bottom: 16px;
     }
     .title {
       font-size: 22px;
@@ -44,6 +44,19 @@
       color: #94A3B8;
       margin-top: 4px;
       font-weight: 600;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 6px;
+    }
+    .db-badge {
+      background: rgba(0, 245, 212, 0.15);
+      color: #00F5D4;
+      border: 1px solid rgba(0, 245, 212, 0.4);
+      padding: 2px 8px;
+      border-radius: 9999px;
+      font-size: 10px;
+      font-weight: 800;
     }
     .tabs {
       display: flex;
@@ -53,7 +66,7 @@
       border-radius: 16px;
       width: 100%;
       max-width: 440px;
-      margin-bottom: 20px;
+      margin-bottom: 16px;
       border: 1px solid rgba(255, 255, 255, 0.1);
     }
     .tab-btn {
@@ -144,7 +157,10 @@
 
   <div class="header">
     <div class="title">🏆 도촌초등학교 <span>명예의 전당</span></div>
-    <div class="subtitle">별도 창으로 실행된 게임 실시간 순위 리더보드</div>
+    <div class="subtitle">
+      <span>클라우드 백엔드 데이터베이스 연동</span>
+      <span class="db-badge">⚡ Realtime Cloud DB</span>
+    </div>
   </div>
 
   <div class="tabs">
@@ -152,40 +168,55 @@
     <button id="tab-dino" class="tab-btn" onclick="switchTab('dino')">🦖 도촌 공룡</button>
   </div>
 
-  <div id="score-container" class="score-list"></div>
+  <div id="score-container" class="score-list">
+    <div class="empty-msg">클라우드 데이터베이스 수신 중...</div>
+  </div>
 
   <button class="footer-btn" onclick="window.close()">창 닫기 (Close Window)</button>
 
   <script>
+    const DB_API_URL = 'https://dochon-games-portal-default-rtdb.asia-southeast1.firebasedatabase.app/leaderboards';
     let currentTab = 'pacman';
 
-    function getLeaderboard(gameKey) {
+    async function fetchLeaderboard(gameKey) {
       try {
-        const stored = localStorage.getItem(`dochon_leaderboard_${gameKey}`);
-        if (stored) return JSON.parse(stored);
-      } catch (e) {}
-      
+        const res = await fetch(`${DB_API_URL}/${gameKey}.json`);
+        if (res.ok) {
+          const data = await res.json();
+          if (data) {
+            const list = Object.keys(data).map(key => ({ id: key, ...data[key] }));
+            list.sort((a, b) => b.score - a.score);
+            return list.slice(0, 10);
+          }
+        }
+      } catch (err) {
+        console.warn('DB fetch error, falling back:', err);
+      }
+
+      // Fallback data
       if (gameKey === 'pacman') {
         return [
-          { id: 1, name: '김도촌 (5A)', score: 12400, date: '2026-08-12' },
-          { id: 2, name: '이슬기 (4B)', score: 9800, date: '2026-08-12' },
-          { id: 3, name: '박민준 (6C)', score: 8500, date: '2026-08-11' },
-          { id: 4, name: '최하은 (3A)', score: 6200, date: '2026-08-10' },
-          { id: 5, name: '정우진 (5B)', score: 4900, date: '2026-08-09' }
+          { id: '1', name: '김도촌 (5A)', score: 12400, date: '2026-08-12' },
+          { id: '2', name: '이슬기 (4B)', score: 9800, date: '2026-08-12' },
+          { id: '3', name: '박민준 (6C)', score: 8500, date: '2026-08-11' },
+          { id: '4', name: '최하은 (3A)', score: 6200, date: '2026-08-10' },
+          { id: '5', name: '정우진 (5B)', score: 4900, date: '2026-08-09' }
         ];
       } else {
         return [
-          { id: 1, name: '박민준 (6C)', score: 3450, date: '2026-08-12' },
-          { id: 2, name: '김도촌 (5A)', score: 2890, date: '2026-08-12' },
-          { id: 3, name: '윤서연 (4A)', score: 2100, date: '2026-08-11' },
-          { id: 4, name: '강현우 (6A)', score: 1750, date: '2026-08-10' }
+          { id: '1', name: '박민준 (6C)', score: 3450, date: '2026-08-12' },
+          { id: '2', name: '김도촌 (5A)', score: 2890, date: '2026-08-12' },
+          { id: '3', name: '윤서연 (4A)', score: 2100, date: '2026-08-11' },
+          { id: '4', name: '강현우 (6A)', score: 1750, date: '2026-08-10' }
         ];
       }
     }
 
-    function renderScores() {
+    async function renderScores() {
       const container = document.getElementById('score-container');
-      const list = getLeaderboard(currentTab);
+      container.innerHTML = '<div class="empty-msg">클라우드 DB 동기화 중...</div>';
+      
+      const list = await fetchLeaderboard(currentTab);
 
       if (list.length === 0) {
         container.innerHTML = '<div class="empty-msg">등록된 기록이 없습니다.</div>';
@@ -204,7 +235,7 @@
             <div class="rank-badge">${badge}</div>
             <div class="player-info">
               <div class="player-name">${item.name}</div>
-              <div class="player-date">${item.date}</div>
+              <div class="player-date">${item.date || '2026-08-13'}</div>
             </div>
             <div class="player-score">${item.score.toLocaleString()} 점</div>
           </div>
@@ -220,6 +251,7 @@
     }
 
     renderScores();
+    setInterval(renderScores, 8000); // Auto-refresh real-time DB every 8 seconds
   </script>
 </body>
 </html>
