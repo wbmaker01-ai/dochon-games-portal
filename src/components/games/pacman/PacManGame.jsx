@@ -464,31 +464,97 @@ export default function PacManGame({ onScoreSubmitted }) {
         )}
       </div>
 
-      {/* Footer Actions & Mobile D-Pad */}
-      <div className="flex flex-wrap items-center justify-between w-full mt-3 px-2 gap-2">
-        <div className="flex items-center gap-2">
-          <button onClick={togglePause} className="btn-outline text-xs px-3 py-1.5">
-            {gameState === 'PAUSED' ? <Play className="w-4 h-4" /> : <Pause className="w-4 h-4" />}
-            {gameState === 'PAUSED' ? '재개' : '일시정지'}
+      {/* Cute Arcade Action Bar & Large 3-Row Touch D-Pad */}
+      <div className="flex flex-col items-center justify-center w-full mt-4 gap-4 px-2">
+
+        {/* 1. Cute Action Pill Buttons Row */}
+        <div className="flex items-center justify-center gap-2.5 sm:gap-3 flex-wrap">
+          <button
+            onClick={togglePause}
+            className="px-4 py-2 rounded-2xl bg-gradient-to-r from-indigo-600 to-purple-600 hover:from-indigo-500 hover:to-purple-500 text-white font-black text-xs sm:text-sm flex items-center gap-2 shadow-lg shadow-indigo-900/40 border border-indigo-400/40 active:scale-95 transition-transform"
+          >
+            {gameState === 'PAUSED' ? <Play className="w-4 h-4 fill-current text-yellow-300" /> : <Pause className="w-4 h-4 fill-current text-purple-200" />}
+            <span>{gameState === 'PAUSED' ? '게임 재개' : '일시 정지'}</span>
           </button>
-          <button onClick={restartGame} className="btn-outline text-xs px-3 py-1.5">
-            <RotateCcw className="w-4 h-4" /> 다시 시작
+
+          <button
+            onClick={restartGame}
+            className="px-4 py-2 rounded-2xl bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-500 hover:to-teal-500 text-white font-black text-xs sm:text-sm flex items-center gap-2 shadow-lg shadow-emerald-900/40 border border-emerald-400/40 active:scale-95 transition-transform"
+          >
+            <RotateCcw className="w-4 h-4 text-emerald-200" />
+            <span>다시 시작</span>
           </button>
-          <button onClick={() => setIsMuted(soundFx.toggleMute())} className="btn-outline text-xs px-3 py-1.5">
-            {isMuted ? <VolumeX className="w-4 h-4 text-red-400" /> : <Volume2 className="w-4 h-4 text-teal-400" />}
-            {isMuted ? '음소거' : '소리 ON'}
+
+          <button
+            onClick={() => setIsMuted(soundFx.toggleMute())}
+            className="px-4 py-2 rounded-2xl bg-gradient-to-r from-amber-500 to-orange-500 hover:from-amber-400 hover:to-orange-400 text-slate-950 font-black text-xs sm:text-sm flex items-center gap-2 shadow-lg shadow-amber-900/40 border border-amber-300/60 active:scale-95 transition-transform"
+          >
+            {isMuted ? <VolumeX className="w-4 h-4 text-red-950" /> : <Volume2 className="w-4 h-4 text-slate-950" />}
+            <span>{isMuted ? '음소거' : '소리 ON'}</span>
           </button>
         </div>
 
-        {/* Touch D-Pad for Mobile */}
-        <div className="flex items-center gap-1 md:hidden bg-slate-900/90 p-1.5 rounded-2xl border border-slate-700">
-          <button onClick={() => setDirection(-1, 0)} className="btn-outline p-2"><ArrowLeft className="w-4 h-4" /></button>
-          <div className="flex flex-col gap-1">
-            <button onClick={() => setDirection(0, -1)} className="btn-outline p-2"><ArrowUp className="w-4 h-4" /></button>
-            <button onClick={() => setDirection(0, 1)} className="btn-outline p-2"><ArrowDown className="w-4 h-4" /></button>
+        {/* 2. Large & Cute 3-Row D-Pad Controller for Mobile & Tablet */}
+        <div className="flex flex-col items-center bg-slate-900/90 p-3 sm:p-4 rounded-3xl border-2 border-amber-400/70 shadow-2xl shadow-amber-500/10 backdrop-blur-md">
+          <div className="text-[10px] sm:text-[11px] font-black text-amber-300 tracking-wider uppercase mb-2 flex items-center gap-1">
+            <span>🕹️ DOCHON TOUCH D-PAD</span>
           </div>
-          <button onClick={() => setDirection(1, 0)} className="btn-outline p-2"><ArrowRight className="w-4 h-4" /></button>
+
+          {/* 3x3 Grid Layout for D-Pad */}
+          <div className="grid grid-cols-3 gap-2 w-48 sm:w-56 h-48 sm:h-56 place-items-center">
+            {/* Row 1: Top Center = UP */}
+            <div className="col-start-2">
+              <button
+                type="button"
+                onClick={() => setDirection(0, -1)}
+                className="w-14 h-14 sm:w-16 sm:h-16 rounded-2xl bg-gradient-to-b from-amber-300 to-amber-500 hover:from-amber-200 hover:to-amber-400 text-slate-950 flex items-center justify-center shadow-lg shadow-amber-500/40 border-2 border-yellow-200 active:scale-90 active:translate-y-1 transition-all select-none touch-manipulation cursor-pointer"
+                title="위쪽 이동 (Up)"
+              >
+                <ArrowUp className="w-7 h-7 sm:w-8 sm:h-8 stroke-[3.5]" />
+              </button>
+            </div>
+
+            {/* Row 2: Left = LEFT, Center = DECORATIVE LOGO, Right = RIGHT */}
+            <div className="col-start-1 row-start-2">
+              <button
+                type="button"
+                onClick={() => setDirection(-1, 0)}
+                className="w-14 h-14 sm:w-16 sm:h-16 rounded-2xl bg-gradient-to-r from-teal-300 to-cyan-500 hover:from-teal-200 hover:to-cyan-400 text-slate-950 flex items-center justify-center shadow-lg shadow-cyan-500/40 border-2 border-cyan-200 active:scale-90 active:-translate-x-1 transition-all select-none touch-manipulation cursor-pointer"
+                title="왼쪽 이동 (Left)"
+              >
+                <ArrowLeft className="w-7 h-7 sm:w-8 sm:h-8 stroke-[3.5]" />
+              </button>
+            </div>
+
+            <div className="col-start-2 row-start-2 w-10 h-10 sm:w-11 sm:h-11 rounded-full bg-slate-950 border-2 border-slate-700 flex items-center justify-center text-amber-400 font-black text-xs shadow-inner select-none">
+              🟡
+            </div>
+
+            <div className="col-start-3 row-start-2">
+              <button
+                type="button"
+                onClick={() => setDirection(1, 0)}
+                className="w-14 h-14 sm:w-16 sm:h-16 rounded-2xl bg-gradient-to-r from-pink-300 to-rose-500 hover:from-pink-200 hover:to-rose-400 text-slate-950 flex items-center justify-center shadow-lg shadow-rose-500/40 border-2 border-pink-200 active:scale-90 active:translate-x-1 transition-all select-none touch-manipulation cursor-pointer"
+                title="오른쪽 이동 (Right)"
+              >
+                <ArrowRight className="w-7 h-7 sm:w-8 sm:h-8 stroke-[3.5]" />
+              </button>
+            </div>
+
+            {/* Row 3: Bottom Center = DOWN */}
+            <div className="col-start-2 row-start-3">
+              <button
+                type="button"
+                onClick={() => setDirection(0, 1)}
+                className="w-14 h-14 sm:w-16 sm:h-16 rounded-2xl bg-gradient-to-t from-orange-400 to-amber-300 hover:from-orange-300 hover:to-amber-200 text-slate-950 flex items-center justify-center shadow-lg shadow-orange-500/40 border-2 border-orange-200 active:scale-90 active:-translate-y-1 transition-all select-none touch-manipulation cursor-pointer"
+                title="아래쪽 이동 (Down)"
+              >
+                <ArrowDown className="w-7 h-7 sm:w-8 sm:h-8 stroke-[3.5]" />
+              </button>
+            </div>
+          </div>
         </div>
+
       </div>
     </div>
   );
