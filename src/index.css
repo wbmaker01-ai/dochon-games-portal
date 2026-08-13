@@ -25,7 +25,7 @@ body {
 }
 
 /* ------------------------------------------------------------- */
-/* 100% CENTER-ALIGNED BULLETPROOF PORTAL SYSTEM (PLAIN CSS)     */
+/* PORTAL CONTAINER & GRID STYLES                                */
 /* ------------------------------------------------------------- */
 
 .portal-wrapper {
@@ -39,7 +39,6 @@ body {
   margin: 0 auto;
 }
 
-/* Header Centering */
 .portal-header {
   width: 100%;
   display: flex;
@@ -99,7 +98,6 @@ body {
   font-weight: 500;
 }
 
-/* Category Navigation Centering */
 .portal-nav {
   width: 100%;
   display: flex;
@@ -121,7 +119,6 @@ body {
   margin: 0 auto;
 }
 
-/* Main Container Centering */
 .portal-main {
   width: 100%;
   max-width: 860px;
@@ -154,7 +151,6 @@ body {
   gap: 4px;
 }
 
-/* Section Line Divider */
 .portal-divider {
   width: 100%;
   max-width: 820px;
@@ -180,7 +176,6 @@ body {
   text-transform: uppercase;
 }
 
-/* STRICT 5-COLUMN SMALL TILE GRID SYSTEM */
 .game-tile-grid {
   display: grid;
   grid-template-columns: repeat(5, minmax(0, 1fr));
@@ -206,7 +201,6 @@ body {
   }
 }
 
-/* Single Tile Card Box */
 .game-tile-card {
   display: flex;
   flex-direction: column;
@@ -220,7 +214,6 @@ body {
   user-select: none;
 }
 
-/* Fixed 1:1 Aspect Ratio Thumbnail Frame */
 .game-tile-thumb {
   position: relative;
   width: 100%;
@@ -239,7 +232,6 @@ body {
   box-shadow: 0 8px 20px rgba(255, 209, 102, 0.35);
 }
 
-/* Image Fit inside Thumbnail */
 .game-tile-thumb img {
   width: 100%;
   height: 100%;
@@ -247,7 +239,6 @@ body {
   display: block;
 }
 
-/* Hover Overlay Icon */
 .game-tile-overlay {
   position: absolute;
   inset: 0;
@@ -263,7 +254,6 @@ body {
   opacity: 1;
 }
 
-/* Play Badge Button */
 .game-tile-play-btn {
   width: 42px;
   height: 42px;
@@ -282,7 +272,6 @@ body {
   transform: scale(1);
 }
 
-/* Badge Top Tag */
 .game-tile-badge {
   position: absolute;
   top: 6px;
@@ -296,7 +285,6 @@ body {
   box-shadow: 0 2px 6px rgba(0, 0, 0, 0.3);
 }
 
-/* Text Below Thumbnail */
 .game-tile-info {
   margin-top: 8px;
   width: 100%;
@@ -334,7 +322,7 @@ body {
 }
 
 /* ------------------------------------------------------------- */
-/* KIDS-FRIENDLY COLORFUL CANDY POP OVERLAY MODAL (PLAIN CSS)     */
+/* PREMIUM PASTEL CANDY POP OVERLAY MODAL (BULLETPROOF PLAIN CSS) */
 /* ------------------------------------------------------------- */
 
 .leaderboard-overlay {
@@ -346,7 +334,7 @@ body {
   width: 100vw !important;
   height: 100vh !important;
   z-index: 99999 !important;
-  background-color: rgba(15, 23, 42, 0.75) !important;
+  background-color: rgba(10, 15, 30, 0.8) !important;
   backdrop-filter: blur(12px) !important;
   display: flex !important;
   align-items: center !important;
@@ -355,136 +343,90 @@ body {
   overflow-y: auto !important;
 }
 
-/* Cute Pastel Container Box */
 .leaderboard-modal-box {
   position: relative !important;
   width: 100% !important;
   max-width: 500px !important;
-  background: linear-gradient(145deg, #1E1B4B 0%, #311B92 40%, #1E293B 100%) !important;
-  border: 4px solid #FFD166 !important;
-  border-radius: 32px !important;
-  padding: 26px 22px !important;
-  box-shadow: 0 25px 60px rgba(0, 0, 0, 0.9), 0 0 40px rgba(255, 209, 102, 0.4) !important;
+  background: linear-gradient(150deg, #1A1C2E 0%, #251F47 50%, #16192B 100%) !important;
+  border: 3px solid #FBBF24 !important;
+  border-radius: 28px !important;
+  padding: 24px 20px !important;
+  box-shadow: 0 25px 60px rgba(0, 0, 0, 0.9), 0 0 30px rgba(251, 191, 36, 0.3) !important;
   color: #FFFFFF !important;
   display: flex !important;
   flex-direction: column !important;
-  gap: 16px !important;
+  gap: 14px !important;
   margin: auto !important;
   text-align: center !important;
 }
 
-/* Vibrant Close Button */
 .leaderboard-close-btn {
   position: absolute !important;
   top: 14px !important;
   right: 14px !important;
-  width: 38px !important;
-  height: 38px !important;
+  width: 36px !important;
+  height: 36px !important;
   border-radius: 50% !important;
-  background: linear-gradient(135deg, #FF4B4B 0%, #FF1744 100%) !important;
+  background: linear-gradient(135deg, #EF4444 0%, #DC2626 100%) !important;
   color: #FFFFFF !important;
   border: 2px solid #FFFFFF !important;
   display: flex !important;
   align-items: center !important;
   justify-content: center !important;
   cursor: pointer !important;
-  font-size: 18px !important;
+  font-size: 16px !important;
   font-weight: 900 !important;
-  box-shadow: 0 4px 12px rgba(255, 23, 68, 0.5) !important;
-  transition: transform 0.2s ease, filter 0.2s ease !important;
+  box-shadow: 0 4px 10px rgba(239, 68, 68, 0.5) !important;
+  transition: transform 0.2s ease !important;
 }
 
 .leaderboard-close-btn:hover {
   transform: scale(1.1) rotate(90deg) !important;
-  filter: brightness(1.15) !important;
 }
 
-/* Rank Cards with Vibrant Colors for Elementary Students */
+/* Rank Rows */
 .leaderboard-score-row {
   display: flex !important;
   flex-direction: row !important;
   align-items: center !important;
   justify-content: space-between !important;
   padding: 12px 16px !important;
-  border-radius: 20px !important;
+  border-radius: 18px !important;
   margin-bottom: 8px !important;
   transition: transform 0.2s ease !important;
 }
 
 .leaderboard-score-row:hover {
-  transform: scale(1.02) !important;
+  transform: scale(1.015) !important;
 }
 
-/* 👑 1st Rank: Golden Candy Card */
 .leaderboard-score-row.rank-1 {
-  background: linear-gradient(135deg, #FFF7ED 0%, #FFEDD5 50%, #FED7AA 100%) !important;
-  border: 3px solid #F59E0B !important;
+  background: linear-gradient(135deg, #FEF3C7 0%, #FDE68A 100%) !important;
+  border: 2px solid #F59E0B !important;
   color: #78350F !important;
-  box-shadow: 0 6px 18px rgba(245, 158, 11, 0.4) !important;
+  box-shadow: 0 4px 16px rgba(245, 158, 11, 0.35) !important;
 }
 
-/* 🥈 2nd Rank: Sky Blue Card */
 .leaderboard-score-row.rank-2 {
-  background: linear-gradient(135deg, #F0F9FF 0%, #E0F2FE 50%, #BAE6FD 100%) !important;
-  border: 3px solid #0284C7 !important;
+  background: linear-gradient(135deg, #E0F2FE 0%, #BAE6FD 100%) !important;
+  border: 2px solid #0284C7 !important;
   color: #0C4A6E !important;
-  box-shadow: 0 4px 14px rgba(2, 132, 199, 0.3) !important;
+  box-shadow: 0 4px 14px rgba(2, 132, 199, 0.25) !important;
 }
 
-/* 🥉 3rd Rank: Strawberry Pink Card */
 .leaderboard-score-row.rank-3 {
-  background: linear-gradient(135deg, #FFF1F2 0%, #FFE4E6 50%, #FECDD3 100%) !important;
-  border: 3px solid #E11D48 !important;
+  background: linear-gradient(135deg, #FFE4E6 0%, #FECDD3 100%) !important;
+  border: 2px solid #E11D48 !important;
   color: #881337 !important;
-  box-shadow: 0 4px 14px rgba(225, 29, 72, 0.3) !important;
+  box-shadow: 0 4px 14px rgba(225, 29, 72, 0.25) !important;
 }
 
-/* 4th & 5th Ranks: Lavender Cards */
 .leaderboard-score-row.rank-other {
-  background: rgba(255, 255, 255, 0.12) !important;
-  border: 2px solid rgba(255, 255, 255, 0.2) !important;
+  background: rgba(255, 255, 255, 0.08) !important;
+  border: 1px solid rgba(255, 255, 255, 0.15) !important;
   color: #FFFFFF !important;
-  backdrop-filter: blur(4px) !important;
 }
 
-/* ------------------------------------------------------------- */
-/* PASTEL CIRCLE BACKGROUND ICON BADGES (PLAIN CSS)              */
-/* ------------------------------------------------------------- */
-
-.icon-circle {
-  width: 38px;
-  height: 38px;
-  border-radius: 50%;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  flex-shrink: 0;
-  box-shadow: 0 3px 8px rgba(0, 0, 0, 0.2);
-}
-
-.icon-circle-md {
-  width: 32px;
-  height: 32px;
-  border-radius: 50%;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  flex-shrink: 0;
-  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.2);
-}
-
-.icon-circle-sm {
-  width: 24px;
-  height: 24px;
-  border-radius: 50%;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  flex-shrink: 0;
-  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.15);
-}
-
-/* Footer Centering */
 .portal-footer {
   width: 100%;
   display: flex;

@@ -2,8 +2,6 @@ import React, { useState, useEffect } from 'react';
 import { getLeaderboardFromDB, updateScoreInDB, deleteScoreFromDB } from '../utils/leaderboardApi';
 import { Trophy, X, Crown, Medal, Zap, RefreshCw, Sparkles, Star, Heart, Lock, Edit2, Trash2, Check, LogOut, ShieldAlert } from 'lucide-react';
 
-const ENCODED_PASS = 'ODU4Mg=='; // btoa('8582')
-
 export default function LeaderboardModal({ isOpen, onClose, activeTab = 'pacman' }) {
   const [currentTab, setCurrentTab] = useState(activeTab);
   const [scores, setScores] = useState([]);
@@ -39,7 +37,7 @@ export default function LeaderboardModal({ isOpen, onClose, activeTab = 'pacman'
     setLoading(false);
   };
 
-  // Secret Hidden Trigger on Left Trophy Circle (Looks like a normal graphic)
+  // Secret Hidden Trigger on Left Trophy Circle (Seamless Graphic)
   const handleTrophyClick = () => {
     if (isAdminMode) return;
     setPasswordInput('');
@@ -47,17 +45,17 @@ export default function LeaderboardModal({ isOpen, onClose, activeTab = 'pacman'
     setShowPasswordPrompt(true);
   };
 
-  // Verify Admin Password '8582'
+  // 100% Reliable Admin Password Verification for '8582'
   const handlePasswordSubmit = (e) => {
     e.preventDefault();
     const cleanInput = String(passwordInput).trim();
-    if (cleanInput === '8582' || btoa(cleanInput) === ENCODED_PASS) {
+    if (cleanInput === '8582' || btoa(cleanInput) === 'ODU4Mg==') {
       setIsAdminMode(true);
       setShowPasswordPrompt(false);
       setPasswordInput('');
       setPasswordError('');
     } else {
-      setPasswordError('❌ 암호가 올바르지 않습니다. (비밀번호: 4자리)');
+      setPasswordError('❌ 암호가 올바르지 않습니다. (비밀번호: 8582)');
     }
   };
 
@@ -93,10 +91,10 @@ export default function LeaderboardModal({ isOpen, onClose, activeTab = 'pacman'
 
   return (
     <div className="leaderboard-overlay">
-      {/* Colorful 3D Candy Pop Container Box */}
+      {/* Premium Pastel Candy Pop Container Box */}
       <div className="leaderboard-modal-box">
         
-        {/* Vibrant Red Close Button (Top-Right Only, No Bottom Close Button) */}
+        {/* Vibrant Red Close Button (Top-Right Only) */}
         <button
           onClick={onClose}
           className="leaderboard-close-btn"
@@ -105,109 +103,208 @@ export default function LeaderboardModal({ isOpen, onClose, activeTab = 'pacman'
           <X className="w-5 h-5" />
         </button>
 
-        {/* 1-Line Balanced Header Layout (Icons on BOTH Left & Right Sides) */}
-        <div className="flex flex-col items-center justify-center text-center gap-2 pt-1">
+        {/* 1-Line Balanced Header Layout */}
+        <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', gap: '10px' }}>
           
           {/* Main Title Row: Left Trophy Circle | Title | Right Sparkle Circle */}
-          <div className="flex flex-row items-center justify-center gap-3 w-full">
+          <div style={{ display: 'flex', flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: '10px', width: '100%' }}>
             
-            {/* Left Seamless Hidden Trophy Secret Icon (Pastel Circle) */}
+            {/* 🏆 Seamless Secret Hidden Trophy Graphic (Pastel Circle Background) */}
             <div
               onClick={handleTrophyClick}
-              className="icon-circle bg-amber-400 text-amber-950 border-2 border-white shadow-md cursor-pointer hover:scale-110 active:scale-95 transition-transform"
+              style={{
+                width: '38px',
+                height: '38px',
+                borderRadius: '50%',
+                backgroundColor: 'rgba(251, 191, 36, 0.25)',
+                border: '1.5px solid rgba(251, 191, 36, 0.6)',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                cursor: 'pointer',
+                flexShrink: 0
+              }}
               title="도촌초등학교 명예의 전당"
             >
-              <Trophy className="w-5 h-5 fill-amber-950" />
+              <Trophy style={{ width: '20px', height: '20px', color: '#FBBF24', fill: 'rgba(251, 191, 36, 0.5)' }} />
             </div>
 
-            <h2 className="text-2xl md:text-3xl font-black tracking-tight text-white drop-shadow-md whitespace-nowrap">
-              도촌초등학교 <span className="text-amber-300">명예의 전당</span>
+            <h2 style={{ fontSize: '1.5rem', fontWeight: 900, color: '#FFFFFF', margin: 0, whiteSpace: 'nowrap' }}>
+              도촌초등학교 <span style={{ color: '#FBBF24' }}>명예의 전당</span>
             </h2>
 
             {/* Right Pastel Sparkles Circle */}
-            <div className="icon-circle bg-yellow-400 text-yellow-950 border-2 border-white shadow-md animate-bounce">
-              <Sparkles className="w-5 h-5 fill-yellow-950" />
+            <div style={{
+              width: '32px',
+              height: '32px',
+              borderRadius: '50%',
+              backgroundColor: 'rgba(253, 224, 71, 0.25)',
+              border: '1.5px solid rgba(253, 224, 71, 0.6)',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              flexShrink: 0
+            }}>
+              <Sparkles style={{ width: '18px', height: '18px', color: '#FDE047' }} />
             </div>
           </div>
 
-          {/* Sub-Badges Row (Icons on BOTH Left & Right Sides of Text) */}
-          <div className="flex flex-row items-center justify-center gap-2.5 w-full flex-wrap">
+          {/* Sub-Badges Row */}
+          <div style={{ display: 'flex', flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: '8px', flexWrap: 'wrap', width: '100%' }}>
             {/* Left Badge: Heart - 도촌어린이 랭킹 - Star */}
-            <span className="bg-pink-500/25 text-pink-200 border border-pink-400/50 px-3 py-1 rounded-full text-xs font-black flex flex-row items-center gap-2 shadow-sm">
-              <div className="icon-circle-sm bg-pink-500 text-white">
-                <Heart className="w-3 h-3 fill-white" />
+            <span style={{
+              backgroundColor: 'rgba(244, 63, 94, 0.18)',
+              color: '#FDA4AF',
+              border: '1px solid rgba(244, 63, 94, 0.4)',
+              padding: '4px 12px',
+              borderRadius: '9999px',
+              fontSize: '11px',
+              fontWeight: 800,
+              display: 'flex',
+              flexDirection: 'row',
+              alignItems: 'center',
+              gap: '6px'
+            }}>
+              <div style={{ width: '18px', height: '18px', borderRadius: '50%', backgroundColor: '#F43F5E', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                <Heart style={{ width: '10px', height: '10px', color: '#FFFFFF', fill: '#FFFFFF' }} />
               </div>
               <span>도촌어린이 랭킹</span>
-              <div className="icon-circle-sm bg-pink-500 text-white">
-                <Star className="w-3 h-3 fill-white" />
+              <div style={{ width: '18px', height: '18px', borderRadius: '50%', backgroundColor: '#F43F5E', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                <Star style={{ width: '10px', height: '10px', color: '#FFFFFF', fill: '#FFFFFF' }} />
               </div>
             </span>
 
             {/* Right Badge: Refresh - 실시간 클라우드 DB - Zap */}
-            <span className="bg-emerald-500/25 text-emerald-200 border border-emerald-400/50 px-3 py-1 rounded-full text-xs font-black flex flex-row items-center gap-2 shadow-sm">
-              <div className="icon-circle-sm bg-emerald-500 text-white">
-                <RefreshCw className="w-3 h-3 animate-spin" />
+            <span style={{
+              backgroundColor: 'rgba(16, 185, 129, 0.18)',
+              color: '#6EE7B7',
+              border: '1px solid rgba(16, 185, 129, 0.4)',
+              padding: '4px 12px',
+              borderRadius: '9999px',
+              fontSize: '11px',
+              fontWeight: 800,
+              display: 'flex',
+              flexDirection: 'row',
+              alignItems: 'center',
+              gap: '6px'
+            }}>
+              <div style={{ width: '18px', height: '18px', borderRadius: '50%', backgroundColor: '#10B981', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                <RefreshCw style={{ width: '10px', height: '10px', color: '#FFFFFF' }} />
               </div>
               <span>실시간 클라우드 DB</span>
-              <div className="icon-circle-sm bg-emerald-500 text-white">
-                <Zap className="w-3 h-3 fill-white" />
+              <div style={{ width: '18px', height: '18px', borderRadius: '50%', backgroundColor: '#10B981', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                <Zap style={{ width: '10px', height: '10px', color: '#FFFFFF', fill: '#FFFFFF' }} />
               </div>
             </span>
           </div>
 
           {/* Admin Mode Active Banner */}
           {isAdminMode && (
-            <div className="mt-1 w-full bg-gradient-to-r from-red-600/90 to-rose-600/90 border-2 border-red-400 text-white px-4 py-2 rounded-2xl text-xs font-black flex flex-row items-center justify-between shadow-lg animate-pulse">
-              <span className="flex flex-row items-center gap-1.5">
-                <ShieldAlert className="w-4 h-4 text-yellow-300" />
+            <div style={{
+              width: '100%',
+              background: 'linear-gradient(135deg, #DC2626, #EF4444)',
+              border: '2px solid #F87171',
+              color: '#FFFFFF',
+              padding: '6px 14px',
+              borderRadius: '14px',
+              fontSize: '11px',
+              fontWeight: 900,
+              display: 'flex',
+              flexDirection: 'row',
+              alignItems: 'center',
+              justifyContent: 'space-between',
+              boxShadow: '0 4px 12px rgba(220, 38, 38, 0.4)'
+            }}>
+              <span style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
+                <ShieldAlert style={{ width: '16px', height: '16px', color: '#FDE047' }} />
                 🔐 관리자 모드 (수정 및 삭제 권한 활성화됨)
               </span>
               <button
                 onClick={() => setIsAdminMode(false)}
-                className="bg-black/40 hover:bg-black/60 px-2.5 py-1 rounded-xl text-[10px] text-white flex flex-row items-center gap-1 transition"
+                style={{
+                  backgroundColor: 'rgba(0,0,0,0.4)',
+                  color: '#FFFFFF',
+                  border: 'none',
+                  padding: '3px 8px',
+                  borderRadius: '8px',
+                  fontSize: '10px',
+                  cursor: 'pointer',
+                  fontWeight: 700
+                }}
               >
-                <LogOut className="w-3 h-3" /> 로그아웃
+                로그아웃
               </button>
             </div>
           )}
         </div>
 
         {/* Colorful Game Tab Switcher */}
-        <div className="flex flex-row items-center justify-center gap-2.5 bg-slate-900/80 p-2 rounded-2xl border-2 border-slate-700/80 w-full shadow-inner">
+        <div style={{
+          display: 'flex',
+          flexDirection: 'row',
+          alignItems: 'center',
+          justifyContent: 'center',
+          gap: '8px',
+          backgroundColor: 'rgba(15, 23, 42, 0.8)',
+          padding: '6px',
+          borderRadius: '16px',
+          border: '1.5px solid rgba(255, 255, 255, 0.15)',
+          width: '100%'
+        }}>
           <button
             onClick={() => setCurrentTab('pacman')}
-            className={`flex-1 py-2.5 px-4 rounded-xl text-xs md:text-sm font-black transition-all flex flex-row items-center justify-center gap-2 shadow-md ${
-              currentTab === 'pacman'
-                ? 'bg-gradient-to-r from-amber-400 to-yellow-400 text-amber-950 scale-105 border-2 border-white'
-                : 'bg-slate-800/80 text-slate-300 hover:text-white hover:bg-slate-700'
-            }`}
+            style={{
+              flex: 1,
+              padding: '8px',
+              borderRadius: '12px',
+              fontSize: '13px',
+              fontWeight: 900,
+              border: 'none',
+              cursor: 'pointer',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              gap: '6px',
+              background: currentTab === 'pacman' ? 'linear-gradient(135deg, #FBBF24, #F59E0B)' : 'transparent',
+              color: currentTab === 'pacman' ? '#78350F' : '#94A3B8',
+              boxShadow: currentTab === 'pacman' ? '0 4px 10px rgba(245, 158, 11, 0.3)' : 'none'
+            }}
           >
-            <span className="text-base">🟡</span>
-            <span>도촌 팩맨</span>
+            <span>🟡 도촌 팩맨</span>
           </button>
 
           <button
             onClick={() => setCurrentTab('dino')}
-            className={`flex-1 py-2.5 px-4 rounded-xl text-xs md:text-sm font-black transition-all flex flex-row items-center justify-center gap-2 shadow-md ${
-              currentTab === 'dino'
-                ? 'bg-gradient-to-r from-emerald-400 to-teal-400 text-emerald-950 scale-105 border-2 border-white'
-                : 'bg-slate-800/80 text-slate-300 hover:text-white hover:bg-slate-700'
-            }`}
+            style={{
+              flex: 1,
+              padding: '8px',
+              borderRadius: '12px',
+              fontSize: '13px',
+              fontWeight: 900,
+              border: 'none',
+              cursor: 'pointer',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              gap: '6px',
+              background: currentTab === 'dino' ? 'linear-gradient(135deg, #34D399, #10B981)' : 'transparent',
+              color: currentTab === 'dino' ? '#064E3B' : '#94A3B8',
+              boxShadow: currentTab === 'dino' ? '0 4px 10px rgba(16, 185, 129, 0.3)' : 'none'
+            }}
           >
-            <span className="text-base">🦖</span>
-            <span>도촌 공룡</span>
+            <span>🦖 도촌 공룡</span>
           </button>
         </div>
 
-        {/* Leaderboard Score List (Balanced 1-Line Horizontal Cards) */}
-        <div className="flex flex-col gap-2.5 max-h-[300px] md:max-h-[340px] overflow-y-auto pr-1">
+        {/* Leaderboard Score List */}
+        <div style={{ display: 'flex', flexDirection: 'column', gap: '8px', maxHeight: '320px', overflowY: 'auto' }}>
           {loading && scores.length === 0 ? (
-            <div className="py-8 text-center text-amber-300 text-xs font-bold flex flex-row items-center justify-center gap-2 bg-slate-900/50 rounded-2xl border border-slate-700">
-              <RefreshCw className="w-4 h-4 animate-spin text-amber-400" />
-              <span>클라우드 백엔드 DB에서 랭킹을 불러오는 중...</span>
+            <div style={{ padding: '30px', textAlign: 'center', color: '#FBBF24', fontSize: '12px', fontWeight: 700 }}>
+              <RefreshCw style={{ width: '16px', height: '16px', display: 'inline-block', marginRight: '6px' }} />
+              클라우드 DB에서 랭킹을 불러오는 중...
             </div>
           ) : scores.length === 0 ? (
-            <div className="py-8 text-center text-slate-300 text-xs font-bold bg-slate-900/50 rounded-2xl border border-slate-700">
+            <div style={{ padding: '30px', textAlign: 'center', color: '#94A3B8', fontSize: '12px', fontWeight: 700 }}>
               아직 등록된 랭킹 기록이 없습니다.<br />첫 번째 랭커에 도전해보세요! 🚀
             </div>
           ) : (
@@ -215,48 +312,48 @@ export default function LeaderboardModal({ isOpen, onClose, activeTab = 'pacman'
               const rank = idx + 1;
               let rankBadge = null;
               let rowClass = 'rank-other';
-              let nameColor = 'text-white';
-              let scoreColor = 'text-amber-300';
+              let nameColor = '#FFFFFF';
+              let scoreColor = '#FBBF24';
 
               if (rank === 1) {
                 rowClass = 'rank-1';
-                nameColor = 'text-amber-950 font-black';
-                scoreColor = 'text-amber-900 font-black';
+                nameColor = '#78350F';
+                scoreColor = '#78350F';
                 rankBadge = (
-                  <div className="flex flex-row items-center gap-1 bg-amber-500 text-white px-2.5 py-1 rounded-full text-xs font-black shadow-md border border-white shrink-0">
-                    <div className="icon-circle-sm bg-yellow-300/40 text-amber-950">
-                      <Crown className="w-3.5 h-3.5 fill-amber-950" />
+                  <div style={{ display: 'flex', flexDirection: 'row', alignItems: 'center', gap: '4px', backgroundColor: '#F59E0B', color: '#FFFFFF', padding: '2px 8px', borderRadius: '9999px', fontSize: '11px', fontWeight: 900 }}>
+                    <div style={{ width: '16px', height: '16px', borderRadius: '50%', backgroundColor: 'rgba(255,255,255,0.3)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                      <Crown style={{ width: '10px', height: '10px', color: '#FFFFFF', fill: '#FFFFFF' }} />
                     </div>
                     <span>1등</span>
                   </div>
                 );
               } else if (rank === 2) {
                 rowClass = 'rank-2';
-                nameColor = 'text-sky-950 font-black';
-                scoreColor = 'text-sky-900 font-black';
+                nameColor = '#0C4A6E';
+                scoreColor = '#0C4A6E';
                 rankBadge = (
-                  <div className="flex flex-row items-center gap-1 bg-sky-500 text-white px-2.5 py-1 rounded-full text-xs font-black shadow-md border border-white shrink-0">
-                    <div className="icon-circle-sm bg-sky-200/40 text-sky-950">
-                      <Medal className="w-3.5 h-3.5" />
+                  <div style={{ display: 'flex', flexDirection: 'row', alignItems: 'center', gap: '4px', backgroundColor: '#0284C7', color: '#FFFFFF', padding: '2px 8px', borderRadius: '9999px', fontSize: '11px', fontWeight: 900 }}>
+                    <div style={{ width: '16px', height: '16px', borderRadius: '50%', backgroundColor: 'rgba(255,255,255,0.3)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                      <Medal style={{ width: '10px', height: '10px', color: '#FFFFFF' }} />
                     </div>
                     <span>2등</span>
                   </div>
                 );
               } else if (rank === 3) {
                 rowClass = 'rank-3';
-                nameColor = 'text-rose-950 font-black';
-                scoreColor = 'text-rose-900 font-black';
+                nameColor = '#881337';
+                scoreColor = '#881337';
                 rankBadge = (
-                  <div className="flex flex-row items-center gap-1 bg-rose-500 text-white px-2.5 py-1 rounded-full text-xs font-black shadow-md border border-white shrink-0">
-                    <div className="icon-circle-sm bg-rose-200/40 text-rose-950">
-                      <Medal className="w-3.5 h-3.5" />
+                  <div style={{ display: 'flex', flexDirection: 'row', alignItems: 'center', gap: '4px', backgroundColor: '#E11D48', color: '#FFFFFF', padding: '2px 8px', borderRadius: '9999px', fontSize: '11px', fontWeight: 900 }}>
+                    <div style={{ width: '16px', height: '16px', borderRadius: '50%', backgroundColor: 'rgba(255,255,255,0.3)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                      <Medal style={{ width: '10px', height: '10px', color: '#FFFFFF' }} />
                     </div>
                     <span>3등</span>
                   </div>
                 );
               } else {
                 rankBadge = (
-                  <div className="icon-circle-md bg-slate-800 text-slate-300 font-extrabold border border-slate-600 shrink-0 text-xs">
+                  <div style={{ width: '24px', height: '24px', borderRadius: '50%', backgroundColor: '#334155', color: '#94A3B8', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '11px', fontWeight: 900 }}>
                     {rank}
                   </div>
                 );
@@ -265,93 +362,78 @@ export default function LeaderboardModal({ isOpen, onClose, activeTab = 'pacman'
               const isEditingThis = editingId === item.id;
 
               return (
-                <div
-                  key={item.id || idx}
-                  className={`leaderboard-score-row ${rowClass} relative`}
-                >
+                <div key={item.id || idx} className={`leaderboard-score-row ${rowClass}`}>
                   {isEditingThis ? (
-                    /* Inline Admin Edit Form */
-                    <div className="flex flex-col gap-2 w-full p-2 bg-slate-900 rounded-xl border-2 border-amber-400 text-white">
-                      <div className="flex flex-row items-center justify-between text-xs font-bold text-amber-300">
-                        <span>✏️ 기록 수정하기</span>
-                        <span className="text-[10px] text-slate-400">ID: {item.id}</span>
+                    <div style={{ display: 'flex', flexDirection: 'column', gap: '6px', width: '100%', padding: '6px', backgroundColor: '#0F172A', borderRadius: '12px' }}>
+                      <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '11px', fontWeight: 800, color: '#FBBF24' }}>
+                        <span>✏️ 기록 수정</span>
+                        <span>ID: {item.id}</span>
                       </div>
-                      <div className="flex flex-row gap-2">
+                      <div style={{ display: 'flex', gap: '6px' }}>
                         <input
                           type="text"
                           value={editName}
                           onChange={(e) => setEditName(e.target.value)}
-                          className="flex-1 px-3 py-1.5 bg-slate-800 border border-slate-600 rounded-lg text-xs font-bold text-white focus:outline-none focus:border-amber-400"
-                          placeholder="학생 이름/반"
+                          style={{ flex: 1, padding: '4px 8px', backgroundColor: '#1E293B', border: '1px solid #475569', borderRadius: '6px', color: '#FFFFFF', fontSize: '12px' }}
                         />
                         <input
                           type="number"
                           value={editScore}
                           onChange={(e) => setEditScore(e.target.value)}
-                          className="w-24 px-3 py-1.5 bg-slate-800 border border-slate-600 rounded-lg text-xs font-bold text-amber-300 focus:outline-none focus:border-amber-400 text-right"
-                          placeholder="점수"
+                          style={{ width: '80px', padding: '4px 8px', backgroundColor: '#1E293B', border: '1px solid #475569', borderRadius: '6px', color: '#FBBF24', fontSize: '12px', textAlign: 'right' }}
                         />
                       </div>
-                      <div className="flex flex-row justify-end gap-2 mt-1">
-                        <button
-                          onClick={() => saveEditing(item.id)}
-                          className="px-3 py-1 bg-emerald-500 hover:bg-emerald-600 text-white rounded-lg text-xs font-black flex flex-row items-center gap-1 shadow"
-                        >
-                          <Check className="w-3.5 h-3.5" /> 저장
+                      <div style={{ display: 'flex', justifyContent: 'flex-end', gap: '6px' }}>
+                        <button onClick={() => saveEditing(item.id)} style={{ backgroundColor: '#10B981', color: '#FFFFFF', border: 'none', padding: '4px 10px', borderRadius: '6px', fontSize: '11px', fontWeight: 800, cursor: 'pointer' }}>
+                          저장
                         </button>
-                        <button
-                          onClick={cancelEditing}
-                          className="px-3 py-1 bg-slate-700 hover:bg-slate-600 text-slate-300 rounded-lg text-xs font-bold"
-                        >
+                        <button onClick={cancelEditing} style={{ backgroundColor: '#475569', color: '#FFFFFF', border: 'none', padding: '4px 10px', borderRadius: '6px', fontSize: '11px', cursor: 'pointer' }}>
                           취소
                         </button>
                       </div>
                     </div>
                   ) : (
-                    /* Normal Display Row with Icons on Left & Right */
                     <>
-                      <div className="flex flex-row items-center gap-2.5 overflow-hidden">
+                      {/* Left Side: Rank Badge + Name */}
+                      <div style={{ display: 'flex', flexDirection: 'row', alignItems: 'center', gap: '10px' }}>
                         {rankBadge}
-                        <div className="flex flex-col text-left truncate">
-                          <span className={`text-sm md:text-base font-black truncate ${nameColor}`}>
+                        <div style={{ display: 'flex', flexDirection: 'column', textAlign: 'left' }}>
+                          <span style={{ fontSize: '14px', fontWeight: 900, color: nameColor }}>
                             {item.name}
                           </span>
-                          <span className={`text-[10px] ${rank <= 3 ? 'opacity-80 font-bold' : 'text-slate-400'}`}>
+                          <span style={{ fontSize: '10px', opacity: 0.7 }}>
                             {item.date || '2026-08-13'}
                           </span>
                         </div>
                       </div>
 
-                      <div className="flex flex-row items-center gap-2 shrink-0">
-                        {/* Score Zap Icon inside Pastel Circle */}
-                        <div className="flex flex-row items-center gap-1.5 bg-black/20 px-3 py-1 rounded-xl border border-white/20">
-                          <div className="icon-circle-sm bg-amber-400/30 text-amber-300">
-                            <Zap className={`w-3.5 h-3.5 ${rank <= 3 ? scoreColor : 'text-amber-400'}`} />
+                      {/* Right Side: Score Pill with Circle Zap & Trophy Icons */}
+                      <div style={{ display: 'flex', flexDirection: 'row', alignItems: 'center', gap: '6px' }}>
+                        <div style={{
+                          display: 'flex',
+                          flexDirection: 'row',
+                          alignItems: 'center',
+                          gap: '6px',
+                          backgroundColor: 'rgba(0, 0, 0, 0.2)',
+                          padding: '4px 10px',
+                          borderRadius: '12px',
+                          border: '1px solid rgba(255, 255, 255, 0.2)'
+                        }}>
+                          <div style={{ width: '18px', height: '18px', borderRadius: '50%', backgroundColor: 'rgba(245, 158, 11, 0.3)', display: 'flex', alignItems: 'center', justify: 'center' }}>
+                            <Zap style={{ width: '10px', height: '10px', color: scoreColor, fill: scoreColor }} />
                           </div>
-                          <span className={`text-base md:text-lg font-black ${scoreColor}`}>
-                            {item.score.toLocaleString()} <span className="text-[11px] font-bold opacity-80">점</span>
+                          <span style={{ fontSize: '15px', fontWeight: 900, color: scoreColor }}>
+                            {item.score.toLocaleString()} <span style={{ fontSize: '10px', fontWeight: 600 }}>점</span>
                           </span>
-                          <div className="icon-circle-sm bg-amber-400/30 text-amber-300">
-                            <Trophy className={`w-3.5 h-3.5 ${rank <= 3 ? scoreColor : 'text-amber-400'}`} />
-                          </div>
                         </div>
 
-                        {/* Admin Action Buttons */}
                         {isAdminMode && (
-                          <div className="flex flex-row items-center gap-1 ml-1">
-                            <button
-                              onClick={() => startEditing(item)}
-                              className="p-1.5 bg-blue-600 hover:bg-blue-500 text-white rounded-lg transition shadow-md"
-                              title="수정"
-                            >
-                              <Edit2 className="w-3.5 h-3.5" />
+                          <div style={{ display: 'flex', gap: '4px', marginLeft: '4px' }}>
+                            <button onClick={() => startEditing(item)} style={{ backgroundColor: '#2563EB', color: '#FFFFFF', border: 'none', padding: '4px 8px', borderRadius: '6px', cursor: 'pointer' }} title="수정">
+                              <Edit2 style={{ width: '12px', height: '12px' }} />
                             </button>
-                            <button
-                              onClick={() => handleDelete(item.id, item.name)}
-                              className="p-1.5 bg-rose-600 hover:bg-rose-500 text-white rounded-lg transition shadow-md"
-                              title="삭제"
-                            >
-                              <Trash2 className="w-3.5 h-3.5" />
+                            <button onClick={() => handleDelete(item.id, item.name)} style={{ backgroundColor: '#E11D48', color: '#FFFFFF', border: 'none', padding: '4px 8px', borderRadius: '6px', cursor: 'pointer' }} title="삭제">
+                              <Trash2 style={{ width: '12px', height: '12px' }} />
                             </button>
                           </div>
                         )}
@@ -364,58 +446,108 @@ export default function LeaderboardModal({ isOpen, onClose, activeTab = 'pacman'
           )}
         </div>
 
-        {/* Footer Text (Balanced Icons on BOTH Left & Right Sides) */}
-        <div className="pt-2 border-t border-slate-700/80 flex flex-row items-center justify-center gap-2">
-          <div className="icon-circle-sm bg-yellow-400 text-amber-950">
-            <Star className="w-3.5 h-3.5 fill-amber-950" />
+        {/* Footer (No bottom Close button, 1-line horizontal text with circle icons) */}
+        <div style={{ paddingTop: '8px', borderTop: '1px solid rgba(255, 255, 255, 0.1)', display: 'flex', flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: '6px' }}>
+          <div style={{ width: '18px', height: '18px', borderRadius: '50%', backgroundColor: 'rgba(253, 224, 71, 0.3)', display: 'flex', alignItems: 'center', justify: 'center' }}>
+            <Star style={{ width: '10px', height: '10px', color: '#FDE047', fill: '#FDE047' }} />
           </div>
-          <span className="text-xs font-extrabold text-amber-200">도촌초등학교 게임 명예의 전당</span>
-          <div className="icon-circle-sm bg-yellow-400 text-amber-950">
-            <Sparkles className="w-3.5 h-3.5 fill-amber-950" />
-          </div>
+          <span style={{ fontSize: '11px', fontWeight: 800, color: '#FDE047' }}>도촌초등학교 게임 명예의 전당</span>
         </div>
       </div>
 
       {/* Secret Password Prompt Overlay Modal */}
       {showPasswordPrompt && (
-        <div className="fixed inset-0 z-[100000] bg-black/90 backdrop-blur-md flex items-center justify-center p-4">
-          <div className="bg-[#1E1B4B] border-4 border-[#FFD166] rounded-3xl p-6 w-full max-w-sm text-center shadow-2xl flex flex-col gap-4 animate-in zoom-in-95">
-            <div className="flex flex-col items-center gap-2">
-              <div className="icon-circle bg-amber-400 text-amber-950 border-2 border-white shadow-lg">
-                <Lock className="w-5 h-5 fill-amber-950" />
+        <div style={{
+          position: 'fixed',
+          top: 0, left: 0, right: 0, bottom: 0,
+          backgroundColor: 'rgba(0, 0, 0, 0.85)',
+          backdropFilter: 'blur(8px)',
+          zIndex: 100000,
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'center',
+          padding: '16px'
+        }}>
+          <div style={{
+            backgroundColor: '#1E1B4B',
+            border: '3px solid #FBBF24',
+            borderRadius: '24px',
+            padding: '24px',
+            width: '100%',
+            maxWidth: '360px',
+            textAlign: 'center',
+            boxShadow: '0 20px 50px rgba(0,0,0,0.8)',
+            display: 'flex',
+            flexDirection: 'column',
+            gap: '12px',
+            color: '#FFFFFF'
+          }}>
+            <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '6px' }}>
+              <div style={{ width: '42px', height: '42px', borderRadius: '50%', backgroundColor: 'rgba(245, 158, 11, 0.2)', border: '1px solid #F59E0B', display: 'flex', alignItems: 'center', justify: 'center' }}>
+                <Lock style={{ width: '20px', height: '20px', color: '#FBBF24' }} />
               </div>
-              <h3 className="text-xl font-black text-white">🔐 관리자 암호 인증</h3>
-              <p className="text-xs text-slate-300">
+              <h3 style={{ fontSize: '18px', fontWeight: 900, margin: 0 }}>🔐 관리자 암호 인증</h3>
+              <p style={{ fontSize: '11px', color: '#94A3B8', margin: 0 }}>
                 리더보드 관리자 모드 진입을 위한 암호를 입력하세요.
               </p>
             </div>
 
-            <form onSubmit={handlePasswordSubmit} className="flex flex-col gap-3">
+            <form onSubmit={handlePasswordSubmit} style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
               <input
                 type="password"
-                placeholder="관리자 암호 (4자리)"
+                placeholder="관리자 암호 (8582)"
                 value={passwordInput}
                 onChange={(e) => setPasswordInput(e.target.value)}
-                className="px-4 py-3 bg-slate-900 border-2 border-amber-400/60 rounded-2xl text-center text-amber-300 font-black text-xl focus:outline-none focus:border-amber-400 tracking-widest"
+                style={{
+                  padding: '10px 14px',
+                  backgroundColor: '#0F172A',
+                  border: '2px solid #FBBF24',
+                  borderRadius: '12px',
+                  textAlign: 'center',
+                  color: '#FBBF24',
+                  fontWeight: 900,
+                  fontSize: '18px',
+                  letterSpacing: '4px',
+                  outline: 'none'
+                }}
                 autoFocus
                 required
               />
 
               {passwordError && (
-                <p className="text-xs font-bold text-rose-400">{passwordError}</p>
+                <p style={{ fontSize: '11px', fontWeight: 800, color: '#F87171', margin: 0 }}>{passwordError}</p>
               )}
 
-              <div className="flex flex-row gap-2 mt-1">
+              <div style={{ display: 'flex', gap: '8px', marginTop: '4px' }}>
                 <button
                   type="submit"
-                  className="flex-1 py-2.5 bg-gradient-to-r from-amber-400 to-yellow-400 text-amber-950 font-black rounded-xl text-sm shadow-md hover:brightness-110"
+                  style={{
+                    flex: 1,
+                    padding: '10px',
+                    background: 'linear-gradient(135deg, #FBBF24, #F59E0B)',
+                    color: '#78350F',
+                    fontWeight: 900,
+                    fontSize: '13px',
+                    border: 'none',
+                    borderRadius: '12px',
+                    cursor: 'pointer'
+                  }}
                 >
                   인증 및 진입
                 </button>
                 <button
                   type="button"
                   onClick={() => setShowPasswordPrompt(false)}
-                  className="px-4 py-2.5 bg-slate-800 text-slate-300 font-bold rounded-xl text-sm hover:bg-slate-700"
+                  style={{
+                    padding: '10px 16px',
+                    backgroundColor: '#334155',
+                    color: '#CBD5E1',
+                    fontWeight: 700,
+                    fontSize: '13px',
+                    border: 'none',
+                    borderRadius: '12px',
+                    cursor: 'pointer'
+                  }}
                 >
                   취소
                 </button>
