@@ -2,11 +2,14 @@ import React, { useState } from 'react';
 import PacManGame from './components/games/PacManGame';
 import DinoGame from './components/games/DinoGame';
 import GameCard from './components/GameCard';
+import LeaderboardModal from './components/LeaderboardModal';
 import { PLAYABLE_GAMES, COMING_SOON_GAMES, CATEGORIES } from './data/gamesData';
-import { Trophy, X, Search, Lock, Gamepad2, ExternalLink } from 'lucide-react';
+import { Trophy, X, Search, Lock, Gamepad2 } from 'lucide-react';
 
 export default function App() {
   const [activeGame, setActiveGame] = useState(null);
+  const [isLeaderboardOpen, setIsLeaderboardOpen] = useState(false);
+  const [leaderboardTab, setLeaderboardTab] = useState('pacman');
   const [filterCategory, setFilterCategory] = useState('ALL');
   const [searchQuery, setSearchQuery] = useState('');
 
@@ -19,18 +22,10 @@ export default function App() {
   const filteredPlayable = PLAYABLE_GAMES.filter(filterGame);
   const filteredComingSoon = COMING_SOON_GAMES.filter(filterGame);
 
-  // Opens a REAL separate popup window for the Leaderboard
-  const openSeparateLeaderboardWindow = () => {
-    const url = `${import.meta.env.BASE_URL}leaderboard.html`;
-    const windowName = 'DochonLeaderboardWindow';
-    const features = 'width=520,height=680,scrollbars=yes,resizable=yes,top=100,left=100';
-    
-    const popup = window.open(url, windowName, features);
-    if (popup) {
-      popup.focus();
-    } else {
-      alert('팝업 차단이 설정되어 있습니다. 팝업 허용 후 다시 시도해 주세요.');
-    }
+  // Opens the in-page responsive centered popup overlay modal
+  const openLeaderboardModal = (gameKey = 'pacman') => {
+    setLeaderboardTab(gameKey);
+    setIsLeaderboardOpen(true);
   };
 
   return (
@@ -46,7 +41,7 @@ export default function App() {
           </p>
         </div>
 
-        {/* Search Bar & Separate Window Leaderboard Button */}
+        {/* Search Bar & In-Page Leaderboard Button */}
         <div className="portal-search-row">
           <div className="portal-search-input">
             <Search className="w-4 h-4 text-slate-400 mr-2 shrink-0" />
@@ -59,13 +54,12 @@ export default function App() {
           </div>
 
           <button
-            onClick={openSeparateLeaderboardWindow}
+            onClick={() => openLeaderboardModal('pacman')}
             className="btn-gold shadow-md flex items-center gap-1.5"
-            title="별도 랭킹 창 띄우기"
+            title="학교 랭킹 열기"
           >
             <Trophy className="w-4 h-4 text-slate-950" />
             <span>학교 랭킹</span>
-            <ExternalLink className="w-3 h-3 text-slate-950 opacity-70" />
           </button>
         </div>
       </header>
@@ -174,16 +168,23 @@ export default function App() {
             </button>
 
             {activeGame === 'pacman' && (
-              <PacManGame onScoreSubmitted={() => openSeparateLeaderboardWindow()} />
+              <PacManGame onScoreSubmitted={() => openLeaderboardModal('pacman')} />
             )}
             {activeGame === 'dino' && (
-              <DinoGame onScoreSubmitted={() => openSeparateLeaderboardWindow()} />
+              <DinoGame onScoreSubmitted={() => openLeaderboardModal('dino')} />
             )}
           </div>
         </div>
       )}
 
-      {/* 5. Centered Footer */}
+      {/* 5. In-Page Centered Popup Leaderboard Modal */}
+      <LeaderboardModal
+        isOpen={isLeaderboardOpen}
+        onClose={() => setIsLeaderboardOpen(false)}
+        activeTab={leaderboardTab}
+      />
+
+      {/* 6. Centered Footer */}
       <footer className="portal-footer">
         <p className="font-bold text-slate-400">도촌초등학교 게임 포털</p>
         <p className="text-[11px] text-slate-600 mt-1">
