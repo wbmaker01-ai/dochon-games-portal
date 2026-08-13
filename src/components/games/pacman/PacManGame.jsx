@@ -363,29 +363,53 @@ export default function PacManGame({ onScoreSubmitted }) {
   };
 
   return (
-    <div className="flex flex-col items-center justify-center w-full max-w-4xl mx-auto p-3 md:p-5 glass-panel glass-panel-gold">
-      {/* Header Bar */}
-      <div className="flex flex-wrap items-center justify-between w-full mb-3 px-2">
+    <div className="flex flex-col items-center justify-center w-full max-w-4xl mx-auto p-3 md:p-5 glass-panel glass-panel-gold select-none">
+      {/* 1. Header Bar with Cute Arcade Typography */}
+      <div className="flex flex-wrap items-center justify-between w-full mb-2 px-2 gap-2">
         <div className="flex items-center gap-2">
-          <span className="text-xl md:text-2xl font-black text-amber-300 flex items-center gap-1.5">
+          <span className="text-xl md:text-2xl font-black bg-gradient-to-r from-amber-300 via-yellow-200 to-amber-400 bg-clip-text text-transparent flex items-center gap-1.5 drop-shadow">
             🕹️ Dochon Pac-Man
           </span>
-          <span className="text-[11px] bg-amber-400/20 text-amber-300 border border-amber-400/50 px-2.5 py-0.5 rounded-full font-black">
+          <span className="text-[11px] bg-amber-400/20 text-amber-300 border border-amber-400/50 px-2.5 py-0.5 rounded-full font-black tracking-wide shadow-sm">
             D-O-C-H-O-N 미로 맵
           </span>
         </div>
-        <div className="flex items-center gap-4 md:gap-6 font-black text-sm md:text-base">
-          <div>점수: <span className="text-amber-400 font-mono text-xl md:text-2xl">{score}</span></div>
-          <div>최고: <span className="text-teal-400 font-mono text-lg md:text-xl">{highScore}</span></div>
-          <div className="flex items-center gap-1">
-            목숨: {Array.from({ length: 3 }).map((_, i) => (
-              <span key={i} className={`text-lg ${i < lives ? 'opacity-100 scale-110' : 'opacity-25'}`}>❤️</span>
-            ))}
+
+        {/* Scoreboard Pills */}
+        <div className="flex items-center gap-3 md:gap-5 font-black text-xs md:text-sm">
+          <div className="bg-slate-900/90 border border-amber-500/40 px-3 py-1 rounded-xl shadow-inner flex items-center gap-1.5">
+            <span className="text-slate-400 text-[11px]">점수</span>
+            <span className="text-amber-400 font-mono text-base md:text-lg">{score.toLocaleString()}</span>
+          </div>
+
+          <div className="bg-slate-900/90 border border-teal-500/40 px-3 py-1 rounded-xl shadow-inner flex items-center gap-1.5">
+            <span className="text-slate-400 text-[11px]">최고</span>
+            <span className="text-teal-300 font-mono text-base md:text-lg">{highScore.toLocaleString()}</span>
+          </div>
+
+          <div className="bg-slate-900/90 border border-pink-500/40 px-3 py-1 rounded-xl shadow-inner flex items-center gap-1.5">
+            <span className="text-slate-400 text-[11px]">목숨</span>
+            <div className="flex items-center gap-1">
+              {Array.from({ length: 3 }).map((_, i) => (
+                <span key={i} className={`text-base transition-all duration-300 ${i < lives ? 'opacity-100 scale-110 drop-shadow-[0_0_8px_rgba(244,63,94,0.8)]' : 'opacity-20 scale-90 grayscale'}`}>💖</span>
+              ))}
+            </div>
           </div>
         </div>
       </div>
 
-      {/* Main Canvas Container */}
+      {/* 2. Reserved Fixed-Height Announcement Ribbon (100% Fixed Height, Zero Layout Shift) */}
+      <div className="w-full h-10 sm:h-11 flex items-center justify-center mb-2 shrink-0">
+        <div className={`transition-all duration-300 transform ${comboText ? 'opacity-100 scale-100 translate-y-0' : 'opacity-0 scale-95 -translate-y-1 pointer-events-none'}`}>
+          <div className="px-4 py-1.5 rounded-full bg-gradient-to-r from-amber-400 via-yellow-300 to-amber-400 text-slate-950 font-black text-xs sm:text-sm shadow-xl shadow-amber-500/30 border-2 border-yellow-200 flex items-center gap-2 tracking-tight">
+            <Sparkles className="w-4 h-4 text-slate-950 animate-spin" />
+            <span>{comboText || '도촌 팩맨 파워업!'}</span>
+            <Sparkles className="w-4 h-4 text-slate-950 animate-spin" />
+          </div>
+        </div>
+      </div>
+
+      {/* 3. Main Canvas Container */}
       <div className="relative border-4 border-amber-400/60 rounded-2xl overflow-hidden shadow-2xl bg-slate-950 max-w-full">
         <canvas
           ref={canvasRef}
@@ -394,22 +418,18 @@ export default function PacManGame({ onScoreSubmitted }) {
           className="block mx-auto max-w-full h-auto"
         />
 
-        {/* Combo Popup Text */}
-        {comboText && (
-          <div className="absolute top-4 left-1/2 -translate-x-1/2 z-30 bg-amber-400 text-slate-950 px-4 py-1.5 rounded-full font-black text-xs md:text-sm shadow-xl animate-bounce whitespace-nowrap">
-            {comboText}
-          </div>
-        )}
-
         {/* Overlay States */}
         {gameState === 'IDLE' && (
           <div className="absolute inset-0 bg-black/85 backdrop-blur-md flex flex-col items-center justify-center gap-4 text-center p-6">
-            <h3 className="text-2xl md:text-4xl font-black text-amber-300">도촌 팩맨 (DOCHON PAC-MAN)</h3>
+            <h3 className="text-2xl md:text-4xl font-black bg-gradient-to-r from-yellow-300 via-amber-200 to-amber-400 bg-clip-text text-transparent drop-shadow">
+              도촌 팩맨 (DOCHON PAC-MAN)
+            </h3>
             <p className="text-slate-200 text-xs md:text-sm max-w-md leading-relaxed">
-              알파벳 <strong className="text-amber-400">D O C H O N</strong>으로 만들어진 도촌 팩맨 미로!<br />
-              키보드 방향키(W/A/S/D)로 조작하며 <span className="text-pink-400 font-extrabold">도촌 햄버거(파워 구슬)</span>를 먹고 유령을 물리치세요!
+              알파벳 <strong className="text-amber-400 font-black">D O C H O N</strong>으로 디자인된 도촌초등학교 팩맨 미로!<br />
+              키보드 방향키(W/A/S/D) 또는 아래 십자키로 조작하며<br />
+              <span className="text-pink-300 font-black underline decoration-pink-500">도촌 급식 햄버거(파워 구슬)</span>를 먹고 유령을 물리치세요!
             </p>
-            <button onClick={restartGame} className="btn-gold text-base md:text-lg px-8 py-3 animate-pulse">
+            <button onClick={restartGame} className="btn-gold text-base md:text-lg px-8 py-3 animate-pulse shadow-2xl">
               <Play className="w-5 h-5 fill-current" /> 게임 시작하기
             </button>
           </div>
