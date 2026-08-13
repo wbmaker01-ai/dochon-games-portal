@@ -1,19 +1,11 @@
 :root {
   --dochon-teal: #00F5D4;
-  --dochon-teal-glow: rgba(0, 245, 212, 0.5);
-  --dochon-teal-dark: #00B4D8;
   --dochon-gold: #FFD166;
-  --dochon-gold-glow: rgba(255, 209, 102, 0.6);
-  --dochon-gold-bright: #FFB703;
   --dochon-pink: #FF007F;
-  --dochon-purple: #7209B7;
-  --dochon-blue: #4CC9F0;
-  
   --bg-dark: #141619;
   --bg-card: rgba(30, 34, 40, 0.9);
   --text-main: #FFFFFF;
   --text-muted: #94A3B8;
-  --border-glass: rgba(255, 255, 255, 0.12);
   --font-family: 'Outfit', 'Pretendard', system-ui, -apple-system, sans-serif;
 }
 
@@ -29,12 +21,166 @@ body {
   font-family: var(--font-family);
   min-height: 100vh;
   overflow-x: hidden;
+  text-align: center;
 }
 
 /* ------------------------------------------------------------- */
-/* STRICT 5-COLUMN SMALL TILE GRID SYSTEM (BULLETPROOF PLAIN CSS) */
+/* 100% CENTER-ALIGNED BULLETPROOF PORTAL SYSTEM (PLAIN CSS)     */
 /* ------------------------------------------------------------- */
 
+.portal-wrapper {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: flex-start;
+  text-align: center;
+  width: 100%;
+  min-height: 100vh;
+  margin: 0 auto;
+}
+
+/* Header Centering */
+.portal-header {
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  background-color: rgba(30, 32, 34, 0.95);
+  backdrop-filter: blur(12px);
+  border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+  padding: 16px;
+  position: sticky;
+  top: 0;
+  z-index: 40;
+}
+
+.portal-title-box {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  margin-bottom: 12px;
+}
+
+.portal-search-row {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: center;
+  gap: 12px;
+  width: 100%;
+  max-width: 540px;
+  margin: 0 auto;
+}
+
+.portal-search-input {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background-color: #2A2D32;
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  border-radius: 9999px;
+  padding: 8px 18px;
+  flex: 1;
+  min-width: 220px;
+}
+
+.portal-search-input input {
+  background: transparent;
+  border: none;
+  color: #FFFFFF;
+  text-align: center;
+  outline: none;
+  width: 100%;
+  font-size: 13px;
+  font-weight: 500;
+}
+
+/* Category Navigation Centering */
+.portal-nav {
+  width: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  background-color: #1E2022;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+  padding: 10px 16px;
+}
+
+.portal-categories {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  max-width: 820px;
+  margin: 0 auto;
+}
+
+/* Main Container Centering */
+.portal-main {
+  width: 100%;
+  max-width: 860px;
+  margin: 0 auto;
+  padding: 28px 16px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  gap: 28px;
+}
+
+.portal-section {
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  gap: 16px;
+}
+
+.portal-section-title {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  gap: 4px;
+}
+
+/* Section Line Divider */
+.portal-divider {
+  width: 100%;
+  max-width: 820px;
+  margin: 8px auto;
+  border-top: 2px dashed rgba(255, 255, 255, 0.12);
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.portal-divider-badge {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  background-color: #141619;
+  padding: 0 16px;
+  font-size: 11px;
+  font-weight: 800;
+  color: #64748B;
+  letter-spacing: 2px;
+  text-transform: uppercase;
+}
+
+/* STRICT 5-COLUMN SMALL TILE GRID SYSTEM */
 .game-tile-grid {
   display: grid;
   grid-template-columns: repeat(5, minmax(0, 1fr));
@@ -42,6 +188,8 @@ body {
   width: 100%;
   max-width: 820px;
   margin: 0 auto;
+  justify-items: center;
+  align-items: start;
 }
 
 @media (max-width: 768px) {
@@ -62,9 +210,11 @@ body {
 .game-tile-card {
   display: flex;
   flex-direction: column;
-  align-items: flex-start;
+  align-items: center;
+  justify-content: flex-start;
+  text-align: center;
   width: 100%;
-  max-width: 140px;
+  max-width: 135px;
   margin: 0 auto;
   cursor: pointer;
   user-select: none;
@@ -150,7 +300,10 @@ body {
 .game-tile-info {
   margin-top: 8px;
   width: 100%;
-  text-align: left;
+  text-align: center;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
 }
 
 .game-tile-title {
@@ -160,6 +313,8 @@ body {
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
+  text-align: center;
+  width: 100%;
 }
 
 .game-tile-card:hover .game-tile-title {
@@ -174,58 +329,42 @@ body {
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
+  text-align: center;
+  width: 100%;
 }
 
-/* Glassmorphism Panel */
-.glass-panel {
-  background: var(--bg-card);
-  backdrop-filter: blur(12px);
-  border: 1px solid var(--border-glass);
-  border-radius: 20px;
-}
-
-.glass-panel-gold {
-  border: 1px solid rgba(255, 209, 102, 0.4);
-  box-shadow: 0 0 20px rgba(255, 209, 102, 0.15);
-}
-
-.text-gradient-gold {
-  background: linear-gradient(135deg, #FFF 10%, #FFD166 60%, #FFB703 100%);
-  -webkit-background-clip: text;
-  -webkit-text-fill-color: transparent;
+/* Footer Centering */
+.portal-footer {
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  background-color: #181A1C;
+  border-top: 1px solid rgba(255, 255, 255, 0.08);
+  padding: 24px 16px;
+  color: #64748B;
+  font-size: 12px;
 }
 
 .btn-gold {
   background: linear-gradient(135deg, #FFD166 0%, #FFB703 100%);
   color: #0F172A;
   border: none;
-  padding: 10px 20px;
-  border-radius: 12px;
+  padding: 8px 18px;
+  border-radius: 9999px;
   font-weight: 900;
-  font-size: 0.9rem;
+  font-size: 0.85rem;
   cursor: pointer;
   transition: all 0.2s ease;
   display: inline-flex;
   align-items: center;
+  justify-content: center;
   gap: 6px;
 }
 
 .btn-gold:hover {
   transform: translateY(-2px);
   filter: brightness(1.1);
-}
-
-.btn-outline {
-  background: rgba(255, 255, 255, 0.08);
-  color: var(--text-main);
-  border: 1px solid rgba(255, 255, 255, 0.2);
-  padding: 8px 16px;
-  border-radius: 10px;
-  font-weight: 700;
-  cursor: pointer;
-  transition: all 0.2s ease;
-}
-
-.btn-outline:hover {
-  background: rgba(255, 255, 255, 0.18);
 }
