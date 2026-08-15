@@ -28,20 +28,20 @@ export const DOCHON_MAZE_GRID = [
   // Row 6: "D O C H O N" - Bottom edge of letters (33 tiles)
   [1,2, 1,1,1,0, 2, 0,1,1,0, 2, 0,1,1,1, 2, 1,0,0,1, 2, 0,1,1,0, 2, 1,0,0,1, 2,1],
 
-  // Row 7: Connecting middle corridor (33 tiles)
-  [1,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,1],
+  // Row 7: 5-Tile Teleport Zone Row 1 (Col 0 = Left Open, Col 32 = Right Open) (33 tiles)
+  [0,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,0],
 
-  // Row 8: Upper Ghost House area (33 tiles)
-  [1,2, 1,1,1, 2, 1,1,1, 2, 1, 1,1,9,9,9,9,9,1,1, 1, 2, 1,1,1, 2, 1,1,1, 2,2,1],
+  // Row 8: 5-Tile Teleport Zone Row 2 (Col 0 = Left Open, Col 32 = Right Open) (33 tiles)
+  [0,0, 1,1,1, 2, 1,1,1, 2, 1, 1,1,9,9,9,9,9,1,1, 1, 2, 1,1,1, 2, 1,1,1, 2,0,0],
 
-  // Row 9: Teleport Zone Row (Col 0 = Left Portal, Col 32 = Right Portal) (33 tiles)
-  [0,0, 2,2,2, 2, 2,2,2, 2, 1, 1,1,9,9,9,9,9,1,1, 1, 2, 2,2,2, 2, 2,2,2, 2,0,0,0],
+  // Row 9: 5-Tile Teleport Zone Row 3 (Col 0 = Left Open, Col 32 = Right Open) (33 tiles)
+  [0,0, 2,2,2, 2, 2,2,2, 2, 1, 1,1,9,9,9,9,9,1,1, 1, 2, 2,2,2, 2, 2,2,2, 2,0,0],
 
-  // Row 10: Ghost house door & exit (33 tiles)
-  [1,2, 1,1,1, 2, 1,1,1, 2, 1, 1,1,1,0,0,0,1,1,1, 1, 2, 1,1,1, 2, 1,1,1, 2,2,1],
+  // Row 10: 5-Tile Teleport Zone Row 4 (Col 0 = Left Open, Col 32 = Right Open) (33 tiles)
+  [0,0, 1,1,1, 2, 1,1,1, 2, 1, 1,1,1,0,0,0,1,1,1, 1, 2, 1,1,1, 2, 1,1,1, 2,0,0],
 
-  // Row 11: Main lower corridor (33 tiles)
-  [1,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,1],
+  // Row 11: 5-Tile Teleport Zone Row 5 (Col 0 = Left Open, Col 32 = Right Open) (33 tiles)
+  [0,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,0],
 
   // Row 12: Sub-maze obstacles (33 tiles)
   [1,2, 1,1,1,2, 1,1,1,2, 1,1,1,2, 1,1,1,2, 1,1,1,2, 1,1,1,2, 1,1,1, 2,2,1],
