@@ -4,13 +4,16 @@ import DinoGame from './components/games/dino/DinoGame';
 import SnakeGame from './components/games/snake/SnakeGame';
 import GameCard from './components/GameCard';
 import LeaderboardModal from './components/LeaderboardModal';
+import ChangelogModal from './components/ChangelogModal';
 import { PLAYABLE_GAMES, COMING_SOON_GAMES, CATEGORY_DEFINITIONS } from './data/gamesData';
+import { getLatestVersion } from './data/changelogData';
 import { getLeaderboardFromDB } from './utils/leaderboardApi';
-import { Trophy, X, Search, Lock, Gamepad2, Dices, Sparkles, Heart, Crown, Flame } from 'lucide-react';
+import { Trophy, X, Search, Lock, Gamepad2, Dices, Sparkles, Heart, Crown, Flame, History } from 'lucide-react';
 
 export default function App() {
   const [activeGame, setActiveGame] = useState(null);
   const [isLeaderboardOpen, setIsLeaderboardOpen] = useState(false);
+  const [isChangelogOpen, setIsChangelogOpen] = useState(false);
   const [leaderboardTab, setLeaderboardTab] = useState('pacman');
   const [filterCategory, setFilterCategory] = useState('ALL');
   const [searchQuery, setSearchQuery] = useState('');
@@ -122,9 +125,23 @@ export default function App() {
             </h1>
             <span className="text-2xl animate-bounce">✨</span>
           </div>
-          <p className="text-[11px] text-amber-300/80 font-extrabold tracking-widest uppercase mt-0.5">
-            도촌초등학교 아케이드 게임 종합 포털
-          </p>
+
+          <div className="flex flex-wrap items-center justify-center gap-2 mt-1">
+            <p className="text-[11px] text-amber-300/80 font-extrabold tracking-widest uppercase">
+              도촌초등학교 아케이드 게임 종합 포털
+            </p>
+            <button
+              onClick={() => setIsChangelogOpen(true)}
+              className="btn-changelog"
+              title="포털 업데이트 및 개선 내역 확인하기"
+            >
+              <History className="w-3.5 h-3.5 text-amber-400" />
+              <span>업데이트 내역</span>
+              <span className="bg-amber-400/25 text-amber-300 text-[9px] px-1.5 py-0.5 rounded-full font-black border border-amber-400/40">
+                {getLatestVersion()}
+              </span>
+            </button>
+          </div>
         </div>
 
         {/* Search Bar, Random Game Button & School Leaderboard Button */}
@@ -379,7 +396,13 @@ export default function App() {
         activeTab={leaderboardTab}
       />
 
-      {/* 7. Centered Footer */}
+      {/* 7. Pure HTML/CSS In-Page Overlay Modal for Changelog Release Notes */}
+      <ChangelogModal
+        isOpen={isChangelogOpen}
+        onClose={() => setIsChangelogOpen(false)}
+      />
+
+      {/* 8. Centered Footer */}
       <footer className="portal-footer">
         <p className="font-bold text-amber-200/80">도촌초등학교 게임 포털</p>
         <p className="text-[11px] text-slate-500 mt-1">
