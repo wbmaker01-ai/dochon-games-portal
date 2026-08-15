@@ -21,10 +21,10 @@ export default function PacManGame({ onScoreSubmitted }) {
     grid: JSON.parse(JSON.stringify(DOCHON_MAZE_GRID)),
     pacman: { x: 16, y: 11, dx: 0, dy: 0, nextDx: 0, nextDy: 0, mouthAngle: 0.2, mouthSpeed: 0.05 },
     ghosts: [
-      { id: 'blinky', name: '시험지', color: '#FF0055', x: 15, y: 8, dx: 1, dy: 0, frightened: false },
-      { id: 'pinky', name: '시간', color: '#FF77BC', x: 16, y: 8, dx: -1, dy: 0, frightened: false },
-      { id: 'inky', name: '숙제', color: '#00F5D4', x: 17, y: 8, dx: 0, dy: -1, frightened: false },
-      { id: 'clyde', name: '게으름', color: '#FFB703', x: 16, y: 9, dx: 0, dy: 1, frightened: false }
+      { id: 'blinky', name: '시험지', color: '#FF0055', x: 14, y: 7, dx: 1, dy: 0, frightened: false },
+      { id: 'pinky', name: '시간', color: '#FF77BC', x: 16, y: 7, dx: -1, dy: 0, frightened: false },
+      { id: 'inky', name: '숙제', color: '#00F5D4', x: 18, y: 7, dx: 1, dy: 0, frightened: false },
+      { id: 'clyde', name: '게으름', color: '#FFB703', x: 16, y: 11, dx: -1, dy: 0, frightened: false }
     ],
     frightenedTimer: null,
     frightenedTimeLeft: 0,
@@ -83,10 +83,10 @@ export default function PacManGame({ onScoreSubmitted }) {
     g.grid = JSON.parse(JSON.stringify(DOCHON_MAZE_GRID));
     g.pacman = { x: 16, y: 11, dx: 0, dy: 0, nextDx: 0, nextDy: 0, mouthAngle: 0.2, mouthSpeed: 0.05 };
     g.ghosts = [
-      { id: 'blinky', name: '시험지', color: '#FF0055', x: 15, y: 8, dx: 1, dy: 0, frightened: false },
-      { id: 'pinky', name: '시간', color: '#FF77BC', x: 16, y: 8, dx: -1, dy: 0, frightened: false },
-      { id: 'inky', name: '숙제', color: '#00F5D4', x: 17, y: 8, dx: 0, dy: -1, frightened: false },
-      { id: 'clyde', name: '게으름', color: '#FFB703', x: 16, y: 9, dx: 0, dy: 1, frightened: false }
+      { id: 'blinky', name: '시험지', color: '#FF0055', x: 14, y: 7, dx: 1, dy: 0, frightened: false },
+      { id: 'pinky', name: '시간', color: '#FF77BC', x: 16, y: 7, dx: -1, dy: 0, frightened: false },
+      { id: 'inky', name: '숙제', color: '#00F5D4', x: 18, y: 7, dx: 1, dy: 0, frightened: false },
+      { id: 'clyde', name: '게으름', color: '#FFB703', x: 16, y: 11, dx: -1, dy: 0, frightened: false }
     ];
     g.score = 0;
     g.lives = 3;
@@ -178,22 +178,42 @@ export default function PacManGame({ onScoreSubmitted }) {
       }
 
       g.ghosts.forEach(ghost => {
-        const possibleMoves = [
+        // 1. Find all unblocked adjacent directions
+        const allMoves = [
           { dx: 0, dy: -1 }, { dx: 0, dy: 1 },
           { dx: -1, dy: 0 }, { dx: 1, dy: 0 }
-        ].filter(m => !isWall(ghost.x + m.dx, ghost.y + m.dy) && (m.dx !== -ghost.dx || m.dy !== -ghost.dy));
+        ].filter(m => !isWall(ghost.x + m.dx, ghost.y + m.dy));
 
-        if (possibleMoves.length > 0) {
-          const move = possibleMoves[Math.floor(Math.random() * possibleMoves.length)];
-          ghost.dx = move.dx; ghost.dy = move.dy;
-          ghost.x += ghost.dx; ghost.y += ghost.dy;
+        if (allMoves.length > 0) {
+          // 2. Filter out moves that reverse direction, unless at a dead-end
+          let validMoves = allMoves.filter(m => !(m.dx === -ghost.dx && m.dy === -ghost.dy));
+          if (validMoves.length === 0) {
+            validMoves = allMoves; // Dead-end fallback: allow 180-degree turn!
+          }
+
+          let chosenMove;
+          if (!ghost.frightened && Math.random() < 0.4) {
+            // Chase Pac-Man: pick move minimizing Manhattan distance to Pac-Man
+            chosenMove = validMoves.reduce((best, m) => {
+              const distM = Math.abs((ghost.x + m.dx) - p.x) + Math.abs((ghost.y + m.dy) - p.y);
+              const distBest = Math.abs((ghost.x + best.dx) - p.x) + Math.abs((ghost.y + best.dy) - p.y);
+              return distM < distBest ? m : best;
+            }, validMoves[0]);
+          } else {
+            chosenMove = validMoves[Math.floor(Math.random() * validMoves.length)];
+          }
+
+          ghost.dx = chosenMove.dx;
+          ghost.dy = chosenMove.dy;
+          ghost.x += ghost.dx;
+          ghost.y += ghost.dy;
         }
 
         if (ghost.x === p.x && ghost.y === p.y) {
           if (ghost.frightened) {
             soundFx.playPacmanEatGhost();
             triggerComboMsg(`💥 DOCHON! ${ghost.name} 퇴치! (+200점)`);
-            ghost.x = 16; ghost.y = 8;
+            ghost.x = 16; ghost.y = 7;
             ghost.frightened = false;
             g.score += 200;
             setScore(g.score);
@@ -436,11 +456,13 @@ export default function PacManGame({ onScoreSubmitted }) {
         )}
 
         {gameState === 'PAUSED' && (
-          <div className="absolute inset-0 bg-black/80 backdrop-blur-sm flex flex-col items-center justify-center gap-3">
-            <h3 className="text-3xl font-black text-amber-400">일시 정지</h3>
-            <button onClick={togglePause} className="btn-primary">
-              <Play className="w-5 h-5 fill-current" /> 계속하기
-            </button>
+          <div className="absolute inset-0 bg-black/75 backdrop-blur-sm flex flex-col items-center justify-center gap-2 pointer-events-none">
+            <h3 className="text-3xl md:text-4xl font-black bg-gradient-to-r from-amber-300 via-yellow-200 to-amber-400 bg-clip-text text-transparent drop-shadow-[0_0_12px_rgba(251,191,36,0.6)]">
+              ⏸️ 일시 정지
+            </h3>
+            <p className="text-slate-300 text-xs font-bold bg-slate-900/80 border border-slate-700 px-4 py-1.5 rounded-full shadow-lg">
+              하단의 [게임 재개] 버튼을 누르면 이어서 진행됩니다
+            </p>
           </div>
         )}
 
