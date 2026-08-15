@@ -4,8 +4,9 @@ import DinoGame from './components/games/dino/DinoGame';
 import SnakeGame from './components/games/snake/SnakeGame';
 import GameCard from './components/GameCard';
 import LeaderboardModal from './components/LeaderboardModal';
-import { PLAYABLE_GAMES, COMING_SOON_GAMES, CATEGORIES } from './data/gamesData';
-import { Trophy, X, Search, Lock, Gamepad2 } from 'lucide-react';
+import { PLAYABLE_GAMES, COMING_SOON_GAMES, CATEGORY_DEFINITIONS } from './data/gamesData';
+import { getLeaderboardFromDB } from './utils/leaderboardApi';
+import { Trophy, X, Search, Lock, Gamepad2, Dices, Sparkles, Heart, Crown, Flame } from 'lucide-react';
 
 export default function App() {
   const [activeGame, setActiveGame] = useState(null);
@@ -13,8 +14,36 @@ export default function App() {
   const [leaderboardTab, setLeaderboardTab] = useState('pacman');
   const [filterCategory, setFilterCategory] = useState('ALL');
   const [searchQuery, setSearchQuery] = useState('');
+  const [favorites, setFavorites] = useState(() => {
+    try {
+      const saved = localStorage.getItem('dochon_favorites');
+      return saved ? JSON.parse(saved) : ['pacman', 'dino', 'snake'];
+    } catch (e) {
+      return ['pacman', 'dino', 'snake'];
+    }
+  });
 
-  // Lock body scroll when a game modal is active (No ESC key exit to prevent accidental loss of gameplay progress)
+  // Top Champions Data for Playable Games
+  const [topScores, setTopScores] = useState({});
+
+  useEffect(() => {
+    // Fetch top scores for playable games
+    async function fetchTopScores() {
+      const results = {};
+      for (const game of PLAYABLE_GAMES) {
+        try {
+          const list = await getLeaderboardFromDB(game.id);
+          if (list && list.length > 0) {
+            results[game.id] = list[0];
+          }
+        } catch (e) {}
+      }
+      setTopScores(results);
+    }
+    fetchTopScores();
+  }, [isLeaderboardOpen]);
+
+  // Lock body scroll when a game modal is active
   useEffect(() => {
     if (activeGame) {
       document.body.style.overflow = 'hidden';
@@ -24,102 +53,224 @@ export default function App() {
     }
   }, [activeGame]);
 
+  const toggleFavorite = (gameId) => {
+    setFavorites(prev => {
+      const next = prev.includes(gameId)
+        ? prev.filter(id => id !== gameId)
+        : [...prev, gameId];
+      try {
+        localStorage.setItem('dochon_favorites', JSON.stringify(next));
+      } catch (e) {}
+      return next;
+    });
+  };
+
+  // Lucky Random Game Picker (🎲)
+  const handleRandomPlay = () => {
+    const randomGame = PLAYABLE_GAMES[Math.floor(Math.random() * PLAYABLE_GAMES.length)];
+    if (randomGame) {
+      setActiveGame(randomGame.id);
+    }
+  };
+
+  // Filtering Logic
+  const allGames = [...PLAYABLE_GAMES, ...COMING_SOON_GAMES];
+
   const filterGame = (game) => {
-    const matchesCategory = filterCategory === 'ALL' || game.category === filterCategory;
-    const matchesSearch = game.title.toLowerCase().includes(searchQuery.toLowerCase());
+    let matchesCategory = true;
+    if (filterCategory === 'FAVORITES') {
+      matchesCategory = favorites.includes(game.id);
+    } else if (filterCategory !== 'ALL') {
+      matchesCategory = game.category === filterCategory;
+    }
+
+    const matchesSearch = game.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
+      (game.category && game.category.toLowerCase().includes(searchQuery.toLowerCase()));
+
     return matchesCategory && matchesSearch;
   };
 
   const filteredPlayable = PLAYABLE_GAMES.filter(filterGame);
   const filteredComingSoon = COMING_SOON_GAMES.filter(filterGame);
 
+  // Category counts calculation
+  const getCategoryCount = (catId) => {
+    if (catId === 'ALL') return allGames.length;
+    if (catId === 'FAVORITES') return favorites.length;
+    return allGames.filter(g => g.category === catId).length;
+  };
+
   const openInPageLeaderboardModal = (gameKey = 'pacman') => {
     setLeaderboardTab(gameKey);
     setIsLeaderboardOpen(true);
   };
 
+  // Find overall highest champion for Hero Highlight Banner
+  const featuredGame = PLAYABLE_GAMES[0];
+  const featuredChampion = topScores['pacman'] || { name: '김도촌 (5A)', score: 12400 };
+
   return (
     <div className="portal-wrapper">
+      
       {/* 1. Centered Header Bar */}
       <header className="portal-header">
         <div className="portal-title-box">
-          <h1 className="text-2xl sm:text-3xl font-black tracking-tight text-white flex items-center justify-center gap-2">
-            DOCHON GAMES <span className="text-amber-400">PORTAL</span>
-          </h1>
-          <p className="text-[11px] text-slate-400 font-bold tracking-widest uppercase mt-0.5">
-            도촌초등학교 게임 종합 포털
+          <div className="flex items-center justify-center gap-2">
+            <span className="text-2xl animate-bounce">🎮</span>
+            <h1 className="text-2xl sm:text-3xl font-black tracking-tight text-white flex items-center justify-center gap-1.5 drop-shadow-md">
+              DOCHON GAMES <span className="text-amber-400">PORTAL</span>
+            </h1>
+            <span className="text-2xl animate-bounce">✨</span>
+          </div>
+          <p className="text-[11px] text-amber-300/80 font-extrabold tracking-widest uppercase mt-0.5">
+            도촌초등학교 아케이드 게임 종합 포털
           </p>
         </div>
 
-        {/* Search Bar & Pure In-Page Modal Button */}
+        {/* Search Bar, Random Game Button & School Leaderboard Button */}
         <div className="portal-search-row">
           <div className="portal-search-input">
-            <Search className="w-4 h-4 text-slate-400 mr-2 shrink-0" />
+            <Search className="w-4 h-4 text-amber-400/80 mr-2 shrink-0" />
             <input
               type="text"
-              placeholder="게임을 검색하세요..."
+              placeholder="플레이할 게임을 검색하세요..."
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
             />
+            {searchQuery && (
+              <button
+                type="button"
+                onClick={() => setSearchQuery('')}
+                className="text-xs text-slate-400 hover:text-white px-1"
+              >
+                ✕
+              </button>
+            )}
           </div>
 
-          <button
-            onClick={() => openInPageLeaderboardModal('pacman')}
-            className="btn-gold shadow-md flex items-center gap-1.5"
-            title="학교 랭킹 팝업 열기"
-          >
-            <Trophy className="w-4 h-4 text-slate-950" />
-            <span>학교 랭킹</span>
-          </button>
+          <div className="flex items-center gap-2">
+            {/* 🎲 Lucky Random Pick Button */}
+            <button
+              onClick={handleRandomPlay}
+              className="btn-dice shadow-md flex items-center gap-1.5"
+              title="어떤 게임을 할지 고민될 때! 랜덤 게임 시작"
+            >
+              <Dices className="w-4 h-4 text-emerald-300" />
+              <span>랜덤 게임</span>
+            </button>
+
+            {/* 🏆 School Ranking Button */}
+            <button
+              onClick={() => openInPageLeaderboardModal('pacman')}
+              className="btn-gold shadow-md flex items-center gap-1.5"
+              title="학교 랭킹 팝업 열기"
+            >
+              <Trophy className="w-4 h-4 text-slate-950" />
+              <span>학교 랭킹</span>
+            </button>
+          </div>
         </div>
       </header>
 
-      {/* 2. Centered Category Filter Chips Bar */}
+      {/* 2. Interactive Hero Hall of Fame Showcase Banner */}
+      <section className="portal-hero-section">
+        <div className="portal-hero-banner">
+          <div className="portal-hero-content">
+            <div className="portal-hero-badge">
+              <Flame className="w-3.5 h-3.5 text-amber-400 animate-pulse" />
+              <span>오늘의 도촌 명예의 전당 1위 챔피언</span>
+              <Sparkles className="w-3.5 h-3.5 text-amber-400" />
+            </div>
+
+            <h2 className="portal-hero-title">
+              현재 <span className="text-amber-300 font-black">{featuredGame.title}</span> 최고 랭커는?
+            </h2>
+
+            <div className="portal-hero-champion-box">
+              <div className="portal-hero-crown">
+                <Crown className="w-5 h-5 text-amber-400 fill-amber-400" />
+              </div>
+              <div className="flex flex-col text-left">
+                <span className="text-xs text-amber-200/80 font-bold">1등 명예의 전당</span>
+                <span className="text-sm sm:text-base font-black text-white">
+                  {featuredChampion.name} <strong className="text-amber-400">({featuredChampion.score.toLocaleString()}점)</strong>
+                </span>
+              </div>
+            </div>
+
+            <div className="portal-hero-actions">
+              <button
+                onClick={() => setActiveGame('pacman')}
+                className="btn-hero-play"
+              >
+                <span>🔥 팩맨 챔피언에 도전하기</span>
+              </button>
+              <button
+                onClick={() => openInPageLeaderboardModal('pacman')}
+                className="btn-hero-ranking"
+              >
+                <span>🏆 랭킹 전체보기</span>
+              </button>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      {/* 3. Centered Category Filter Chips Bar with Pictograms & Counters */}
       <nav className="portal-nav">
         <div className="portal-categories">
-          {CATEGORIES.map(cat => (
-            <button
-              key={cat}
-              onClick={() => setFilterCategory(cat)}
-              className={`px-3.5 py-1 rounded-full text-[11px] font-bold transition-all whitespace-nowrap ${
-                filterCategory === cat
-                  ? 'bg-amber-400 text-slate-950 font-black shadow-sm'
-                  : 'bg-[#2A2D32] text-slate-300 hover:bg-slate-700/60'
-              }`}
-            >
-              {cat === 'ALL' ? '전체 보기' : cat}
-            </button>
-          ))}
+          {CATEGORY_DEFINITIONS.map(cat => {
+            const count = getCategoryCount(cat.id);
+            const isActive = filterCategory === cat.id;
+
+            return (
+              <button
+                key={cat.id}
+                onClick={() => setFilterCategory(cat.id)}
+                className={`portal-category-chip ${isActive ? 'active' : ''}`}
+              >
+                <span>{cat.icon}</span>
+                <span>{cat.label}</span>
+                <span className={`portal-category-counter ${isActive ? 'active' : ''}`}>
+                  {count}
+                </span>
+              </button>
+            );
+          })}
         </div>
       </nav>
 
-      {/* 3. Centered Main Grid Container */}
+      {/* 4. Centered Main Grid Container */}
       <main className="portal-main">
-        {/* SECTION 1: PLAYABLE GAMES (TOP ROW) */}
+        {/* SECTION 1: PLAYABLE GAMES */}
         {filteredPlayable.length > 0 && (
           <section className="portal-section">
             <div className="portal-section-title">
               <div className="flex items-center justify-center gap-2">
-                <Gamepad2 className="w-5 h-5 text-amber-400" />
+                <Gamepad2 className="w-5 h-5 text-amber-400 animate-pulse" />
                 <h2 className="text-base font-black text-amber-300 tracking-tight uppercase">
-                  🔥 즉시 플레이 가능 게임 (Playable Games)
+                  ⚡ 즉시 플레이 가능 게임 (Playable Games)
                 </h2>
               </div>
-              <p className="text-[11px] text-slate-400 font-semibold">
-                클릭 시 게임이 바로 실행되며 점수가 학교 랭킹에 기록됩니다!
+              <p className="text-[11px] text-slate-300 font-semibold">
+                클릭 시 게임이 바로 시작되며 점수가 실시간 학교 랭킹에 기록됩니다!
               </p>
             </div>
 
-            {/* Playable Games Grid (Top Row) */}
+            {/* Playable Games Grid (Top Row with Pulse Glow) */}
             <div className="game-tile-grid">
               {filteredPlayable.map(game => (
                 <GameCard
                   key={game.id}
+                  id={game.id}
                   title={game.title}
                   category={game.category}
                   imageSrc={game.imageSrc}
                   isPlayable={true}
                   badgeText={game.badgeText}
+                  isFavorite={favorites.includes(game.id)}
+                  onToggleFavorite={toggleFavorite}
+                  topScore={topScores[game.id]}
                   onPlay={() => setActiveGame(game.id)}
                 />
               ))}
@@ -130,11 +281,11 @@ export default function App() {
         {/* SECTION SEPARATOR LINE DIVIDER */}
         <div className="portal-divider">
           <span className="portal-divider-badge">
-            Dochon Arcade
+            Dochon Arcade Matrix
           </span>
         </div>
 
-        {/* SECTION 2: COMING SOON GAMES (BOTTOM ROWS) */}
+        {/* SECTION 2: COMING SOON GAMES */}
         {filteredComingSoon.length > 0 && (
           <section className="portal-section">
             <div className="portal-section-title">
@@ -145,20 +296,23 @@ export default function App() {
                 </h2>
               </div>
               <p className="text-[11px] text-slate-400 font-medium">
-                총 <strong className="text-amber-400">{filteredComingSoon.length}개</strong>의 준비중인 게임
+                총 <strong className="text-amber-400">{filteredComingSoon.length}개</strong>의 신작 게임이 순차적으로 공개됩니다.
               </p>
             </div>
 
-            {/* Coming Soon 5-Column Tile Matrix */}
+            {/* Coming Soon Tile Matrix */}
             <div className="game-tile-grid">
               {filteredComingSoon.map(game => (
                 <GameCard
                   key={game.id}
+                  id={game.id}
                   title={game.title}
                   category={game.category}
                   imageSrc={game.imageSrc}
                   isPlayable={false}
                   badgeText={game.badgeText}
+                  isFavorite={favorites.includes(game.id)}
+                  onToggleFavorite={toggleFavorite}
                 />
               ))}
             </div>
@@ -166,7 +320,7 @@ export default function App() {
         )}
       </main>
 
-      {/* 4. Responsive Overlay Popup Modal (Safe Closing: Only Close Button Exits) */}
+      {/* 5. Responsive Overlay Popup Modal for Active Game */}
       {activeGame && (
         <div className="game-overlay">
           <div className="game-modal-box">
@@ -218,18 +372,18 @@ export default function App() {
         </div>
       )}
 
-      {/* 5. Pure HTML/CSS In-Page Overlay Modal (Zero Browser Window Popups) */}
+      {/* 6. Pure HTML/CSS In-Page Overlay Modal for School Leaderboard */}
       <LeaderboardModal
         isOpen={isLeaderboardOpen}
         onClose={() => setIsLeaderboardOpen(false)}
         activeTab={leaderboardTab}
       />
 
-      {/* 6. Centered Footer */}
+      {/* 7. Centered Footer */}
       <footer className="portal-footer">
-        <p className="font-bold text-slate-400">도촌초등학교 게임 포털</p>
-        <p className="text-[11px] text-slate-600 mt-1">
-          Google Games 타일 방식 모방 · 비영리 교육용 확장 포털
+        <p className="font-bold text-amber-200/80">도촌초등학교 게임 포털</p>
+        <p className="text-[11px] text-slate-500 mt-1">
+          Google Games 타일 방식 모방 · 비영리 초등학교 교육용 아케이드 포털
         </p>
       </footer>
     </div>

@@ -1,14 +1,25 @@
 import React from 'react';
-import { Play } from 'lucide-react';
+import { Play, Lock, Heart } from 'lucide-react';
 
 export default function GameCard({
+  id,
   title,
   category,
   imageSrc,
   isPlayable,
   onPlay,
-  badgeText
+  badgeText,
+  isFavorite,
+  onToggleFavorite,
+  topScore
 }) {
+  const handleFavoriteClick = (e) => {
+    e.stopPropagation();
+    if (onToggleFavorite) {
+      onToggleFavorite(id);
+    }
+  };
+
   return (
     <div
       onClick={isPlayable ? onPlay : undefined}
@@ -24,6 +35,16 @@ export default function GameCard({
           loading="lazy"
         />
 
+        {/* Favorite Heart Button (Top Right) */}
+        <button
+          type="button"
+          onClick={handleFavoriteClick}
+          className={`game-favorite-btn ${isFavorite ? 'active' : ''}`}
+          title={isFavorite ? '즐겨찾기 해제' : '즐겨찾기 추가'}
+        >
+          <Heart className={`w-3.5 h-3.5 ${isFavorite ? 'fill-rose-500 text-rose-500' : 'text-white/80'}`} />
+        </button>
+
         {/* Hover Overlay */}
         <div className="game-tile-overlay">
           {isPlayable ? (
@@ -31,8 +52,9 @@ export default function GameCard({
               <Play className="w-5 h-5 fill-current ml-0.5" />
             </div>
           ) : (
-            <span style={{ fontSize: '10px', fontWeight: 900, background: '#0F172A', color: '#CBD5E1', padding: '4px 8px', borderRadius: '6px' }}>
-              준비중
+            <span className="game-tile-lock-badge">
+              <Lock className="w-3 h-3 inline mr-1 text-slate-300" />
+              준비 중
             </span>
           )}
         </div>
@@ -50,9 +72,17 @@ export default function GameCard({
         <div className="game-tile-title" title={title}>
           {title}
         </div>
-        <div className="game-tile-category">
-          {category}
-        </div>
+        
+        {/* Top Score or Category Display */}
+        {isPlayable && topScore ? (
+          <div className="game-tile-champion-chip" title={`최고 점수: ${topScore.name} (${topScore.score.toLocaleString()}점)`}>
+            👑 {topScore.score.toLocaleString()}점
+          </div>
+        ) : (
+          <div className="game-tile-category">
+            {category}
+          </div>
+        )}
       </div>
     </div>
   );

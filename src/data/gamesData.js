@@ -10,7 +10,8 @@ export const PLAYABLE_GAMES = [
     category: '클래식',
     imageSrc: getThumb('pacman.jpg'),
     isPlayable: true,
-    badgeText: '🔥 인기 1위'
+    badgeText: '🔥 인기 1위',
+    description: '고스트를 피해 쿠키를 모두 먹고 최고 점수를 기록하세요!'
   },
   {
     id: 'dino',
@@ -18,7 +19,8 @@ export const PLAYABLE_GAMES = [
     category: '액션',
     imageSrc: getThumb('dino.jpg'),
     isPlayable: true,
-    badgeText: '🦖 2위'
+    badgeText: '🦖 2위',
+    description: '선인장과 익룡을 점프하며 끝없이 질주하세요!'
   },
   {
     id: 'snake',
@@ -26,7 +28,8 @@ export const PLAYABLE_GAMES = [
     category: '클래식',
     imageSrc: getThumb('snake.jpg'),
     isPlayable: true,
-    badgeText: '🐍 NEW 3위'
+    badgeText: '🐍 NEW 3위',
+    description: '사과를 먹고 몸집을 불려 도촌 스네이크 마스터가 되어보세요!'
   }
 ];
 
@@ -75,7 +78,7 @@ export const COMING_SOON_GAMES = [
   },
   {
     id: 'tictactoe',
-    title: '틱택고',
+    title: '틱택토',
     category: '퍼즐',
     imageSrc: getThumb('tictactoe.jpg'),
     isPlayable: false
@@ -145,4 +148,16 @@ export const COMING_SOON_GAMES = [
   }
 ];
 
-export const CATEGORIES = ['ALL', '클래식', '액션', '퍼즐', '카드', '스포츠', '어드벤처', '멀티플레이어'];
+export const CATEGORY_DEFINITIONS = [
+  { id: 'ALL', label: '전체', icon: '🎮' },
+  { id: 'FAVORITES', label: '즐겨찾기', icon: '❤️' },
+  { id: '클래식', label: '클래식', icon: '👾' },
+  { id: '액션', label: '액션', icon: '🏃' },
+  { id: '퍼즐', label: '퍼즐', icon: '🧩' },
+  { id: '카드', label: '카드', icon: '🃏' },
+  { id: '스포츠', label: '스포츠', icon: '⚽' },
+  { id: '어드벤처', label: '어드벤처', icon: '🗺️' },
+  { id: '멀티플레이어', label: '멀티', icon: '👥' }
+];
+
+export const CATEGORIES = CATEGORY_DEFINITIONS.map(c => c.id);
