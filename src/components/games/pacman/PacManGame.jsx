@@ -417,12 +417,12 @@ export default function PacManGame({ onScoreSubmitted }) {
   return (
     <div className="flex flex-col items-center justify-center w-full max-w-4xl mx-auto p-3 md:p-5 glass-panel glass-panel-gold select-none">
       {/* 1. Header Bar with Cute Arcade Typography */}
-      <div className="flex flex-wrap items-center justify-between w-full mb-2 px-2 gap-2">
-        <div className="flex items-center gap-2">
-          <span className="text-xl md:text-2xl font-black bg-gradient-to-r from-amber-300 via-yellow-200 to-amber-400 bg-clip-text text-transparent flex items-center gap-1.5 drop-shadow">
-            🕹️ Dochon Pac-Man
+      <div className="flex flex-wrap items-center justify-between w-full mb-2 px-2 gap-3">
+        <div className="flex items-center gap-3">
+          <span className="text-xl md:text-2xl font-black bg-gradient-to-r from-amber-300 via-yellow-200 to-amber-400 bg-clip-text text-transparent flex items-center gap-2 drop-shadow">
+            🕹️ Dochon Pac-Man&nbsp;&nbsp;
           </span>
-          <span className="text-[11px] bg-amber-400/20 text-amber-300 border border-amber-400/50 px-2.5 py-0.5 rounded-full font-black tracking-wide shadow-sm">
+          <span className="text-[12px] bg-amber-400/20 text-amber-300 border border-amber-400/50 px-3 py-0.5 rounded-full font-black tracking-wide shadow-sm">
             D-O-C-H-O-N 미로 맵
           </span>
         </div>
