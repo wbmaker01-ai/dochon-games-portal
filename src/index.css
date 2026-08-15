@@ -1067,6 +1067,159 @@ body {
 }
 
 /* ------------------------------------------------------------- */
+/* PREMIUM ARCADE TOUCH D-PAD CONTROLLER                         */
+/* ------------------------------------------------------------- */
+
+.dpad-panel {
+  display: flex !important;
+  flex-direction: column !important;
+  align-items: center !important;
+  justify-content: center !important;
+  background: linear-gradient(145deg, rgba(15, 23, 42, 0.95) 0%, rgba(30, 41, 59, 0.9) 100%) !important;
+  padding: 16px 24px !important;
+  border-radius: 28px !important;
+  border: 2.5px solid rgba(251, 191, 36, 0.5) !important;
+  box-shadow: 0 12px 32px rgba(0, 0, 0, 0.6), 0 0 25px rgba(251, 191, 36, 0.2) !important;
+  margin-top: 14px !important;
+  width: 100% !important;
+  max-width: 420px !important;
+}
+
+.dpad-title {
+  font-size: 11.5px !important;
+  font-weight: 900 !important;
+  color: #FBBF24 !important;
+  letter-spacing: 1.5px !important;
+  margin-bottom: 12px !important;
+  display: flex !important;
+  align-items: center !important;
+  gap: 6px !important;
+  text-transform: uppercase !important;
+}
+
+/* 3x3 CROSS GRID LAYOUT */
+.dpad-grid-3x3 {
+  display: grid !important;
+  grid-template-columns: repeat(3, 72px) !important;
+  grid-template-rows: repeat(3, 72px) !important;
+  gap: 10px !important;
+  align-items: center !important;
+  justify-items: center !important;
+  padding: 8px !important;
+  background: rgba(3, 7, 18, 0.6) !important;
+  border-radius: 24px !important;
+  border: 1.5px solid rgba(255, 255, 255, 0.08) !important;
+}
+
+@media (max-width: 480px) {
+  .dpad-grid-3x3 {
+    grid-template-columns: repeat(3, 60px) !important;
+    grid-template-rows: repeat(3, 60px) !important;
+    gap: 8px !important;
+  }
+}
+
+.dpad-btn {
+  width: 72px !important;
+  height: 72px !important;
+  border-radius: 20px !important;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  cursor: pointer !important;
+  user-select: none !important;
+  touch-action: manipulation !important;
+  transition: all 0.12s ease !important;
+  position: relative !important;
+  overflow: hidden !important;
+  box-shadow: 0 6px 16px rgba(0, 0, 0, 0.6), inset 0 2px 4px rgba(255, 255, 255, 0.3) !important;
+}
+
+@media (max-width: 480px) {
+  .dpad-btn {
+    width: 60px !important;
+    height: 60px !important;
+    border-radius: 16px !important;
+  }
+}
+
+.dpad-btn:hover {
+  filter: brightness(1.1) !important;
+  transform: translateY(-2px) !important;
+}
+
+.dpad-btn:active {
+  transform: scale(0.92) translateY(2px) !important;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.8), inset 0 2px 6px rgba(0, 0, 0, 0.4) !important;
+}
+
+/* UP BUTTON: Golden Amber Gamepad Arrow */
+.dpad-btn-up {
+  grid-column: 2 !important;
+  grid-row: 1 !important;
+  background: linear-gradient(180deg, #FDE047 0%, #F59E0B 70%, #D97706 100%) !important;
+  color: #451A03 !important;
+  border: 2.5px solid #FEF08A !important;
+}
+
+/* LEFT BUTTON: Electric Teal Gamepad Arrow */
+.dpad-btn-left {
+  grid-column: 1 !important;
+  grid-row: 2 !important;
+  background: linear-gradient(180deg, #5EEAD4 0%, #0D9488 70%, #115E59 100%) !important;
+  color: #042F2E !important;
+  border: 2.5px solid #99F6E4 !important;
+}
+
+/* CENTER HUB: Arcade Joystick Pivot Dot */
+.dpad-btn-center {
+  grid-column: 2 !important;
+  grid-row: 2 !important;
+  width: 48px !important;
+  height: 48px !important;
+  border-radius: 50% !important;
+  background: radial-gradient(circle at 35% 35%, #334155 0%, #0F172A 70%, #020617 100%) !important;
+  border: 2.5px solid rgba(251, 191, 36, 0.4) !important;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  box-shadow: inset 0 3px 6px rgba(0, 0, 0, 0.8), 0 2px 8px rgba(0, 0, 0, 0.5) !important;
+}
+
+@media (max-width: 480px) {
+  .dpad-btn-center {
+    width: 38px !important;
+    height: 38px !important;
+  }
+}
+
+.dpad-center-core {
+  width: 14px !important;
+  height: 14px !important;
+  border-radius: 50% !important;
+  background: radial-gradient(circle at 35% 35%, #FDE047 0%, #F59E0B 100%) !important;
+  box-shadow: 0 0 10px rgba(251, 191, 36, 0.8) !important;
+}
+
+/* RIGHT BUTTON: Neon Pink Gamepad Arrow */
+.dpad-btn-right {
+  grid-column: 3 !important;
+  grid-row: 2 !important;
+  background: linear-gradient(180deg, #F472B6 0%, #E11D48 70%, #9F1239 100%) !important;
+  color: #4C0519 !important;
+  border: 2.5px solid #FBCFE8 !important;
+}
+
+/* DOWN BUTTON: Radiant Coral Gamepad Arrow */
+.dpad-btn-down {
+  grid-column: 2 !important;
+  grid-row: 3 !important;
+  background: linear-gradient(180deg, #FB923C 0%, #EA580C 70%, #9A3412 100%) !important;
+  color: #431407 !important;
+  border: 2.5px solid #FFEDD5 !important;
+}
+
+/* ------------------------------------------------------------- */
 /* DINO RUNNER DEDICATED STYLING                                 */
 /* ------------------------------------------------------------- */
 .dino-container {

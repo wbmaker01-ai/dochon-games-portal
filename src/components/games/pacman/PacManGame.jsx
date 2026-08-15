@@ -570,7 +570,7 @@ export default function PacManGame({ onScoreSubmitted }) {
               className="dpad-btn dpad-btn-up"
               title="위쪽 이동 (Up)"
             >
-              <ArrowUp className="w-8 h-8 stroke-[3.5]" />
+              <ArrowUp className="w-9 h-9 stroke-[3.5] drop-shadow-sm" />
             </button>
 
             {/* Row 2: Left = LEFT (◀) */}
@@ -580,12 +580,12 @@ export default function PacManGame({ onScoreSubmitted }) {
               className="dpad-btn dpad-btn-left"
               title="왼쪽 이동 (Left)"
             >
-              <ArrowLeft className="w-8 h-8 stroke-[3.5]" />
+              <ArrowLeft className="w-9 h-9 stroke-[3.5] drop-shadow-sm" />
             </button>
 
-            {/* Row 2: Center = Mascot */}
-            <div className="dpad-btn-center select-none">
-              🟡
+            {/* Row 2: Center = Joystick Pivot Dot */}
+            <div className="dpad-btn-center select-none" title="도촌 아케이드 조이스틱 코어">
+              <div className="dpad-center-core" />
             </div>
 
             {/* Row 2: Right = RIGHT (▶) */}
@@ -595,7 +595,7 @@ export default function PacManGame({ onScoreSubmitted }) {
               className="dpad-btn dpad-btn-right"
               title="오른쪽 이동 (Right)"
             >
-              <ArrowRight className="w-8 h-8 stroke-[3.5]" />
+              <ArrowRight className="w-9 h-9 stroke-[3.5] drop-shadow-sm" />
             </button>
 
             {/* Row 3: Bottom Center = DOWN (▼) */}
@@ -605,7 +605,7 @@ export default function PacManGame({ onScoreSubmitted }) {
               className="dpad-btn dpad-btn-down"
               title="아래쪽 이동 (Down)"
             >
-              <ArrowDown className="w-8 h-8 stroke-[3.5]" />
+              <ArrowDown className="w-9 h-9 stroke-[3.5] drop-shadow-sm" />
             </button>
           </div>
         </div>
