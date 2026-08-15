@@ -447,18 +447,6 @@ export default function DinoGame({ onScoreSubmitted }) {
             ctx.arc(obs.x + obs.width / 2, obs.y + obs.height / 2, obs.width / 2, 0, Math.PI * 2);
             ctx.fill();
           }
-        }
-
-        // Tag label
-        ctx.fillStyle = 'rgba(15, 23, 42, 0.85)';
-        ctx.beginPath();
-        ctx.roundRect(obs.x - 6, obs.y - 15, obs.width + 12, 12, 4);
-        ctx.fill();
-        ctx.fillStyle = '#FFFFFF';
-        ctx.font = 'bold 8.5px Pretendard, sans-serif';
-        ctx.textAlign = 'center';
-        ctx.fillText(obs.label, obs.x + obs.width / 2, obs.y - 6);
-
         ctx.restore();
       });
 
