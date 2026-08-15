@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import PacManGame from './components/games/pacman/PacManGame';
-import DinoGame from './components/games/DinoGame';
-import SnakeGame from './components/games/SnakeGame';
+import DinoGame from './components/games/dino/DinoGame';
+import SnakeGame from './components/games/snake/SnakeGame';
 import GameCard from './components/GameCard';
 import LeaderboardModal from './components/LeaderboardModal';
 import { PLAYABLE_GAMES, COMING_SOON_GAMES, CATEGORIES } from './data/gamesData';
