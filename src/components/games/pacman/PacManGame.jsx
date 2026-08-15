@@ -28,6 +28,7 @@ export default function PacManGame({ onScoreSubmitted }) {
     ],
     frightenedTimer: null,
     frightenedTimeLeft: 0,
+    invincibleUntil: 0,
     dotsRemaining: 0,
     score: 0,
     lives: 3
@@ -49,6 +50,8 @@ export default function PacManGame({ onScoreSubmitted }) {
     g.pacman.nextDx = dx;
     g.pacman.nextDy = dy;
     if (gameState === 'IDLE') {
+      g.invincibleUntil = Date.now() + 3000;
+      triggerComboMsg('🛡️ 3초 무적 보호막 발동!');
       setGameState('PLAYING');
     }
   };
@@ -91,9 +94,11 @@ export default function PacManGame({ onScoreSubmitted }) {
     g.score = 0;
     g.lives = 3;
     g.frightenedTimeLeft = 0;
+    g.invincibleUntil = Date.now() + 3000;
     setScore(0);
     setLives(3);
     setSubmitted(false);
+    triggerComboMsg('🛡️ 3초 무적 보호막 발동!');
     setGameState('PLAYING');
 
     let count = 0;
@@ -250,14 +255,19 @@ export default function PacManGame({ onScoreSubmitted }) {
             g.score += 200;
             setScore(g.score);
           } else {
-            soundFx.playGameOver();
-            g.lives--;
-            setLives(g.lives);
-            if (g.lives <= 0) {
-              setGameState('GAMEOVER');
-              if (g.score > highScore) setHighScore(g.score);
-            } else {
-              p.x = 16; p.y = 11; p.dx = 0; p.dy = 0; p.nextDx = 0; p.nextDy = 0;
+            const isInvincible = Date.now() < g.invincibleUntil;
+            if (!isInvincible) {
+              soundFx.playGameOver();
+              g.lives--;
+              setLives(g.lives);
+              if (g.lives <= 0) {
+                setGameState('GAMEOVER');
+                if (g.score > highScore) setHighScore(g.score);
+              } else {
+                p.x = 16; p.y = 11; p.dx = 0; p.dy = 0; p.nextDx = 0; p.nextDy = 0;
+                g.invincibleUntil = Date.now() + 3000;
+                triggerComboMsg('🛡️ 3초 무적 보호막 발동!');
+              }
             }
           }
         }
@@ -327,6 +337,38 @@ export default function PacManGame({ onScoreSubmitted }) {
       const px = g.pacman.x * TILE_SIZE + TILE_SIZE / 2;
       const py = g.pacman.y * TILE_SIZE + TILE_SIZE / 2;
       const radius = TILE_SIZE / 2 - 1;
+      const isInvincible = Date.now() < g.invincibleUntil;
+
+      // Draw Invincibility Forcefield Bubble
+      if (isInvincible) {
+        const shieldPulse = Math.sin(Date.now() / 70) * 2;
+        ctx.save();
+        ctx.beginPath();
+        ctx.arc(px, py, radius + 5 + shieldPulse, 0, Math.PI * 2);
+        ctx.strokeStyle = '#00F5D4';
+        ctx.lineWidth = 2.5;
+        ctx.shadowColor = '#00F5D4';
+        ctx.shadowBlur = 10;
+        ctx.fillStyle = 'rgba(0, 245, 212, 0.22)';
+        ctx.fill();
+        ctx.stroke();
+
+        // Orbiting golden spark
+        const sparkAngle = (Date.now() / 160) % (Math.PI * 2);
+        const sparkX = px + Math.cos(sparkAngle) * (radius + 5.5);
+        const sparkY = py + Math.sin(sparkAngle) * (radius + 5.5);
+        ctx.fillStyle = '#FFD166';
+        ctx.beginPath();
+        ctx.arc(sparkX, sparkY, 2.5, 0, Math.PI * 2);
+        ctx.fill();
+
+        // Shield status badge
+        ctx.fillStyle = '#00F5D4';
+        ctx.font = '900 8.5px Pretendard, sans-serif';
+        ctx.textAlign = 'center';
+        ctx.fillText('🛡️ 무적', px, py - radius - 7);
+        ctx.restore();
+      }
 
       // Animate mouth
       g.pacman.mouthAngle += g.pacman.mouthSpeed;
@@ -343,6 +385,11 @@ export default function PacManGame({ onScoreSubmitted }) {
       ctx.save();
       ctx.translate(px, py);
       ctx.rotate(rotationAngle);
+
+      // Blinking effect when invincible
+      if (isInvincible) {
+        ctx.globalAlpha = Math.floor(Date.now() / 120) % 2 === 0 ? 1 : 0.45;
+      }
 
       ctx.fillStyle = '#FFD166';
       ctx.beginPath();
