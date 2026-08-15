@@ -108,9 +108,28 @@ export default function App() {
     setIsLeaderboardOpen(true);
   };
 
-  // Find overall highest champion for Hero Highlight Banner
-  const featuredGame = PLAYABLE_GAMES[0];
-  const featuredChampion = topScores['pacman'] || { name: '김도촌 (5A)', score: 12400 };
+  // Random / Auto-cycling Featured Game Algorithm for Hero Banner
+  const [featuredGameIndex, setFeaturedGameIndex] = useState(() =>
+    Math.floor(Math.random() * PLAYABLE_GAMES.length)
+  );
+
+  useEffect(() => {
+    const timer = setInterval(() => {
+      setFeaturedGameIndex(prev => (prev + 1) % PLAYABLE_GAMES.length);
+    }, 7500);
+    return () => clearInterval(timer);
+  }, []);
+
+  const featuredGame = PLAYABLE_GAMES[featuredGameIndex] || PLAYABLE_GAMES[0];
+  const featuredChampion = topScores[featuredGame.id] || { name: '도촌 학생', score: 0 };
+  const featuredScoreUnit = featuredGame.id === 'dino' ? 'm' : '점';
+
+  const getChallengeBtnText = (game) => {
+    if (game.id === 'pacman') return '🔥 팩맨 챔피언에 도전하기';
+    if (game.id === 'dino') return '🔥 공룡 달리기 챔피언에 도전하기';
+    if (game.id === 'snake') return '🔥 스네이크 챔피언에 도전하기';
+    return `🔥 ${game.title.replace('도촌 ', '')} 챔피언에 도전하기`;
+  };
 
   return (
     <div className="portal-wrapper">
@@ -125,26 +144,12 @@ export default function App() {
             </h1>
             <span className="text-2xl animate-bounce">✨</span>
           </div>
-
-          <div className="flex flex-wrap items-center justify-center gap-2 mt-1">
-            <p className="text-[11px] text-amber-300/80 font-extrabold tracking-widest uppercase">
-              도촌초등학교 아케이드 게임 종합 포털
-            </p>
-            <button
-              onClick={() => setIsChangelogOpen(true)}
-              className="btn-changelog"
-              title="포털 업데이트 및 개선 내역 확인하기"
-            >
-              <History className="w-3.5 h-3.5 text-amber-400" />
-              <span>업데이트 내역</span>
-              <span className="bg-amber-400/25 text-amber-300 text-[9px] px-1.5 py-0.5 rounded-full font-black border border-amber-400/40">
-                {getLatestVersion()}
-              </span>
-            </button>
-          </div>
+          <p className="text-[11px] text-amber-300/80 font-extrabold tracking-widest uppercase mt-0.5">
+            도촌초등학교 아케이드 게임 종합 포털
+          </p>
         </div>
 
-        {/* Search Bar, Random Game Button & School Leaderboard Button */}
+        {/* Search Bar, Random Game Button, School Leaderboard Button & Update History Button */}
         <div className="portal-search-row">
           <div className="portal-search-input">
             <Search className="w-4 h-4 text-amber-400/80 mr-2 shrink-0" />
@@ -165,7 +170,7 @@ export default function App() {
             )}
           </div>
 
-          <div className="flex items-center gap-2">
+          <div className="flex items-center gap-2 flex-wrap justify-center">
             {/* 🎲 Lucky Random Pick Button */}
             <button
               onClick={handleRandomPlay}
@@ -178,18 +183,28 @@ export default function App() {
 
             {/* 🏆 School Ranking Button */}
             <button
-              onClick={() => openInPageLeaderboardModal('pacman')}
+              onClick={() => openInPageLeaderboardModal(featuredGame.id)}
               className="btn-gold shadow-md flex items-center gap-1.5"
               title="학교 랭킹 팝업 열기"
             >
               <Trophy className="w-4 h-4 text-slate-950" />
               <span>학교 랭킹</span>
             </button>
+
+            {/* 📜 Update History Button (Placed next to School Ranking) */}
+            <button
+              onClick={() => setIsChangelogOpen(true)}
+              className="btn-changelog shadow-md flex items-center gap-1.5"
+              title="포털 업데이트 및 개선 내역 확인하기"
+            >
+              <History className="w-3.5 h-3.5 text-amber-400" />
+              <span>업데이트 내역</span>
+            </button>
           </div>
         </div>
       </header>
 
-      {/* 2. Interactive Hero Hall of Fame Showcase Banner */}
+      {/* 2. Interactive Hero Hall of Fame Showcase Banner with Random/Auto-cycling Champions */}
       <section className="portal-hero-section">
         <div className="portal-hero-banner">
           <div className="portal-hero-content">
@@ -199,8 +214,10 @@ export default function App() {
               <Sparkles className="w-3.5 h-3.5 text-amber-400" />
             </div>
 
-            <h2 className="portal-hero-title">
-              현재 <span className="text-amber-300 font-black">{featuredGame.title}</span> 최고 랭커는?
+            <h2 className="portal-hero-title flex items-center justify-center gap-1.5">
+              <span>현재</span>
+              <span className="text-amber-300 font-black">{featuredGame.title}</span>
+              <span>최고 랭커는?</span>
             </h2>
 
             <div className="portal-hero-champion-box">
@@ -208,25 +225,30 @@ export default function App() {
                 <Crown className="w-5 h-5 text-amber-400 fill-amber-400" />
               </div>
               <div className="flex flex-col text-left">
-                <span className="text-xs text-amber-200/80 font-bold">1등 명예의 전당</span>
-                <span className="text-sm sm:text-base font-black text-white">
-                  {featuredChampion.name} <strong className="text-amber-400">({featuredChampion.score.toLocaleString()}점)</strong>
+                <span className="text-[11px] text-amber-300 font-black tracking-wide">
+                  👑 {featuredGame.title} 1위 챔피언
+                </span>
+                <span className="text-sm sm:text-base font-black text-white mt-0.5">
+                  {featuredChampion.name || '도촌 학생'}
+                  <strong className="text-amber-400 font-mono ml-2">
+                    ({featuredChampion.score ? featuredChampion.score.toLocaleString() : 0}{featuredScoreUnit})
+                  </strong>
                 </span>
               </div>
             </div>
 
             <div className="portal-hero-actions">
               <button
-                onClick={() => setActiveGame('pacman')}
+                onClick={() => setActiveGame(featuredGame.id)}
                 className="btn-hero-play"
               >
-                <span>🔥 팩맨 챔피언에 도전하기</span>
+                <span>{getChallengeBtnText(featuredGame)}</span>
               </button>
               <button
-                onClick={() => openInPageLeaderboardModal('pacman')}
+                onClick={() => openInPageLeaderboardModal(featuredGame.id)}
                 className="btn-hero-ranking"
               >
-                <span>🏆 랭킹 전체보기</span>
+                <span>🏆 {featuredGame.title} 랭킹 보기</span>
               </button>
             </div>
           </div>
