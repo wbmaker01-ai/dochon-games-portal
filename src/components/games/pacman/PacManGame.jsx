@@ -118,7 +118,9 @@ export default function PacManGame({ onScoreSubmitted }) {
     let lastTime = performance.now();
 
     const isWall = (x, y) => {
-      if (x < 0 || x >= COLS || y < 0 || y >= ROWS) return true;
+      if (y < 0 || y >= ROWS) return true;
+      if (x < 0) return gameStateRef.current.grid[y][COLS - 1] === 1;
+      if (x >= COLS) return gameStateRef.current.grid[y][0] === 1;
       return gameStateRef.current.grid[y][x] === 1;
     };
 
@@ -128,15 +130,25 @@ export default function PacManGame({ onScoreSubmitted }) {
 
       const p = g.pacman;
       if (p.nextDx !== 0 || p.nextDy !== 0) {
-        if (!isWall(p.x + p.nextDx, p.y + p.nextDy)) {
+        let testX = p.x + p.nextDx;
+        let testY = p.y + p.nextDy;
+        if (testX < 0) testX = COLS - 1;
+        else if (testX >= COLS) testX = 0;
+
+        if (!isWall(testX, testY)) {
           p.dx = p.nextDx;
           p.dy = p.nextDy;
         }
       }
 
       if (p.dx !== 0 || p.dy !== 0) {
-        const nextX = p.x + p.dx;
-        const nextY = p.y + p.dy;
+        let nextX = p.x + p.dx;
+        let nextY = p.y + p.dy;
+
+        // Teleport wrap across left & right edges
+        if (nextX < 0) nextX = COLS - 1;
+        else if (nextX >= COLS) nextX = 0;
+
         if (!isWall(nextX, nextY)) {
           p.x = nextX;
           p.y = nextY;
@@ -178,11 +190,19 @@ export default function PacManGame({ onScoreSubmitted }) {
       }
 
       g.ghosts.forEach(ghost => {
-        // 1. Find all unblocked adjacent directions
-        const allMoves = [
+        // 1. Find all unblocked adjacent directions with teleport support
+        const moves = [
           { dx: 0, dy: -1 }, { dx: 0, dy: 1 },
           { dx: -1, dy: 0 }, { dx: 1, dy: 0 }
-        ].filter(m => !isWall(ghost.x + m.dx, ghost.y + m.dy));
+        ];
+
+        const allMoves = moves.filter(m => {
+          let tx = ghost.x + m.dx;
+          let ty = ghost.y + m.dy;
+          if (tx < 0) tx = COLS - 1;
+          else if (tx >= COLS) tx = 0;
+          return !isWall(tx, ty);
+        });
 
         if (allMoves.length > 0) {
           // 2. Filter out moves that reverse direction, unless at a dead-end
@@ -195,8 +215,16 @@ export default function PacManGame({ onScoreSubmitted }) {
           if (!ghost.frightened && Math.random() < 0.4) {
             // Chase Pac-Man: pick move minimizing Manhattan distance to Pac-Man
             chosenMove = validMoves.reduce((best, m) => {
-              const distM = Math.abs((ghost.x + m.dx) - p.x) + Math.abs((ghost.y + m.dy) - p.y);
-              const distBest = Math.abs((ghost.x + best.dx) - p.x) + Math.abs((ghost.y + best.dy) - p.y);
+              let tx = ghost.x + m.dx;
+              if (tx < 0) tx = COLS - 1;
+              else if (tx >= COLS) tx = 0;
+              const distM = Math.abs(tx - p.x) + Math.abs((ghost.y + m.dy) - p.y);
+
+              let bx = ghost.x + best.dx;
+              if (bx < 0) bx = COLS - 1;
+              else if (bx >= COLS) bx = 0;
+              const distBest = Math.abs(bx - p.x) + Math.abs((ghost.y + best.dy) - p.y);
+
               return distM < distBest ? m : best;
             }, validMoves[0]);
           } else {
@@ -207,6 +235,10 @@ export default function PacManGame({ onScoreSubmitted }) {
           ghost.dy = chosenMove.dy;
           ghost.x += ghost.dx;
           ghost.y += ghost.dy;
+
+          // Wrap ghost across left & right teleport portals
+          if (ghost.x < 0) ghost.x = COLS - 1;
+          else if (ghost.x >= COLS) ghost.x = 0;
         }
 
         if (ghost.x === p.x && ghost.y === p.y) {
@@ -279,6 +311,36 @@ export default function PacManGame({ onScoreSubmitted }) {
           }
         }
       }
+
+      // 1.5 Draw Teleport Portal Gates on Left and Right of Row 9
+      const portalY = 9 * TILE_SIZE;
+
+      // Left Portal Gate (Col 0, Row 9)
+      ctx.fillStyle = 'rgba(0, 245, 212, 0.2)';
+      ctx.strokeStyle = '#00F5D4';
+      ctx.lineWidth = 2;
+      ctx.beginPath();
+      ctx.roundRect(0, portalY + 2, TILE_SIZE - 2, TILE_SIZE - 4, [0, 8, 8, 0]);
+      ctx.fill();
+      ctx.stroke();
+      ctx.fillStyle = '#00F5D4';
+      ctx.font = '900 10px Pretendard, sans-serif';
+      ctx.textAlign = 'center';
+      ctx.fillText('◀', TILE_SIZE / 2 - 2, portalY + TILE_SIZE / 2 + 3.5);
+
+      // Right Portal Gate (Col COLS - 1, Row 9)
+      const rightX = (COLS - 1) * TILE_SIZE;
+      ctx.fillStyle = 'rgba(0, 245, 212, 0.2)';
+      ctx.strokeStyle = '#00F5D4';
+      ctx.lineWidth = 2;
+      ctx.beginPath();
+      ctx.roundRect(rightX + 2, portalY + 2, TILE_SIZE - 2, TILE_SIZE - 4, [8, 0, 0, 8]);
+      ctx.fill();
+      ctx.stroke();
+      ctx.fillStyle = '#00F5D4';
+      ctx.font = '900 10px Pretendard, sans-serif';
+      ctx.textAlign = 'center';
+      ctx.fillText('▶', rightX + TILE_SIZE / 2 + 2, portalY + TILE_SIZE / 2 + 3.5);
 
       // 2. Draw "D O C H O N" Highlight Badges above letter Columns
       LETTER_REGIONS.forEach(({ letter, startCol, endCol }) => {
