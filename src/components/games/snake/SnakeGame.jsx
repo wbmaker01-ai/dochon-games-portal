@@ -709,12 +709,12 @@ export default function SnakeGame({ onScoreSubmitted }) {
           <div className="snake-overlay">
             <h3 className="snake-overlay-title">도촌 스네이크 시작!</h3>
             <p className="snake-overlay-desc">
-              <span style={{ color: '#34D399', fontWeight: 900 }}>방향키(↑↓←→) / WASD</span> 키로 뱀을 조종하여<br />
+              <span style={{ color: '#34D399', fontWeight: 900 }}>방향키(↑↓←→) / WASD</span> 키 또는 <span style={{ color: '#FBBF24', fontWeight: 900 }}>아래 십자키</span>로 뱀을 조종하여<br />
               맛있는 <span style={{ color: '#EF4444', fontWeight: 900 }}>도촌 사과 🍎</span>와 <span style={{ color: '#FBBF24', fontWeight: 900 }}>황금 도토리 🌰</span>를 먹어보세요!<br />
               <span style={{ color: '#F87171', fontWeight: 800 }}>벽이나 자신의 몸통에 부딪히면 게임이 종료됩니다.</span>
             </p>
-            <button onClick={restartGame} className="btn-snake-start">
-              <Play style={{ width: '20px', height: '20px', fill: 'currentColor' }} /> 게임 시작하기
+            <button onClick={restartGame} className="btn-gold text-base md:text-lg px-8 py-3 animate-pulse shadow-2xl">
+              <Play className="w-5 h-5 fill-current" /> 게임 시작하기
             </button>
           </div>
         )}
@@ -722,8 +722,8 @@ export default function SnakeGame({ onScoreSubmitted }) {
         {gameState === 'PAUSED' && (
           <div className="snake-overlay">
             <h3 className="snake-overlay-title" style={{ color: '#34D399' }}>일시 정지</h3>
-            <button onClick={() => setGameState('PLAYING')} className="btn-snake-start">
-              <Play style={{ width: '18px', height: '18px', fill: 'currentColor' }} /> 계속하기
+            <button onClick={() => setGameState('PLAYING')} className="btn-gold text-sm md:text-base px-6 py-2.5 shadow-xl">
+              <Play className="w-4 h-4 fill-current" /> 계속하기
             </button>
           </div>
         )}
@@ -755,8 +755,8 @@ export default function SnakeGame({ onScoreSubmitted }) {
                     maxLength={16}
                     required
                   />
-                  <button type="submit" className="btn-snake-start" style={{ justifyContent: 'center', padding: '8px 16px', fontSize: '13px' }}>
-                    <Trophy style={{ width: '16px', height: '16px' }} /> 랭킹 등록하기
+                  <button type="submit" className="btn-gold text-xs font-black justify-center py-2.5 shadow-lg">
+                    <Trophy className="w-4 h-4 text-slate-950" /> 랭킹 등록하기
                   </button>
                 </form>
               ) : (
@@ -782,65 +782,88 @@ export default function SnakeGame({ onScoreSubmitted }) {
         )}
       </div>
 
-      {/* Action Controls & D-Pad Bar */}
-      <div className="snake-controls-bar">
-        {/* Left Utility Buttons */}
-        <div style={{ display: 'flex', alignItems: 'center', gap: '8px', flexWrap: 'wrap' }}>
-          <button onClick={restartGame} className="btn-arcade-purple" style={{ padding: '8px 14px', fontSize: '12px' }}>
-            <RotateCcw style={{ width: '14px', height: '14px' }} /> 다시 시작
-          </button>
+      {/* Cute Arcade Action Bar & Large 3-Row Touch D-Pad (Dochon Pac-Man Style) */}
+      <div className="flex flex-col items-center justify-center w-full mt-3 px-2">
+
+        {/* 1. Cute Action Pill Buttons Row */}
+        <div className="arcade-action-bar">
           <button
             onClick={() => {
               if (gameState === 'PLAYING') setGameState('PAUSED');
               else if (gameState === 'PAUSED') setGameState('PLAYING');
             }}
             className="btn-arcade-purple"
-            style={{ padding: '8px 14px', fontSize: '12px' }}
           >
-            {gameState === 'PAUSED' ? <Play style={{ width: '14px', height: '14px', color: '#34D399' }} /> : <Pause style={{ width: '14px', height: '14px' }} />}
-            {gameState === 'PAUSED' ? '계속' : '일시정지'}
+            {gameState === 'PAUSED' ? <Play className="w-4 h-4 fill-current text-yellow-300" /> : <Pause className="w-4 h-4 fill-current text-purple-100" />}
+            <span>{gameState === 'PAUSED' ? '게임 재개' : '일시 정지'}</span>
           </button>
-          <button onClick={() => setIsMuted(soundFx.toggleMute())} className="btn-arcade-purple" style={{ padding: '8px 14px', fontSize: '12px' }}>
-            {isMuted ? <VolumeX style={{ width: '14px', height: '14px', color: '#F87171' }} /> : <Volume2 style={{ width: '14px', height: '14px', color: '#34D399' }} />}
-            {isMuted ? '음소거' : '소리 ON'}
+
+          <button onClick={restartGame} className="btn-arcade-emerald">
+            <RotateCcw className="w-4 h-4 text-emerald-100" />
+            <span>다시 시작</span>
+          </button>
+
+          <button onClick={() => setIsMuted(soundFx.toggleMute())} className="btn-arcade-amber">
+            {isMuted ? <VolumeX className="w-4 h-4 text-red-950" /> : <Volume2 className="w-4 h-4 text-slate-950" />}
+            <span>{isMuted ? '음소거' : '소리 ON'}</span>
           </button>
         </div>
 
-        {/* Right Touch / D-Pad Cross Controller */}
-        <div className="snake-dpad-container">
-          <div className="snake-dpad-row">
-            <button
-              onClick={() => changeDirection(DIRECTIONS.UP)}
-              className="snake-dpad-btn"
-              title="위로 이동"
-            >
-              <ArrowUp style={{ width: '18px', height: '18px' }} />
-            </button>
+        {/* 2. Large & Cute 3-Row D-Pad Controller for Mobile, Tablet & Desktop */}
+        <div className="dpad-panel">
+          <div className="dpad-title">
+            <span>🕹️ DOCHON TOUCH CONTROLLER</span>
           </div>
-          <div className="snake-dpad-row">
+
+          {/* 3x3 Grid Layout for D-Pad */}
+          <div className="dpad-grid-3x3">
+            {/* Row 1: Top Center = UP (▲) */}
             <button
+              type="button"
+              onClick={() => changeDirection(DIRECTIONS.UP)}
+              className="dpad-btn dpad-btn-up"
+              title="위쪽 이동 (Up)"
+            >
+              <ArrowUp className="w-9 h-9 stroke-[3.5] drop-shadow-sm" />
+            </button>
+
+            {/* Row 2: Left = LEFT (◀) */}
+            <button
+              type="button"
               onClick={() => changeDirection(DIRECTIONS.LEFT)}
-              className="snake-dpad-btn"
-              title="왼쪽으로 이동"
+              className="dpad-btn dpad-btn-left"
+              title="왼쪽 이동 (Left)"
             >
-              <ArrowLeft style={{ width: '18px', height: '18px' }} />
+              <ArrowLeft className="w-9 h-9 stroke-[3.5] drop-shadow-sm" />
             </button>
+
+            {/* Row 2: Center = Joystick Pivot Dot */}
+            <div className="dpad-btn-center select-none" title="도촌 아케이드 조이스틱 코어">
+              <div className="dpad-center-core" />
+            </div>
+
+            {/* Row 2: Right = RIGHT (▶) */}
             <button
-              onClick={() => changeDirection(DIRECTIONS.DOWN)}
-              className="snake-dpad-btn"
-              title="아래로 이동"
-            >
-              <ArrowDown style={{ width: '18px', height: '18px' }} />
-            </button>
-            <button
+              type="button"
               onClick={() => changeDirection(DIRECTIONS.RIGHT)}
-              className="snake-dpad-btn"
-              title="오른쪽으로 이동"
+              className="dpad-btn dpad-btn-right"
+              title="오른쪽 이동 (Right)"
             >
-              <ArrowRight style={{ width: '18px', height: '18px' }} />
+              <ArrowRight className="w-9 h-9 stroke-[3.5] drop-shadow-sm" />
+            </button>
+
+            {/* Row 3: Bottom Center = DOWN (▼) */}
+            <button
+              type="button"
+              onClick={() => changeDirection(DIRECTIONS.DOWN)}
+              className="dpad-btn dpad-btn-down"
+              title="아래쪽 이동 (Down)"
+            >
+              <ArrowDown className="w-9 h-9 stroke-[3.5] drop-shadow-sm" />
             </button>
           </div>
         </div>
+
       </div>
     </div>
   );
