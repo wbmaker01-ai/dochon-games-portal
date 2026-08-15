@@ -440,7 +440,7 @@ export default function PacManGame({ onScoreSubmitted }) {
 
         {/* Overlay States */}
         {gameState === 'IDLE' && (
-          <div className="absolute inset-0 bg-black/85 backdrop-blur-md flex flex-col items-center justify-center gap-4 text-center p-6">
+          <div className="absolute inset-0 z-30 bg-black/85 backdrop-blur-md flex flex-col items-center justify-center gap-4 text-center p-6">
             <h3 className="text-2xl md:text-4xl font-black bg-gradient-to-r from-yellow-300 via-amber-200 to-amber-400 bg-clip-text text-transparent drop-shadow">
               도촌 팩맨 (DOCHON PAC-MAN)
             </h3>
@@ -456,7 +456,7 @@ export default function PacManGame({ onScoreSubmitted }) {
         )}
 
         {gameState === 'PAUSED' && (
-          <div className="absolute inset-0 bg-black/75 backdrop-blur-sm flex flex-col items-center justify-center gap-2 pointer-events-none">
+          <div className="absolute inset-0 z-30 bg-black/75 backdrop-blur-sm flex flex-col items-center justify-center gap-2 pointer-events-none">
             <h3 className="text-3xl md:text-4xl font-black bg-gradient-to-r from-amber-300 via-yellow-200 to-amber-400 bg-clip-text text-transparent drop-shadow-[0_0_12px_rgba(251,191,36,0.6)]">
               ⏸️ 일시 정지
             </h3>
@@ -467,18 +467,18 @@ export default function PacManGame({ onScoreSubmitted }) {
         )}
 
         {(gameState === 'GAMEOVER' || gameState === 'VICTORY') && (
-          <div className="absolute inset-0 bg-black/90 backdrop-blur-md flex flex-col items-center justify-center p-6 text-center gap-4">
-            <h3 className={`text-3xl md:text-5xl font-black ${gameState === 'VICTORY' ? 'text-teal-400' : 'text-red-400'}`}>
+          <div className="absolute inset-0 z-30 bg-black/90 backdrop-blur-md flex flex-col items-center justify-center p-4 sm:p-6 text-center gap-3 sm:gap-4">
+            <h3 className={`text-2xl sm:text-4xl font-black ${gameState === 'VICTORY' ? 'text-teal-400 drop-shadow-[0_0_15px_rgba(45,212,191,0.6)]' : 'text-red-400 drop-shadow-[0_0_15px_rgba(248,113,113,0.6)]'}`}>
               {gameState === 'VICTORY' ? '🎉 전교 1위 등극! 축하합니다!' : '💀 유령에게 잡혔습니다!'}
             </h3>
-            <p className="text-lg md:text-xl font-bold text-slate-200">
-              최종 획득 점수: <span className="text-amber-400 text-2xl md:text-3xl font-mono">{score}점</span>
+            <p className="text-sm sm:text-base font-bold text-slate-200">
+              최종 획득 점수: <span className="text-amber-400 text-xl sm:text-2xl font-mono font-black">{score.toLocaleString()}점</span>
             </p>
 
             {!submitted ? (
-              <form onSubmit={handleScoreSubmit} className="flex flex-col gap-3 w-full max-w-xs bg-slate-900/95 p-4 rounded-2xl border-2 border-amber-500/50 shadow-2xl">
+              <form onSubmit={handleScoreSubmit} className="flex flex-col gap-2.5 w-full max-w-xs bg-slate-900/95 p-4 rounded-2xl border-2 border-amber-500/60 shadow-2xl">
                 <label className="text-xs text-amber-300 font-black flex items-center justify-center gap-1">
-                  <Sparkles className="w-4 h-4" /> 도촌 명예의 전당 점수 등록
+                  <Sparkles className="w-4 h-4 text-amber-400" /> 도촌 명예의 전당 점수 등록
                 </label>
                 <input
                   type="text"
@@ -489,12 +489,12 @@ export default function PacManGame({ onScoreSubmitted }) {
                   maxLength={16}
                   required
                 />
-                <button type="submit" className="btn-gold text-xs font-black justify-center py-2.5">
+                <button type="submit" className="btn-gold text-xs font-black justify-center py-2.5 shadow-lg">
                   <Trophy className="w-4 h-4 text-slate-950" /> 랭킹 등록하기
                 </button>
               </form>
             ) : (
-              <p className="text-teal-300 font-black bg-teal-950/80 border-2 border-teal-500/50 px-5 py-2 rounded-xl text-xs shadow-lg">
+              <p className="text-teal-300 font-black bg-teal-950/90 border-2 border-teal-500/60 px-5 py-2.5 rounded-xl text-xs sm:text-sm shadow-xl">
                 ✅ 도촌 명예의 전당에 성공적으로 등록되었습니다!
               </p>
             )}
