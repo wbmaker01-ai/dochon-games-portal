@@ -235,6 +235,14 @@ function getLocalLeaderboardFallback(gameKey) {
       { id: '4', name: '최하은 (3A)', score: 6200, date: '2026-08-10' },
       { id: '5', name: '정우진 (5B)', score: 4900, date: '2026-08-09' }
     ]);
+  } else if (gameKey === 'snake') {
+    return deduplicateLeaderboard([
+      { id: '1', name: '강스네이크 (6A)', score: 480, date: '2026-08-14' },
+      { id: '2', name: '김도촌 (5A)', score: 360, date: '2026-08-14' },
+      { id: '3', name: '이민서 (4C)', score: 280, date: '2026-08-13' },
+      { id: '4', name: '박지훈 (3B)', score: 190, date: '2026-08-12' },
+      { id: '5', name: '최예은 (5C)', score: 150, date: '2026-08-11' }
+    ]);
   } else {
     return deduplicateLeaderboard([
       { id: '1', name: '박민준 (6C)', score: 3450, date: '2026-08-12' },

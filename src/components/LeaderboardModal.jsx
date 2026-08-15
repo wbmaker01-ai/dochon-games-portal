@@ -266,13 +266,20 @@ export default function LeaderboardModal({ isOpen, onClose, activeTab = 'pacman'
             let iconEmoji = '🕹️';
             if (game.id === 'pacman') iconEmoji = '🟡';
             if (game.id === 'dino') iconEmoji = '🦖';
+            if (game.id === 'snake') iconEmoji = '🐍';
+
+            let activeCustomStyle = {};
+            if (isActive) {
+              if (game.id === 'dino') activeCustomStyle = { background: 'linear-gradient(135deg, #34D399, #10B981)', color: '#064E3B' };
+              else if (game.id === 'snake') activeCustomStyle = { background: 'linear-gradient(135deg, #10B981, #059669)', color: '#FFFFFF' };
+            }
 
             return (
               <button
                 key={game.id}
                 onClick={() => setCurrentTab(game.id)}
                 className={`leaderboard-tab-chip ${isActive ? 'active' : ''}`}
-                style={game.id === 'dino' && isActive ? { background: 'linear-gradient(135deg, #34D399, #10B981)', color: '#064E3B' } : {}}
+                style={activeCustomStyle}
               >
                 <span>{iconEmoji}</span>
                 <span>{game.title}</span>

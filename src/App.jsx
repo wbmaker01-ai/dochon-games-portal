@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import PacManGame from './components/games/pacman/PacManGame';
 import DinoGame from './components/games/DinoGame';
+import SnakeGame from './components/games/SnakeGame';
 import GameCard from './components/GameCard';
 import LeaderboardModal from './components/LeaderboardModal';
 import { PLAYABLE_GAMES, COMING_SOON_GAMES, CATEGORIES } from './data/gamesData';
@@ -173,7 +174,9 @@ export default function App() {
             <div className="game-modal-header">
               <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
                 <span style={{ fontSize: '1.05rem', fontWeight: 900, color: '#FBBF24' }}>
-                  {activeGame === 'pacman' ? '🕹️ 도촌 팩맨 (DOCHON PAC-MAN)' : '🦖 도촌 공룡 달리기'}
+                  {activeGame === 'pacman' && '🕹️ 도촌 팩맨 (DOCHON PAC-MAN)'}
+                  {activeGame === 'dino' && '🦖 도촌 공룡 달리기 (DOCHON DINO RUN)'}
+                  {activeGame === 'snake' && '🐍 도촌 스네이크 (DOCHON SNAKE MASTER)'}
                 </span>
                 <span style={{
                   backgroundColor: 'rgba(251, 191, 36, 0.2)',
@@ -206,6 +209,9 @@ export default function App() {
               )}
               {activeGame === 'dino' && (
                 <DinoGame onScoreSubmitted={() => openInPageLeaderboardModal('dino')} />
+              )}
+              {activeGame === 'snake' && (
+                <SnakeGame onScoreSubmitted={() => openInPageLeaderboardModal('snake')} />
               )}
             </div>
           </div>

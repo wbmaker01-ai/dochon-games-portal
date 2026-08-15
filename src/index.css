@@ -1036,4 +1036,258 @@ body {
   transform: scale(0.94) !important;
 }
 
+/* ------------------------------------------------------------- */
+/* SNAKE MASTER DEDICATED STYLING */
+/* ------------------------------------------------------------- */
+.snake-container {
+  display: flex !important;
+  flex-direction: column !important;
+  align-items: center !important;
+  justify-content: center !important;
+  width: 100% !important;
+  max-width: 680px !important;
+  margin: 0 auto !important;
+  padding: 16px 20px !important;
+  background: rgba(15, 23, 42, 0.96) !important;
+  border: 2px solid rgba(16, 185, 129, 0.45) !important;
+  border-radius: 24px !important;
+  box-shadow: 0 20px 50px rgba(0, 0, 0, 0.85), 0 0 35px rgba(16, 185, 129, 0.18) !important;
+}
+
+.snake-header {
+  display: flex !important;
+  flex-direction: row !important;
+  align-items: center !important;
+  justify-content: space-between !important;
+  width: 100% !important;
+  margin-bottom: 12px !important;
+  padding: 0 4px !important;
+  flex-wrap: wrap !important;
+  gap: 8px !important;
+}
+
+.snake-title-wrap {
+  display: flex !important;
+  align-items: center !important;
+  gap: 10px !important;
+}
+
+.snake-title {
+  font-size: 20px !important;
+  font-weight: 900 !important;
+  background: linear-gradient(135deg, #34D399 0%, #10B981 50%, #6EE7B7 100%) !important;
+  -webkit-background-clip: text !important;
+  -webkit-text-fill-color: transparent !important;
+}
+
+.snake-badge {
+  font-size: 11px !important;
+  font-weight: 900 !important;
+  padding: 4px 10px !important;
+  background: rgba(16, 185, 129, 0.15) !important;
+  border: 1px solid rgba(52, 211, 153, 0.5) !important;
+  border-radius: 9999px !important;
+  color: #34D399 !important;
+}
+
+.snake-score-wrap {
+  display: flex !important;
+  align-items: center !important;
+  gap: 16px !important;
+  font-size: 13px !important;
+  font-weight: 800 !important;
+  color: #CBD5E1 !important;
+  flex-wrap: wrap !important;
+}
+
+.snake-score-val {
+  color: #34D399 !important;
+  font-family: monospace !important;
+  font-size: 20px !important;
+  font-weight: 900 !important;
+  margin-left: 4px !important;
+}
+
+.snake-apple-val {
+  color: #EF4444 !important;
+  font-family: monospace !important;
+  font-size: 18px !important;
+  font-weight: 900 !important;
+  margin-left: 2px !important;
+}
+
+.snake-high-val {
+  color: #FBBF24 !important;
+  font-family: monospace !important;
+  font-size: 19px !important;
+  font-weight: 900 !important;
+  margin-left: 4px !important;
+}
+
+.snake-canvas-wrap {
+  position: relative !important;
+  width: 100% !important;
+  max-width: 616px !important;
+  border: 3.5px solid rgba(16, 185, 129, 0.55) !important;
+  border-radius: 20px !important;
+  overflow: hidden !important;
+  background-color: #0F172A !important;
+  box-shadow: 0 12px 35px rgba(0, 0, 0, 0.8), 0 0 25px rgba(16, 185, 129, 0.2) !important;
+}
+
+.snake-canvas-wrap canvas {
+  display: block !important;
+  width: 100% !important;
+  height: auto !important;
+}
+
+.snake-overlay {
+  position: absolute !important;
+  inset: 0 !important;
+  background: rgba(15, 23, 42, 0.88) !important;
+  backdrop-filter: blur(8px) !important;
+  display: flex !important;
+  flex-direction: column !important;
+  align-items: center !important;
+  justify-content: center !important;
+  text-align: center !important;
+  gap: 12px !important;
+  padding: 16px !important;
+  z-index: 20 !important;
+}
+
+.snake-overlay-title {
+  font-size: 26px !important;
+  font-weight: 900 !important;
+  color: #34D399 !important;
+  margin: 0 !important;
+}
+
+.snake-overlay-desc {
+  font-size: 13px !important;
+  color: #E2E8F0 !important;
+  line-height: 1.6 !important;
+  max-width: 440px !important;
+  margin: 0 !important;
+}
+
+.snake-score-form {
+  display: flex !important;
+  flex-direction: column !important;
+  gap: 8px !important;
+  width: 100% !important;
+  max-width: 280px !important;
+  background: rgba(15, 23, 42, 0.95) !important;
+  padding: 14px 18px !important;
+  border-radius: 18px !important;
+  border: 2px solid rgba(16, 185, 129, 0.5) !important;
+  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.6) !important;
+}
+
+.snake-score-input {
+  width: 100% !important;
+  padding: 8px 12px !important;
+  background: #1E293B !important;
+  border: 1.5px solid #475569 !important;
+  border-radius: 10px !important;
+  color: #FFFFFF !important;
+  font-size: 13px !important;
+  font-weight: 700 !important;
+  outline: none !important;
+  text-align: center !important;
+}
+.snake-score-input:focus {
+  border-color: #34D399 !important;
+}
+
+.snake-controls-bar {
+  display: flex !important;
+  flex-direction: row !important;
+  align-items: center !important;
+  justify-content: space-between !important;
+  width: 100% !important;
+  margin-top: 14px !important;
+  padding: 0 4px !important;
+  flex-wrap: wrap !important;
+  gap: 12px !important;
+}
+
+.snake-combo-badge {
+  position: absolute !important;
+  top: 16px !important;
+  left: 50% !important;
+  transform: translateX(-50%) !important;
+  z-index: 30 !important;
+  background: linear-gradient(135deg, #10B981 0%, #059669 100%) !important;
+  color: #FFFFFF !important;
+  padding: 6px 18px !important;
+  border-radius: 9999px !important;
+  font-weight: 900 !important;
+  font-size: 13px !important;
+  box-shadow: 0 6px 20px rgba(16, 185, 129, 0.5) !important;
+  border: 2px solid #6EE7B7 !important;
+  animation: bounce 0.6s infinite alternate !important;
+}
+
+.btn-snake-start {
+  background: linear-gradient(135deg, #10B981 0%, #059669 100%) !important;
+  color: #FFFFFF !important;
+  border: 2px solid #6EE7B7 !important;
+  padding: 10px 24px !important;
+  border-radius: 16px !important;
+  font-size: 14px !important;
+  font-weight: 900 !important;
+  cursor: pointer !important;
+  display: inline-flex !important;
+  align-items: center !important;
+  gap: 6px !important;
+  box-shadow: 0 6px 18px rgba(16, 185, 129, 0.45) !important;
+  user-select: none !important;
+  touch-action: manipulation !important;
+  transition: transform 0.15s ease !important;
+}
+.btn-snake-start:active {
+  transform: scale(0.94) !important;
+}
+
+/* D-Pad Controls for Snake */
+.snake-dpad-container {
+  display: flex !important;
+  flex-direction: column !important;
+  align-items: center !important;
+  gap: 4px !important;
+}
+
+.snake-dpad-row {
+  display: flex !important;
+  flex-direction: row !important;
+  align-items: center !important;
+  justify-content: center !important;
+  gap: 4px !important;
+}
+
+.snake-dpad-btn {
+  width: 44px !important;
+  height: 40px !important;
+  background: linear-gradient(135deg, #334155, #1E293B) !important;
+  border: 1.5px solid rgba(52, 211, 153, 0.5) !important;
+  border-radius: 10px !important;
+  color: #34D399 !important;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  cursor: pointer !important;
+  box-shadow: 0 3px 8px rgba(0, 0, 0, 0.4) !important;
+  user-select: none !important;
+  touch-action: manipulation !important;
+  transition: all 0.12s ease !important;
+}
+
+.snake-dpad-btn:active {
+  transform: scale(0.9) !important;
+  background: #10B981 !important;
+  color: #FFFFFF !important;
+}
+
+
 

@@ -19,17 +19,18 @@ export const PLAYABLE_GAMES = [
     imageSrc: getThumb('dino.jpg'),
     isPlayable: true,
     badgeText: '🦖 2위'
+  },
+  {
+    id: 'snake',
+    title: '도촌 스네이크',
+    category: '클래식',
+    imageSrc: getThumb('snake.jpg'),
+    isPlayable: true,
+    badgeText: '🐍 NEW 3위'
   }
 ];
 
 export const COMING_SOON_GAMES = [
-  {
-    id: 'snake',
-    title: '스네이크',
-    category: '클래식',
-    imageSrc: getThumb('snake.jpg'),
-    isPlayable: false
-  },
   {
     id: 'solitaire',
     title: '솔리테어',
