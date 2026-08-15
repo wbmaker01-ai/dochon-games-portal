@@ -84,6 +84,12 @@ export async function getLeaderboardFromDB(gameKey = 'pacman') {
 export async function submitScoreToDB(gameKey, name, score) {
   const cleanName = String(name).trim() || '도촌 학생';
   const newScore = Number(score) || 0;
+
+  // Rule: Do not register scores of 100 or below to Leaderboard
+  if (newScore <= 100) {
+    return false;
+  }
+
   const todayDate = new Date().toISOString().split('T')[0];
 
   // 1. Check if name already exists in Cloud DB

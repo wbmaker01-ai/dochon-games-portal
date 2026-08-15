@@ -454,7 +454,7 @@ export default function PacManGame({ onScoreSubmitted }) {
 
   const handleScoreSubmit = async (e) => {
     e.preventDefault();
-    if (!studentName.trim()) return;
+    if (!studentName.trim() || score <= 100) return;
     saveScore('pacman', studentName, score);
     await submitScoreToDB('pacman', studentName, score);
     setSubmitted(true);
@@ -554,28 +554,39 @@ export default function PacManGame({ onScoreSubmitted }) {
               최종 획득 점수: <span className="text-amber-400 text-xl sm:text-2xl font-mono font-black">{score.toLocaleString()}점</span>
             </p>
 
-            {!submitted ? (
-              <form onSubmit={handleScoreSubmit} className="flex flex-col gap-2.5 w-full max-w-xs bg-slate-900/95 p-4 rounded-2xl border-2 border-amber-500/60 shadow-2xl">
-                <label className="text-xs text-amber-300 font-black flex items-center justify-center gap-1">
-                  <Sparkles className="w-4 h-4 text-amber-400" /> 도촌 명예의 전당 점수 등록
-                </label>
-                <input
-                  type="text"
-                  placeholder="예: 홍길동"
-                  value={studentName}
-                  onChange={(e) => setStudentName(e.target.value)}
-                  className="px-4 py-2 bg-slate-800 border-2 border-slate-600 rounded-xl text-white text-xs font-bold focus:outline-none focus:border-amber-400 text-center"
-                  maxLength={16}
-                  required
-                />
-                <button type="submit" className="btn-gold text-xs font-black justify-center py-2.5 shadow-lg">
-                  <Trophy className="w-4 h-4 text-slate-950" /> 랭킹 등록하기
-                </button>
-              </form>
+            {score > 100 ? (
+              !submitted ? (
+                <form onSubmit={handleScoreSubmit} className="flex flex-col gap-2.5 w-full max-w-xs bg-slate-900/95 p-4 rounded-2xl border-2 border-amber-500/60 shadow-2xl">
+                  <label className="text-xs text-amber-300 font-black flex items-center justify-center gap-1">
+                    <Sparkles className="w-4 h-4 text-amber-400" /> 도촌 명예의 전당 점수 등록
+                  </label>
+                  <input
+                    type="text"
+                    placeholder="예: 홍길동"
+                    value={studentName}
+                    onChange={(e) => setStudentName(e.target.value)}
+                    className="px-4 py-2 bg-slate-800 border-2 border-slate-600 rounded-xl text-white text-xs font-bold focus:outline-none focus:border-amber-400 text-center"
+                    maxLength={16}
+                    required
+                  />
+                  <button type="submit" className="btn-gold text-xs font-black justify-center py-2.5 shadow-lg">
+                    <Trophy className="w-4 h-4 text-slate-950" /> 랭킹 등록하기
+                  </button>
+                </form>
+              ) : (
+                <p className="text-teal-300 font-black bg-teal-950/90 border-2 border-teal-500/60 px-5 py-2.5 rounded-xl text-xs sm:text-sm shadow-xl">
+                  ✅ 도촌 명예의 전당에 성공적으로 등록되었습니다!
+                </p>
+              )
             ) : (
-              <p className="text-teal-300 font-black bg-teal-950/90 border-2 border-teal-500/60 px-5 py-2.5 rounded-xl text-xs sm:text-sm shadow-xl">
-                ✅ 도촌 명예의 전당에 성공적으로 등록되었습니다!
-              </p>
+              <div className="bg-slate-900/80 border border-slate-700/80 px-4 py-3 rounded-2xl max-w-xs text-center">
+                <p className="text-xs text-amber-300/90 font-bold mb-1">
+                  💡 100점 초과 달성 시 랭킹에 등록할 수 있어요!
+                </p>
+                <p className="text-[11px] text-slate-400">
+                  다시 도전해서 더 높은 점수를 노려보세요 🔥
+                </p>
+              </div>
             )}
           </div>
         )}

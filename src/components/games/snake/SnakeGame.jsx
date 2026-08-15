@@ -181,7 +181,7 @@ export default function SnakeGame({ onScoreSubmitted }) {
   // Score Submit Handler
   const handleScoreSubmit = async (e) => {
     e.preventDefault();
-    if (!studentName.trim()) return;
+    if (!studentName.trim() || score <= 100) return;
     await submitScoreToDB('snake', studentName, score);
     setSubmitted(true);
     if (onScoreSubmitted) onScoreSubmitted();
@@ -740,28 +740,39 @@ export default function SnakeGame({ onScoreSubmitted }) {
               </span>
             </p>
 
-            {!submitted ? (
-              <form onSubmit={handleScoreSubmit} className="snake-score-form">
-                <label style={{ fontSize: '12px', color: '#34D399', fontWeight: 900, display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '4px' }}>
-                  <Sparkles style={{ width: '14px', height: '14px' }} /> 도촌 명예의 전당 점수 등록
-                </label>
-                <input
-                  type="text"
-                  placeholder="예: 홍길동"
-                  value={studentName}
-                  onChange={(e) => setStudentName(e.target.value)}
-                  className="snake-score-input"
-                  maxLength={16}
-                  required
-                />
-                <button type="submit" className="btn-snake-start" style={{ justifyContent: 'center', padding: '8px 16px', fontSize: '13px' }}>
-                  <Trophy style={{ width: '16px', height: '16px' }} /> 랭킹 등록하기
-                </button>
-              </form>
+            {score > 100 ? (
+              !submitted ? (
+                <form onSubmit={handleScoreSubmit} className="snake-score-form">
+                  <label style={{ fontSize: '12px', color: '#34D399', fontWeight: 900, display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '4px' }}>
+                    <Sparkles style={{ width: '14px', height: '14px' }} /> 도촌 명예의 전당 점수 등록
+                  </label>
+                  <input
+                    type="text"
+                    placeholder="예: 홍길동"
+                    value={studentName}
+                    onChange={(e) => setStudentName(e.target.value)}
+                    className="snake-score-input"
+                    maxLength={16}
+                    required
+                  />
+                  <button type="submit" className="btn-snake-start" style={{ justifyContent: 'center', padding: '8px 16px', fontSize: '13px' }}>
+                    <Trophy style={{ width: '16px', height: '16px' }} /> 랭킹 등록하기
+                  </button>
+                </form>
+              ) : (
+                <p style={{ color: '#34D399', fontWeight: 900, background: 'rgba(6, 78, 59, 0.8)', border: '1.5px solid #10B981', padding: '8px 18px', borderRadius: '12px' }}>
+                  ✅ 도촌 명예의 전당에 성공적으로 등록되었습니다!
+                </p>
+              )
             ) : (
-              <p style={{ color: '#34D399', fontWeight: 900, background: 'rgba(6, 78, 59, 0.8)', border: '1.5px solid #10B981', padding: '8px 18px', borderRadius: '12px' }}>
-                ✅ 도촌 명예의 전당에 성공적으로 등록되었습니다!
-              </p>
+              <div style={{ background: 'rgba(15, 23, 42, 0.8)', border: '1px solid rgba(255, 255, 255, 0.15)', padding: '10px 16px', borderRadius: '14px', maxWidth: '300px', textAlign: 'center' }}>
+                <p style={{ fontSize: '12px', color: '#34D399', fontWeight: 800, marginBottom: '2px' }}>
+                  💡 100점 초과 달성 시 랭킹에 등록할 수 있어요!
+                </p>
+                <p style={{ fontSize: '11px', color: '#94A3B8' }}>
+                  사과를 더 많이 먹고 100점을 돌파해보세요 🐍
+                </p>
+              </div>
             )}
 
             <button onClick={restartGame} className="btn-gold" style={{ marginTop: '6px' }}>

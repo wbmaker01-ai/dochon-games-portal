@@ -37,13 +37,17 @@ export const getLeaderboard = () => {
 };
 
 export const saveScore = (gameKey, name, score) => {
+  const numScore = Number(score) || 0;
+  // Rule: Do not register scores of 100 or below to Leaderboard
+  if (numScore <= 100) return;
+
   const current = getLeaderboard();
   const gameScores = current[gameKey] || [];
 
   const newEntry = {
     id: Date.now().toString(),
     name: name || '도촌학생',
-    score: Number(score),
+    score: numScore,
     date: new Date().toISOString().split('T')[0]
   };
 
