@@ -12,7 +12,7 @@ export const CHANGELOG_DATA = [
       {
         tag: 'UI/UX',
         tagColor: 'teal',
-        text: '상단 게임 검색창 가로 크기를 860px로 시원하게 확장하고 [업데이트] 버튼 텍스트를 간결하게 최적화'
+        text: '헤더 타이틀 아이콘(🎮, ✨)을 DOCHON GAMES PORTAL 좌우 1열(줄바꿈 방지)로 완벽 고정 및 검색창 최대 너비 600px 황금비율 적용'
       },
       {
         tag: 'HERO',

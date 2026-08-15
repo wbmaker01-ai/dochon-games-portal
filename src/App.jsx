@@ -137,14 +137,14 @@ export default function App() {
       {/* 1. Centered Header Bar */}
       <header className="portal-header">
         <div className="portal-title-box">
-          <div className="flex items-center justify-center gap-2">
-            <span className="text-2xl animate-bounce">🎮</span>
-            <h1 className="text-2xl sm:text-3xl font-black tracking-tight text-white flex items-center justify-center gap-1.5 drop-shadow-md">
+          <div className="portal-title-heading-row">
+            <span className="portal-title-icon animate-bounce">🎮</span>
+            <h1 className="portal-title-text">
               DOCHON GAMES <span className="text-amber-400">PORTAL</span>
             </h1>
-            <span className="text-2xl animate-bounce">✨</span>
+            <span className="portal-title-icon animate-bounce">✨</span>
           </div>
-          <p className="text-[11px] text-amber-300/80 font-extrabold tracking-widest uppercase mt-0.5">
+          <p className="portal-subtitle-text">
             도촌초등학교 아케이드 게임 종합 포털
           </p>
         </div>
