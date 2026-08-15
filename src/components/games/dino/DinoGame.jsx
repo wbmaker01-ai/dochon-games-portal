@@ -357,35 +357,38 @@ export default function DinoGame({ onScoreSubmitted }) {
         ctx.fillRect(0, 0, CANVAS_WIDTH, CANVAS_HEIGHT);
       }
 
-      // 2. Draw Athletic Track & Ground
-      // Track Bed (School red tartan running track)
-      const trackGrad = ctx.createLinearGradient(0, GROUND_Y, 0, CANVAS_HEIGHT);
-      trackGrad.addColorStop(0, '#D34528');
-      trackGrad.addColorStop(0.5, '#BA361D');
-      trackGrad.addColorStop(1, '#8C2410');
-      ctx.fillStyle = trackGrad;
-      ctx.fillRect(0, GROUND_Y, CANVAS_WIDTH, CANVAS_HEIGHT - GROUND_Y);
+      // 2. Draw Athletic Track & Ground Line
+      if (!assets.bgSchool || !assets.bgSchool.complete) {
+        // Fallback Track Bed if background image is not yet loaded
+        const trackGrad = ctx.createLinearGradient(0, GROUND_Y - 30, 0, CANVAS_HEIGHT);
+        trackGrad.addColorStop(0, '#D34528');
+        trackGrad.addColorStop(0.5, '#BA361D');
+        trackGrad.addColorStop(1, '#8C2410');
+        ctx.fillStyle = trackGrad;
+        ctx.fillRect(0, GROUND_Y - 30, CANVAS_WIDTH, CANVAS_HEIGHT - (GROUND_Y - 30));
 
-      // Top green turf border
-      ctx.fillStyle = '#22C55E';
-      ctx.fillRect(0, GROUND_Y - 4, CANVAS_WIDTH, 4);
+        // Top green turf border
+        ctx.fillStyle = '#22C55E';
+        ctx.fillRect(0, GROUND_Y - 34, CANVAS_WIDTH, 4);
 
-      // White Track Lane Lines
-      ctx.strokeStyle = 'rgba(255, 255, 255, 0.9)';
-      ctx.lineWidth = 2.5;
-      ctx.beginPath();
-      ctx.moveTo(0, GROUND_Y + 18);
-      ctx.lineTo(CANVAS_WIDTH, GROUND_Y + 18);
-      ctx.moveTo(0, GROUND_Y + 44);
-      ctx.lineTo(CANVAS_WIDTH, GROUND_Y + 44);
-      ctx.stroke();
+        // White Track Lane Lines
+        ctx.strokeStyle = 'rgba(255, 255, 255, 0.9)';
+        ctx.lineWidth = 2.5;
+        ctx.beginPath();
+        ctx.moveTo(0, GROUND_Y - 10);
+        ctx.lineTo(CANVAS_WIDTH, GROUND_Y - 10);
+        ctx.moveTo(0, GROUND_Y + 22);
+        ctx.lineTo(CANVAS_WIDTH, GROUND_Y + 22);
+        ctx.stroke();
+      }
 
-      // Moving Dash marks on Track
-      ctx.fillStyle = 'rgba(255, 255, 255, 0.75)';
+      // Moving subtle speed lane dashes on the track
+      ctx.fillStyle = 'rgba(255, 255, 255, 0.55)';
       const laneOffset = (frameCount * g.speed) % 50;
       for (let x = -laneOffset; x < CANVAS_WIDTH; x += 50) {
-        ctx.fillRect(x, GROUND_Y + 28, 24, 4);
+        ctx.fillRect(x, GROUND_Y + 14, 22, 3);
       }
+
 
       // 3. Draw Running Dust Particles
       g.particles.forEach((pt) => {
@@ -577,7 +580,7 @@ export default function DinoGame({ onScoreSubmitted }) {
                 </label>
                 <input
                   type="text"
-                  placeholder="예: 박달리기 (5학년 2반)"
+                  placeholder="예: 홍길동"
                   value={studentName}
                   onChange={(e) => setStudentName(e.target.value)}
                   className="dino-score-input"

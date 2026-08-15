@@ -1,7 +1,7 @@
 // Dino Runner Constants & Configurations
 export const CANVAS_WIDTH = 760;
 export const CANVAS_HEIGHT = 290;
-export const GROUND_Y = 224;
+export const GROUND_Y = 254;
 
 export const INITIAL_PLAYER_STATE = {
   x: 70,
@@ -24,3 +24,4 @@ export const INITIAL_GAME_CONFIG = {
   bgScroll: 0,
   bgPhase: 'DAY',
 };
+
