@@ -415,31 +415,31 @@ export default function PacManGame({ onScoreSubmitted }) {
   };
 
   return (
-    <div className="flex flex-col items-center justify-center w-full max-w-4xl mx-auto p-3 md:p-5 glass-panel glass-panel-gold select-none">
+    <div className="flex flex-col items-center justify-center w-full max-w-4xl mx-auto p-1.5 sm:p-3 select-none">
       {/* 1. Header Bar with Cute Arcade Typography */}
-      <div className="flex flex-wrap items-center justify-between w-full mb-2 px-2 gap-3">
-        <div className="flex items-center gap-3">
-          <span className="text-xl md:text-2xl font-black bg-gradient-to-r from-amber-300 via-yellow-200 to-amber-400 bg-clip-text text-transparent flex items-center gap-2 drop-shadow">
+      <div className="flex flex-wrap items-center justify-between w-full mb-2 px-1 gap-2 sm:gap-3">
+        <div className="flex items-center gap-2 sm:gap-3">
+          <span className="text-lg sm:text-2xl font-black bg-gradient-to-r from-amber-300 via-yellow-200 to-amber-400 bg-clip-text text-transparent flex items-center gap-1.5 sm:gap-2 drop-shadow">
             🕹️ Dochon Pac-Man&nbsp;&nbsp;
           </span>
-          <span className="text-[12px] bg-amber-400/20 text-amber-300 border border-amber-400/50 px-3 py-0.5 rounded-full font-black tracking-wide shadow-sm">
+          <span className="text-[11px] sm:text-[12px] bg-amber-400/20 text-amber-300 border border-amber-400/50 px-2.5 sm:px-3 py-0.5 rounded-full font-black tracking-wide shadow-sm">
             D-O-C-H-O-N 미로 맵
           </span>
         </div>
 
         {/* Scoreboard Pills */}
-        <div className="flex items-center gap-3 md:gap-5 font-black text-xs md:text-sm">
-          <div className="bg-slate-900/90 border border-amber-500/40 px-3 py-1 rounded-xl shadow-inner flex items-center gap-1.5">
+        <div className="flex items-center gap-2 sm:gap-4 font-black text-xs md:text-sm">
+          <div className="bg-slate-900/90 border border-amber-500/40 px-2.5 sm:px-3 py-1 rounded-xl shadow-inner flex items-center gap-1.5">
             <span className="text-slate-400 text-[11px]">점수</span>
             <span className="text-amber-400 font-mono text-base md:text-lg">{score.toLocaleString()}</span>
           </div>
 
-          <div className="bg-slate-900/90 border border-teal-500/40 px-3 py-1 rounded-xl shadow-inner flex items-center gap-1.5">
+          <div className="bg-slate-900/90 border border-teal-500/40 px-2.5 sm:px-3 py-1 rounded-xl shadow-inner flex items-center gap-1.5">
             <span className="text-slate-400 text-[11px]">최고</span>
             <span className="text-teal-300 font-mono text-base md:text-lg">{highScore.toLocaleString()}</span>
           </div>
 
-          <div className="bg-slate-900/90 border border-pink-500/40 px-3 py-1 rounded-xl shadow-inner flex items-center gap-1.5">
+          <div className="bg-slate-900/90 border border-pink-500/40 px-2.5 sm:px-3 py-1 rounded-xl shadow-inner flex items-center gap-1.5">
             <span className="text-slate-400 text-[11px]">목숨</span>
             <div className="flex items-center gap-1">
               {Array.from({ length: 3 }).map((_, i) => (
@@ -451,7 +451,7 @@ export default function PacManGame({ onScoreSubmitted }) {
       </div>
 
       {/* 2. Reserved Fixed-Height Announcement Ribbon (100% Fixed Height, Zero Layout Shift) */}
-      <div className="w-full h-10 sm:h-11 flex items-center justify-center mb-2 shrink-0">
+      <div className="w-full h-9 sm:h-11 flex items-center justify-center mb-1.5 sm:mb-2 shrink-0">
         <div className={`transition-all duration-300 transform ${comboText ? 'opacity-100 scale-100 translate-y-0' : 'opacity-0 scale-95 -translate-y-1 pointer-events-none'}`}>
           <div className="px-4 py-1.5 rounded-full bg-gradient-to-r from-amber-400 via-yellow-300 to-amber-400 text-slate-950 font-black text-xs sm:text-sm shadow-xl shadow-amber-500/30 border-2 border-yellow-200 flex items-center gap-2 tracking-tight">
             <Sparkles className="w-4 h-4 text-slate-950 animate-spin" />
@@ -462,12 +462,12 @@ export default function PacManGame({ onScoreSubmitted }) {
       </div>
 
       {/* 3. Main Canvas Container */}
-      <div className="relative border-4 border-amber-400/60 rounded-2xl overflow-hidden shadow-2xl bg-slate-950 max-w-full">
+      <div className="relative border-4 border-amber-400/60 rounded-2xl overflow-hidden shadow-2xl bg-slate-950 w-full max-w-[792px] mx-auto">
         <canvas
           ref={canvasRef}
           width={COLS * TILE_SIZE}
           height={ROWS * TILE_SIZE}
-          className="block mx-auto max-w-full h-auto"
+          style={{ width: '100%', height: 'auto', display: 'block' }}
         />
 
         {/* Overlay States */}
