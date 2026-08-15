@@ -312,36 +312,6 @@ export default function PacManGame({ onScoreSubmitted }) {
         }
       }
 
-      // 1.5 Draw Teleport Portal Gates on Left and Right of Row 9
-      const portalY = 9 * TILE_SIZE;
-
-      // Left Portal Gate (Col 0, Row 9)
-      ctx.fillStyle = 'rgba(0, 245, 212, 0.2)';
-      ctx.strokeStyle = '#00F5D4';
-      ctx.lineWidth = 2;
-      ctx.beginPath();
-      ctx.roundRect(0, portalY + 2, TILE_SIZE - 2, TILE_SIZE - 4, [0, 8, 8, 0]);
-      ctx.fill();
-      ctx.stroke();
-      ctx.fillStyle = '#00F5D4';
-      ctx.font = '900 10px Pretendard, sans-serif';
-      ctx.textAlign = 'center';
-      ctx.fillText('◀', TILE_SIZE / 2 - 2, portalY + TILE_SIZE / 2 + 3.5);
-
-      // Right Portal Gate (Col COLS - 1, Row 9)
-      const rightX = (COLS - 1) * TILE_SIZE;
-      ctx.fillStyle = 'rgba(0, 245, 212, 0.2)';
-      ctx.strokeStyle = '#00F5D4';
-      ctx.lineWidth = 2;
-      ctx.beginPath();
-      ctx.roundRect(rightX + 2, portalY + 2, TILE_SIZE - 2, TILE_SIZE - 4, [8, 0, 0, 8]);
-      ctx.fill();
-      ctx.stroke();
-      ctx.fillStyle = '#00F5D4';
-      ctx.font = '900 10px Pretendard, sans-serif';
-      ctx.textAlign = 'center';
-      ctx.fillText('▶', rightX + TILE_SIZE / 2 + 2, portalY + TILE_SIZE / 2 + 3.5);
-
       // 2. Draw "D O C H O N" Highlight Badges above letter Columns
       LETTER_REGIONS.forEach(({ letter, startCol, endCol }) => {
         const lx = ((startCol + endCol) / 2 + 0.5) * TILE_SIZE;
