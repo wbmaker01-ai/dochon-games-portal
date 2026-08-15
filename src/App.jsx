@@ -198,7 +198,7 @@ export default function App() {
               title="포털 업데이트 및 개선 내역 확인하기"
             >
               <History className="w-3.5 h-3.5 text-amber-400" />
-              <span>업데이트 내역</span>
+              <span>업데이트</span>
             </button>
           </div>
         </div>

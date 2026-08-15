@@ -10,6 +10,11 @@ export const CHANGELOG_DATA = [
     badgeColor: 'emerald',
     items: [
       {
+        tag: 'UI/UX',
+        tagColor: 'teal',
+        text: '상단 게임 검색창 가로 크기를 860px로 시원하게 확장하고 [업데이트] 버튼 텍스트를 간결하게 최적화'
+      },
+      {
         tag: 'HERO',
         tagColor: 'amber',
         text: '메인 명예의 전당 배너에 [종목별 1위 챔피언 랜덤 추천 & 실시간 순환 알고리즘] 적용 (새로고침/접속 시 다양한 게임 1등 챔피언 소개 및 원클릭 즉시 도전)'
@@ -17,7 +22,7 @@ export const CHANGELOG_DATA = [
       {
         tag: 'UI/UX',
         tagColor: 'purple',
-        text: '[업데이트 내역] 버튼을 상단 [학교 랭킹] 버튼 우측으로 재배치하여 헤더 영역 시각적 균형감 및 접근성 최적화'
+        text: '[업데이트] 버튼을 상단 [학교 랭킹] 버튼 우측으로 재배치하여 헤더 영역 시각적 균형감 및 접근성 최적화'
       },
       {
         tag: 'NEW',
