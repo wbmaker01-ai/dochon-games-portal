@@ -447,6 +447,8 @@ export default function DinoGame({ onScoreSubmitted }) {
             ctx.arc(obs.x + obs.width / 2, obs.y + obs.height / 2, obs.width / 2, 0, Math.PI * 2);
             ctx.fill();
           }
+        }
+
         ctx.restore();
       });
 
