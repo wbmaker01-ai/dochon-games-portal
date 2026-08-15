@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { getLeaderboardFromDB, updateScoreInDB, deleteScoreFromDB } from '../utils/leaderboardApi';
+import { getLeaderboardFromDB, updateScoreInDB, deleteScoreFromDB, deduplicateLeaderboard } from '../utils/leaderboardApi';
 import { PLAYABLE_GAMES } from '../data/gamesData';
 import { Trophy, X, Crown, Medal, Zap, RefreshCw, Sparkles, Star, Heart, Lock, Edit2, Trash2, Check, LogOut, ShieldAlert } from 'lucide-react';
 
@@ -80,11 +80,10 @@ export default function LeaderboardModal({ isOpen, onClose, activeTab = 'pacman'
     const updatedName = editName.trim();
     const updatedScore = Number(editScore);
 
-    // 1. Optimistic UI update immediately
+    // 1. Optimistic UI update immediately with deduplication
     setScores(prev => {
       const newList = prev.map(item => String(item.id) === String(id) ? { ...item, name: updatedName, score: updatedScore } : item);
-      newList.sort((a, b) => b.score - a.score);
-      return newList;
+      return deduplicateLeaderboard(newList);
     });
 
     setEditingId(null);
