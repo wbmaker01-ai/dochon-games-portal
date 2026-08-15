@@ -476,16 +476,16 @@ export default function PacManGame({ onScoreSubmitted }) {
             </p>
 
             {!submitted ? (
-              <form onSubmit={handleScoreSubmit} className="flex flex-col gap-3 w-full max-w-xs bg-slate-900 p-4 rounded-2xl border-2 border-amber-500/50 shadow-2xl">
+              <form onSubmit={handleScoreSubmit} className="flex flex-col gap-3 w-full max-w-xs bg-slate-900/95 p-4 rounded-2xl border-2 border-amber-500/50 shadow-2xl">
                 <label className="text-xs text-amber-300 font-black flex items-center justify-center gap-1">
                   <Sparkles className="w-4 h-4" /> 도촌 명예의 전당 점수 등록
                 </label>
                 <input
                   type="text"
-                  placeholder="예: 김도촌 (6학년 1반)"
+                  placeholder="예: 홍길동"
                   value={studentName}
                   onChange={(e) => setStudentName(e.target.value)}
-                  className="px-4 py-2 bg-slate-800 border-2 border-slate-600 rounded-xl text-white text-xs font-bold focus:outline-none focus:border-amber-400"
+                  className="px-4 py-2 bg-slate-800 border-2 border-slate-600 rounded-xl text-white text-xs font-bold focus:outline-none focus:border-amber-400 text-center"
                   maxLength={16}
                   required
                 />
@@ -498,10 +498,6 @@ export default function PacManGame({ onScoreSubmitted }) {
                 ✅ 도촌 명예의 전당에 성공적으로 등록되었습니다!
               </p>
             )}
-
-            <button onClick={restartGame} className="btn-primary mt-2 text-xs md:text-sm">
-              <RotateCcw className="w-4 h-4" /> 다시 도전하기
-            </button>
           </div>
         )}
       </div>
