@@ -180,30 +180,48 @@ export default function BaseballGame({ onScoreSubmitted }) {
       return;
     }
 
-    const currentScore = scoreRef.current;
-    const currentCombo = comboRef.current;
-    const pitch = selectNextPitch(currentScore, currentCombo);
-    const speedInfo = calculatePitchSpeed(currentScore, pitch);
+    try {
+      const currentScore = scoreRef.current;
+      const currentCombo = comboRef.current;
+      const pitch = selectNextPitch(currentScore, currentCombo);
+      const speedInfo = calculatePitchSpeed(currentScore, pitch);
 
-    // Check if speed level leveled up!
-    if (speedInfo.speedLevel.level > speedLevelRef.current.level) {
-      soundFx.playPacmanEatFruit();
-      setSpeedUpAlert(speedInfo.speedLevel);
-      setTimeout(() => setSpeedUpAlert(null), 1800);
+      // Check if speed level leveled up!
+      if (speedInfo.speedLevel.level > speedLevelRef.current.level) {
+        try {
+          soundFx?.playPacmanEatFruit?.();
+        } catch (audioErr) {
+          console.warn('Audio play error:', audioErr);
+        }
+        setSpeedUpAlert(speedInfo.speedLevel);
+        setTimeout(() => setSpeedUpAlert(null), 1800);
+      }
+
+      speedLevelRef.current = speedInfo.speedLevel;
+      currentPitchRef.current = pitch;
+      pitchDurationRef.current = speedInfo.actualDuration;
+      pitchStartTimeRef.current = performance.now();
+      isSwungRef.current = false;
+      batterStateRef.current = 'READY';
+
+      gameStateRef.current = 'PITCHING';
+      setPitchToast(pitch);
+      syncUiState();
+
+      try {
+        soundFx?.playBaseballPitch?.();
+      } catch (audioErr) {
+        console.warn('Audio play error:', audioErr);
+      }
+    } catch (err) {
+      console.error('startNextPitch error:', err);
+      // Fallback: recover state machine
+      gameStateRef.current = 'PITCHING';
+      pitchStartTimeRef.current = performance.now();
+      pitchDurationRef.current = 2000;
+      isSwungRef.current = false;
+      syncUiState();
     }
-
-    speedLevelRef.current = speedInfo.speedLevel;
-    currentPitchRef.current = pitch;
-    pitchDurationRef.current = speedInfo.actualDuration;
-    pitchStartTimeRef.current = performance.now();
-    isSwungRef.current = false;
-    batterStateRef.current = 'READY';
-
-    gameStateRef.current = 'PITCHING';
-    setPitchToast(pitch);
-    syncUiState();
-
-    soundFx.playBaseballPitch();
   }, [syncUiState]);
 
   // 3. Game Reset & Restart
@@ -345,13 +363,13 @@ export default function BaseballGame({ onScoreSubmitted }) {
     // Handle Successful Hit (Single, Double, Triple, Homerun, Grand Slam)
     const isHomerun = result.bases >= 4;
     if (isHomerun) {
-      soundFx.playBaseballHomerun();
-      soundFx.playPacmanEatFruit();
+      soundFx?.playBaseballHomerun?.();
+      soundFx?.playPacmanEatFruit?.();
       particleSystemRef.current.addHomerunFireworks();
       setShowHomerunBadge(true);
       setTimeout(() => setShowHomerunBadge(false), 2200);
     } else {
-      soundFx.playBaseballHit();
+      soundFx?.playBaseballHit?.();
       particleSystemRef.current.addHitSparks(HOME_PLATE_POS.x, HOME_PLATE_POS.y - 15, 25, result.color);
     }
 

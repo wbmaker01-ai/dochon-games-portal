@@ -3,11 +3,30 @@
 
 export const CHANGELOG_DATA = [
   {
+    version: 'v1.7.7',
+    date: '2026-08-16',
+    title: '도촌 야구왕 [400점 스피드 레벨업 시 발생하던 투구 정지 버그 긴급 해결]',
+    badge: 'LATEST',
+    badgeColor: 'emerald',
+    items: [
+      {
+        tag: 'BUG FIX',
+        tagColor: 'amber',
+        text: '[레벨업 사운드 메서드 누락 해결] 400점(Lv.2 진입) 및 홈런 시 호출되던 레벨업 사운드 신시사이저를 Web Audio API에 정식 탑재하고 호출 예외 방어 적용'
+      },
+      {
+        tag: 'STABILITY',
+        tagColor: 'blue',
+        text: '[투구 상태 머신 오류 복구 엔진] startNextPitch 및 타격 처리부에 전역 try-catch 및 오류 복구(Fallback) 메커니즘을 적용하여 어떠한 예외 상황에서도 다음 투구가 반드시 이어지도록 보장'
+      }
+    ]
+  },
+  {
     version: 'v1.7.6',
     date: '2026-08-16',
     title: '도촌 야구왕 [점수 비례 점진적 투구 속도 가속 엔진 & SPEED Lv.1~MAX 시스템] 탑재',
-    badge: 'LATEST',
-    badgeColor: 'emerald',
+    badge: 'UPDATE',
+    badgeColor: 'blue',
     items: [
       {
         tag: 'SPEED ENGINE',

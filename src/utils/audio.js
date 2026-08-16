@@ -523,6 +523,36 @@ class SoundEngine {
       osc.stop(noteStart + 0.24);
     });
   }
+
+  playPacmanEatFruit() {
+    if (this.muted) return;
+    this.init();
+    if (!this.ctx) return;
+
+    const now = this.ctx.currentTime;
+    const notes = [659.25, 783.99, 987.77, 1318.51]; // E5, G5, B5, E6
+    notes.forEach((freq, idx) => {
+      const osc = this.ctx.createOscillator();
+      const gain = this.ctx.createGain();
+      const start = now + idx * 0.045;
+
+      osc.type = 'triangle';
+      osc.frequency.setValueAtTime(freq, start);
+
+      gain.gain.setValueAtTime(0.2, start);
+      gain.gain.exponentialRampToValueAtTime(0.001, start + 0.15);
+
+      osc.connect(gain);
+      gain.connect(this.ctx.destination);
+
+      osc.start(start);
+      osc.stop(start + 0.16);
+    });
+  }
+
+  playSpeedUpLevel() {
+    this.playPacmanEatFruit();
+  }
 }
 
 export const soundFx = new SoundEngine();
