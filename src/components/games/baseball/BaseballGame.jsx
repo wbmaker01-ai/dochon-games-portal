@@ -393,109 +393,42 @@ export default function BaseballGame({ onScoreSubmitted }) {
       if (bgImgRef.current) {
         ctx.drawImage(bgImgRef.current, 0, 0, CANVAS_WIDTH, CANVAS_HEIGHT);
       } else {
+        // Fallback Sky & Bleachers
         ctx.fillStyle = '#38BDF8';
         ctx.fillRect(0, 0, CANVAS_WIDTH, 140);
         ctx.fillStyle = '#22C55E';
         ctx.fillRect(0, 140, CANVAS_WIDTH, CANVAS_HEIGHT - 140);
+
+        // Infield Dirt Area
+        ctx.save();
+        ctx.fillStyle = '#E2B184';
+        ctx.beginPath();
+        ctx.moveTo(PITCHER_POS.x, PITCHER_POS.y - 10);
+        ctx.lineTo(820, CANVAS_HEIGHT);
+        ctx.lineTo(140, CANVAS_HEIGHT);
+        ctx.closePath();
+        ctx.fill();
+
+        // 3D Foul Lines
+        ctx.strokeStyle = '#FFFFFF';
+        ctx.lineWidth = 3.5;
+        ctx.beginPath();
+        ctx.moveTo(HOME_PLATE_POS.x, HOME_PLATE_POS.y);
+        ctx.lineTo(80, 240);
+        ctx.moveTo(HOME_PLATE_POS.x, HOME_PLATE_POS.y);
+        ctx.lineTo(880, 240);
+        ctx.stroke();
+        ctx.restore();
       }
 
-      // 1. Infield Dirt Area (Perspective Diamond Fan)
+      // Home Plate Sweet Spot Target Indicator
       ctx.save();
-      ctx.fillStyle = '#E2B184';
-      ctx.beginPath();
-      ctx.moveTo(PITCHER_POS.x, PITCHER_POS.y - 10);
-      ctx.lineTo(820, CANVAS_HEIGHT);
-      ctx.lineTo(140, CANVAS_HEIGHT);
-      ctx.closePath();
-      ctx.fill();
-
-      // 2. Perspective Diamond Turf / Checked Grid Lines
-      ctx.strokeStyle = 'rgba(255, 255, 255, 0.25)';
-      ctx.lineWidth = 1.5;
-      
-      const radialAngles = [-0.55, -0.38, -0.20, 0, 0.20, 0.38, 0.55];
-      radialAngles.forEach(ang => {
-        ctx.beginPath();
-        ctx.moveTo(PITCHER_POS.x, PITCHER_POS.y + 5);
-        ctx.lineTo(PITCHER_POS.x + Math.sin(ang) * 580, CANVAS_HEIGHT);
-        ctx.stroke();
-      });
-
-      const depthSteps = [0.15, 0.32, 0.50, 0.70, 0.88, 1.0];
-      depthSteps.forEach(ratio => {
-        const y = PITCHER_POS.y + 10 + (HOME_PLATE_POS.y - PITCHER_POS.y - 10) * ratio;
-        const halfW = 80 + ratio * 320;
-        ctx.beginPath();
-        ctx.moveTo(PITCHER_POS.x - halfW, y);
-        ctx.lineTo(PITCHER_POS.x + halfW, y);
-        ctx.stroke();
-      });
-
-      // 3. 3D Foul Lines
-      ctx.strokeStyle = '#FFFFFF';
-      ctx.lineWidth = 3.5;
-      ctx.beginPath();
-      ctx.moveTo(HOME_PLATE_POS.x, HOME_PLATE_POS.y);
-      ctx.lineTo(80, 240);
-      ctx.moveTo(HOME_PLATE_POS.x, HOME_PLATE_POS.y);
-      ctx.lineTo(880, 240);
-      ctx.stroke();
-
-      // 4. Distant Infield Bases in 3D
-      ctx.fillStyle = '#FFFFFF';
-      ctx.save();
-      ctx.translate(PITCHER_POS.x, PITCHER_POS.y - 30);
-      ctx.rotate(Math.PI / 4);
-      ctx.fillRect(-6, -6, 12, 12);
-      ctx.restore();
-
-      ctx.save();
-      ctx.translate(280, 310);
-      ctx.rotate(Math.PI / 4);
-      ctx.fillRect(-8, -8, 16, 16);
-      ctx.restore();
-
-      ctx.save();
-      ctx.translate(680, 310);
-      ctx.rotate(Math.PI / 4);
-      ctx.fillRect(-8, -8, 16, 16);
-      ctx.restore();
-
-      // 5. Pitcher Mound Dirt Circle & Rubber Plate
-      ctx.fillStyle = '#C89360';
-      ctx.beginPath();
-      ctx.ellipse(PITCHER_POS.x, PITCHER_POS.y + 12, 45, 18, 0, 0, Math.PI * 2);
-      ctx.fill();
-      ctx.fillStyle = '#FFFFFF';
-      ctx.fillRect(PITCHER_POS.x - 12, PITCHER_POS.y + 6, 24, 5);
-
-      // 6. Left & Right Batter's Boxes Chalk Outlines
-      ctx.strokeStyle = 'rgba(255, 255, 255, 0.7)';
-      ctx.lineWidth = 2.5;
-      ctx.strokeRect(BATTER_POS.x - 70, BATTER_POS.y - 20, 140, 110);
-      ctx.strokeRect(620, BATTER_POS.y - 20, 140, 110);
-
-      // 7. 3D Home Plate Pentagon
-      ctx.fillStyle = '#FFFFFF';
-      ctx.strokeStyle = '#334155';
-      ctx.lineWidth = 2;
-      ctx.beginPath();
-      ctx.moveTo(HOME_PLATE_POS.x - 28, HOME_PLATE_POS.y - 12);
-      ctx.lineTo(HOME_PLATE_POS.x + 28, HOME_PLATE_POS.y - 12);
-      ctx.lineTo(HOME_PLATE_POS.x + 28, HOME_PLATE_POS.y + 6);
-      ctx.lineTo(HOME_PLATE_POS.x, HOME_PLATE_POS.y + 22);
-      ctx.lineTo(HOME_PLATE_POS.x - 28, HOME_PLATE_POS.y + 6);
-      ctx.closePath();
-      ctx.fill();
-      ctx.stroke();
-
-      // 8. Home Plate Sweet Spot Target Circle
       ctx.fillStyle = '#3B82F6';
       ctx.beginPath();
       ctx.arc(HOME_PLATE_POS.x, HOME_PLATE_POS.y + 2, 18, 0, Math.PI * 2);
       ctx.fill();
       ctx.strokeStyle = '#FFFFFF';
-      ctx.lineWidth = 2;
+      ctx.lineWidth = 2.5;
       ctx.stroke();
 
       ctx.fillStyle = '#FFFFFF';
@@ -503,8 +436,8 @@ export default function BaseballGame({ onScoreSubmitted }) {
       ctx.textAlign = 'center';
       ctx.textBaseline = 'middle';
       ctx.fillText('⚾', HOME_PLATE_POS.x, HOME_PLATE_POS.y + 3);
-
       ctx.restore();
+
 
       // =========================================================================
       // B. Draw Distant Pitcher (Proportioned Cute Size)

@@ -3,17 +3,17 @@
 export const CANVAS_WIDTH = 960;
 export const CANVAS_HEIGHT = 540;
 
-// 3D Perspective Coordinate Reference Points (Google Doodle Baseball View)
+// 3D Perspective Coordinate Reference Points (Matching New 3D Stadium Field)
 export const PITCHER_POS = {
   x: 480,
-  y: 155,
-  scale: 0.20
+  y: 350,
+  scale: 0.28
 };
 
-// Batter in Left Batter's Box (Completely clears the center ball alley!)
+// Batter in Left Batter's Box (Facing right towards plate & pitcher)
 export const BATTER_POS = {
   x: 260,
-  y: 405,
+  y: 420,
   scale: 0.58
 };
 

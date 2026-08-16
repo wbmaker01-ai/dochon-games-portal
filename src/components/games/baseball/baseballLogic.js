@@ -122,22 +122,22 @@ export function calculateBallState(pitchConfig, elapsedMs, totalDuration) {
 
   // Lateral curve movement on ground X
   if (pitchConfig?.id === 'CURVE') {
-    const amp = pitchConfig.curveAmplitude || 120;
+    const amp = pitchConfig.curveAmplitude || 60;
     groundX += Math.sin(progress * Math.PI) * amp;
   } else if (pitchConfig?.id === 'ZIGZAG') {
     const freq = pitchConfig.zigzagFreq || 4;
-    const amp = pitchConfig.zigzagAmp || 75;
+    const amp = pitchConfig.zigzagAmp || 40;
     groundX += Math.sin(progress * Math.PI * freq) * amp * (1 - progress * 0.2);
   }
 
   // 2. 3D Elevation / Ball Flight Height above ground
-  const maxArc = pitchConfig?.id === 'SLOWBALL' ? 110 : (pitchConfig?.id === 'FASTBALL' ? 35 : 50);
-  let flightHeight = Math.sin(progress * Math.PI) * maxArc + (1 - progress) * 18;
+  const maxArc = pitchConfig?.id === 'SLOWBALL' ? 55 : (pitchConfig?.id === 'FASTBALL' ? 20 : 30);
+  let flightHeight = Math.sin(progress * Math.PI) * maxArc + (1 - progress) * 12;
 
   // Sinker drops sharply near plate
   if (pitchConfig?.id === 'SINKER' && progress > 0.55) {
     const sinkProgress = (progress - 0.55) / 0.45;
-    flightHeight -= Math.pow(sinkProgress, 2) * (pitchConfig.verticalDrop || 60);
+    flightHeight -= Math.pow(sinkProgress, 2) * (pitchConfig.verticalDrop || 35);
     flightHeight = Math.max(0, flightHeight);
   }
 

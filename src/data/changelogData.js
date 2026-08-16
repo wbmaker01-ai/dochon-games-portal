@@ -3,11 +3,35 @@
 
 export const CHANGELOG_DATA = [
   {
+    version: 'v1.7.3',
+    date: '2026-08-16',
+    title: '도촌 야구왕 [3D 원근 야구장 배경 & 우측 조준 좌타자 에셋] 전면 리뉴얼',
+    badge: 'LATEST',
+    badgeColor: 'emerald',
+    items: [
+      {
+        tag: 'NEW 3D BG',
+        tagColor: 'blue',
+        text: '[3D 원근 야구 경기장 배경 교체] 도촌초 교사, 관중석, 잔디 다이아몬드가 완벽한 3D 하향 시점으로 펼쳐지는 신규 전용 배경화면 탑재'
+      },
+      {
+        tag: 'BATTER SPRITE',
+        tagColor: 'amber',
+        text: '[우측 지향 좌타자 스프라이트 교체] 좌측 타석에서 오른쪽(홈플레이트 & 투수 마운드)을 향해 배트를 들고 겨누는 자연스러운 타격 자세 및 스윙 모션 에셋 적용'
+      },
+      {
+        tag: 'POSITIONING',
+        tagColor: 'emerald',
+        text: '[3D 마운드 & 홈플레이트 앵커링] 신규 3D 배경 다이아몬드 비율에 맞추어 투수 마운드(Y=350) 및 타석 위치 좌표 정밀 동기화'
+      }
+    ]
+  },
+  {
     version: 'v1.7.2',
     date: '2026-08-16',
     title: '도촌 야구왕 [5콤보 이상 고득점 체인지업 프리징 버그 완벽 해결] & 상태 머신 안정화',
-    badge: 'LATEST',
-    badgeColor: 'emerald',
+    badge: 'UPDATE',
+    badgeColor: 'blue',
     items: [
       {
         tag: 'BUG FIX',
