@@ -355,49 +355,11 @@ export function applyMagicShuffle(gameState) {
   // Remaining goes to stock
   const newStock = shuffledPool.slice(poolIdx).map(c => ({ ...c, faceUp: false }));
 
-  // If stock was empty, automatically flip 1 hidden card to guarantee a breakthrough
-  if (stock.length === 0 && waste.length === 0 && faceDownCards.length > 0) {
-    for (let col of newTableau) {
-      const hIdx = col.findIndex(c => !c.faceUp);
-      if (hIdx >= 0) {
-        col[hIdx].faceUp = true;
-        break;
-      }
-    }
-  }
-
   return {
     ...gameState,
     tableau: newTableau,
     stock: newStock,
     waste: []
-  };
-}
-
-/**
- * 🔮 Flips the topmost hidden card in any tableau column
- */
-export function flipFirstHiddenCard(gameState) {
-  const { tableau } = gameState;
-  let flipped = false;
-  const newTableau = tableau.map(col => {
-    if (flipped) return col;
-    const hiddenIdx = col.findIndex(c => !c.faceUp);
-    if (hiddenIdx >= 0) {
-      flipped = true;
-      return col.map((c, idx) => {
-        if (idx === hiddenIdx) {
-          return { ...c, faceUp: true };
-        }
-        return c;
-      });
-    }
-    return col;
-  });
-
-  return {
-    ...gameState,
-    tableau: newTableau
   };
 }
 

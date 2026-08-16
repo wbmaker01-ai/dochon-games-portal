@@ -18,7 +18,6 @@ import {
   Flame,
   Wand2,
   AlertCircle,
-  Eye,
   Search,
   Check
 } from 'lucide-react';
@@ -292,51 +291,6 @@ export default function SolitaireGame({ onScoreSubmitted }) {
       }, 350);
     }
   }, [gameState.foundations, isWon, score, timeElapsed, highScore]);
-
-  // Handle direct click on face-down card to reveal (초등학생 마법의 카드 뒤집기)
-  const handleFaceDownCardClick = (colIdx, cardIdx) => {
-    if (isWon || isAutoCompleting) return;
-    saveSnapshot();
-    startTimer();
-
-    const { tableau } = gameState;
-    const newTableau = tableau.map((col, cIdx) => {
-      if (cIdx !== colIdx) return col;
-      return col.map((c, rIdx) => {
-        if (rIdx === cardIdx) {
-          return { ...c, faceUp: true };
-        }
-        return c;
-      });
-    });
-
-    const flippedCard = newTableau[colIdx][cardIdx];
-
-    setGameState(prev => ({
-      ...prev,
-      tableau: newTableau
-    }));
-    setScore(prev => prev + SCORING.FLIP_TABLEAU_CARD);
-    setMoves(prev => prev + 1);
-    setIsDeadEnd(false);
-    setHint(null);
-    soundFx.playCardFlip();
-    setCoachMsg(`🔮 [마법의 카드 뒤집기] 숨겨져 있던 [${flippedCard.suitSymbol} ${flippedCard.rankLabel}] 카드를 열었습니다! ✨`);
-  };
-
-  // Helper toolbar button: Flip first available hidden card
-  const handleFlipAnyHiddenCard = () => {
-    if (isWon || isAutoCompleting) return;
-    const { tableau } = gameState;
-    for (let c = 0; c < 7; c++) {
-      const hIdx = tableau[c].findIndex(card => !card.faceUp);
-      if (hIdx >= 0) {
-        handleFaceDownCardClick(c, hIdx);
-        return;
-      }
-    }
-    setCoachMsg('✨ 바닥에 더 이상 숨겨진 카드가 없어요! 모든 카드가 열려 있습니다.');
-  };
 
   // SMART AUTO MOVE (Tap-to-Move / Click Card)
   const handleSmartCardClick = (card, sourceInfo) => {
@@ -629,16 +583,6 @@ export default function SolitaireGame({ onScoreSubmitted }) {
           <span>🪄 마법의 셔플 {magicShuffleCount > 0 && `(${magicShuffleCount})`}</span>
         </button>
 
-        {/* 🔮 Magic Card Flip Button (초등학생 숨겨진 카드 직접 뒤집기) */}
-        <button
-          onClick={handleFlipAnyHiddenCard}
-          className="btn-solitaire btn-sol-cyan"
-          title="막혔을 때 숨겨진 뒷면 카드 1장을 바로 열어주는 마법의 뒤집기!"
-        >
-          <Eye className="w-4 h-4 text-cyan-200" />
-          <span>🔮 카드 뒤집기</span>
-        </button>
-
         {/* Undo Button */}
         <button
           onClick={handleUndo}
@@ -863,9 +807,8 @@ export default function SolitaireGame({ onScoreSubmitted }) {
                   return (
                     <div
                       key={card.id}
-                      className={`solitaire-tableau-card-wrapper ${!card.faceUp ? 'card-back-wrapper-clickable' : ''}`}
+                      className="solitaire-tableau-card-wrapper"
                       style={{ top: `${topOffset}px`, zIndex: cardIdx + 1 }}
-                      onClick={!card.faceUp ? () => handleFaceDownCardClick(colIdx, cardIdx) : undefined}
                     >
                       {card.faceUp ? (
                         <div
@@ -885,10 +828,7 @@ export default function SolitaireGame({ onScoreSubmitted }) {
                           </div>
                         </div>
                       ) : (
-                        <div
-                          className="solitaire-card card-back card-back-clickable"
-                          title="클릭하여 마법처럼 이 뒷면 카드를 바로 열어 확인하기!"
-                        />
+                        <div className="solitaire-card card-back" />
                       )}
                     </div>
                   );
@@ -907,20 +847,17 @@ export default function SolitaireGame({ onScoreSubmitted }) {
                 <h3 className="text-xl font-black text-amber-300">더 이상 옮길 카드가 없어요!</h3>
               </div>
               <p className="text-xs sm:text-sm text-slate-200 leading-relaxed mb-4">
-                잠시 길이 막혔더라도 실망하지 마세요! <strong>[마법의 셔플]</strong>이나 <strong>[🔮 카드 뒤집기]</strong>로 새로운 길을 바로 열 수 있어요.
+                잠시 길이 막혔더라도 실망하지 마세요! <strong>[마법의 셔플]</strong>로 카드를 다시 섞어 새로운 길을 열거나, 이전 수로 되돌릴 수 있어요.
               </p>
 
               <div className="flex flex-col sm:flex-row flex-wrap gap-2.5 justify-center w-full">
-                <button onClick={handleMagicShuffle} className="btn-solitaire btn-sol-magic py-3 px-4 text-xs sm:text-sm font-black shadow-xl">
-                  <Wand2 className="w-4 h-4" /> 🪄 마법의 셔플
+                <button onClick={handleMagicShuffle} className="btn-solitaire btn-sol-magic py-3 px-5 text-sm font-black shadow-xl">
+                  <Wand2 className="w-4 h-4" /> 🪄 마법의 셔플로 새 길 열기!
                 </button>
-                <button onClick={handleFlipAnyHiddenCard} className="btn-solitaire btn-sol-cyan py-3 px-4 text-xs sm:text-sm font-black shadow-xl">
-                  <Eye className="w-4 h-4" /> 🔮 카드 뒤집기
-                </button>
-                <button onClick={handleUndo} className="btn-solitaire btn-sol-blue py-3 px-4 text-xs sm:text-sm font-black shadow-xl">
+                <button onClick={handleUndo} className="btn-solitaire btn-sol-blue py-3 px-5 text-sm font-black shadow-xl">
                   <Undo2 className="w-4 h-4" /> ↩️ 되돌리기
                 </button>
-                <button onClick={handleNewGame} className="btn-solitaire btn-sol-emerald py-3 px-4 text-xs sm:text-sm font-black shadow-xl">
+                <button onClick={handleNewGame} className="btn-solitaire btn-sol-emerald py-3 px-5 text-sm font-black shadow-xl">
                   <RotateCcw className="w-4 h-4" /> 🎲 새 게임
                 </button>
               </div>

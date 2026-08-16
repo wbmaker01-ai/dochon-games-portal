@@ -469,20 +469,6 @@
   filter: drop-shadow(0 2px 4px rgba(0, 0, 0, 0.3));
 }
 
-.card-back-clickable {
-  cursor: pointer !important;
-  transition: transform 0.15s ease, box-shadow 0.15s ease, border-color 0.15s ease;
-}
-.card-back-clickable:hover {
-  transform: translateY(-3px) scale(1.02);
-  border-color: #38BDF8 !important;
-  box-shadow: 0 0 14px rgba(56, 189, 248, 0.8) !important;
-}
-
-.card-back-wrapper-clickable {
-  cursor: pointer !important;
-}
-
 /* Tableau Stack Positioning */
 .solitaire-tableau-card-wrapper {
   position: absolute;

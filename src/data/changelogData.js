@@ -28,6 +28,11 @@ export const CHANGELOG_DATA = [
         tag: 'FOUNDATION UI',
         tagColor: 'amber',
         text: '[완성칸 누적 카드 장수 뱃지 표시] 상단 완성칸에 차곡차곡 쌓인 카드 장수(예: 7장 보관)를 뱃지로 표기하여 직관적인 시각 피드백 제공'
+      },
+      {
+        tag: 'CLEANUP',
+        tagColor: 'purple',
+        text: '[강제 카드 뒤집기 기능 정리] 클래식 퍼즐 본연의 재미와 규칙성을 위해 임의 카드 뒤집기 기능을 깔끔하게 제거하고 마법의 셔플 및 스마트 힌트 기반으로 인터페이스 최적화'
       }
     ]
   },
