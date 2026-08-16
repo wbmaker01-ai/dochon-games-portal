@@ -23,6 +23,7 @@ import {
 import { championAudio } from './championAudio';
 import { submitScoreToDB } from '../../../utils/leaderboardApi';
 import ChampionHowToPlayModal from './ChampionHowToPlayModal';
+import confetti from 'canvas-confetti';
 import './champion.css';
 import {
   Volume2,
@@ -763,12 +764,37 @@ export default function ChampionGame({ onScoreSubmitted }) {
         if (eng.winner) {
           const won = eng.winner === 'player';
           const matchScore = eng.playerScore * 100 + (won ? 500 : 0) + eng.maxRally * 20;
+          const wasCollectedBefore = collectedScrolls.table_tennis;
+          const nextScrolls = {
+            ...collectedScrolls,
+            table_tennis: won ? true : collectedScrolls.table_tennis
+          };
           if (won) {
-            setCollectedScrolls(prev => ({ ...prev, table_tennis: true }));
+            setCollectedScrolls(nextScrolls);
           }
-          setTotalScore(prev => prev + matchScore);
-          setLastMatchResult({ sport: activeSport, score: matchScore, won });
-          setGameMode('result');
+          const nextTotalScore = totalScore + matchScore;
+          setTotalScore(nextTotalScore);
+
+          const allFourCollected = Object.values(nextScrolls).every(Boolean);
+          const isFinalFourthScroll = won && !wasCollectedBefore && allFourCollected;
+
+          setLastMatchResult({
+            sport: activeSport,
+            score: matchScore,
+            won,
+            isNewScroll: won && !wasCollectedBefore,
+            allCompleted: allFourCollected
+          });
+
+          if (isFinalFourthScroll) {
+            championAudio.playGameVictory();
+            try {
+              confetti({ particleCount: 120, spread: 80, origin: { y: 0.6 } });
+            } catch (e) {}
+            setGameMode('grand_champion');
+          } else {
+            setGameMode('result');
+          }
         }
       } else if (activeSport.id === 'archery' && archeryEngineRef.current) {
         const eng = archeryEngineRef.current;
@@ -778,12 +804,37 @@ export default function ChampionGame({ onScoreSubmitted }) {
         if (eng.winner !== null) {
           const won = eng.winner === 'player';
           const matchScore = eng.score + (won ? 400 : 0);
+          const wasCollectedBefore = collectedScrolls.archery;
+          const nextScrolls = {
+            ...collectedScrolls,
+            archery: won ? true : collectedScrolls.archery
+          };
           if (won) {
-            setCollectedScrolls(prev => ({ ...prev, archery: true }));
+            setCollectedScrolls(nextScrolls);
           }
-          setTotalScore(prev => prev + matchScore);
-          setLastMatchResult({ sport: activeSport, score: matchScore, won });
-          setGameMode('result');
+          const nextTotalScore = totalScore + matchScore;
+          setTotalScore(nextTotalScore);
+
+          const allFourCollected = Object.values(nextScrolls).every(Boolean);
+          const isFinalFourthScroll = won && !wasCollectedBefore && allFourCollected;
+
+          setLastMatchResult({
+            sport: activeSport,
+            score: matchScore,
+            won,
+            isNewScroll: won && !wasCollectedBefore,
+            allCompleted: allFourCollected
+          });
+
+          if (isFinalFourthScroll) {
+            championAudio.playGameVictory();
+            try {
+              confetti({ particleCount: 120, spread: 80, origin: { y: 0.6 } });
+            } catch (e) {}
+            setGameMode('grand_champion');
+          } else {
+            setGameMode('result');
+          }
         }
       } else if (activeSport.id === 'marathon' && marathonEngineRef.current) {
         const eng = marathonEngineRef.current;
@@ -792,10 +843,32 @@ export default function ChampionGame({ onScoreSubmitted }) {
 
         if (eng.winner) {
           const matchScore = eng.score;
-          setCollectedScrolls(prev => ({ ...prev, marathon: true }));
-          setTotalScore(prev => prev + matchScore);
-          setLastMatchResult({ sport: activeSport, score: matchScore, won: true });
-          setGameMode('result');
+          const wasCollectedBefore = collectedScrolls.marathon;
+          const nextScrolls = { ...collectedScrolls, marathon: true };
+          setCollectedScrolls(nextScrolls);
+          const nextTotalScore = totalScore + matchScore;
+          setTotalScore(nextTotalScore);
+
+          const allFourCollected = Object.values(nextScrolls).every(Boolean);
+          const isFinalFourthScroll = !wasCollectedBefore && allFourCollected;
+
+          setLastMatchResult({
+            sport: activeSport,
+            score: matchScore,
+            won: true,
+            isNewScroll: !wasCollectedBefore,
+            allCompleted: allFourCollected
+          });
+
+          if (isFinalFourthScroll) {
+            championAudio.playGameVictory();
+            try {
+              confetti({ particleCount: 120, spread: 80, origin: { y: 0.6 } });
+            } catch (e) {}
+            setGameMode('grand_champion');
+          } else {
+            setGameMode('result');
+          }
         }
       } else if (activeSport.id === 'climbing' && climbingEngineRef.current) {
         const eng = climbingEngineRef.current;
@@ -804,10 +877,32 @@ export default function ChampionGame({ onScoreSubmitted }) {
 
         if (eng.winner) {
           const matchScore = eng.score;
-          setCollectedScrolls(prev => ({ ...prev, climbing: true }));
-          setTotalScore(prev => prev + matchScore);
-          setLastMatchResult({ sport: activeSport, score: matchScore, won: true });
-          setGameMode('result');
+          const wasCollectedBefore = collectedScrolls.climbing;
+          const nextScrolls = { ...collectedScrolls, climbing: true };
+          setCollectedScrolls(nextScrolls);
+          const nextTotalScore = totalScore + matchScore;
+          setTotalScore(nextTotalScore);
+
+          const allFourCollected = Object.values(nextScrolls).every(Boolean);
+          const isFinalFourthScroll = !wasCollectedBefore && allFourCollected;
+
+          setLastMatchResult({
+            sport: activeSport,
+            score: matchScore,
+            won: true,
+            isNewScroll: !wasCollectedBefore,
+            allCompleted: allFourCollected
+          });
+
+          if (isFinalFourthScroll) {
+            championAudio.playGameVictory();
+            try {
+              confetti({ particleCount: 120, spread: 80, origin: { y: 0.6 } });
+            } catch (e) {}
+            setGameMode('grand_champion');
+          } else {
+            setGameMode('result');
+          }
         }
       }
     }
@@ -943,7 +1038,7 @@ export default function ChampionGame({ onScoreSubmitted }) {
           </div>
         )}
 
-        {/* 4. Match Result / Scroll Ceremony Modal */}
+        {/* 4. Single Match Result Modal (NO Leaderboard Form Here) */}
         {gameMode === 'result' && lastMatchResult && (
           <div className="game-result-modal">
             <div className="result-card">
@@ -952,7 +1047,7 @@ export default function ChampionGame({ onScoreSubmitted }) {
               </div>
               <h2 className="result-title">
                 {lastMatchResult.won
-                  ? `[${lastMatchResult.sport.scrollName}] 획득 성공!`
+                  ? `[${lastMatchResult.sport.scrollName}] 획득!`
                   : `경기 종료 (${lastMatchResult.sport.name})`}
               </h2>
               <p className="result-subtitle">
@@ -966,9 +1061,89 @@ export default function ChampionGame({ onScoreSubmitted }) {
                 <div className="result-score-val">+{lastMatchResult.score.toLocaleString()}점</div>
               </div>
 
-              {/* Hall of Fame Score Registration Form: ONLY for score > 100 */}
+              {/* Scroll Collection Status Box */}
+              <div className="scroll-collection-status-box">
+                <div className="status-box-title">
+                  <span>📜 성스러운 두루마리 수집 현황 ({Object.values(collectedScrolls).filter(Boolean).length}/4)</span>
+                </div>
+                <div className="status-scrolls-row">
+                  <div className={`status-scroll-chip ${collectedScrolls.table_tennis ? 'active' : ''}`}>
+                    <span>🏓</span>
+                    <span>탁구</span>
+                  </div>
+                  <div className={`status-scroll-chip ${collectedScrolls.archery ? 'active' : ''}`}>
+                    <span>🎯</span>
+                    <span>양궁</span>
+                  </div>
+                  <div className={`status-scroll-chip ${collectedScrolls.marathon ? 'active' : ''}`}>
+                    <span>🏃</span>
+                    <span>마라톤</span>
+                  </div>
+                  <div className={`status-scroll-chip ${collectedScrolls.climbing ? 'active' : ''}`}>
+                    <span>🧗</span>
+                    <span>클라이밍</span>
+                  </div>
+                </div>
+                <div className="status-hint-text">
+                  💡 4개의 성스러운 두루마리를 모두 모으면 <strong>4종목 총 합계 점수</strong>로 명예의 전당 최종 등록이 열립니다!
+                </div>
+              </div>
+
+              <div className="result-buttons-row">
+                <button className="btn-return-map" onClick={returnToOverworld}>
+                  <span>섬으로 돌아가기 (다음 종목 도전)</span>
+                  <ArrowRight size={16} />
+                </button>
+              </div>
+            </div>
+          </div>
+        )}
+
+        {/* 5. Grand Champion Victory Ceremony Modal (Final 4 Scrolls Combined Total Score Leaderboard Registration) */}
+        {gameMode === 'grand_champion' && (
+          <div className="game-result-modal grand-champion-modal">
+            <div className="result-card grand-champion-card">
+              <div className="result-badge-icon pulse-bounce">
+                👑🏝️✨
+              </div>
+              <h2 className="result-title grand-title">
+                도촌 챔피언 아일랜드 대통합 챔피언 등극!
+              </h2>
+              <p className="result-subtitle">
+                4개의 성스러운 두루마리를 모두 수집하여 섬의 전설적인 챔피언이 되었습니다!
+              </p>
+
+              <div className="grand-scrolls-grid">
+                <div className="grand-scroll-item">
+                  <span className="scroll-emoji">🏓</span>
+                  <span className="scroll-text">바람의 탁구 두루마리</span>
+                </div>
+                <div className="grand-scroll-item">
+                  <span className="scroll-emoji">🎯</span>
+                  <span className="scroll-text">명사수의 양궁 두루마리</span>
+                </div>
+                <div className="grand-scroll-item">
+                  <span className="scroll-emoji">🏃</span>
+                  <span className="scroll-text">질풍의 마라톤 두루마리</span>
+                </div>
+                <div className="grand-scroll-item">
+                  <span className="scroll-emoji">🧗</span>
+                  <span className="scroll-text">정복자의 등반 두루마리</span>
+                </div>
+              </div>
+
+              <div className="result-score-box grand-score-box">
+                <div className="result-score-label">4종목 통합 최종 합계 점수</div>
+                <div className="result-score-val grand-val">{totalScore.toLocaleString()}점</div>
+              </div>
+
+              {/* Hall of Fame Score Registration Form: ONLY on 4 scrolls completion and score > 100 */}
               {totalScore > 100 && !submitSuccess && (
                 <form onSubmit={handleScoreSubmit} className="leaderboard-form">
+                  <div className="leaderboard-form-title">
+                    <Trophy size={16} className="icon-gold" />
+                    <span>도촌초등학교 명예의 전당 최종 랭킹 등록</span>
+                  </div>
                   <input
                     type="text"
                     className="leaderboard-input"
@@ -978,23 +1153,27 @@ export default function ChampionGame({ onScoreSubmitted }) {
                     maxLength={10}
                     required
                   />
-                  <button type="submit" className="btn-submit-score" disabled={isSubmitting}>
-                    <Trophy size={16} />
-                    <span>{isSubmitting ? '등록 중...' : '도촌초 명예의 전당 등록'}</span>
+                  <button type="submit" className="btn-submit-score btn-submit-grand" disabled={isSubmitting}>
+                    <Trophy size={18} />
+                    <span>{isSubmitting ? '명예의 전당 등록 중...' : '챔피언 최종 점수 등록하기'}</span>
                   </button>
                 </form>
               )}
 
               {submitSuccess && (
-                <div style={{ color: '#10B981', fontWeight: 800, margin: '10px 0', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '6px' }}>
-                  <CheckCircle2 size={18} />
-                  <span>명예의 전당에 성공적으로 등록되었습니다!</span>
+                <div className="submit-success-banner">
+                  <CheckCircle2 size={20} />
+                  <span>4종목 통합 최종 점수가 명예의 전당에 성공적으로 등록되었습니다!</span>
                 </div>
               )}
 
               <div className="result-buttons-row">
+                <button className="btn-return-map" onClick={resetGame}>
+                  <RotateCcw size={16} />
+                  <span>새로운 모험 다시 시작하기</span>
+                </button>
                 <button className="btn-return-map" onClick={returnToOverworld}>
-                  <span>섬으로 돌아가기</span>
+                  <span>섬 자유롭게 둘러보기</span>
                   <ArrowRight size={16} />
                 </button>
               </div>

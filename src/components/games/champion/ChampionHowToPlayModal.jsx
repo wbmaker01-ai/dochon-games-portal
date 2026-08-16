@@ -125,10 +125,10 @@ export default function ChampionHowToPlayModal({ isOpen, onClose }) {
           <div className="guide-section highlight-box-gold">
             <div className="section-title">
               <Trophy className="icon-gold" size={18} />
-              <h3>도촌초등학교 명예의 전당 랭킹 등록</h3>
+              <h3>도촌초등학교 명예의 전당 랭킹 등록 (4종목 완주 시)</h3>
             </div>
             <p>
-              각 종목 승리와 두루마리 획득으로 <strong>100점을 초과</strong>하여 달성하면, 게임 종료 시 자신의 이름과 학반을 입력해 실시간 클라우드 명예의 전당에 영광의 챔피언으로 이름을 올릴 수 있습니다!
+              4대 스포츠(탁구, 양궁, 마라톤, 클라이밍)를 모두 정복하여 <strong>4개의 성스러운 두루마리를 모두 수집</strong>하면, 대통합 챔피언 세레머니와 함께 <strong>4종목 총 합계 점수</strong>로 실시간 도촌초 명예의 전당에 단 한 번 영광의 챔피언으로 이름을 올릴 수 있습니다!
             </p>
           </div>
         </div>
