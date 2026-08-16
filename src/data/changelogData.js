@@ -10,6 +10,11 @@ export const CHANGELOG_DATA = [
     badgeColor: 'emerald',
     items: [
       {
+        tag: 'UI/UX',
+        tagColor: 'teal',
+        text: '[메인 챔피언 배너 가독성 개선] 게임 타이틀과 챔피언 학생 이름 사이 간격(2칸 공백) 및 뱃지 스타일을 최적화하여 텍스트 겹침 완벽 해소'
+      },
+      {
         tag: 'NEW GAME',
         tagColor: 'emerald',
         text: '[도촌 정원 요정 정식 출시] 2018년 구글 두들 명작을 계승한 투석기 발사 & 거리 달성 물리 액션 캐주얼 게임 정식 오픈'

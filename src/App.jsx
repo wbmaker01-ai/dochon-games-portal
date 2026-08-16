@@ -231,13 +231,13 @@ export default function App() {
               <div className="portal-hero-crown">
                 <Crown className="w-5 h-5 text-amber-400 fill-amber-400" />
               </div>
-              <div className="flex flex-col text-left">
-                <span className="text-[11px] text-amber-300 font-black tracking-wide">
-                  👑 {featuredGame.title} 1위 챔피언
+              <div className="portal-hero-champion-info">
+                <span className="portal-hero-champion-title">
+                  👑 {featuredGame.title} 1위 챔피언&nbsp;&nbsp;
                 </span>
-                <span className="text-sm sm:text-base font-black text-white mt-0.5">
+                <span className="portal-hero-champion-name">
                   {featuredChampion.name || '도촌 학생'}
-                  <strong className="text-amber-400 font-mono ml-2">
+                  <strong className="portal-hero-champion-score">
                     ({featuredChampion.score ? featuredChampion.score.toLocaleString() : 0}{featuredScoreUnit})
                   </strong>
                 </span>
