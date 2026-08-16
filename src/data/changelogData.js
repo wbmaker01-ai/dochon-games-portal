@@ -3,11 +3,35 @@
 
 export const CHANGELOG_DATA = [
   {
+    version: 'v1.7.5',
+    date: '2026-08-16',
+    title: '도촌 야구왕 [유령 마구 투구 프리징 근본 해결 & 캔버스 무중단 렌더 루프 보장]',
+    badge: 'LATEST',
+    badgeColor: 'emerald',
+    items: [
+      {
+        tag: 'CRASH-PROOF',
+        tagColor: 'amber',
+        text: '[무중단 렌더 루프 보장 아키텍처] 캔버스 렌더링 내에 try-catch-finally를 도입하여 어떤 연산 예외나 그래픽 글리치가 발생해도 requestAnimationFrame이 절대로 중단되지 않도록 원천 차단'
+      },
+      {
+        tag: 'GHOST BALL',
+        tagColor: 'purple',
+        text: '[도촌 유령 마구 가시성 & 투명도 개선] 완전 투명화로 인한 시야 상실 및 타격 불능을 방지하고 멋진 반투명 고스트 구체(최저 투명도 25%)로 렌더링되도록 밸런스 개선'
+      },
+      {
+        tag: 'PARAM SAFETY',
+        tagColor: 'blue',
+        text: '[캔버스 기하학 파라미터 안전 바운더리] 공/그림자/타이밍 링의 radius가 0 이하 또는 비정상 값이 되지 않도록 Math.max 방어 로직 전면 보강'
+      }
+    ]
+  },
+  {
     version: 'v1.7.4',
     date: '2026-08-16',
     title: '도촌 야구왕 [타자 타석 위치 최적화 & 캐릭터 바지/눈/글러브 색상 복원 & 타이밍 판정 개선]',
-    badge: 'LATEST',
-    badgeColor: 'emerald',
+    badge: 'UPDATE',
+    badgeColor: 'blue',
     items: [
       {
         tag: 'POSITION',

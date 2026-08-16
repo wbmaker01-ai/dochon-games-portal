@@ -395,218 +395,221 @@ export default function BaseballGame({ onScoreSubmitted }) {
     const ctx = canvas.getContext('2d');
 
     const render = () => {
-      ctx.clearRect(0, 0, CANVAS_WIDTH, CANVAS_HEIGHT);
+      try {
+        ctx.clearRect(0, 0, CANVAS_WIDTH, CANVAS_HEIGHT);
 
-      // =========================================================================
-      // A. Draw 3D Perspective Stadium Background & Field
-      // =========================================================================
-      if (bgImgRef.current) {
-        ctx.drawImage(bgImgRef.current, 0, 0, CANVAS_WIDTH, CANVAS_HEIGHT);
-      } else {
-        // Fallback Sky & Bleachers
-        ctx.fillStyle = '#38BDF8';
-        ctx.fillRect(0, 0, CANVAS_WIDTH, 140);
-        ctx.fillStyle = '#22C55E';
-        ctx.fillRect(0, 140, CANVAS_WIDTH, CANVAS_HEIGHT - 140);
+        // =========================================================================
+        // A. Draw 3D Perspective Stadium Background & Field
+        // =========================================================================
+        if (bgImgRef.current) {
+          ctx.drawImage(bgImgRef.current, 0, 0, CANVAS_WIDTH, CANVAS_HEIGHT);
+        } else {
+          // Fallback Sky & Bleachers
+          ctx.fillStyle = '#38BDF8';
+          ctx.fillRect(0, 0, CANVAS_WIDTH, 140);
+          ctx.fillStyle = '#22C55E';
+          ctx.fillRect(0, 140, CANVAS_WIDTH, CANVAS_HEIGHT - 140);
 
-        // Infield Dirt Area
+          // Infield Dirt Area
+          ctx.save();
+          ctx.fillStyle = '#E2B184';
+          ctx.beginPath();
+          ctx.moveTo(PITCHER_POS.x, PITCHER_POS.y - 10);
+          ctx.lineTo(820, CANVAS_HEIGHT);
+          ctx.lineTo(140, CANVAS_HEIGHT);
+          ctx.closePath();
+          ctx.fill();
+
+          // 3D Foul Lines
+          ctx.strokeStyle = '#FFFFFF';
+          ctx.lineWidth = 3.5;
+          ctx.beginPath();
+          ctx.moveTo(HOME_PLATE_POS.x, HOME_PLATE_POS.y);
+          ctx.lineTo(80, 240);
+          ctx.moveTo(HOME_PLATE_POS.x, HOME_PLATE_POS.y);
+          ctx.lineTo(880, 240);
+          ctx.stroke();
+          ctx.restore();
+        }
+
+        // Home Plate Sweet Spot Target Indicator
         ctx.save();
-        ctx.fillStyle = '#E2B184';
+        ctx.fillStyle = '#3B82F6';
         ctx.beginPath();
-        ctx.moveTo(PITCHER_POS.x, PITCHER_POS.y - 10);
-        ctx.lineTo(820, CANVAS_HEIGHT);
-        ctx.lineTo(140, CANVAS_HEIGHT);
-        ctx.closePath();
+        ctx.arc(HOME_PLATE_POS.x, HOME_PLATE_POS.y + 2, 18, 0, Math.PI * 2);
         ctx.fill();
-
-        // 3D Foul Lines
         ctx.strokeStyle = '#FFFFFF';
-        ctx.lineWidth = 3.5;
-        ctx.beginPath();
-        ctx.moveTo(HOME_PLATE_POS.x, HOME_PLATE_POS.y);
-        ctx.lineTo(80, 240);
-        ctx.moveTo(HOME_PLATE_POS.x, HOME_PLATE_POS.y);
-        ctx.lineTo(880, 240);
+        ctx.lineWidth = 2.5;
         ctx.stroke();
-        ctx.restore();
-      }
 
-      // Home Plate Sweet Spot Target Indicator
-      ctx.save();
-      ctx.fillStyle = '#3B82F6';
-      ctx.beginPath();
-      ctx.arc(HOME_PLATE_POS.x, HOME_PLATE_POS.y + 2, 18, 0, Math.PI * 2);
-      ctx.fill();
-      ctx.strokeStyle = '#FFFFFF';
-      ctx.lineWidth = 2.5;
-      ctx.stroke();
-
-      ctx.fillStyle = '#FFFFFF';
-      ctx.font = '12px sans-serif';
-      ctx.textAlign = 'center';
-      ctx.textBaseline = 'middle';
-      ctx.fillText('⚾', HOME_PLATE_POS.x, HOME_PLATE_POS.y + 3);
-      ctx.restore();
-
-
-      // =========================================================================
-      // B. Draw Distant Pitcher (Proportioned Cute Size)
-      // =========================================================================
-      if (pitcherSpriteRef.current) {
-        const pW = 85;
-        const pH = 85;
-        const pX = PITCHER_POS.x - pW / 2;
-        const pY = PITCHER_POS.y - pH + 12;
-
-        ctx.save();
-        ctx.fillStyle = 'rgba(0, 0, 0, 0.25)';
-        ctx.beginPath();
-        ctx.ellipse(PITCHER_POS.x, PITCHER_POS.y + 12, 16, 6, 0, 0, Math.PI * 2);
-        ctx.fill();
+        ctx.fillStyle = '#FFFFFF';
+        ctx.font = '12px sans-serif';
+        ctx.textAlign = 'center';
+        ctx.textBaseline = 'middle';
+        ctx.fillText('⚾', HOME_PLATE_POS.x, HOME_PLATE_POS.y + 3);
         ctx.restore();
 
-        ctx.drawImage(pitcherSpriteRef.current, pX, pY, pW, pH);
-      }
+        // =========================================================================
+        // B. Draw Distant Pitcher (Proportioned Cute Size)
+        // =========================================================================
+        if (pitcherSpriteRef.current) {
+          const pW = 85;
+          const pH = 85;
+          const pX = PITCHER_POS.x - pW / 2;
+          const pY = PITCHER_POS.y - pH + 12;
 
-      // =========================================================================
-      // C. Draw 3D Ball & Dynamic Shadow in Flight
-      // =========================================================================
-      if (gameStateRef.current === 'PITCHING' && currentPitchRef.current) {
-        const now = performance.now();
-        const elapsed = now - pitchStartTimeRef.current;
-        const duration = pitchDurationRef.current;
+          ctx.save();
+          ctx.fillStyle = 'rgba(0, 0, 0, 0.25)';
+          ctx.beginPath();
+          ctx.ellipse(PITCHER_POS.x, PITCHER_POS.y + 12, 16, 6, 0, 0, Math.PI * 2);
+          ctx.fill();
+          ctx.restore();
 
-        // Auto Miss if ball travels past plate
-        if (elapsed > duration + 200 && !isSwungRef.current) {
-          isSwungRef.current = true;
-          soundFx.playBaseballSwingMiss();
-          setHitFeedback({
-            label: 'STRIKE! ❌',
-            desc: '루킹 스트라이크! 공을 지켜보았습니다.',
-            color: '#EF4444'
-          });
+          ctx.drawImage(pitcherSpriteRef.current, pX, pY, pW, pH);
+        }
 
-          const nextStrikes = strikesRef.current + 1;
-          if (nextStrikes >= 3) {
-            const nextOuts = outsRef.current + 1;
-            strikesRef.current = 0;
-            outsRef.current = nextOuts;
-            comboRef.current = 0;
+        // =========================================================================
+        // C. Draw 3D Ball & Dynamic Shadow in Flight
+        // =========================================================================
+        if (gameStateRef.current === 'PITCHING' && currentPitchRef.current) {
+          const now = performance.now();
+          const elapsed = now - pitchStartTimeRef.current;
+          const duration = Math.max(500, pitchDurationRef.current || 2000);
 
-            if (nextOuts >= 3) {
-              gameStateRef.current = 'GAME_OVER';
-              soundFx.playPacmanGameOver();
+          // Auto Miss if ball travels past plate
+          if (elapsed > duration + 200 && !isSwungRef.current) {
+            isSwungRef.current = true;
+            soundFx.playBaseballSwingMiss();
+            setHitFeedback({
+              label: 'STRIKE! ❌',
+              desc: '루킹 스트라이크! 공을 지켜보았습니다.',
+              color: '#EF4444'
+            });
+
+            const nextStrikes = strikesRef.current + 1;
+            if (nextStrikes >= 3) {
+              const nextOuts = outsRef.current + 1;
+              strikesRef.current = 0;
+              outsRef.current = nextOuts;
+              comboRef.current = 0;
+
+              if (nextOuts >= 3) {
+                gameStateRef.current = 'GAME_OVER';
+                soundFx.playPacmanGameOver();
+                syncUiState();
+              }
+            } else {
+              strikesRef.current = nextStrikes;
+            }
+
+            if (gameStateRef.current !== 'GAME_OVER') {
+              gameStateRef.current = 'MISS_ANIMATION';
               syncUiState();
+              nextPitchTimeoutRef.current = setTimeout(() => {
+                setHitFeedback(null);
+                startNextPitch();
+              }, 1200);
             }
           } else {
-            strikesRef.current = nextStrikes;
-          }
+            const ball = calculateBallState(currentPitchRef.current, elapsed, duration);
 
-          if (gameStateRef.current !== 'GAME_OVER') {
-            gameStateRef.current = 'MISS_ANIMATION';
-            syncUiState();
-            nextPitchTimeoutRef.current = setTimeout(() => {
-              setHitFeedback(null);
-              startNextPitch();
-            }, 1200);
-          }
-        } else {
-          const ball = calculateBallState(currentPitchRef.current, elapsed, duration);
+            if (currentPitchRef.current.hasFlameEffect) {
+              particleSystemRef.current.addFireballTrail(ball.x, ball.y);
+            }
 
-          if (currentPitchRef.current.hasFlameEffect) {
-            particleSystemRef.current.addFireballTrail(ball.x, ball.y);
-          }
+            // 1. Sweet Spot Converging Timing Ring
+            if (ball.timingRingRadius > 2 && ball.opacity > 0.2) {
+              ctx.save();
+              ctx.strokeStyle = ball.isAtSweetSpot ? '#FBBF24' : 'rgba(251, 191, 36, 0.6)';
+              ctx.lineWidth = ball.isAtSweetSpot ? 3.5 : 2;
+              ctx.beginPath();
+              ctx.arc(HOME_PLATE_POS.x, HOME_PLATE_POS.y + 2, Math.max(1, 18 + ball.timingRingRadius), 0, Math.PI * 2);
+              ctx.stroke();
+              ctx.restore();
+            }
 
-          // 1. Sweet Spot Converging Timing Ring
-          if (ball.timingRingRadius > 2 && ball.opacity > 0.3) {
+            // 2. Draw 3D Ground Shadow on Field
             ctx.save();
-            ctx.strokeStyle = ball.isAtSweetSpot ? '#FBBF24' : 'rgba(251, 191, 36, 0.6)';
-            ctx.lineWidth = ball.isAtSweetSpot ? 3.5 : 2;
+            ctx.globalAlpha = Math.max(0, Math.min(1, 0.4 * ball.opacity));
+            ctx.fillStyle = '#000000';
             ctx.beginPath();
-            ctx.arc(HOME_PLATE_POS.x, HOME_PLATE_POS.y + 2, 18 + ball.timingRingRadius, 0, Math.PI * 2);
+            ctx.ellipse(ball.shadowX, ball.shadowY, Math.max(1, ball.shadowRadiusX), Math.max(1, ball.shadowRadiusY), 0, 0, Math.PI * 2);
+            ctx.fill();
+            ctx.restore();
+
+            // 3. Draw 3D Ball with Glowing Atmosphere
+            ctx.save();
+            ctx.globalAlpha = Math.max(0.1, Math.min(1, ball.opacity));
+
+            if (currentPitchRef.current.id !== 'FASTBALL') {
+              ctx.shadowColor = currentPitchRef.current.color;
+              ctx.shadowBlur = 12;
+            }
+
+            ctx.fillStyle = currentPitchRef.current.color || '#FFFFFF';
+            ctx.strokeStyle = '#1E293B';
+            ctx.lineWidth = 1.8;
+            ctx.beginPath();
+            ctx.arc(ball.x, ball.y, Math.max(4, ball.radius), 0, Math.PI * 2);
+            ctx.fill();
+            ctx.stroke();
+
+            ctx.shadowBlur = 0;
+            ctx.strokeStyle = '#EF4444';
+            ctx.lineWidth = Math.max(1, ball.radius * 0.1);
+            ctx.beginPath();
+            ctx.arc(ball.x - ball.radius * 0.35, ball.y, Math.max(1, ball.radius * 0.75), -0.6, 0.6);
+            ctx.stroke();
+            ctx.beginPath();
+            ctx.arc(ball.x + ball.radius * 0.35, ball.y, Math.max(1, ball.radius * 0.75), Math.PI - 0.6, Math.PI + 0.6);
             ctx.stroke();
             ctx.restore();
           }
+        }
 
-          // 2. Draw 3D Ground Shadow on Field
+        // =========================================================================
+        // D. Draw Batter in Left Batter's Box
+        // =========================================================================
+        const activeBatterSprite = batterStateRef.current === 'SWING'
+          ? batterSwingSpriteRef.current
+          : batterReadySpriteRef.current;
+
+        if (activeBatterSprite) {
+          const bW = 185;
+          const bH = 185;
+          const bX = BATTER_POS.x - bW / 2;
+          const bY = BATTER_POS.y - bH / 2;
+
           ctx.save();
-          ctx.globalAlpha = 0.4 * ball.opacity;
-          ctx.fillStyle = '#000000';
+          ctx.fillStyle = 'rgba(0, 0, 0, 0.3)';
           ctx.beginPath();
-          ctx.ellipse(ball.shadowX, ball.shadowY, ball.shadowRadiusX, ball.shadowRadiusY, 0, 0, Math.PI * 2);
+          ctx.ellipse(BATTER_POS.x, BATTER_POS.y + bH * 0.38, bW * 0.32, 14, 0, 0, Math.PI * 2);
           ctx.fill();
           ctx.restore();
 
-          // 3. Draw 3D Ball with Glowing Atmosphere
-          ctx.save();
-          ctx.globalAlpha = ball.opacity;
+          ctx.drawImage(activeBatterSprite, bX, bY, bW, bH);
 
-          if (currentPitchRef.current.id !== 'FASTBALL') {
-            ctx.shadowColor = currentPitchRef.current.color;
-            ctx.shadowBlur = 12;
+          if (batterStateRef.current === 'SWING') {
+            ctx.save();
+            ctx.strokeStyle = 'rgba(255, 255, 255, 0.65)';
+            ctx.lineWidth = 4;
+            ctx.beginPath();
+            ctx.arc(BATTER_POS.x + 30, BATTER_POS.y - 10, 110, -0.3, 0.8);
+            ctx.stroke();
+            ctx.restore();
           }
-
-          ctx.fillStyle = currentPitchRef.current.color || '#FFFFFF';
-          ctx.strokeStyle = '#1E293B';
-          ctx.lineWidth = 1.8;
-          ctx.beginPath();
-          ctx.arc(ball.x, ball.y, ball.radius, 0, Math.PI * 2);
-          ctx.fill();
-          ctx.stroke();
-
-          ctx.shadowBlur = 0;
-          ctx.strokeStyle = '#EF4444';
-          ctx.lineWidth = Math.max(1, ball.radius * 0.1);
-          ctx.beginPath();
-          ctx.arc(ball.x - ball.radius * 0.35, ball.y, ball.radius * 0.75, -0.6, 0.6);
-          ctx.stroke();
-          ctx.beginPath();
-          ctx.arc(ball.x + ball.radius * 0.35, ball.y, ball.radius * 0.75, Math.PI - 0.6, Math.PI + 0.6);
-          ctx.stroke();
-          ctx.restore();
         }
+
+        // =========================================================================
+        // E. Update & Draw Particles
+        // =========================================================================
+        particleSystemRef.current.update();
+        particleSystemRef.current.render(ctx);
+      } catch (err) {
+        console.error('Canvas render loop caught exception:', err);
+      } finally {
+        animFrameRef.current = requestAnimationFrame(render);
       }
-
-      // =========================================================================
-      // D. Draw Batter in Left Batter's Box
-      // =========================================================================
-      const activeBatterSprite = batterStateRef.current === 'SWING'
-        ? batterSwingSpriteRef.current
-        : batterReadySpriteRef.current;
-
-      if (activeBatterSprite) {
-        const bW = 185;
-        const bH = 185;
-        const bX = BATTER_POS.x - bW / 2;
-        const bY = BATTER_POS.y - bH / 2;
-
-        ctx.save();
-        ctx.fillStyle = 'rgba(0, 0, 0, 0.3)';
-        ctx.beginPath();
-        ctx.ellipse(BATTER_POS.x, BATTER_POS.y + bH * 0.38, bW * 0.32, 14, 0, 0, Math.PI * 2);
-        ctx.fill();
-        ctx.restore();
-
-        ctx.drawImage(activeBatterSprite, bX, bY, bW, bH);
-
-        if (batterStateRef.current === 'SWING') {
-          ctx.save();
-          ctx.strokeStyle = 'rgba(255, 255, 255, 0.65)';
-          ctx.lineWidth = 4;
-          ctx.beginPath();
-          ctx.arc(BATTER_POS.x + 30, BATTER_POS.y - 10, 110, -0.3, 0.8);
-          ctx.stroke();
-          ctx.restore();
-        }
-      }
-
-      // =========================================================================
-      // E. Update & Draw Particles
-      // =========================================================================
-      particleSystemRef.current.update();
-      particleSystemRef.current.render(ctx);
-
-      animFrameRef.current = requestAnimationFrame(render);
     };
 
     animFrameRef.current = requestAnimationFrame(render);

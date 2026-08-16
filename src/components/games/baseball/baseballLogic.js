@@ -205,14 +205,16 @@ export function calculateBallState(pitchConfig, elapsedMs, totalDuration) {
   const ballX = isFinite(groundX) ? groundX : 480;
   const ballY = isFinite(groundY - flightHeight) ? (groundY - flightHeight) : 300;
 
-  // Ghost ball opacity handling
+  // Ghost ball translucent opacity handling
   let opacity = 1;
   if (pitchConfig?.id === 'GHOST' && pitchConfig.disappearRange) {
     const [dStart, dEnd] = pitchConfig.disappearRange;
     if (progress >= dStart && progress <= dEnd) {
-      opacity = 0.08; // Almost invisible
-    } else if (progress > dEnd && progress < dEnd + 0.12) {
-      opacity = (progress - dEnd) / 0.12;
+      opacity = 0.25; // Translucent ghostly sphere
+    } else if (progress > dEnd && progress < dEnd + 0.15) {
+      opacity = 0.25 + ((progress - dEnd) / 0.15) * 0.75;
+    } else if (progress < dStart && progress > dStart - 0.10) {
+      opacity = 1.0 - ((progress - (dStart - 0.10)) / 0.10) * 0.75;
     }
   }
 
@@ -220,17 +222,17 @@ export function calculateBallState(pitchConfig, elapsedMs, totalDuration) {
   const timingRingRadius = Math.max(0, (1 - progress) * 45);
 
   return {
-    x: ballX,
-    y: ballY,
-    shadowX: groundX,
-    shadowY: groundY,
-    radius,
-    shadowRadiusX,
-    shadowRadiusY,
+    x: isFinite(ballX) ? ballX : 480,
+    y: isFinite(ballY) ? ballY : 400,
+    shadowX: isFinite(groundX) ? groundX : 480,
+    shadowY: isFinite(groundY) ? groundY : 460,
+    radius: Math.max(8, isFinite(radius) ? radius : 10),
+    shadowRadiusX: Math.max(6, isFinite(shadowRadiusX) ? shadowRadiusX : 8),
+    shadowRadiusY: Math.max(3, isFinite(shadowRadiusY) ? shadowRadiusY : 4),
     progress,
-    opacity,
-    timingRingRadius,
-    isAtSweetSpot: progress >= 0.88 && progress <= 1.05
+    opacity: Math.max(0.15, Math.min(1, isFinite(opacity) ? opacity : 1)),
+    timingRingRadius: Math.max(0, isFinite(timingRingRadius) ? timingRingRadius : 0),
+    isAtSweetSpot: progress >= 0.82 && progress <= 1.05
   };
 }
 
