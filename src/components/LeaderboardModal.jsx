@@ -259,7 +259,7 @@ export default function LeaderboardModal({ isOpen, onClose, activeTab = 'pacman'
           )}
         </div>
 
-        {/* Future-Proof Dynamic Game Tab Bar */}
+        {/* Future-Proof Dynamic Game Tab Bar (No horizontal scroll, wrap-enabled) */}
         <div className="leaderboard-tab-container">
           {PLAYABLE_GAMES.map(game => {
             const isActive = currentTab === game.id;
@@ -269,13 +269,19 @@ export default function LeaderboardModal({ isOpen, onClose, activeTab = 'pacman'
             if (game.id === 'snake') iconEmoji = '🐍';
             if (game.id === 'solitaire') iconEmoji = '🃏';
             if (game.id === 'minesweeper') iconEmoji = '💣';
+            if (game.id === 'baseball') iconEmoji = '⚾';
+
+            // Remove '도촌 ' prefix for compact and clean layout
+            const shortTitle = game.title.replace(/^도촌\s*/, '');
 
             let activeCustomStyle = {};
             if (isActive) {
-              if (game.id === 'dino') activeCustomStyle = { background: 'linear-gradient(135deg, #34D399, #10B981)', color: '#064E3B' };
+              if (game.id === 'pacman') activeCustomStyle = { background: 'linear-gradient(135deg, #FBBF24, #F59E0B)', color: '#78350F' };
+              else if (game.id === 'dino') activeCustomStyle = { background: 'linear-gradient(135deg, #34D399, #10B981)', color: '#064E3B' };
               else if (game.id === 'snake') activeCustomStyle = { background: 'linear-gradient(135deg, #10B981, #059669)', color: '#FFFFFF' };
               else if (game.id === 'solitaire') activeCustomStyle = { background: 'linear-gradient(135deg, #F59E0B, #D97706)', color: '#0F172A' };
               else if (game.id === 'minesweeper') activeCustomStyle = { background: 'linear-gradient(135deg, #10B981, #047857)', color: '#FFFFFF' };
+              else if (game.id === 'baseball') activeCustomStyle = { background: 'linear-gradient(135deg, #38BDF8, #0284C7)', color: '#FFFFFF' };
             }
 
             return (
@@ -285,8 +291,8 @@ export default function LeaderboardModal({ isOpen, onClose, activeTab = 'pacman'
                 className={`leaderboard-tab-chip ${isActive ? 'active' : ''}`}
                 style={activeCustomStyle}
               >
-                <span>{iconEmoji}</span>
-                <span>{game.title}</span>
+                <span style={{ fontSize: '13px' }}>{iconEmoji}</span>
+                <span>{shortTitle}</span>
               </button>
             );
           })}

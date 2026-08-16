@@ -3,11 +3,35 @@
 
 export const CHANGELOG_DATA = [
   {
+    version: 'v1.8.1',
+    date: '2026-08-16',
+    title: '명예의 전당(리더보드) 탭바 UI 전면 개편 & 좌우 스크롤 제거 (줄바꿈 반응형 레이아웃)',
+    badge: 'LATEST',
+    badgeColor: 'emerald',
+    items: [
+      {
+        tag: 'NO SCROLL',
+        tagColor: 'amber',
+        text: '[좌우 스크롤 100% 제거] 명예의 전당 모달에서 좌우 스크롤바를 완전히 없애고 줄바꿈(Wrap) 반응형 그리드를 적용하여 모든 게임 탭을 한눈에 확인 가능'
+      },
+      {
+        tag: 'COMPACT',
+        tagColor: 'teal',
+        text: '[게임 이름 도촌 접두사 축약] 탭 버튼 텍스트에서 "도촌 "을 제외하고 팩맨, 공룡 달리기, 스네이크, 솔리테어, 지뢰찾기, 야구왕으로 컴팩트화하여 가독성 및 클릭 편의성 극대화'
+      },
+      {
+        tag: 'DESIGN',
+        tagColor: 'purple',
+        text: '[야구왕 전용 블루 그라데이션 탭 추가] 6개 전체 게임별 전용 시그니처 컬러 및 이모지(🟡🦖🐍🃏💣⚾) 일체형 테마 적용'
+      }
+    ]
+  },
+  {
     version: 'v1.8.0',
     date: '2026-08-16',
     title: '도촌 야구왕 [긴장감 극대화 난이도 밸런스 대패치 (플라이/땅볼 아웃 & 선구안 시스템)]',
-    badge: 'LATEST',
-    badgeColor: 'emerald',
+    badge: 'UPDATE',
+    badgeColor: 'blue',
     items: [
       {
         tag: 'FLY/GROUND OUT',

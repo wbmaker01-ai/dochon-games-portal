@@ -802,7 +802,7 @@ body {
 .leaderboard-modal-box {
   position: relative !important;
   width: 100% !important;
-  max-width: 520px !important;
+  max-width: 540px !important;
   background: linear-gradient(150deg, #1A1C2E 0%, #251F47 50%, #16192B 100%) !important;
   border: 3.5px solid #FBBF24 !important;
   border-radius: 28px !important;
@@ -844,54 +844,48 @@ body {
 .leaderboard-tab-container {
   display: flex !important;
   flex-direction: row !important;
+  flex-wrap: wrap !important;
   align-items: center !important;
-  justify-content: flex-start !important;
-  gap: 8px !important;
+  justify-content: center !important;
+  gap: 6px 8px !important;
   background-color: rgba(15, 23, 42, 0.85) !important;
-  padding: 8px 10px !important;
+  padding: 10px !important;
   border-radius: 18px !important;
   border: 1.5px solid rgba(255, 255, 255, 0.15) !important;
   width: 100% !important;
-  overflow-x: auto !important;
-  overflow-y: hidden !important;
-  scrollbar-width: thin !important;
-  scrollbar-color: rgba(251, 191, 36, 0.4) transparent !important;
-}
-
-.leaderboard-tab-container::-webkit-scrollbar {
-  height: 4px;
-}
-
-.leaderboard-tab-container::-webkit-scrollbar-track {
-  background: transparent;
-}
-
-.leaderboard-tab-container::-webkit-scrollbar-thumb {
-  background: rgba(251, 191, 36, 0.4);
-  border-radius: 9999px;
+  overflow: hidden !important;
 }
 
 .leaderboard-tab-chip {
-  flex: 0 0 auto !important;
-  padding: 8px 16px !important;
-  border-radius: 14px !important;
-  font-size: 13px !important;
-  font-weight: 900 !important;
+  flex: 0 1 auto !important;
+  padding: 6px 12px !important;
+  border-radius: 12px !important;
+  font-size: 12.5px !important;
+  font-weight: 800 !important;
   border: none !important;
   cursor: pointer !important;
-  display: flex !important;
+  display: inline-flex !important;
   align-items: center !important;
-  gap: 6px !important;
+  justify-content: center !important;
+  gap: 5px !important;
   white-space: nowrap !important;
   transition: all 0.2s ease !important;
-  background: transparent;
+  background: rgba(255, 255, 255, 0.06);
   color: #94A3B8;
+  user-select: none !important;
+}
+
+.leaderboard-tab-chip:hover {
+  background: rgba(255, 255, 255, 0.14) !important;
+  color: #FFFFFF !important;
+  transform: translateY(-1px) !important;
 }
 
 .leaderboard-tab-chip.active {
   background: linear-gradient(135deg, #FBBF24 0%, #F59E0B 100%) !important;
   color: #78350F !important;
   box-shadow: 0 4px 12px rgba(245, 158, 11, 0.35) !important;
+  transform: scale(1.03) !important;
 }
 
 .leaderboard-score-list {
