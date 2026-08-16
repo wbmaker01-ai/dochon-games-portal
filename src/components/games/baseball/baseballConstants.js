@@ -10,10 +10,10 @@ export const PITCHER_POS = {
   scale: 0.28
 };
 
-// Batter in Left Batter's Box (Facing right towards plate & pitcher)
+// Batter in Left Batter's Box (Naturally standing just left of home plate)
 export const BATTER_POS = {
-  x: 260,
-  y: 420,
+  x: 400,
+  y: 445,
   scale: 0.58
 };
 
@@ -61,39 +61,39 @@ export const PITCH_TYPES = {
     trailColor: 'rgba(245, 158, 11, 0.6)',
     baseSpeed: 2200,
     difficulty: 2,
-    curveAmplitude: 140,
-    description: '좌우로 크게 호를 그리며 휘어 들어오는 공'
+    curveAmplitude: 120,
+    description: '옆으로 크게 휘어지는 궤적의 커브볼'
   },
   SINKER: {
     id: 'SINKER',
-    name: '급강하 싱커',
-    color: '#EC4899',
-    trailColor: 'rgba(236, 72, 153, 0.6)',
-    baseSpeed: 2000,
+    name: '낙차 큰 싱커',
+    color: '#A855F7',
+    trailColor: 'rgba(168, 85, 247, 0.6)',
+    baseSpeed: 1950,
     difficulty: 3,
-    verticalDrop: 90,
-    description: '홈플레이트 바로 앞에서 바닥으로 뚝 떨어지는 공'
+    verticalDrop: 60,
+    description: '타석 앞에서 아래로 급격히 가라앉는 싱커'
   },
   ZIGZAG: {
     id: 'ZIGZAG',
-    name: '번개 지그재그 마구',
-    color: '#A855F7',
-    trailColor: 'rgba(168, 85, 247, 0.7)',
-    baseSpeed: 1900,
+    name: '도촌 마구 (지그재그)',
+    color: '#EC4899',
+    trailColor: 'rgba(236, 72, 153, 0.7)',
+    baseSpeed: 2100,
     difficulty: 4,
     zigzagFreq: 4,
-    zigzagAmp: 90,
-    description: '번개처럼 좌우로 지그재그 꺾여 날아오는 마구'
+    zigzagAmp: 75,
+    description: '좌우로 번갈아 꺾이며 날아오는 마구'
   },
   GHOST: {
     id: 'GHOST',
-    name: '사라지는 유령 마구',
-    color: '#38BDF8',
-    trailColor: 'rgba(56, 189, 248, 0.4)',
-    baseSpeed: 1800,
-    difficulty: 5,
+    name: '도촌 유령 마구',
+    color: '#94A3B8',
+    trailColor: 'rgba(148, 163, 184, 0.5)',
+    baseSpeed: 2200,
+    difficulty: 4,
     disappearRange: [0.35, 0.75],
-    description: '공중에서 투명해졌다가 타석 앞에서 다시 나타나는 마구'
+    description: '중간 구간에서 시야에서 사라졌다가 나타나는 유령구'
   },
   FIREBALL: {
     id: 'FIREBALL',
@@ -109,10 +109,10 @@ export const PITCH_TYPES = {
 
 // Batting Timing Judgments (ms difference between swing and sweet spot)
 export const TIMING_THRESHOLDS = {
-  PERFECT: 35,   // +/- 35ms -> Homerun
-  GREAT: 75,     // +/- 75ms -> 2B or 3B
-  GOOD: 125,     // +/- 125ms -> 1B Hit
-  FOUL: 175      // +/- 175ms -> Foul
+  PERFECT: 55,   // +/- 55ms -> Homerun / Grand Slam
+  GREAT: 130,    // +/- 130ms -> 2B / 3B
+  GOOD: 220,     // +/- 220ms -> 1B Hit
+  FOUL: 320      // +/- 320ms -> Foul
 };
 
 // Hit Type Definitions & Scoring

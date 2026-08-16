@@ -12,9 +12,10 @@ import {
 } from './baseballConstants';
 
 /**
- * Creates a transparent sprite canvas from a source image by keying out white background
+ * Creates a transparent sprite canvas from a source image by flood-filling the outer white background.
+ * Preserves all internal white details (pants, eyes, gloves, socks) with 100% opacity!
  */
-export function createTransparentSprite(img, threshold = 235) {
+export function createTransparentSprite(img, threshold = 225) {
   const offCanvas = document.createElement('canvas');
   const w = img.naturalWidth || img.width || 400;
   const h = img.naturalHeight || img.height || 400;
@@ -28,24 +29,83 @@ export function createTransparentSprite(img, threshold = 235) {
     const imgData = ctx.getImageData(0, 0, w, h);
     const data = imgData.data;
 
-    for (let i = 0; i < data.length; i += 4) {
-      const r = data[i];
-      const g = data[i + 1];
-      const b = data[i + 2];
+    // Fast boundary-connected flood fill (BFS) so internal whites stay solid!
+    const isBackground = new Uint8Array(w * h);
+    const queue = [];
 
-      // Solid white or near-white background removal
-      if (r >= threshold && g >= threshold && b >= threshold) {
-        data[i + 3] = 0;
-      } else if (r >= threshold - 20 && g >= threshold - 20 && b >= threshold - 20) {
-        // Soft anti-aliasing edge blending
-        const avg = (r + g + b) / 3;
-        const alphaRatio = (255 - avg) / 25;
-        data[i + 3] = Math.max(0, Math.min(255, Math.floor(data[i + 3] * alphaRatio)));
+    const isWhite = (idx) => {
+      const r = data[idx];
+      const g = data[idx + 1];
+      const b = data[idx + 2];
+      return r >= threshold && g >= threshold && b >= threshold;
+    };
+
+    // Enqueue top & bottom border pixels
+    for (let x = 0; x < w; x++) {
+      const topIdx = (0 * w + x) * 4;
+      if (isWhite(topIdx)) {
+        isBackground[x] = 1;
+        queue.push(x);
+      }
+      const bPos = (h - 1) * w + x;
+      const bottomIdx = bPos * 4;
+      if (isWhite(bottomIdx)) {
+        isBackground[bPos] = 1;
+        queue.push(bPos);
       }
     }
+
+    // Enqueue left & right border pixels
+    for (let y = 0; y < h; y++) {
+      const lPos = y * w;
+      const leftIdx = lPos * 4;
+      if (!isBackground[lPos] && isWhite(leftIdx)) {
+        isBackground[lPos] = 1;
+        queue.push(lPos);
+      }
+      const rPos = y * w + (w - 1);
+      const rightIdx = rPos * 4;
+      if (!isBackground[rPos] && isWhite(rightIdx)) {
+        isBackground[rPos] = 1;
+        queue.push(rPos);
+      }
+    }
+
+    // BFS Queue Expansion
+    let head = 0;
+    while (head < queue.length) {
+      const pos = queue[head++];
+      const px = pos % w;
+      const py = Math.floor(pos / w);
+
+      const neighbors = [
+        px > 0 ? pos - 1 : -1,
+        px < w - 1 ? pos + 1 : -1,
+        py > 0 ? pos - w : -1,
+        py < h - 1 ? pos + w : -1
+      ];
+
+      for (const nPos of neighbors) {
+        if (nPos >= 0 && !isBackground[nPos]) {
+          const nIdx = nPos * 4;
+          if (isWhite(nIdx)) {
+            isBackground[nPos] = 1;
+            queue.push(nPos);
+          }
+        }
+      }
+    }
+
+    // Apply transparency ONLY to verified external background pixels
+    for (let i = 0; i < w * h; i++) {
+      if (isBackground[i]) {
+        data[i * 4 + 3] = 0;
+      }
+    }
+
     ctx.putImageData(imgData, 0, 0);
   } catch (e) {
-    // In case of any cross-origin restrictions, fallback to original canvas
+    console.warn('createTransparentSprite fallback:', e);
   }
 
   return offCanvas;

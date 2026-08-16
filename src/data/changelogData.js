@@ -3,11 +3,35 @@
 
 export const CHANGELOG_DATA = [
   {
+    version: 'v1.7.4',
+    date: '2026-08-16',
+    title: '도촌 야구왕 [타자 타석 위치 최적화 & 캐릭터 바지/눈/글러브 색상 복원 & 타이밍 판정 개선]',
+    badge: 'LATEST',
+    badgeColor: 'emerald',
+    items: [
+      {
+        tag: 'POSITION',
+        tagColor: 'blue',
+        text: '[타자 타석 위치 정밀 보정] 타자 캐릭터를 가운데 홈플레이트 바로 왼쪽(X=400, Y=445) 타석 박스로 자연스럽게 이동 배치'
+      },
+      {
+        tag: 'GRAPHICS',
+        tagColor: 'purple',
+        text: '[Flood Fill 배경 분리 엔진 탑재] 외곽 배경만 스마트하게 투명화하여 타자 및 투수의 흰색 바지, 눈동자, 글러브, 양말 색상을 100% 온전하게 복원'
+      },
+      {
+        tag: 'TIMING & BUFFER',
+        tagColor: 'emerald',
+        text: '[타격 타이밍 판정 범위 확대 & 연타 방지 버퍼] 안타 판정 폭(±220ms) 확대 및 투구 직후(300ms) 실수 클릭으로 인한 즉시 스트라이크/아웃 방지 안전 버퍼 적용'
+      }
+    ]
+  },
+  {
     version: 'v1.7.3',
     date: '2026-08-16',
     title: '도촌 야구왕 [3D 원근 야구장 배경 & 우측 조준 좌타자 에셋] 전면 리뉴얼',
-    badge: 'LATEST',
-    badgeColor: 'emerald',
+    badge: 'UPDATE',
+    badgeColor: 'blue',
     items: [
       {
         tag: 'NEW 3D BG',

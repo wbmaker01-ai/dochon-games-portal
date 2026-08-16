@@ -232,13 +232,23 @@ export default function BaseballGame({ onScoreSubmitted }) {
 
     if (gameStateRef.current !== 'PITCHING' || isSwungRef.current) return;
 
-    isSwungRef.current = true;
-    batterStateRef.current = 'SWING';
-
     const now = performance.now();
     const elapsed = now - pitchStartTimeRef.current;
     const duration = pitchDurationRef.current;
     const targetArrival = duration;
+
+    // Early swing safety buffer (ignore accidental clicks within 300ms of pitch release)
+    if (elapsed < 300) {
+      batterStateRef.current = 'SWING';
+      if (swingDisplayTimerRef.current) clearTimeout(swingDisplayTimerRef.current);
+      swingDisplayTimerRef.current = setTimeout(() => {
+        batterStateRef.current = 'READY';
+      }, 250);
+      return;
+    }
+
+    isSwungRef.current = true;
+    batterStateRef.current = 'SWING';
 
     const pitch = currentPitchRef.current || PITCH_TYPES.FASTBALL;
     const result = judgeSwing(elapsed, targetArrival, pitch, runnersRef.current);
@@ -565,8 +575,8 @@ export default function BaseballGame({ onScoreSubmitted }) {
         : batterReadySpriteRef.current;
 
       if (activeBatterSprite) {
-        const bW = 230;
-        const bH = 230;
+        const bW = 185;
+        const bH = 185;
         const bX = BATTER_POS.x - bW / 2;
         const bY = BATTER_POS.y - bH / 2;
 
