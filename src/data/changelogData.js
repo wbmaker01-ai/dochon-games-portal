@@ -45,6 +45,11 @@ export const CHANGELOG_DATA = [
         text: '막힘 실시간 감지기(Dead-end Detector) 및 초등학생 구원 [🪄 마법의 셔플 (Magic Shuffle)] 찬스 기능 신설'
       },
       {
+        tag: 'UI/UX',
+        tagColor: 'blue',
+        text: '상단 카드 영역(덱, 뽑은 카드, 완성칸 4개)을 바닥 7열과 동일한 7열 대칭 그리드로 전면 개편하여 카드 크기 확대 및 시각적 시인성 대폭 개선'
+      },
+      {
         tag: 'AUTO WIN',
         tagColor: 'emerald',
         text: '바닥 카드가 모두 열려 클리어가 확정되었을 때 1초 만에 덱을 완성하는 [🎉 자동 완성하기] 기능 및 승리 폭죽 세레머니 구현'

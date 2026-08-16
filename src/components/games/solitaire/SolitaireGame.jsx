@@ -572,106 +572,111 @@ export default function SolitaireGame({ onScoreSubmitted }) {
       {/* 4. Solitaire Game Board Table */}
       <div className="solitaire-board">
         
-        {/* TOP ROW: Stock + Waste | 4 Foundations */}
+        {/* TOP ROW: 7-Column Grid Layout (Exactly matching Tableau Column Widths & Alignment) */}
         <div className="solitaire-top-row">
-          {/* Stock & Waste Group */}
-          <div className="solitaire-stock-waste-group">
-            {/* Stock Pile */}
-            <div
-              onClick={handleStockClick}
-              className={`solitaire-card-slot slot-stock ${
-                hint && hint.highlightZone === 'stock' ? 'slot-highlight' : ''
-              }`}
-              title="카드 뽑기 더미"
-            >
-              {gameState.stock.length > 0 ? (
-                <div className="solitaire-card card-back">
-                  <span style={{ position: 'absolute', bottom: '4px', fontSize: '10px', color: '#93C5FD', fontWeight: 900 }}>
-                    {gameState.stock.length}
-                  </span>
-                </div>
-              ) : (
-                <div className="flex flex-col items-center">
-                  <RotateCcw className="w-5 h-5 opacity-60 mb-1" />
-                  <span className="text-[10px] opacity-75">다시 모으기</span>
-                </div>
-              )}
-            </div>
-
-            {/* Waste Pile (Drawn Cards) */}
-            <div
-              className={`solitaire-card-slot slot-waste ${
-                hint && hint.highlightZone === 'waste' ? 'slot-highlight' : ''
-              }`}
-            >
-              {gameState.waste.length > 0 && (() => {
-                const topWasteCard = gameState.waste[gameState.waste.length - 1];
-                const isHintCard = hint && hint.highlightCardId === topWasteCard.id;
-                return (
-                  <div
-                    onClick={() => handleSmartCardClick(topWasteCard, { type: 'waste' })}
-                    className={`solitaire-card ${topWasteCard.color === 'red' ? 'card-red' : 'card-black'} ${
-                      isHintCard ? 'card-highlight-hint' : ''
-                    }`}
-                  >
-                    <div className="card-corner">
-                      <span className="card-rank-text">{topWasteCard.rankLabel}</span>
-                      <span className="card-suit-mini">{topWasteCard.suitSymbol}</span>
-                    </div>
-                    <div className="card-center-icon">{topWasteCard.suitSymbol}</div>
-                    <div className="card-corner" style={{ transform: 'rotate(180deg)' }}>
-                      <span className="card-rank-text">{topWasteCard.rankLabel}</span>
-                      <span className="card-suit-mini">{topWasteCard.suitSymbol}</span>
-                    </div>
-                  </div>
-                );
-              })()}
-            </div>
+          {/* Col 1: Stock Pile (카드 뽑기 더미) */}
+          <div
+            onClick={handleStockClick}
+            className={`solitaire-card-slot slot-stock ${
+              hint && hint.highlightZone === 'stock' ? 'slot-highlight' : ''
+            }`}
+            title="카드 뽑기 더미 (클릭하여 새 카드 확인)"
+          >
+            {gameState.stock.length > 0 ? (
+              <div className="solitaire-card card-back">
+                <span className="stock-count-badge">
+                  {gameState.stock.length}장
+                </span>
+              </div>
+            ) : (
+              <div className="stock-empty-box">
+                <RotateCcw className="w-6 h-6 text-amber-300/80 mb-1" />
+                <span className="text-[11px] text-amber-200 font-black">다시 모으기</span>
+              </div>
+            )}
           </div>
 
-          {/* 4 Foundations Group (♠, ♥, ♦, ♣) */}
-          <div className="solitaire-foundations-group">
-            {SUIT_KEYS.map(suitKey => {
-              const suitObj = SUITS[suitKey.toUpperCase()];
-              const pile = gameState.foundations[suitKey] || [];
-              const topCard = pile.length > 0 ? pile[pile.length - 1] : null;
-              const isTargetHint = hint && hint.targetZone === `foundation-${suitKey}`;
-
+          {/* Col 2: Waste Pile (뒤집은 카드) */}
+          <div
+            className={`solitaire-card-slot slot-waste ${
+              hint && hint.highlightZone === 'waste' ? 'slot-highlight' : ''
+            }`}
+          >
+            {gameState.waste.length > 0 ? (() => {
+              const topWasteCard = gameState.waste[gameState.waste.length - 1];
+              const isHintCard = hint && hint.highlightCardId === topWasteCard.id;
               return (
                 <div
-                  key={suitKey}
-                  onClick={() => {
-                    if (topCard) {
-                      handleSmartCardClick(topCard, { type: 'foundation', suit: suitKey });
-                    }
-                  }}
-                  className={`solitaire-card-slot slot-foundation ${
-                    isTargetHint ? 'slot-highlight' : ''
+                  onClick={() => handleSmartCardClick(topWasteCard, { type: 'waste' })}
+                  className={`solitaire-card ${topWasteCard.color === 'red' ? 'card-red' : 'card-black'} ${
+                    isHintCard ? 'card-highlight-hint' : ''
                   }`}
-                  title={`${suitObj.name} 완성칸 (A ➔ K)`}
+                  title="클릭하여 바닥이나 완성칸으로 이동"
                 >
-                  {topCard ? (
-                    <div className={`solitaire-card ${topCard.color === 'red' ? 'card-red' : 'card-black'}`}>
-                      <div className="card-corner">
-                        <span className="card-rank-text">{topCard.rankLabel}</span>
-                        <span className="card-suit-mini">{topCard.suitSymbol}</span>
-                      </div>
-                      <div className="card-center-icon">{topCard.suitSymbol}</div>
-                      <div className="card-corner" style={{ transform: 'rotate(180deg)' }}>
-                        <span className="card-rank-text">{topCard.rankLabel}</span>
-                        <span className="card-suit-mini">{topCard.suitSymbol}</span>
-                      </div>
-                    </div>
-                  ) : (
-                    <div className="flex flex-col items-center">
-                      <span className="text-xl opacity-40">{suitObj.symbol}</span>
-                      <span className="text-[10px] text-amber-300/60 font-black mt-1">A</span>
-                    </div>
-                  )}
+                  <div className="card-corner">
+                    <span className="card-rank-text">{topWasteCard.rankLabel}</span>
+                    <span className="card-suit-mini">{topWasteCard.suitSymbol}</span>
+                  </div>
+                  <div className="card-center-icon">{topWasteCard.suitSymbol}</div>
+                  <div className="card-corner" style={{ transform: 'rotate(180deg)' }}>
+                    <span className="card-rank-text">{topWasteCard.rankLabel}</span>
+                    <span className="card-suit-mini">{topWasteCard.suitSymbol}</span>
+                  </div>
                 </div>
               );
-            })}
+            })() : (
+              <div className="waste-empty-placeholder">
+                <span className="text-[11px] text-white/30 font-bold">뽑은 카드</span>
+              </div>
+            )}
           </div>
+
+          {/* Col 3: Middle Spacer (중앙 여백) */}
+          <div className="solitaire-top-spacer" />
+
+          {/* Col 4, 5, 6, 7: 4 Foundation Piles (♠, ♥, ♦, ♣) */}
+          {SUIT_KEYS.map(suitKey => {
+            const suitObj = SUITS[suitKey.toUpperCase()];
+            const pile = gameState.foundations[suitKey] || [];
+            const topCard = pile.length > 0 ? pile[pile.length - 1] : null;
+            const isTargetHint = hint && hint.targetZone === `foundation-${suitKey}`;
+
+            return (
+              <div
+                key={suitKey}
+                onClick={() => {
+                  if (topCard) {
+                    handleSmartCardClick(topCard, { type: 'foundation', suit: suitKey });
+                  }
+                }}
+                className={`solitaire-card-slot slot-foundation ${
+                  isTargetHint ? 'slot-highlight' : ''
+                }`}
+                title={`${suitObj.name} 완성칸 (A부터 K까지 쌓기)`}
+              >
+                {topCard ? (
+                  <div className={`solitaire-card ${topCard.color === 'red' ? 'card-red' : 'card-black'}`}>
+                    <div className="card-corner">
+                      <span className="card-rank-text">{topCard.rankLabel}</span>
+                      <span className="card-suit-mini">{topCard.suitSymbol}</span>
+                    </div>
+                    <div className="card-center-icon">{topCard.suitSymbol}</div>
+                    <div className="card-corner" style={{ transform: 'rotate(180deg)' }}>
+                      <span className="card-rank-text">{topCard.rankLabel}</span>
+                      <span className="card-suit-mini">{topCard.suitSymbol}</span>
+                    </div>
+                  </div>
+                ) : (
+                  <div className="foundation-empty-slot">
+                    <span className={`foundation-watermark ${suitObj.color === 'red' ? 'text-rose-400/50' : 'text-slate-300/40'}`}>
+                      {suitObj.symbol}
+                    </span>
+                    <span className="foundation-a-badge">A</span>
+                  </div>
+                )}
+              </div>
+            );
+          })}
         </div>
 
         {/* BOTTOM ROW: 7 Tableau Columns */}
