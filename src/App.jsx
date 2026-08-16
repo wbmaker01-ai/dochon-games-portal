@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import PacManGame from './components/games/pacman/PacManGame';
 import DinoGame from './components/games/dino/DinoGame';
 import SnakeGame from './components/games/snake/SnakeGame';
+import SolitaireGame from './components/games/solitaire/SolitaireGame';
 import GameCard from './components/GameCard';
 import LeaderboardModal from './components/LeaderboardModal';
 import ChangelogModal from './components/ChangelogModal';
@@ -20,9 +21,9 @@ export default function App() {
   const [favorites, setFavorites] = useState(() => {
     try {
       const saved = localStorage.getItem('dochon_favorites');
-      return saved ? JSON.parse(saved) : ['pacman', 'dino', 'snake'];
+      return saved ? JSON.parse(saved) : ['pacman', 'dino', 'snake', 'solitaire'];
     } catch (e) {
-      return ['pacman', 'dino', 'snake'];
+      return ['pacman', 'dino', 'snake', 'solitaire'];
     }
   });
 
@@ -128,6 +129,7 @@ export default function App() {
     if (game.id === 'pacman') return '🔥 팩맨 챔피언에 도전하기';
     if (game.id === 'dino') return '🔥 공룡 달리기 챔피언에 도전하기';
     if (game.id === 'snake') return '🔥 스네이크 챔피언에 도전하기';
+    if (game.id === 'solitaire') return '🔥 솔리테어 챔피언에 도전하기';
     return `🔥 ${game.title.replace('도촌 ', '')} 챔피언에 도전하기`;
   };
 
@@ -370,6 +372,7 @@ export default function App() {
                   {activeGame === 'pacman' && '🕹️ 도촌 팩맨 (DOCHON PAC-MAN)'}
                   {activeGame === 'dino' && '🦖 도촌 공룡 달리기 (DOCHON DINO RUN)'}
                   {activeGame === 'snake' && '🐍 도촌 스네이크 (DOCHON SNAKE MASTER)'}
+                  {activeGame === 'solitaire' && '🃏 도촌 솔리테어 (DOCHON SOLITAIRE)'}
                 </span>
                 <span style={{
                   backgroundColor: 'rgba(251, 191, 36, 0.2)',
@@ -405,6 +408,9 @@ export default function App() {
               )}
               {activeGame === 'snake' && (
                 <SnakeGame onScoreSubmitted={() => openInPageLeaderboardModal('snake')} />
+              )}
+              {activeGame === 'solitaire' && (
+                <SolitaireGame onScoreSubmitted={() => openInPageLeaderboardModal('solitaire')} />
               )}
             </div>
           </div>

@@ -3,11 +3,55 @@
 
 export const CHANGELOG_DATA = [
   {
+    version: 'v1.5.0',
+    date: '2026-08-16',
+    title: '초등학생 맞춤형 카드 퍼즐 [도촌 솔리테어] 정식 출시 & 스마트 코칭 시스템 신설',
+    badge: 'LATEST',
+    badgeColor: 'emerald',
+    items: [
+      {
+        tag: 'NEW GAME',
+        tagColor: 'amber',
+        text: '초등학생 눈높이에 맞춘 클래식 카드 퍼즐 [도촌 솔리테어 (Dochon Solitaire)] 정식 출시 및 독립 모듈(src/components/games/solitaire/) 구축'
+      },
+      {
+        tag: 'COACH',
+        tagColor: 'teal',
+        text: '[초등학생 눈높이 완벽 가이드 모달(📖 게임 방법)] 신설 (그림과 이모지로 색깔 번갈아 놓기, K 빈칸 이동, A 완성칸 올리기 등 4대 핵심 규칙 제공)'
+      },
+      {
+        tag: 'SMART HINT',
+        tagColor: 'amber',
+        text: '실시간 [스마트 힌트(💡 힌트 보기)] 코칭 시스템 탑재 (이동 가능한 카드에 황금빛 반짝임 효과 및 친절한 다음 행동 가이드 말풍선 제공)'
+      },
+      {
+        tag: 'EASY UX',
+        tagColor: 'emerald',
+        text: '[원클릭 스마트 자동 이동(Tap-to-Move)] 지원 (카드를 클릭/터치하기만 해도 완성칸 또는 바닥 열로 최적의 위치를 찾아 자동으로 쏙 이동)'
+      },
+      {
+        tag: 'FEATURE',
+        tagColor: 'blue',
+        text: '초등학생 추천 [1장 뽑기(쉬움, 기본값)] 및 [3장 뽑기(도전)] 난이도 선택, 무제한 [실행 취소(Undo)] 지원'
+      },
+      {
+        tag: 'AUTO WIN',
+        tagColor: 'purple',
+        text: '바닥 카드가 모두 열려 클리어가 확정되었을 때 1초 만에 덱을 완성하는 [🎉 자동 완성하기] 기능 및 승리 폭죽 세레머니 구현'
+      },
+      {
+        tag: 'AUDIO',
+        tagColor: 'teal',
+        text: 'Web Audio API 기반 리얼 카드 셔플, 카드 뒤집기음, 안착음, 힌트 차임벨 및 승리 팡파르 효과음 5종 추가'
+      }
+    ]
+  },
+  {
     version: 'v1.4.0',
     date: '2026-08-16',
     title: '스네이크 터치 D-Pad 고도화 & 업데이트 내역 모달 시스템 신설',
-    badge: 'LATEST',
-    badgeColor: 'emerald',
+    badge: 'UPDATE',
+    badgeColor: 'blue',
     items: [
       {
         tag: 'UI/UX',

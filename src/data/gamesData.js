@@ -28,19 +28,21 @@ export const PLAYABLE_GAMES = [
     category: '클래식',
     imageSrc: getThumb('snake.jpg'),
     isPlayable: true,
-    badgeText: '🐍 NEW 3위',
+    badgeText: '🐍 인기 3위',
     description: '사과를 먹고 몸집을 불려 도촌 스네이크 마스터가 되어보세요!'
+  },
+  {
+    id: 'solitaire',
+    title: '도촌 솔리테어',
+    category: '카드',
+    imageSrc: getThumb('solitaire.jpg'),
+    isPlayable: true,
+    badgeText: '🃏 NEW 4위',
+    description: 'A부터 K까지 카드를 정리하는 초등학생 맞춤형 솔리테어 퍼즐!'
   }
 ];
 
 export const COMING_SOON_GAMES = [
-  {
-    id: 'solitaire',
-    title: '솔리테어',
-    category: '카드',
-    imageSrc: getThumb('solitaire.jpg'),
-    isPlayable: false
-  },
   {
     id: 'minesweeper',
     title: '지뢰찾기',

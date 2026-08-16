@@ -267,11 +267,13 @@ export default function LeaderboardModal({ isOpen, onClose, activeTab = 'pacman'
             if (game.id === 'pacman') iconEmoji = '🟡';
             if (game.id === 'dino') iconEmoji = '🦖';
             if (game.id === 'snake') iconEmoji = '🐍';
+            if (game.id === 'solitaire') iconEmoji = '🃏';
 
             let activeCustomStyle = {};
             if (isActive) {
               if (game.id === 'dino') activeCustomStyle = { background: 'linear-gradient(135deg, #34D399, #10B981)', color: '#064E3B' };
               else if (game.id === 'snake') activeCustomStyle = { background: 'linear-gradient(135deg, #10B981, #059669)', color: '#FFFFFF' };
+              else if (game.id === 'solitaire') activeCustomStyle = { background: 'linear-gradient(135deg, #F59E0B, #D97706)', color: '#0F172A' };
             }
 
             return (
