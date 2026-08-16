@@ -82,8 +82,16 @@ export async function getLeaderboardFromDB(gameKey = 'pacman') {
  * Submit a new high score record to the Cloud DB (Updates existing record if higher, or pushes new)
  */
 export async function submitScoreToDB(gameKey, name, score) {
-  const cleanName = String(name).trim() || '도촌 학생';
-  const newScore = Number(score) || 0;
+  let cleanName = '도촌 학생';
+  let newScore = 0;
+
+  if (typeof name === 'object' && name !== null) {
+    cleanName = String(name.name || '').trim() || '도촌 학생';
+    newScore = Number(name.score) || 0;
+  } else {
+    cleanName = String(name || '').trim() || '도촌 학생';
+    newScore = Number(score) || 0;
+  }
 
   // Rule: Do not register scores of 100 or below to Leaderboard
   if (newScore <= 100) {

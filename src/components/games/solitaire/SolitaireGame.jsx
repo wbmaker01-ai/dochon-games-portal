@@ -390,13 +390,7 @@ export default function SolitaireGame({ onScoreSubmitted }) {
     if (!cleanName || score <= 100) return;
 
     try {
-      await submitScoreToDB('solitaire', {
-        name: cleanName,
-        score: score,
-        time: timeElapsed,
-        moves: moves,
-        date: new Date().toISOString()
-      });
+      await submitScoreToDB('solitaire', cleanName, score);
       setSubmitted(true);
       if (onScoreSubmitted) {
         onScoreSubmitted();
