@@ -9,7 +9,8 @@ import {
   STAGE_CONFIGS,
   ITEM_TYPES,
   GRAZE_DISTANCE,
-  GRAZE_SCORE
+  GRAZE_SCORE,
+  getPopcornAsset
 } from './popcornConstants';
 import {
   soundManager,
@@ -110,13 +111,13 @@ export default function PopcornGame({ onScoreSubmitted }) {
   useEffect(() => {
     soundManager.init();
     const assets = {
-      bgPan: '/assets/popcorn/bg_pan.jpg',
-      cornIdle: '/assets/popcorn/corn_idle.jpg',
-      cornShield: '/assets/popcorn/corn_shield.jpg',
-      cornHeal: '/assets/popcorn/corn_heal.jpg',
-      cornPopped: '/assets/popcorn/corn_popped.jpg',
-      bossButter: '/assets/popcorn/boss_butter.jpg',
-      bossFlame: '/assets/popcorn/boss_flame.jpg'
+      bgPan: getPopcornAsset('bg_pan.jpg'),
+      cornIdle: getPopcornAsset('corn_idle.jpg'),
+      cornShield: getPopcornAsset('corn_shield.jpg'),
+      cornHeal: getPopcornAsset('corn_heal.jpg'),
+      cornPopped: getPopcornAsset('corn_popped.jpg'),
+      bossButter: getPopcornAsset('boss_butter.jpg'),
+      bossFlame: getPopcornAsset('boss_flame.jpg')
     };
 
     Object.entries(assets).forEach(([key, src]) => {
@@ -803,7 +804,7 @@ export default function PopcornGame({ onScoreSubmitted }) {
             <div className="popcorn-result-card">
               {gameState === 'gameover' ? (
                 <img
-                  src="/assets/popcorn/corn_popped.jpg"
+                  src={getPopcornAsset('corn_popped.jpg')}
                   alt="Popped Popcorn"
                   className="w-20 h-20 mx-auto rounded-full object-cover border-2 border-amber-400/50 mb-2 shadow-lg animate-bounce"
                 />

@@ -6,6 +6,9 @@ export const PAN_CENTER_X = CANVAS_WIDTH / 2;
 export const PAN_CENTER_Y = CANVAS_HEIGHT / 2;
 export const PAN_RADIUS = 230; // Circular arena boundary
 
+// Helper to resolve asset path with Vite base URL in production (e.g. /dochon-games-portal/assets/...)
+export const getPopcornAsset = (file) => `${import.meta.env.BASE_URL}assets/popcorn/${file}`;
+
 export const PLAYER_CLASSES = {
   KNIGHT: {
     id: 'knight',
@@ -20,7 +23,7 @@ export const PLAYER_CLASSES = {
     skillCooldown: 10000, // 10s
     skillDuration: 3500,  // 3.5s
     skillDesc: '3.5초간 모든 공격을 무효화하고 탄막을 튕겨냅니다.',
-    avatar: '/assets/popcorn/corn_shield.jpg'
+    avatar: getPopcornAsset('corn_shield.jpg')
   },
   WIZARD: {
     id: 'wizard',
@@ -35,7 +38,7 @@ export const PLAYER_CLASSES = {
     skillCooldown: 12000, // 12s
     skillDuration: 800,   // Instant pulse
     skillDesc: '체력을 1 회복하고 주변 넓은 범위의 탄막을 모두 지웁니다.',
-    avatar: '/assets/popcorn/corn_heal.jpg'
+    avatar: getPopcornAsset('corn_heal.jpg')
   },
   RUNNER: {
     id: 'runner',
@@ -50,7 +53,7 @@ export const PLAYER_CLASSES = {
     skillCooldown: 7000, // 7s
     skillDuration: 1800,  // 1.8s
     skillDesc: '1.8초간 이동속도가 폭발적으로 증가하며 완전 무적 상태가 됩니다.',
-    avatar: '/assets/popcorn/corn_idle.jpg'
+    avatar: getPopcornAsset('corn_idle.jpg')
   }
 };
 
