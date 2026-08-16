@@ -8,8 +8,44 @@ import {
   HOME_PLATE_POS,
   PITCH_TYPES,
   TIMING_THRESHOLDS,
-  HIT_RESULTS
+  HIT_RESULTS,
+  SPEED_LEVELS
 } from './baseballConstants';
+
+/**
+ * Calculate dynamic pitch speed and speed tier level based on score progression
+ * Uses an Asymptotic Exponential decay model ensuring min reaction duration (>= 800ms)
+ * @param {number} score Current game score
+ * @param {Object} pitchConfig Pitch configuration object
+ * @returns {{ actualDuration: number, speedLevel: Object, speedMultiplier: number }}
+ */
+export function calculatePitchSpeed(score = 0, pitchConfig = PITCH_TYPES.FASTBALL) {
+  const safeScore = Math.max(0, Number(score) || 0);
+
+  // 1. Identify discrete Speed Tier
+  let currentTier = SPEED_LEVELS[0];
+  for (let i = SPEED_LEVELS.length - 1; i >= 0; i--) {
+    if (safeScore >= SPEED_LEVELS[i].minScore) {
+      currentTier = SPEED_LEVELS[i];
+      break;
+    }
+  }
+
+  // 2. Continuous Asymptotic Exponential Acceleration Formula:
+  // SpeedScale = 1.0 + 0.55 * (1 - e^(-Score / 2500))
+  const expFactor = 1 - Math.exp(-safeScore / 2500);
+  const continuousMultiplier = 1.0 + 0.55 * expFactor;
+
+  // 3. Bound actual duration with human reaction limit (min 800ms)
+  const baseSpeed = pitchConfig?.baseSpeed || 2000;
+  const actualDuration = Math.max(800, Math.round(baseSpeed / continuousMultiplier));
+
+  return {
+    actualDuration,
+    speedLevel: currentTier,
+    speedMultiplier: Number(continuousMultiplier.toFixed(2))
+  };
+}
 
 /**
  * Creates a transparent sprite canvas from a source image by flood-filling the outer white background.

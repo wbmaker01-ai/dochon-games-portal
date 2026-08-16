@@ -6,12 +6,14 @@ import {
   BATTER_POS,
   HOME_PLATE_POS,
   PITCH_TYPES,
-  HIT_RESULTS
+  HIT_RESULTS,
+  SPEED_LEVELS
 } from './baseballConstants';
 import {
   createTransparentSprite,
   selectNextPitch,
   calculateBallState,
+  calculatePitchSpeed,
   judgeSwing,
   advanceRunners,
   ParticleSystem
@@ -66,6 +68,7 @@ export default function BaseballGame({ onScoreSubmitted }) {
   const runnersRef = useRef([false, false, false]); // [1B, 2B, 3B]
 
   const currentPitchRef = useRef(PITCH_TYPES.FASTBALL);
+  const speedLevelRef = useRef(SPEED_LEVELS[0]);
   const pitchStartTimeRef = useRef(0);
   const pitchDurationRef = useRef(2000);
   const isSwungRef = useRef(false);
@@ -86,11 +89,13 @@ export default function BaseballGame({ onScoreSubmitted }) {
   const [strikes, setStrikes] = useState(0);
   const [outs, setOuts] = useState(0);
   const [runners, setRunners] = useState([false, false, false]);
+  const [speedLevel, setSpeedLevel] = useState(SPEED_LEVELS[0]);
 
   // UI / Feedback Overlays
   const [isMuted, setIsMuted] = useState(soundFx.muted);
   const [isHowToPlayOpen, setIsHowToPlayOpen] = useState(false);
   const [pitchToast, setPitchToast] = useState(null);
+  const [speedUpAlert, setSpeedUpAlert] = useState(null);
   const [hitFeedback, setHitFeedback] = useState(null);
   const [showHomerunBadge, setShowHomerunBadge] = useState(false);
 
@@ -111,6 +116,7 @@ export default function BaseballGame({ onScoreSubmitted }) {
     setStrikes(strikesRef.current);
     setOuts(outsRef.current);
     setRunners([...runnersRef.current]);
+    setSpeedLevel(speedLevelRef.current);
   }, []);
 
   // 1. Asset Preloading & Transparent Sprite Generation
@@ -136,9 +142,9 @@ export default function BaseballGame({ onScoreSubmitted }) {
       loadedCount++;
       if (loadedCount === totalToLoad && isMounted) {
         bgImgRef.current = bg;
-        batterReadySpriteRef.current = createTransparentSprite(bReady, 235);
-        batterSwingSpriteRef.current = createTransparentSprite(bSwing, 235);
-        pitcherSpriteRef.current = createTransparentSprite(pitcher, 235);
+        batterReadySpriteRef.current = createTransparentSprite(bReady, 225);
+        batterSwingSpriteRef.current = createTransparentSprite(bSwing, 225);
+        pitcherSpriteRef.current = createTransparentSprite(pitcher, 225);
         homerunBadgeImgRef.current = badge;
         assetsLoadedRef.current = true;
       }
@@ -164,7 +170,7 @@ export default function BaseballGame({ onScoreSubmitted }) {
     setIsMuted(nextMuted);
   };
 
-  // 2. Start a New Pitch (Always reads from live refs)
+  // 2. Start a New Pitch (Dynamically scales pitch duration and speed tier)
   const startNextPitch = useCallback(() => {
     if (nextPitchTimeoutRef.current) clearTimeout(nextPitchTimeoutRef.current);
 
@@ -177,9 +183,18 @@ export default function BaseballGame({ onScoreSubmitted }) {
     const currentScore = scoreRef.current;
     const currentCombo = comboRef.current;
     const pitch = selectNextPitch(currentScore, currentCombo);
+    const speedInfo = calculatePitchSpeed(currentScore, pitch);
 
+    // Check if speed level leveled up!
+    if (speedInfo.speedLevel.level > speedLevelRef.current.level) {
+      soundFx.playPacmanEatFruit();
+      setSpeedUpAlert(speedInfo.speedLevel);
+      setTimeout(() => setSpeedUpAlert(null), 1800);
+    }
+
+    speedLevelRef.current = speedInfo.speedLevel;
     currentPitchRef.current = pitch;
-    pitchDurationRef.current = pitch.baseSpeed;
+    pitchDurationRef.current = speedInfo.actualDuration;
     pitchStartTimeRef.current = performance.now();
     isSwungRef.current = false;
     batterStateRef.current = 'READY';
@@ -207,9 +222,11 @@ export default function BaseballGame({ onScoreSubmitted }) {
     strikesRef.current = 0;
     outsRef.current = 0;
     runnersRef.current = [false, false, false];
+    speedLevelRef.current = SPEED_LEVELS[0];
     gameStateRef.current = 'IDLE';
 
     setHitFeedback(null);
+    setSpeedUpAlert(null);
     setShowHomerunBadge(false);
     setIsSubmitted(false);
     setPlayerName('');
@@ -688,6 +705,18 @@ export default function BaseballGame({ onScoreSubmitted }) {
 
         {/* Right: Stats & Game Controls */}
         <div className="scoreboard-right">
+          {/* Dynamic Speed Level Tier Badge */}
+          <div
+            className="hud-stat-pill speed-level-pill"
+            title={`스피드 단계: Lv.${speedLevel.level} ${speedLevel.name} (${speedLevel.speedMultiplier}x 속도)`}
+            style={{ borderLeft: `3px solid ${speedLevel.color}` }}
+          >
+            <span className="scoreboard-label" style={{ color: speedLevel.color }}>SPEED</span>
+            <span className="hud-stat-num" style={{ color: speedLevel.color, fontSize: '13px', fontWeight: 900 }}>
+              Lv.{speedLevel.level}
+            </span>
+          </div>
+
           <div className="hud-stat-pill" title="홈런 개수">
             <span className="scoreboard-label">HOMERUN</span>
             <span className="hud-stat-num">{homeruns}</span>
@@ -733,6 +762,21 @@ export default function BaseballGame({ onScoreSubmitted }) {
           <div className="pitch-name-toast">
             <Zap style={{ width: '14px', height: '14px', color: pitchToast.color }} />
             <span>{pitchToast.name}</span>
+          </div>
+        )}
+
+        {/* Speed Up Level Up Toast Alert */}
+        {speedUpAlert && (
+          <div className="speed-up-toast-overlay">
+            <div className="speed-up-toast-card" style={{ borderColor: speedUpAlert.color }}>
+              <Zap style={{ width: '20px', height: '20px', color: speedUpAlert.color }} />
+              <div className="speed-up-toast-text">
+                <span className="speed-up-title">⚡ SPEED UP!</span>
+                <span className="speed-up-sub" style={{ color: speedUpAlert.color }}>
+                  Lv.{speedUpAlert.level} {speedUpAlert.name} 진입 ({speedUpAlert.speedMultiplier}x 속도)
+                </span>
+              </div>
+            </div>
           </div>
         )}
 

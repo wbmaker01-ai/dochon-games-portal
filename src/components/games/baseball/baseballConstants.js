@@ -23,6 +23,16 @@ export const HOME_PLATE_POS = {
   y: 460
 };
 
+// Progressive Speed Level Tiers
+export const SPEED_LEVELS = [
+  { level: 1, name: '루키 (Rookie)', minScore: 0, speedMultiplier: 1.0, color: '#10B981', bgBadge: '#064E3B' },
+  { level: 2, name: '주니어 (Junior)', minScore: 400, speedMultiplier: 1.10, color: '#38BDF8', bgBadge: '#0C4A6E' },
+  { level: 3, name: '에이스 (Ace)', minScore: 1000, speedMultiplier: 1.22, color: '#FBBF24', bgBadge: '#78350F' },
+  { level: 4, name: '마스터 (Master)', minScore: 2000, speedMultiplier: 1.35, color: '#FB923C', bgBadge: '#7C2D12' },
+  { level: 5, name: '올스타 (All-Star)', minScore: 3500, speedMultiplier: 1.46, color: '#F43F5E', bgBadge: '#881337' },
+  { level: 6, name: '레전드 (Legend)', minScore: 5000, speedMultiplier: 1.55, color: '#C084FC', bgBadge: '#581C87' }
+];
+
 // Pitch Types Definitions
 export const PITCH_TYPES = {
   FASTBALL: {

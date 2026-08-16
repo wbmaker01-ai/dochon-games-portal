@@ -3,11 +3,35 @@
 
 export const CHANGELOG_DATA = [
   {
+    version: 'v1.7.6',
+    date: '2026-08-16',
+    title: '도촌 야구왕 [점수 비례 점진적 투구 속도 가속 엔진 & SPEED Lv.1~MAX 시스템] 탑재',
+    badge: 'LATEST',
+    badgeColor: 'emerald',
+    items: [
+      {
+        tag: 'SPEED ENGINE',
+        tagColor: 'amber',
+        text: '[하이브리드 지수 감쇠형 투구 속도 가속] 점수가 올라갈수록 공의 속도가 점진적으로 빨라지며(기본 1.0x ~ 최대 1.55x), 최소 반응 한계 시간(800ms)을 보장하는 공정한 난이도 곡선 구현'
+      },
+      {
+        tag: 'HUD BADGE',
+        tagColor: 'blue',
+        text: '[실시간 SPEED Level HUD] 상단 전광판에 현재 스피드 단계(Lv.1 루키 ~ Lv.MAX 레전드)를 직관적으로 표시'
+      },
+      {
+        tag: 'LEVEL UP ALERT',
+        tagColor: 'emerald',
+        text: '[SPEED UP! 축하 팝업 알림] 스피드 레벨이 승급할 때마다 역동적인 레벨업 효과음과 함께 화려한 토스트 배너 연출 제공'
+      }
+    ]
+  },
+  {
     version: 'v1.7.5',
     date: '2026-08-16',
     title: '도촌 야구왕 [유령 마구 투구 프리징 근본 해결 & 캔버스 무중단 렌더 루프 보장]',
-    badge: 'LATEST',
-    badgeColor: 'emerald',
+    badge: 'UPDATE',
+    badgeColor: 'blue',
     items: [
       {
         tag: 'CRASH-PROOF',
