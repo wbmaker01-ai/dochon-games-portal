@@ -3,11 +3,35 @@
 
 export const CHANGELOG_DATA = [
   {
+    version: 'v1.7.2',
+    date: '2026-08-16',
+    title: '도촌 야구왕 [5콤보 이상 고득점 체인지업 프리징 버그 완벽 해결] & 상태 머신 안정화',
+    badge: 'LATEST',
+    badgeColor: 'emerald',
+    items: [
+      {
+        tag: 'BUG FIX',
+        tagColor: 'amber',
+        text: '[5콤보/고득점 구간 멈춤 현상 수정] React State 클로저 지연으로 인해 발생하던 캔버스 렌더 루프 및 타격 이벤트 드롭 버그를 Ref 기반 상태 머신으로 전면 전환하여 100% 무중단 연속 플레이 보장'
+      },
+      {
+        tag: 'CHANGEUP',
+        tagColor: 'blue',
+        text: '[마법 체인지업 물리 엔진 보강] 비선형 감속 궤적의 0 나누기 및 NaN 예외 방지 안전 로직 추가'
+      },
+      {
+        tag: 'PROPORTION',
+        tagColor: 'emerald',
+        text: '[투수/타자 3D 크기 비율 최적화] 마운드 위 투수 크기(85px) 및 타자 크기(230px)를 고정 비율로 재설정하여 원근 시야 및 공 가시성 극대화'
+      }
+    ]
+  },
+  {
     version: 'v1.7.1',
     date: '2026-08-16',
     title: 'Google 야구 스타일 [3D 입체 원근 뷰 & 시야 100% 개방] 전면 업그레이드',
-    badge: 'LATEST',
-    badgeColor: 'emerald',
+    badge: 'UPDATE',
+    badgeColor: 'blue',
     items: [
       {
         tag: '3D PERSPECTIVE',

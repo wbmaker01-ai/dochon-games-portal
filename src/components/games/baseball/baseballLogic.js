@@ -94,22 +94,25 @@ export function selectNextPitch(score, combo) {
  * Calculate instantaneous 3D perspective ball coordinates and shadow mapping
  */
 export function calculateBallState(pitchConfig, elapsedMs, totalDuration) {
-  let progress = Math.min(1, Math.max(0, elapsedMs / totalDuration));
+  const safeDuration = Math.max(500, Number(totalDuration) || 2000);
+  const rawProgress = Math.min(1, Math.max(0, Number(elapsedMs) / safeDuration));
+  let progress = rawProgress;
 
-  // Handle changeup nonlinear deceleration
-  if (pitchConfig.id === 'CHANGEUP' && pitchConfig.deceleratePoint) {
-    if (progress > pitchConfig.deceleratePoint) {
-      const p1 = pitchConfig.deceleratePoint;
-      const rem = (progress - p1) / (1 - p1);
-      progress = p1 + Math.pow(rem, pitchConfig.decelerateFactor || 1.8) * (1 - p1);
+  // Handle changeup nonlinear deceleration safely
+  if (pitchConfig?.id === 'CHANGEUP' && pitchConfig.deceleratePoint) {
+    const p1 = pitchConfig.deceleratePoint || 0.5;
+    if (progress > p1) {
+      const rem = Math.max(0, Math.min(1, (progress - p1) / (1 - p1)));
+      const factor = pitchConfig.decelerateFactor || 1.6;
+      progress = p1 + Math.pow(rem, factor) * (1 - p1);
     }
   }
 
   // 3D Perspective Scaling (Z: 0 = Pitcher Mound, 1 = Home Plate)
-  const z = progress;
-  const radius = 5 + z * 21; // Ball expands from 5px to 26px
-  const shadowRadiusX = 4 + z * 18;
-  const shadowRadiusY = (4 + z * 18) * 0.45;
+  const z = Math.max(0, Math.min(1, progress));
+  const radius = Math.max(8, 8 + z * 18); // Ball expands from 8px to 26px
+  const shadowRadiusX = Math.max(6, 6 + z * 16);
+  const shadowRadiusY = shadowRadiusX * 0.45;
 
   // 1. Ground Surface Track (Perspective line from Mound to Home Plate)
   const groundStartY = PITCHER_POS.y + 10; // Y = 165
@@ -118,43 +121,43 @@ export function calculateBallState(pitchConfig, elapsedMs, totalDuration) {
   let groundY = groundStartY + (groundTargetY - groundStartY) * z;
 
   // Lateral curve movement on ground X
-  if (pitchConfig.id === 'CURVE') {
+  if (pitchConfig?.id === 'CURVE') {
     const amp = pitchConfig.curveAmplitude || 120;
     groundX += Math.sin(progress * Math.PI) * amp;
-  } else if (pitchConfig.id === 'ZIGZAG') {
+  } else if (pitchConfig?.id === 'ZIGZAG') {
     const freq = pitchConfig.zigzagFreq || 4;
     const amp = pitchConfig.zigzagAmp || 75;
     groundX += Math.sin(progress * Math.PI * freq) * amp * (1 - progress * 0.2);
   }
 
   // 2. 3D Elevation / Ball Flight Height above ground
-  const maxArc = pitchConfig.id === 'SLOWBALL' ? 110 : (pitchConfig.id === 'FASTBALL' ? 40 : 55);
-  let flightHeight = Math.sin(progress * Math.PI) * maxArc + (1 - progress) * 20;
+  const maxArc = pitchConfig?.id === 'SLOWBALL' ? 110 : (pitchConfig?.id === 'FASTBALL' ? 35 : 50);
+  let flightHeight = Math.sin(progress * Math.PI) * maxArc + (1 - progress) * 18;
 
   // Sinker drops sharply near plate
-  if (pitchConfig.id === 'SINKER' && progress > 0.55) {
+  if (pitchConfig?.id === 'SINKER' && progress > 0.55) {
     const sinkProgress = (progress - 0.55) / 0.45;
     flightHeight -= Math.pow(sinkProgress, 2) * (pitchConfig.verticalDrop || 60);
     flightHeight = Math.max(0, flightHeight);
   }
 
   // 3. Final 2D Screen Projected Position
-  const ballX = groundX;
-  const ballY = groundY - flightHeight;
+  const ballX = isFinite(groundX) ? groundX : 480;
+  const ballY = isFinite(groundY - flightHeight) ? (groundY - flightHeight) : 300;
 
   // Ghost ball opacity handling
   let opacity = 1;
-  if (pitchConfig.id === 'GHOST' && pitchConfig.disappearRange) {
+  if (pitchConfig?.id === 'GHOST' && pitchConfig.disappearRange) {
     const [dStart, dEnd] = pitchConfig.disappearRange;
     if (progress >= dStart && progress <= dEnd) {
-      opacity = 0.05; // Invisible
+      opacity = 0.08; // Almost invisible
     } else if (progress > dEnd && progress < dEnd + 0.12) {
       opacity = (progress - dEnd) / 0.12;
     }
   }
 
   // Sweet spot convergence ring on home plate
-  const timingRingRadius = Math.max(0, (1 - progress) * 50);
+  const timingRingRadius = Math.max(0, (1 - progress) * 45);
 
   return {
     x: ballX,
