@@ -354,17 +354,42 @@ export default function GnomeGame({ onScoreSubmitted }) {
           particles.addRainbowTrail(gnome.x, gnome.y);
         }
 
-        // --- Interactive Terrain Collision Detection ---
+        // --- Interactive Terrain Collision Detection (Generous Hitbox & Dynamic Combos) ---
+        const nowTime = currentTime;
         for (const item of terrainItemsRef.current) {
           if (!item.active) continue;
+          if (item.lastHitTime && nowTime - item.lastHitTime < 280) continue;
 
-          // Check AABB collision
-          if (
-            gnome.x + 20 > item.x &&
-            gnome.x - 20 < item.x + item.width &&
-            gnome.y + 20 > item.y &&
-            gnome.y - 20 < item.y + item.height
-          ) {
+          const isGroundItem =
+            item.type === 'MUSHROOM' ||
+            item.type === 'TRAMPOLINE' ||
+            item.type === 'LOG' ||
+            item.type === 'SUNFLOWER';
+
+          const itemCenterX = item.x + item.width / 2;
+          const itemCenterY = item.y + item.height / 2;
+
+          let hit = false;
+          if (isGroundItem) {
+            // Ground Item: reliably triggers when gnome is near ground and item horizontally
+            if (
+              gnome.y >= GROUND_Y - 55 &&
+              Math.abs(gnome.x - itemCenterX) < (item.width / 2 + 28)
+            ) {
+              hit = true;
+            }
+          } else {
+            // Sky Item: generous radial collision zone (40~50px)
+            const dx = gnome.x - itemCenterX;
+            const dy = gnome.y - itemCenterY;
+            const hitRadius = item.width / 2 + 36;
+            if (dx * dx + dy * dy < hitRadius * hitRadius) {
+              hit = true;
+            }
+          }
+
+          if (hit) {
+            item.lastHitTime = nowTime;
             const data = item.data;
 
             if (item.type === 'MUSHROOM') {
@@ -375,7 +400,7 @@ export default function GnomeGame({ onScoreSubmitted }) {
               gnome.isAirDropping = false;
               soundFx.playGnomeMushroomBounce();
               showToast(data.message);
-              particles.addBounceExplosion(item.x + item.width / 2, item.y, '#e53e3e', 22);
+              particles.addBounceExplosion(itemCenterX, item.y, '#e53e3e', 22);
             } else if (item.type === 'TRAMPOLINE') {
               gnome.vy = data.bounceBoostY;
               gnome.vx = Math.max(gnome.vx * data.bounceBoostX, 16);
@@ -384,7 +409,7 @@ export default function GnomeGame({ onScoreSubmitted }) {
               gnome.isAirDropping = false;
               soundFx.playGnomeCloudBounce();
               showToast(data.message);
-              particles.addBounceExplosion(item.x + item.width / 2, item.y, '#48bb78', 24);
+              particles.addBounceExplosion(itemCenterX, item.y, '#48bb78', 24);
             } else if (item.type === 'LOG') {
               gnome.vy = data.bounceBoostY;
               gnome.vx = Math.max(gnome.vx * data.bounceBoostX, data.minSpeedX);
@@ -393,7 +418,7 @@ export default function GnomeGame({ onScoreSubmitted }) {
               gnome.isAirDropping = false;
               soundFx.playGnomeLogBoost();
               showToast(data.message);
-              particles.addLogSparks(item.x + item.width / 2, item.y, 16);
+              particles.addLogSparks(itemCenterX, item.y, 16);
             } else if (item.type === 'SUNFLOWER') {
               gnome.vx = Math.max(gnome.vx * 1.05, 13);
               gnome.vy = -4;
@@ -407,7 +432,7 @@ export default function GnomeGame({ onScoreSubmitted }) {
               gnome.bonusScore += data.points;
               soundFx.playGnomeCloudBounce();
               showToast(data.message);
-              particles.addBounceExplosion(item.x + item.width / 2, item.y, '#63b3ed', 18);
+              particles.addBounceExplosion(itemCenterX, item.y, '#63b3ed', 18);
             } else if (item.type === 'RAINBOW') {
               gnome.vy = data.bounceBoostY;
               gnome.vx += data.boostSpeedX;

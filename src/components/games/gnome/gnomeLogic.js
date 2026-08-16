@@ -48,15 +48,15 @@ export function createTransparentSprite(img) {
 }
 
 /**
- * Generates rich interactive garden objects and collectibles across the 5000m path.
+ * Generates rich interactive garden objects and collectibles across the 5000m path (Super High Density).
  */
 export function generateGardenTerrain(maxDistance = 5500) {
   const items = [];
-  let nextGroundX = 180;
+  let nextGroundX = 120;
 
-  // Ground items distribution (Dense & varied every 80~180px)
+  // Ground items distribution (3x+ Higher Density: Every 30~65px)
   while (nextGroundX < maxDistance) {
-    const gap = 80 + Math.random() * 110;
+    const gap = 32 + Math.random() * 36;
     nextGroundX += gap;
 
     const rand = Math.random();
@@ -80,79 +80,86 @@ export function generateGardenTerrain(maxDistance = 5500) {
       width: type.width,
       height: type.height,
       active: true,
+      lastHitTime: 0,
       data: type
     });
   }
 
-  // Sky items (Clouds, Rainbow Rings, Butterfly Swarms, Airborne Seeds) across all altitude bands
-  let nextSkyX = 220;
+  // Sky items (Clouds, Rainbow Rings, Butterfly Swarms, Airborne Seeds) across all altitude bands (3x+ Density)
+  let nextSkyX = 150;
   while (nextSkyX < maxDistance) {
-    const gap = 60 + Math.random() * 95;
+    const gap = 28 + Math.random() * 38;
     nextSkyX += gap;
 
-    // Distribute across altitudes: Low (120~260), Mid (-140~80), High (-520~-150)
-    const altBand = Math.random();
-    let skyY;
-    if (altBand < 0.40) {
-      skyY = 90 + Math.random() * 160; // Low sky
-    } else if (altBand < 0.75) {
-      skyY = -140 + Math.random() * 200; // Mid sky
-    } else {
-      skyY = -500 + Math.random() * 320; // High stratosphere
-    }
+    // Spawn across multiple altitude layers (Low: 80~250, Mid: -180~60, High: -550~-160)
+    const altLayers = [
+      80 + Math.random() * 160,  // Low sky
+      -160 + Math.random() * 200, // Mid sky
+      -520 + Math.random() * 320  // High sky
+    ];
 
-    const rand = Math.random();
+    // Pick 1~2 altitude layers per column
+    const layerIndices = Math.random() > 0.4 ? [0, 1] : [Math.floor(Math.random() * 3)];
 
-    if (rand < 0.30) {
-      items.push({
-        id: `sky_${items.length}`,
-        type: TERRAIN_ITEM_TYPES.CLOUD.id,
-        name: TERRAIN_ITEM_TYPES.CLOUD.name,
-        x: nextSkyX,
-        y: skyY,
-        width: TERRAIN_ITEM_TYPES.CLOUD.width,
-        height: TERRAIN_ITEM_TYPES.CLOUD.height,
-        active: true,
-        data: TERRAIN_ITEM_TYPES.CLOUD
-      });
-    } else if (rand < 0.55) {
-      items.push({
-        id: `sky_${items.length}`,
-        type: TERRAIN_ITEM_TYPES.RAINBOW.id,
-        name: TERRAIN_ITEM_TYPES.RAINBOW.name,
-        x: nextSkyX,
-        y: skyY - 20,
-        width: TERRAIN_ITEM_TYPES.RAINBOW.width,
-        height: TERRAIN_ITEM_TYPES.RAINBOW.height,
-        active: true,
-        data: TERRAIN_ITEM_TYPES.RAINBOW
-      });
-    } else if (rand < 0.75) {
-      items.push({
-        id: `sky_${items.length}`,
-        type: TERRAIN_ITEM_TYPES.BUTTERFLY_SWARM.id,
-        name: TERRAIN_ITEM_TYPES.BUTTERFLY_SWARM.name,
-        x: nextSkyX,
-        y: skyY - 15,
-        width: TERRAIN_ITEM_TYPES.BUTTERFLY_SWARM.width,
-        height: TERRAIN_ITEM_TYPES.BUTTERFLY_SWARM.height,
-        active: true,
-        data: TERRAIN_ITEM_TYPES.BUTTERFLY_SWARM
-      });
-    } else {
-      // Golden seed arc / constellation
-      for (let s = 0; s < 3; s++) {
+    for (const layerIdx of layerIndices) {
+      const skyY = altLayers[layerIdx];
+      const rand = Math.random();
+
+      if (rand < 0.28) {
         items.push({
-          id: `seed_${items.length}_${s}`,
-          type: TERRAIN_ITEM_TYPES.SEED.id,
-          name: TERRAIN_ITEM_TYPES.SEED.name,
-          x: nextSkyX + s * 38,
-          y: skyY - Math.sin((s / 2) * Math.PI) * 26,
-          width: TERRAIN_ITEM_TYPES.SEED.width,
-          height: TERRAIN_ITEM_TYPES.SEED.height,
+          id: `sky_${items.length}`,
+          type: TERRAIN_ITEM_TYPES.CLOUD.id,
+          name: TERRAIN_ITEM_TYPES.CLOUD.name,
+          x: nextSkyX + (Math.random() - 0.5) * 15,
+          y: skyY,
+          width: TERRAIN_ITEM_TYPES.CLOUD.width,
+          height: TERRAIN_ITEM_TYPES.CLOUD.height,
           active: true,
-          data: TERRAIN_ITEM_TYPES.SEED
+          lastHitTime: 0,
+          data: TERRAIN_ITEM_TYPES.CLOUD
         });
+      } else if (rand < 0.54) {
+        items.push({
+          id: `sky_${items.length}`,
+          type: TERRAIN_ITEM_TYPES.RAINBOW.id,
+          name: TERRAIN_ITEM_TYPES.RAINBOW.name,
+          x: nextSkyX + (Math.random() - 0.5) * 15,
+          y: skyY - 20,
+          width: TERRAIN_ITEM_TYPES.RAINBOW.width,
+          height: TERRAIN_ITEM_TYPES.RAINBOW.height,
+          active: true,
+          lastHitTime: 0,
+          data: TERRAIN_ITEM_TYPES.RAINBOW
+        });
+      } else if (rand < 0.74) {
+        items.push({
+          id: `sky_${items.length}`,
+          type: TERRAIN_ITEM_TYPES.BUTTERFLY_SWARM.id,
+          name: TERRAIN_ITEM_TYPES.BUTTERFLY_SWARM.name,
+          x: nextSkyX + (Math.random() - 0.5) * 15,
+          y: skyY - 15,
+          width: TERRAIN_ITEM_TYPES.BUTTERFLY_SWARM.width,
+          height: TERRAIN_ITEM_TYPES.BUTTERFLY_SWARM.height,
+          active: true,
+          lastHitTime: 0,
+          data: TERRAIN_ITEM_TYPES.BUTTERFLY_SWARM
+        });
+      } else {
+        // Golden seed cluster
+        for (let s = 0; s < 3; s++) {
+          items.push({
+            id: `seed_${items.length}_${s}`,
+            type: TERRAIN_ITEM_TYPES.SEED.id,
+            name: TERRAIN_ITEM_TYPES.SEED.name,
+            x: nextSkyX + s * 34,
+            y: skyY - Math.sin((s / 2) * Math.PI) * 24,
+            width: TERRAIN_ITEM_TYPES.SEED.width,
+            height: TERRAIN_ITEM_TYPES.SEED.height,
+            active: true,
+            lastHitTime: 0,
+            data: TERRAIN_ITEM_TYPES.SEED
+          });
+        }
       }
     }
   }

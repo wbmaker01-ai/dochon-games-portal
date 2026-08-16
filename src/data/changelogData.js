@@ -10,9 +10,9 @@ export const CHANGELOG_DATA = [
     badgeColor: 'emerald',
     items: [
       {
-        tag: 'ITEMS & FLOWERS',
-        tagColor: 'purple',
-        text: '[지상/공중 아이템 대폭 증설 & 실시간 꽃 심기 피드백] 스프링 트램펄린, 요정 나비 떼 등 신규 부스터를 추가하고 아이템 밀도를 대폭 강화. 착지/슬라이딩 시 실시간 5엽 꽃 개화 애니메이션, 황금 꽃가루, "+1 🌸" 플로팅 텍스트 및 상단 HUD "심은 꽃" 실시간 카운터 탑재'
+        tag: 'DENSE ITEMS 3X',
+        tagColor: 'emerald',
+        text: '[지상/공중 아이템 3배 이상 초고밀도 배치 & 판정 영역 확장] 지상(버섯/트램펄린/통나무/해바라기) 및 공중(구름/무지개/나비떼/씨앗) 아이템을 기존 대비 3배 이상 촘촘하게 전 구간에 배치하고 히트박스/인터랙션 범위를 대폭 확장하여 연속 콤보 도약과 비행 몰입감 극대화'
       },
       {
         tag: 'CAMERA & SKY VIEW',
