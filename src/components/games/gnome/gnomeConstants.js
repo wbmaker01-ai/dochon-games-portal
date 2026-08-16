@@ -6,7 +6,7 @@ export const CANVAS_WIDTH = 960;
 export const CANVAS_HEIGHT = 540;
 export const GROUND_Y = 460; // Base ground baseline in world coords
 
-// World & Physics simulation parameters (Soaring floaty flight)
+// World & Physics simulation parameters (Soaring floaty flight with Comfort Bounds)
 export const PHYSICS_CONFIG = {
   GRAVITY: 0.18,
   AIR_DRAG: 0.9982,
@@ -18,6 +18,10 @@ export const PHYSICS_CONFIG = {
   LAUNCH_POWER_MIN: 18,
   LAUNCH_POWER_MAX: 40,
   PERFECT_POWER_THRESHOLD: 0.92, // 92%~100% is PERFECT
+  MAX_HORIZONTAL_SPEED: 28.0, // Soft cap to prevent visual fatigue (~125 km/h)
+  MAX_VERTICAL_SPEED: 24.0,
+  MIN_CAMERA_ZOOM: 0.75, // Dynamic FOV expansion when fast
+  MAX_CAMERA_ZOOM: 1.0,
 };
 
 // 3 Gnome Characters with distinct stats and flight mechanics

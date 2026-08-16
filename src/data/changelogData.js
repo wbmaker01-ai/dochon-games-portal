@@ -10,6 +10,11 @@ export const CHANGELOG_DATA = [
     badgeColor: 'emerald',
     items: [
       {
+        tag: 'COMFORT CAMERA 4-IN-1',
+        tagColor: 'purple',
+        text: '[시각 피로도 제로 편안한 카메라 & 속도 안정화 시스템 구축] ① 고속/고고도 비행 시 시야각(FOV)을 넓혀주는 동적 줌아웃(Dynamic Zoom-Out), ② 최적의 속도감과 제어를 제공하는 소프트 속도 상한선(Speed Cap), ③ 눈의 안정감을 부여하는 원경 패럴랙스(Parallax Anchor), ④ 앞쪽 아이템을 미리 파악할 수 있는 전방 시야 예측(Look-Ahead) 완충 시스템을 통합 적용하여 눈의 피로감을 완벽 해소'
+      },
+      {
         tag: 'DENSE ITEMS 3X',
         tagColor: 'emerald',
         text: '[지상/공중 아이템 3배 이상 초고밀도 배치 & 판정 영역 확장] 지상(버섯/트램펄린/통나무/해바라기) 및 공중(구름/무지개/나비떼/씨앗) 아이템을 기존 대비 3배 이상 촘촘하게 전 구간에 배치하고 히트박스/인터랙션 범위를 대폭 확장하여 연속 콤보 도약과 비행 몰입감 극대화'

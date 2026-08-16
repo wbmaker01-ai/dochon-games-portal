@@ -80,9 +80,10 @@ export default function GnomeGame({ onScoreSubmitted }) {
     bonusScore: 0,
   });
 
-  // Camera State
+  // Camera State (Smooth FOV Zoom & Spring Tracking)
   const cameraXRef = useRef(0);
   const cameraYRef = useRef(0);
+  const cameraZoomRef = useRef(1.0);
 
   // Terrain Items List
   const terrainItemsRef = useRef([]);
@@ -188,6 +189,7 @@ export default function GnomeGame({ onScoreSubmitted }) {
 
     cameraXRef.current = 0;
     cameraYRef.current = 0;
+    cameraZoomRef.current = 1.0;
     angleDegRef.current = 30;
     angleDirRef.current = 1;
     powerPercentRef.current = 0;
@@ -338,6 +340,10 @@ export default function GnomeGame({ onScoreSubmitted }) {
         gnome.vy += PHYSICS_CONFIG.GRAVITY * gnome.mass;
         gnome.vx *= gnome.drag;
         gnome.vy *= gnome.drag;
+
+        // Velocity Soft Clamping (Prevents motion sickness / visual tearing)
+        gnome.vx = Math.min(PHYSICS_CONFIG.MAX_HORIZONTAL_SPEED, Math.max(-10, gnome.vx));
+        gnome.vy = Math.min(PHYSICS_CONFIG.MAX_VERTICAL_SPEED, Math.max(-PHYSICS_CONFIG.MAX_VERTICAL_SPEED, gnome.vy));
 
         // Current metrics
         const currentMeters = Math.max(0, Math.round(gnome.x / 10));
@@ -497,26 +503,45 @@ export default function GnomeGame({ onScoreSubmitted }) {
           }
         }
 
+        // Dynamic Camera Zoom Calculation based on Speed & Altitude
+        const speedRatio = Math.min(1, Math.abs(gnome.vx) / PHYSICS_CONFIG.MAX_HORIZONTAL_SPEED);
+        const altRatio = Math.min(1, Math.max(0, -gnome.y) / 800);
+        const targetZoom = Math.max(
+          PHYSICS_CONFIG.MIN_CAMERA_ZOOM,
+          1.0 - (speedRatio * 0.16 + altRatio * 0.10)
+        );
+        cameraZoomRef.current += (targetZoom - cameraZoomRef.current) * 0.06;
+
         // Sync React HUD
         setDistance(gnome.distance);
         setAltitude(currentAlt);
         setSpeedKmh(currentSpeed);
         setBonusScore(gnome.bonusScore);
         setFlowersPlanted(gnome.flowersPlanted);
+      } else {
+        // Reset zoom smoothly when not flying
+        cameraZoomRef.current += (1.0 - cameraZoomRef.current) * 0.08;
       }
 
-      // 4. Smooth Dynamic Camera Tracking
-      // Keep gnome positioned comfortably in the forward-center of the screen
-      const targetCamX = Math.max(0, gnome.x - 260);
-      const targetCamY = Math.min(0, gnome.y - 240);
-      cameraXRef.current += (targetCamX - cameraXRef.current) * 0.14;
-      cameraYRef.current += (targetCamY - cameraYRef.current) * 0.14;
+      // 4. Smooth Dynamic Camera Tracking with Forward Look-Ahead & Spring Damping
+      const currentGnomeVx = gameStateRef.current === 'FLYING' ? gnomeRef.current.vx : 0;
+      const forwardLookAhead = Math.min(currentGnomeVx * 4.0, 120);
+      const targetCamX = Math.max(0, gnomeRef.current.x + forwardLookAhead - 260);
+      const targetCamY = Math.min(0, gnomeRef.current.y - 230);
+      cameraXRef.current += (targetCamX - cameraXRef.current) * 0.10;
+      cameraYRef.current += (targetCamY - cameraYRef.current) * 0.10;
 
       // 5. Update Particles
       particles.update();
 
-      // 6. Draw Canvas Frame
+      // 6. Draw Canvas Frame with Dynamic Camera Zoom Scaling
       ctx.clearRect(0, 0, CANVAS_WIDTH, CANVAS_HEIGHT);
+
+      ctx.save();
+      const curZoom = cameraZoomRef.current;
+      ctx.translate(CANVAS_WIDTH / 2, CANVAS_HEIGHT / 2);
+      ctx.scale(curZoom, curZoom);
+      ctx.translate(-CANVAS_WIDTH / 2, -CANVAS_HEIGHT / 2);
 
       // Draw Multi-layer Parallax Garden Background
       drawParallaxGarden(ctx, cameraXRef.current, cameraYRef.current, bgImgRef.current);
@@ -542,12 +567,14 @@ export default function GnomeGame({ onScoreSubmitted }) {
       const spriteCanvas = spriteCanvasesRef.current[selectedCharRef.current.id];
       drawGnome(
         ctx,
-        gnome,
+        gnomeRef.current,
         spriteCanvas,
-        gnome.isAirDropping,
+        gnomeRef.current.isAirDropping,
         cameraXRef.current,
         cameraYRef.current
       );
+
+      ctx.restore();
 
       animFrameRef.current = requestAnimationFrame(loop);
     };
