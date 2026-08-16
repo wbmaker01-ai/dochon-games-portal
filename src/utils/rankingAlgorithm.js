@@ -5,6 +5,7 @@
 // 3. [User Engagement]: Local play counts & favorite status
 
 export const GAME_RELEASE_METADATA = {
+  popcorn: { releaseOrder: 9, icon: '🍿', isNew: true },
   colortile: { releaseOrder: 8, icon: '🧩', isNew: true },
   gnome: { releaseOrder: 7, icon: '🌿', isNew: true },
   baseball: { releaseOrder: 6, icon: '⚾', isNew: false },

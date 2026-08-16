@@ -20,20 +20,25 @@ export default function LeaderboardModal({ isOpen, onClose, activeTab = 'pacman'
   const [editScore, setEditScore] = useState('');
 
   useEffect(() => {
-    setCurrentTab(activeTab);
-  }, [activeTab]);
+    if (isOpen && activeTab) {
+      setCurrentTab(activeTab);
+      loadScores(activeTab);
+    }
+  }, [isOpen, activeTab]);
 
   useEffect(() => {
-    if (isOpen) {
-      loadScores();
-      const interval = setInterval(loadScores, 6000);
+    if (isOpen && currentTab) {
+      loadScores(currentTab);
+      const interval = setInterval(() => {
+        loadScores(currentTab);
+      }, 6000);
       return () => clearInterval(interval);
     }
   }, [isOpen, currentTab]);
 
-  const loadScores = async () => {
+  const loadScores = async (tabToFetch = currentTab) => {
     setLoading(true);
-    const data = await getLeaderboardFromDB(currentTab);
+    const data = await getLeaderboardFromDB(tabToFetch);
     setScores(data);
     setLoading(false);
   };
@@ -272,6 +277,7 @@ export default function LeaderboardModal({ isOpen, onClose, activeTab = 'pacman'
             if (game.id === 'baseball') iconEmoji = '⚾';
             if (game.id === 'gnome') iconEmoji = '🌿';
             if (game.id === 'colortile') iconEmoji = '🧩';
+            if (game.id === 'popcorn') iconEmoji = '🍿';
 
             // Remove '도촌 ' prefix for compact and clean layout
             const shortTitle = game.title.replace(/^도촌\s*/, '');
@@ -286,6 +292,7 @@ export default function LeaderboardModal({ isOpen, onClose, activeTab = 'pacman'
               else if (game.id === 'baseball') activeCustomStyle = { background: 'linear-gradient(135deg, #38BDF8, #0284C7)', color: '#FFFFFF' };
               else if (game.id === 'gnome') activeCustomStyle = { background: 'linear-gradient(135deg, #48BB78, #2F855A)', color: '#FFFFFF' };
               else if (game.id === 'colortile') activeCustomStyle = { background: 'linear-gradient(135deg, #EC4899, #8B5CF6)', color: '#FFFFFF' };
+              else if (game.id === 'popcorn') activeCustomStyle = { background: 'linear-gradient(135deg, #F59E0B, #EF4444)', color: '#FFFFFF' };
             }
 
             return (
@@ -432,7 +439,7 @@ export default function LeaderboardModal({ isOpen, onClose, activeTab = 'pacman'
                             <Zap style={{ width: '10px', height: '10px', color: scoreColor, fill: scoreColor }} />
                           </div>
                           <span style={{ fontSize: '14px', fontWeight: 900, color: scoreColor }}>
-                            {item.score.toLocaleString()} <span style={{ fontSize: '10px', fontWeight: 600 }}>점</span>
+                            {item.score.toLocaleString()} <span style={{ fontSize: '10px', fontWeight: 600 }}>{currentTab === 'dino' || currentTab === 'gnome' ? 'm' : '점'}</span>
                           </span>
                         </div>
 
