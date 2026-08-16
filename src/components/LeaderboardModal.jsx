@@ -270,6 +270,7 @@ export default function LeaderboardModal({ isOpen, onClose, activeTab = 'pacman'
             if (game.id === 'solitaire') iconEmoji = '🃏';
             if (game.id === 'minesweeper') iconEmoji = '💣';
             if (game.id === 'baseball') iconEmoji = '⚾';
+            if (game.id === 'gnome') iconEmoji = '🌿';
 
             // Remove '도촌 ' prefix for compact and clean layout
             const shortTitle = game.title.replace(/^도촌\s*/, '');
@@ -282,6 +283,7 @@ export default function LeaderboardModal({ isOpen, onClose, activeTab = 'pacman'
               else if (game.id === 'solitaire') activeCustomStyle = { background: 'linear-gradient(135deg, #F59E0B, #D97706)', color: '#0F172A' };
               else if (game.id === 'minesweeper') activeCustomStyle = { background: 'linear-gradient(135deg, #10B981, #047857)', color: '#FFFFFF' };
               else if (game.id === 'baseball') activeCustomStyle = { background: 'linear-gradient(135deg, #38BDF8, #0284C7)', color: '#FFFFFF' };
+              else if (game.id === 'gnome') activeCustomStyle = { background: 'linear-gradient(135deg, #48BB78, #2F855A)', color: '#FFFFFF' };
             }
 
             return (

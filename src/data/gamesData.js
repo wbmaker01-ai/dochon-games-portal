@@ -55,19 +55,21 @@ export const PLAYABLE_GAMES = [
     category: '스포츠',
     imageSrc: getThumb('baseball.jpg'),
     isPlayable: true,
-    badgeText: '⚾ NEW 6위',
+    badgeText: '⚾ 6위',
     description: '구속과 변화구를 예측하고 만루홈런을 날려 도촌 야구왕이 되어보세요!'
+  },
+  {
+    id: 'gnome',
+    title: '도촌 정원 요정',
+    category: '액션',
+    imageSrc: getThumb('gnome.jpg'),
+    isPlayable: true,
+    badgeText: '🌿 NEW 7위',
+    description: '투석기로 요정을 힘차게 날려 꽃을 심고 최고 비행 거리를 달성하세요!'
   }
 ];
 
 export const COMING_SOON_GAMES = [
-  {
-    id: 'gnome',
-    title: '정원 요정',
-    category: '액션',
-    imageSrc: getThumb('gnome.jpg'),
-    isPlayable: false
-  },
   {
     id: 'colortile',
     title: '컬러 타일',

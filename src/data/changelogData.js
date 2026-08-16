@@ -3,11 +3,40 @@
 
 export const CHANGELOG_DATA = [
   {
+    version: 'v1.9.0',
+    date: '2026-08-16',
+    title: '신규 7번째 게임 [도촌 정원 요정 (Garden Gnomes)] 정식 출시 & 물리 엔진 탑재',
+    badge: 'LATEST',
+    badgeColor: 'emerald',
+    items: [
+      {
+        tag: 'NEW GAME',
+        tagColor: 'emerald',
+        text: '[도촌 정원 요정 정식 출시] 2018년 구글 두들 명작을 계승한 투석기 발사 & 거리 달성 물리 액션 캐주얼 게임 정식 오픈'
+      },
+      {
+        tag: 'CHARACTERS',
+        tagColor: 'purple',
+        text: '[3종 요정 캐릭터 시스템] 클래식 요정(표준 밸런스), 통통이 요정(슈퍼 바운스), 나비 요정(공중 활공) 3인 3색 비행 물리 특성 제공'
+      },
+      {
+        tag: 'PHYSICS & BOOST',
+        tagColor: 'amber',
+        text: '[지형지물 & 공중 제어 시스템] 점핑 버섯, 가속 통나무, 황금 해바라기, 스카이 구름, 무지개 링 등 다양한 인터랙티브 부스터 및 공중 급강하(Air Drop) 메커니즘 탑재'
+      },
+      {
+        tag: 'AUDIO & LEADERBOARD',
+        tagColor: 'blue',
+        text: '[Web Audio 효과음 & 실시간 랭킹 연동] 투석기 텐션/발사음, 바운스음, 부스터음 및 100점 초과 시 명예의 전당 점수 등록 지원'
+      }
+    ]
+  },
+  {
     version: 'v1.8.1',
     date: '2026-08-16',
     title: '명예의 전당(리더보드) 탭바 UI 전면 개편 & 좌우 스크롤 제거 (줄바꿈 반응형 레이아웃)',
-    badge: 'LATEST',
-    badgeColor: 'emerald',
+    badge: 'UPDATE',
+    badgeColor: 'blue',
     items: [
       {
         tag: 'NO SCROLL',
