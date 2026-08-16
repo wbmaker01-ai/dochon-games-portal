@@ -3,11 +3,45 @@
 
 export const CHANGELOG_DATA = [
   {
+    version: 'v1.14.0',
+    date: '2026-08-16',
+    title: '신규 11호 대작 RPG 스포츠 [도촌 챔피언 아일랜드] 공식 출시 & 4대 경기장 완비',
+    badge: 'LATEST',
+    badgeColor: 'emerald',
+    items: [
+      {
+        tag: 'NEW GAME',
+        tagColor: 'amber',
+        text: '[신규 게임 챔피언 아일랜드(Champion Island) 정식 출시] 삼색 닌자 고양이 럭키가 되어 전설의 섬을 탐험하고 4대 스포츠 챔피언들과 승부를 겨루는 16비트 레트로 RPG 스포츠 대작 오픈'
+      },
+      {
+        tag: '4 SPORTS ARENA',
+        tagColor: 'rose',
+        text: '[4대 올림픽 스포츠 미니게임 완비] 텐구와의 랠리 스매시 대결(탁구), 요이치의 움직이는 표적 저격(양궁), 갓파와의 해변 장애물 레이스(마라톤), 후쿠로우의 낙석 빙설 정상 등반(클라이밍)'
+      },
+      {
+        tag: 'TEAMS & OVERWORLD',
+        tagColor: 'purple',
+        text: '[4대 팀 진영 & 오픈월드 섬 탐험 시스템] 레드 키츠네·블루 우시·옐로우 이나리·그린 갓파 팀 선택 및 마을 주민 NPC들과의 대화 및 퀘스트'
+      },
+      {
+        tag: 'SACRED SCROLLS',
+        tagColor: 'blue',
+        text: '[4대 성스러운 두루마리 컬렉션] 각 종목 승리 시 고유 성스러운 두루마리(바람·명사수·질풍·정복자) 획득 및 세레머니 연출'
+      },
+      {
+        tag: 'HALL OF FAME',
+        tagColor: 'teal',
+        text: '[도촌초 명예의 전당 실시간 랭킹 연동] 100점 초과 달성 시 챔피언 아일랜드 글로벌 랭킹 실시간 기록 및 자동 탭 동기화 지원'
+      }
+    ]
+  },
+  {
     version: 'v1.13.0',
     date: '2026-08-16',
     title: '신규 10호 두뇌 퍼즐 [도촌 도넛 틱택토] 공식 출시 & 도넛 토러스 룰 탑재',
-    badge: 'LATEST',
-    badgeColor: 'emerald',
+    badge: 'UPDATE',
+    badgeColor: 'blue',
     items: [
       {
         tag: 'UI/UX EFFECT',

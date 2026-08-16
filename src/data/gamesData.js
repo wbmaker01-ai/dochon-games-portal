@@ -91,19 +91,21 @@ export const PLAYABLE_GAMES = [
     category: '퍼즐',
     imageSrc: getThumb('donut-tictactoe.jpg'),
     isPlayable: true,
-    badgeText: '🍩 NEW 10위',
+    badgeText: '🍩 10위',
     description: '벽을 뚫고 순환하는 도넛 토러스 룰과 달콤한 딸기/초코 도넛의 두뇌 대결!'
+  },
+  {
+    id: 'champion',
+    title: '도촌 챔피언 아일랜드',
+    category: '어드벤처',
+    imageSrc: getThumb('champion.jpg'),
+    isPlayable: true,
+    badgeText: '🥋 NEW 11위',
+    description: '전설의 닌자 고양이 럭키와 함께 4대 스포츠 경기장에서 두루마리를 획득하고 섬의 챔피언이 되어보세요!'
   }
 ];
 
 export const COMING_SOON_GAMES = [
-  {
-    id: 'champion',
-    title: '챔피언 아일랜드',
-    category: '어드벤처',
-    imageSrc: getThumb('champion.jpg'),
-    isPlayable: false
-  },
   {
     id: 'cricket',
     title: '크리켓',

@@ -9,6 +9,7 @@ import GnomeGame from './components/games/gnome/GnomeGame';
 import ColorTileGame from './components/games/colortile/ColorTileGame';
 import PopcornGame from './components/games/popcorn/PopcornGame';
 import DonutTicTacToeGame from './components/games/donut_tictactoe/DonutTicTacToeGame';
+import ChampionGame from './components/games/champion/ChampionGame';
 import GameCard from './components/GameCard';
 import LeaderboardModal from './components/LeaderboardModal';
 import ChangelogModal from './components/ChangelogModal';
@@ -28,9 +29,9 @@ export default function App() {
   const [favorites, setFavorites] = useState(() => {
     try {
       const saved = localStorage.getItem('dochon_favorites');
-      return saved ? JSON.parse(saved) : ['pacman', 'dino', 'snake', 'solitaire', 'minesweeper', 'baseball', 'gnome', 'colortile', 'popcorn', 'tictactoe'];
+      return saved ? JSON.parse(saved) : ['pacman', 'dino', 'snake', 'solitaire', 'minesweeper', 'baseball', 'gnome', 'colortile', 'popcorn', 'tictactoe', 'champion'];
     } catch (e) {
-      return ['pacman', 'dino', 'snake', 'solitaire', 'minesweeper', 'baseball', 'gnome', 'colortile', 'popcorn', 'tictactoe'];
+      return ['pacman', 'dino', 'snake', 'solitaire', 'minesweeper', 'baseball', 'gnome', 'colortile', 'popcorn', 'tictactoe', 'champion'];
     }
   });
 
@@ -478,6 +479,9 @@ export default function App() {
               )}
               {activeGame === 'tictactoe' && (
                 <DonutTicTacToeGame onScoreSubmitted={() => openInPageLeaderboardModal('tictactoe')} />
+              )}
+              {activeGame === 'champion' && (
+                <ChampionGame onScoreSubmitted={() => openInPageLeaderboardModal('champion')} />
               )}
             </div>
           </div>
