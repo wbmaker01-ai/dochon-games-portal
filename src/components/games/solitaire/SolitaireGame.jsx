@@ -18,7 +18,9 @@ import {
   Flame,
   Wand2,
   AlertCircle,
-  Eye
+  Eye,
+  Search,
+  Check
 } from 'lucide-react';
 import { soundFx } from '../../../utils/audio';
 import { submitScoreToDB } from '../../../utils/leaderboardApi';
@@ -31,6 +33,7 @@ import {
 } from './solitaireConstants';
 import {
   dealGame,
+  createDeck,
   canMoveToFoundation,
   canMoveToTableau,
   canAutoComplete,
@@ -60,6 +63,7 @@ export default function SolitaireGame({ onScoreSubmitted }) {
   const [hint, setHint] = useState(null);
   const [coachMsg, setCoachMsg] = useState('💡 카드를 클릭하면 가장 알맞은 위치로 자동 이동해요! 막힐 땐 [힌트]를 눌러보세요.');
   const [isHelpOpen, setIsHelpOpen] = useState(false);
+  const [isTrackerOpen, setIsTrackerOpen] = useState(false);
   const [isMuted, setIsMuted] = useState(false);
   const [isDeadEnd, setIsDeadEnd] = useState(false);
   const [magicShuffleCount, setMagicShuffleCount] = useState(0);
@@ -73,6 +77,30 @@ export default function SolitaireGame({ onScoreSubmitted }) {
   // 🌟 4-King Free Slot Rule Check
   const kingColumnsCount = gameState.tableau.filter(col => col.length > 0 && col[0].rank === 13).length;
   const isAllKingsPlaced = kingColumnsCount >= 4;
+
+  // Deck Integrity Guard & Auto-Healer (덱 52장 무결성 자동 복구 가드)
+  useEffect(() => {
+    const allCards = [];
+    gameState.tableau.forEach(col => col.forEach(c => allCards.push(c)));
+    gameState.stock.forEach(c => allCards.push(c));
+    gameState.waste.forEach(c => allCards.push(c));
+    Object.values(gameState.foundations).forEach(pile => pile.forEach(c => allCards.push(c)));
+
+    const seenIds = new Set();
+    allCards.forEach(c => seenIds.add(c.id));
+
+    const fullDeck = createDeck();
+    const missingCards = fullDeck.filter(c => !seenIds.has(c.id));
+
+    if (missingCards.length > 0) {
+      const healedStock = [...gameState.stock, ...missingCards.map(c => ({ ...c, faceUp: false }))];
+      setGameState(prev => ({
+        ...prev,
+        stock: healedStock
+      }));
+      setCoachMsg(`✨ 누락되었던 카드(${missingCards.map(c => c.suitSymbol + c.rankLabel).join(' ')})가 덱으로 안전하게 복구되었습니다!`);
+    }
+  }, [gameState]);
 
   // Auto-Start Timer on first interaction
   const startTimer = useCallback(() => {
@@ -348,9 +376,12 @@ export default function SolitaireGame({ onScoreSubmitted }) {
       return;
     }
 
-    // 1. Try Foundation First
+    // 1. Try Foundation First (ONLY if the card is the exposed bottom-most card of its pile)
+    const isExposedForFoundation = sourceInfo.type === 'waste'
+      || (sourceInfo.type === 'tableau' && sourceInfo.cardIndex === tableau[sourceInfo.colIndex].length - 1);
+
     const targetFoundation = foundations[card.suit];
-    if (canMoveToFoundation(card, targetFoundation)) {
+    if (isExposedForFoundation && canMoveToFoundation(card, targetFoundation)) {
       saveSnapshot();
 
       const newFoundations = {
@@ -358,7 +389,7 @@ export default function SolitaireGame({ onScoreSubmitted }) {
         [card.suit]: [...targetFoundation, card]
       };
 
-      let newTableau = [...tableau];
+      let newTableau = tableau.map(col => [...col]);
       let newWaste = [...waste];
       let addScore = SCORING.TABLEAU_TO_FOUNDATION;
 
@@ -366,9 +397,11 @@ export default function SolitaireGame({ onScoreSubmitted }) {
         newWaste = waste.slice(0, -1);
         addScore = SCORING.WASTE_TO_FOUNDATION;
       } else if (sourceInfo.type === 'tableau') {
-        const col = [...tableau[sourceInfo.colIndex]];
-        col.pop();
-        newTableau[sourceInfo.colIndex] = col;
+        const fromCol = newTableau[sourceInfo.colIndex];
+        const splitIdx = fromCol.findIndex(c => c.id === card.id);
+        if (splitIdx >= 0) {
+          newTableau[sourceInfo.colIndex] = fromCol.slice(0, splitIdx);
+        }
       }
 
       const { newTableau: cleanedTableau, gainedScore } = cleanAndRevealTableau(newTableau);
@@ -383,7 +416,7 @@ export default function SolitaireGame({ onScoreSubmitted }) {
       setMoves(prev => prev + 1);
       setIsDeadEnd(false);
       soundFx.playCardSnap();
-      setCoachMsg(`🌟 [${card.suitSymbol} ${card.rankLabel}] 카드를 완성칸으로 올렸습니다! (+${addScore}점)`);
+      setCoachMsg(`🌟 [${card.suitSymbol} ${card.rankLabel}] 카드를 완성칸에 보관했습니다! (+${addScore}점)`);
       return;
     }
 
@@ -640,6 +673,16 @@ export default function SolitaireGame({ onScoreSubmitted }) {
           <span>📖 게임 방법</span>
         </button>
 
+        {/* Card Locator / Tracker Modal Button */}
+        <button
+          onClick={() => setIsTrackerOpen(true)}
+          className="btn-solitaire btn-sol-slate"
+          title="52장 전체 카드가 현재 어디(완성칸/바닥/덱)에 있는지 실시간 위치 확인"
+        >
+          <Search className="w-4 h-4 text-emerald-400" />
+          <span>🔍 카드 찾기</span>
+        </button>
+
         {/* New Game Button */}
         <button
           onClick={handleNewGame}
@@ -744,10 +787,14 @@ export default function SolitaireGame({ onScoreSubmitted }) {
                 className={`solitaire-card-slot slot-foundation ${
                   isTargetHint ? 'slot-highlight' : ''
                 }`}
-                title={`${suitObj.name} 완성칸 (A부터 K까지 쌓기)`}
+                title={`${suitObj.name} 완성칸 (현재 A부터 ${topCard ? topCard.rankLabel : 'K'}까지 총 ${pile.length}장 보관 중)\n클릭 시 ${topCard ? topCard.rankLabel : ''} 카드를 바닥으로 다시 내릴 수 있습니다.`}
               >
                 {topCard ? (
-                  <div className={`solitaire-card ${topCard.color === 'red' ? 'card-red' : 'card-black'}`}>
+                  <div
+                    className={`solitaire-card ${topCard.color === 'red' ? 'card-red' : 'card-black'} ${
+                      pile.length > 1 ? 'card-stacked-shadow' : ''
+                    }`}
+                  >
                     <div className="card-corner">
                       <span className="card-rank-text">{topCard.rankLabel}</span>
                       <span className="card-suit-mini">{topCard.suitSymbol}</span>
@@ -757,6 +804,11 @@ export default function SolitaireGame({ onScoreSubmitted }) {
                       <span className="card-rank-text">{topCard.rankLabel}</span>
                       <span className="card-suit-mini">{topCard.suitSymbol}</span>
                     </div>
+
+                    {/* Layered Stack Count Badge */}
+                    <span className="foundation-count-badge">
+                      {pile.length}장 (A~{topCard.rankLabel})
+                    </span>
                   </div>
                 ) : (
                   <div className="foundation-empty-slot">
@@ -950,6 +1002,140 @@ export default function SolitaireGame({ onScoreSubmitted }) {
         isOpen={isHelpOpen}
         onClose={() => setIsHelpOpen(false)}
       />
+
+      {/* 8. 52-Card Locator & Realtime Tracker Modal */}
+      <SolitaireCardTrackerModal
+        isOpen={isTrackerOpen}
+        onClose={() => setIsTrackerOpen(false)}
+        gameState={gameState}
+      />
+    </div>
+  );
+}
+
+/**
+ * 🔍 52-Card Tracker Modal: Displays real-time location of every single card across the 4 suits.
+ */
+function SolitaireCardTrackerModal({ isOpen, onClose, gameState }) {
+  if (!isOpen) return null;
+
+  const ranks = [
+    { label: 'A', val: 1 },
+    { label: '2', val: 2 },
+    { label: '3', val: 3 },
+    { label: '4', val: 4 },
+    { label: '5', val: 5 },
+    { label: '6', val: 6 },
+    { label: '7', val: 7 },
+    { label: '8', val: 8 },
+    { label: '9', val: 9 },
+    { label: '10', val: 10 },
+    { label: 'J', val: 11 },
+    { label: 'Q', val: 12 },
+    { label: 'K', val: 13 }
+  ];
+
+  const suitOrder = [
+    { key: 'spades', symbol: '♠', name: '스페이드', color: 'black' },
+    { key: 'hearts', symbol: '♥', name: '하트', color: 'red' },
+    { key: 'diamonds', symbol: '♦', name: '다이아', color: 'red' },
+    { key: 'clubs', symbol: '♣', name: '클로버', color: 'black' }
+  ];
+
+  // Helper to locate any card
+  const getLoc = (suit, rank) => {
+    const targetId = `${suit}-${rank}`;
+    // 1. Foundation
+    const fPile = gameState.foundations[suit] || [];
+    const fIdx = fPile.findIndex(c => c.rank === rank);
+    if (fIdx >= 0) {
+      const isTop = fIdx === fPile.length - 1;
+      return {
+        status: isTop ? '🏆 완성칸 맨 위' : `🏆 완성칸 (${fPile[fPile.length - 1].rankLabel} 아래)`,
+        badgeClass: 'bg-emerald-950/90 text-emerald-300 border-emerald-500/80 shadow-sm shadow-emerald-950'
+      };
+    }
+    // 2. Tableau
+    for (let c = 0; c < 7; c++) {
+      const col = gameState.tableau[c];
+      const idx = col.findIndex(card => card.id === targetId || (card.suit === suit && card.rank === rank));
+      if (idx >= 0) {
+        const isUp = col[idx].faceUp;
+        return {
+          status: isUp ? `🃏 바닥 ${c + 1}열` : `🔒 바닥 ${c + 1}열(숨김)`,
+          badgeClass: isUp ? 'bg-blue-950/90 text-cyan-300 border-cyan-500/80 shadow-sm shadow-cyan-950' : 'bg-slate-850 text-slate-400 border-slate-700'
+        };
+      }
+    }
+    // 3. Waste
+    const wIdx = gameState.waste.findIndex(card => card.id === targetId || (card.suit === suit && card.rank === rank));
+    if (wIdx >= 0) {
+      return {
+        status: '🎴 뽑은 카드',
+        badgeClass: 'bg-amber-950/90 text-amber-300 border-amber-500/80'
+      };
+    }
+    // 4. Stock
+    const sIdx = gameState.stock.findIndex(card => card.id === targetId || (card.suit === suit && card.rank === rank));
+    if (sIdx >= 0) {
+      return {
+        status: '📦 남은 덱',
+        badgeClass: 'bg-indigo-950/90 text-indigo-300 border-indigo-500/80'
+      };
+    }
+    return {
+      status: '✨ 덱 복구됨',
+      badgeClass: 'bg-emerald-950/90 text-emerald-300 border-emerald-500/80'
+    };
+  };
+
+  return (
+    <div className="solitaire-help-overlay" onClick={onClose}>
+      <div className="solitaire-tracker-modal" onClick={e => e.stopPropagation()}>
+        <div className="flex items-center justify-between border-b border-slate-700 pb-3 mb-3">
+          <div className="flex items-center gap-2">
+            <Search className="w-5 h-5 text-emerald-400" />
+            <h2 className="text-base sm:text-lg font-black text-white">52장 카드 탐색기 (실시간 위치 현황)</h2>
+          </div>
+          <button onClick={onClose} className="text-slate-400 hover:text-white p-1 font-bold text-lg">✕</button>
+        </div>
+
+        <p className="text-xs text-slate-300 mb-3 leading-relaxed">
+          어떤 카드가 어디에 있는지 궁금할 때 확인해보세요! <strong>완성칸에 쌓인 카드도 투명하게 모두 확인</strong>할 수 있습니다.
+        </p>
+
+        <div className="space-y-2.5 overflow-y-auto max-h-[60vh] pr-1">
+          {suitOrder.map(s => (
+            <div key={s.key} className="tracker-suit-block">
+              <div className="tracker-suit-header">
+                <span className={`text-base ${s.color === 'red' ? 'text-rose-400' : 'text-slate-200'}`}>{s.symbol}</span>
+                <span className="text-slate-200">{s.name} ({s.symbol})</span>
+              </div>
+              <div className="tracker-cards-grid">
+                {ranks.map(r => {
+                  const loc = getLoc(s.key, r.val);
+                  return (
+                    <div key={r.val} className={`tracker-card-chip ${loc.badgeClass}`}>
+                      <span className={`tracker-card-label ${s.color === 'red' ? 'text-rose-400' : 'text-slate-100'}`}>
+                        {s.symbol}{r.label}
+                      </span>
+                      <span className="tracker-card-status">
+                        {loc.status}
+                      </span>
+                    </div>
+                  );
+                })}
+              </div>
+            </div>
+          ))}
+        </div>
+
+        <div className="mt-3 pt-2.5 border-t border-slate-700 flex justify-end">
+          <button onClick={onClose} className="btn-solitaire btn-sol-emerald px-5 py-1.5 text-xs sm:text-sm font-bold">
+            확인 완료
+          </button>
+        </div>
+      </div>
     </div>
   );
 }

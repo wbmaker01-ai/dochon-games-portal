@@ -1,6 +1,6 @@
 // Core Game Logic, Solvable Deal Engine & Dead-End Detection for Dochon Solitaire
 
-import { SUITS, SUIT_KEYS, RANKS } from './solitaireConstants';
+import { SUITS, SUIT_KEYS, RANKS } from './solitaireConstants.js';
 
 /**
  * Creates a standard 52-card deck (Strictly 13 of each suit: ♠, ♥, ♦, ♣)

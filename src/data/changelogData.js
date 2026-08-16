@@ -3,11 +3,40 @@
 
 export const CHANGELOG_DATA = [
   {
+    version: 'v1.10.2',
+    date: '2026-08-16',
+    title: '[도촌 솔리테어] 카드 유실/증발 버그 긴급 핫픽스 & [🔍 52장 카드 탐색기] 신설',
+    badge: 'LATEST',
+    badgeColor: 'emerald',
+    items: [
+      {
+        tag: 'HOTFIX',
+        tagColor: 'rose',
+        text: '[카드 유실 및 복제 버그 완벽 수정] 바닥 열 중간 카드를 완성칸으로 이동 시 컬럼 끝 카드가 소실되던 로직을 전면 수정하고 안전 검증을 강화하여 52장 카드 무결성 보장'
+      },
+      {
+        tag: 'AUTO HEALER',
+        tagColor: 'teal',
+        text: '[덱 52장 무결성 실시간 자동 복구기 탑재] 플레이 중 누락된 카드가 발생하면 게임 내에서 즉시 감지하여 덱으로 안전하게 자동 복원하는 자가 치유 시스템 가동'
+      },
+      {
+        tag: 'CARD TRACKER',
+        tagColor: 'blue',
+        text: '[🔍 52장 카드 탐색기 모달 신설] 상단 툴바의 [🔍 카드 찾기]를 통해 52장 전체 카드의 실시간 위치(완성칸, 바닥열, 남은 덱)를 한눈에 투명하게 확인 가능'
+      },
+      {
+        tag: 'FOUNDATION UI',
+        tagColor: 'amber',
+        text: '[완성칸 누적 카드 장수 뱃지 표시] 상단 완성칸에 차곡차곡 쌓인 카드 장수(예: 7장 보관)를 뱃지로 표기하여 직관적인 시각 피드백 제공'
+      }
+    ]
+  },
+  {
     version: 'v1.10.1',
     date: '2026-08-16',
     title: '[도촌 컬러 타일] 타일 재배치 무한 반복 오류 긴급 핫픽스 & 종료 정산 최적화',
-    badge: 'LATEST',
-    badgeColor: 'emerald',
+    badge: 'UPDATE',
+    badgeColor: 'blue',
     items: [
       {
         tag: 'HOTFIX',
