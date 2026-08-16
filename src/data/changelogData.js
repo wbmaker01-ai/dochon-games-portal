@@ -3,11 +3,55 @@
 
 export const CHANGELOG_DATA = [
   {
+    version: 'v1.7.0',
+    date: '2026-08-16',
+    title: 'Google 두들 스타일 캐주얼 스포츠 [도촌 야구왕] 정식 출시 & 타이밍 배팅 시스템',
+    badge: 'LATEST',
+    badgeColor: 'emerald',
+    items: [
+      {
+        tag: 'NEW GAME',
+        tagColor: 'amber',
+        text: '도촌초등학교 6번째 즉시 플레이 가능 게임 [도촌 야구왕 (Dochon Baseball)] 신규 출시 및 전용 독립 모듈(src/components/games/baseball/) 구축'
+      },
+      {
+        tag: 'ONE-BUTTON',
+        tagColor: 'blue',
+        text: '[초간단 원버튼 타격 시스템] 탑재 (스페이스바 또는 화면 터치 1회로 배트를 휘두르는 직관적인 타이밍 액션 구현)'
+      },
+      {
+        tag: 'PITCH ENGINE',
+        tagColor: 'purple',
+        text: '[다채로운 마구 & 변화구 시스템] 직구, 아리랑볼, 체인지업, 커브볼, 싱커, 지그재그 마구, 유령 마구, 불꽃 광속구 등 점수별 난이도 곡선 적용'
+      },
+      {
+        tag: 'DIAMOND HUD',
+        tagColor: 'emerald',
+        text: '[실시간 다이아몬드 주루 & 3아웃 룰] 안타/장타/홈런 시 주자 진루, 홈인 득점(Runs) 및 3아웃 카운트 시스템 완비'
+      },
+      {
+        tag: 'VISUAL ASSETS',
+        tagColor: 'teal',
+        text: '[도촌초 전용 에셋 & 인메모리 알파 크로마키] 도촌 야구장 배경, 치비 타자 준비/스윙 스프라이트, 투수 스프라이트, 홈런 배지 고품질 합성'
+      },
+      {
+        tag: 'WEB AUDIO',
+        tagColor: 'amber',
+        text: '[레트로 야구 신디사이저 효과음] 맑은 배트 쾌타음, 홈런 팡파르, 바람을 가르는 헛스윙음 및 투수 릴리스 비프음 연동'
+      },
+      {
+        tag: 'LEADERBOARD',
+        tagColor: 'amber',
+        text: '실시간 클라우드 DB [도촌 명예의 전당] 야구 탭 자동 연동 및 100점 룰 / 홍길동 플레이스홀더 표준 100% 준수'
+      }
+    ]
+  },
+  {
     version: 'v1.6.0',
     date: '2026-08-16',
     title: 'Google 스타일 클래식 퍼즐 [도촌 지뢰찾기] 정식 출시 & 안심 보호막 시스템 탑재',
-    badge: 'LATEST',
-    badgeColor: 'emerald',
+    badge: 'UPDATE',
+    badgeColor: 'blue',
     items: [
       {
         tag: 'NEW GAME',

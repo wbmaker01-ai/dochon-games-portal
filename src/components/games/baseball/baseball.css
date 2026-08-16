@@ -1,0 +1,973 @@
+/* Dochon Baseball Game Stylesheet */
+
+.baseball-game-container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: flex-start;
+  width: 100%;
+  max-width: 960px;
+  margin: 0 auto;
+  user-select: none;
+  -webkit-user-select: none;
+  font-family: 'Pretendard', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+  position: relative;
+}
+
+/* ==========================================================================
+   1. Stadium Top Scoreboard HUD
+   ========================================================================== */
+.baseball-scoreboard-hud {
+  width: 100%;
+  background: linear-gradient(180deg, #1E293B 0%, #0F172A 100%);
+  border: 2px solid #334155;
+  border-radius: 16px 16px 0 0;
+  padding: 10px 16px;
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.4);
+  z-index: 10;
+}
+
+.scoreboard-left {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.scoreboard-score-card {
+  display: flex;
+  flex-direction: column;
+}
+
+.scoreboard-label {
+  font-size: 10px;
+  font-weight: 800;
+  color: #94A3B8;
+  letter-spacing: 0.5px;
+  text-transform: uppercase;
+}
+
+.scoreboard-value-score {
+  font-size: 24px;
+  font-weight: 900;
+  color: #FBBF24;
+  text-shadow: 0 0 12px rgba(251, 191, 36, 0.4);
+  line-height: 1.1;
+  font-family: 'SF Pro Display', -apple-system, 'Pretendard', sans-serif;
+}
+
+.scoreboard-combo-pill {
+  background: linear-gradient(135deg, #EF4444, #F97316);
+  color: #FFFFFF;
+  font-size: 11px;
+  font-weight: 900;
+  padding: 4px 10px;
+  border-radius: 9999px;
+  box-shadow: 0 0 10px rgba(239, 68, 68, 0.5);
+  animation: pulse-combo 1.2s infinite ease-in-out;
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+
+@keyframes pulse-combo {
+  0%, 100% { transform: scale(1); }
+  50% { transform: scale(1.08); box-shadow: 0 0 16px rgba(249, 115, 22, 0.8); }
+}
+
+/* Center Diamond Bases & Counts */
+.scoreboard-center {
+  display: flex;
+  align-items: center;
+  gap: 18px;
+  background: rgba(15, 23, 42, 0.7);
+  padding: 4px 14px;
+  border-radius: 12px;
+  border: 1px solid rgba(255, 255, 255, 0.08);
+}
+
+.mini-diamond-box {
+  position: relative;
+  width: 44px;
+  height: 44px;
+}
+
+.mini-diamond-outline {
+  position: absolute;
+  width: 28px;
+  height: 28px;
+  border: 1.5px dashed rgba(255, 255, 255, 0.3);
+  transform: rotate(45deg);
+  top: 8px;
+  left: 8px;
+}
+
+.base-dot {
+  position: absolute;
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.25);
+  border: 1.5px solid #0F172A;
+  transition: all 0.2s ease;
+}
+
+.base-dot.b-home {
+  bottom: 1px;
+  left: 17px;
+  background: #E2E8F0;
+}
+
+.base-dot.b-first {
+  right: 1px;
+  top: 17px;
+}
+
+.base-dot.b-second {
+  top: 1px;
+  left: 17px;
+}
+
+.base-dot.b-third {
+  left: 1px;
+  top: 17px;
+}
+
+.base-dot.active {
+  background: #FBBF24;
+  box-shadow: 0 0 8px #FBBF24;
+  transform: scale(1.25);
+}
+
+/* S / B / O Counts */
+.count-meters-box {
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+}
+
+.count-row {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.count-name {
+  font-size: 11px;
+  font-weight: 900;
+  width: 14px;
+  color: #94A3B8;
+}
+
+.count-dots {
+  display: flex;
+  gap: 4px;
+}
+
+.count-lamp {
+  width: 9px;
+  height: 9px;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.15);
+  border: 1px solid rgba(0, 0, 0, 0.5);
+  transition: all 0.2s ease;
+}
+
+.count-lamp.strike.on {
+  background: #FBBF24;
+  box-shadow: 0 0 6px #FBBF24;
+}
+
+.count-lamp.out.on {
+  background: #EF4444;
+  box-shadow: 0 0 6px #EF4444;
+}
+
+/* Right Stats & Controls */
+.scoreboard-right {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.hud-stat-pill {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  background: rgba(255, 255, 255, 0.06);
+  padding: 4px 10px;
+  border-radius: 8px;
+  border: 1px solid rgba(255, 255, 255, 0.08);
+}
+
+.hud-stat-num {
+  font-size: 15px;
+  font-weight: 900;
+  color: #F8FAFC;
+}
+
+.hud-ctrl-btn {
+  background: rgba(255, 255, 255, 0.1);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  color: #E2E8F0;
+  width: 34px;
+  height: 34px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.hud-ctrl-btn:hover {
+  background: rgba(255, 255, 255, 0.25);
+  transform: scale(1.08);
+}
+
+/* ==========================================================================
+   2. Canvas Stadium Area
+   ========================================================================== */
+.baseball-canvas-wrapper {
+  position: relative;
+  width: 100%;
+  background: #000000;
+  border-left: 2px solid #334155;
+  border-right: 2px solid #334155;
+  border-bottom: 2px solid #334155;
+  border-radius: 0 0 16px 16px;
+  overflow: hidden;
+  box-shadow: 0 12px 32px rgba(0, 0, 0, 0.6);
+  touch-action: manipulation;
+  cursor: pointer;
+}
+
+.baseball-main-canvas {
+  display: block;
+  width: 100%;
+  height: auto;
+  aspect-ratio: 16 / 9;
+}
+
+/* Pitch Alert Toast */
+.pitch-name-toast {
+  position: absolute;
+  top: 16px;
+  left: 50%;
+  transform: translateX(-50%);
+  background: rgba(15, 23, 42, 0.85);
+  backdrop-filter: blur(8px);
+  border: 1.5px solid rgba(255, 255, 255, 0.2);
+  padding: 6px 16px;
+  border-radius: 9999px;
+  font-size: 13px;
+  font-weight: 800;
+  color: #FFFFFF;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.4);
+  pointer-events: none;
+  animation: toast-fade 0.3s ease-out;
+}
+
+@keyframes toast-fade {
+  from { opacity: 0; transform: translate(-50%, -10px); }
+  to { opacity: 1; transform: translate(-50%, 0); }
+}
+
+/* Hit Feedback Overlay Popup */
+.hit-feedback-popup {
+  position: absolute;
+  top: 40%;
+  left: 50%;
+  transform: translate(-50%, -50%) scale(1);
+  text-align: center;
+  pointer-events: none;
+  animation: popup-bounce 0.85s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards;
+  z-index: 20;
+}
+
+@keyframes popup-bounce {
+  0% { transform: translate(-50%, -50%) scale(0.4); opacity: 0; }
+  40% { transform: translate(-50%, -50%) scale(1.15); opacity: 1; }
+  75% { transform: translate(-50%, -50%) scale(1); opacity: 1; }
+  100% { transform: translate(-50%, -65%) scale(0.95); opacity: 0; }
+}
+
+.hit-feedback-title {
+  font-size: 42px;
+  font-weight: 900;
+  letter-spacing: 1px;
+  text-shadow: 0 4px 16px rgba(0, 0, 0, 0.9), 0 0 20px currentColor;
+  margin: 0;
+  line-height: 1;
+}
+
+.hit-feedback-desc {
+  font-size: 18px;
+  font-weight: 800;
+  color: #FFFFFF;
+  margin-top: 6px;
+  text-shadow: 0 2px 8px rgba(0, 0, 0, 0.8);
+}
+
+.hit-feedback-distance {
+  display: inline-block;
+  background: rgba(0, 0, 0, 0.7);
+  border: 1px solid rgba(251, 191, 36, 0.6);
+  color: #FBBF24;
+  padding: 3px 12px;
+  border-radius: 9999px;
+  font-size: 14px;
+  font-weight: 900;
+  margin-top: 6px;
+}
+
+/* Homerun Celebration Big Badge */
+.homerun-badge-overlay {
+  position: absolute;
+  top: 25%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  width: 220px;
+  height: 220px;
+  pointer-events: none;
+  animation: homerun-badge-anim 1.5s cubic-bezier(0.2, 0.9, 0.3, 1.2) forwards;
+  z-index: 25;
+}
+
+@keyframes homerun-badge-anim {
+  0% { transform: translate(-50%, -50%) scale(0.2) rotate(-20deg); opacity: 0; }
+  35% { transform: translate(-50%, -50%) scale(1.1) rotate(5deg); opacity: 1; }
+  60% { transform: translate(-50%, -50%) scale(1) rotate(0deg); opacity: 1; }
+  100% { transform: translate(-50%, -60%) scale(0.8); opacity: 0; }
+}
+
+.homerun-badge-img {
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+  filter: drop-shadow(0 8px 24px rgba(251, 191, 36, 0.8));
+}
+
+/* ==========================================================================
+   3. Bottom Action Bar (Mobile Touch Assist & Key Guide)
+   ========================================================================== */
+.baseball-bottom-controls {
+  width: 100%;
+  margin-top: 12px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 8px;
+}
+
+.mobile-swing-btn {
+  width: 100%;
+  max-width: 480px;
+  height: 52px;
+  background: linear-gradient(135deg, #2563EB 0%, #1D4ED8 100%);
+  border: 2px solid #60A5FA;
+  border-radius: 14px;
+  color: #FFFFFF;
+  font-size: 18px;
+  font-weight: 900;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  cursor: pointer;
+  box-shadow: 0 4px 16px rgba(37, 99, 235, 0.4);
+  transition: all 0.15s ease;
+  user-select: none;
+}
+
+.mobile-swing-btn:hover {
+  background: linear-gradient(135deg, #3B82F6 0%, #2563EB 100%);
+  transform: translateY(-2px);
+  box-shadow: 0 6px 20px rgba(37, 99, 235, 0.6);
+}
+
+.mobile-swing-btn:active {
+  transform: translateY(1px) scale(0.98);
+}
+
+.desktop-key-hint {
+  font-size: 12px;
+  font-weight: 700;
+  color: #94A3B8;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.desktop-key-hint kbd {
+  background: #334155;
+  color: #F8FAFC;
+  padding: 2px 6px;
+  border-radius: 4px;
+  font-size: 11px;
+  font-weight: 800;
+  border-bottom: 2px solid #1E293B;
+}
+
+/* ==========================================================================
+   4. Game Over & Result Screen Overlay
+   ========================================================================== */
+.baseball-gameover-overlay {
+  position: absolute;
+  inset: 0;
+  background: rgba(15, 23, 42, 0.92);
+  backdrop-filter: blur(10px);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 20px;
+  z-index: 30;
+  animation: gameover-fadein 0.3s ease-out;
+}
+
+@keyframes gameover-fadein {
+  from { opacity: 0; transform: scale(0.97); }
+  to { opacity: 1; transform: scale(1); }
+}
+
+.baseball-gameover-card {
+  width: 100%;
+  max-width: 440px;
+  background: linear-gradient(180deg, #1E293B 0%, #0F172A 100%);
+  border: 2px solid #334155;
+  border-radius: 20px;
+  padding: 22px;
+  box-shadow: 0 16px 40px rgba(0, 0, 0, 0.8);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+}
+
+.gameover-badge {
+  font-size: 13px;
+  font-weight: 900;
+  color: #EF4444;
+  background: rgba(239, 68, 68, 0.15);
+  border: 1px solid rgba(239, 68, 68, 0.4);
+  padding: 4px 12px;
+  border-radius: 9999px;
+  text-transform: uppercase;
+  margin-bottom: 8px;
+}
+
+.gameover-title {
+  font-size: 26px;
+  font-weight: 900;
+  color: #F8FAFC;
+  margin: 0;
+}
+
+.gameover-score-wrap {
+  margin: 14px 0 16px;
+}
+
+.gameover-score-label {
+  font-size: 11px;
+  font-weight: 800;
+  color: #94A3B8;
+  text-transform: uppercase;
+}
+
+.gameover-score-val {
+  font-size: 38px;
+  font-weight: 900;
+  color: #FBBF24;
+  text-shadow: 0 0 16px rgba(251, 191, 36, 0.4);
+  line-height: 1;
+  margin-top: 4px;
+}
+
+/* Stats Matrix */
+.gameover-stats-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 8px;
+  width: 100%;
+  margin-bottom: 18px;
+}
+
+.stat-box {
+  background: rgba(255, 255, 255, 0.04);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 10px;
+  padding: 8px 6px;
+  display: flex;
+  flex-direction: column;
+}
+
+.stat-box-lbl {
+  font-size: 10px;
+  color: #94A3B8;
+  font-weight: 700;
+}
+
+.stat-box-val {
+  font-size: 16px;
+  font-weight: 900;
+  color: #F1F5F9;
+  margin-top: 2px;
+}
+
+/* Leaderboard Input Form (Rule: Only if score > 100) */
+.leaderboard-register-box {
+  width: 100%;
+  background: rgba(16, 185, 129, 0.08);
+  border: 1.5px solid rgba(16, 185, 129, 0.4);
+  border-radius: 14px;
+  padding: 12px;
+  margin-bottom: 16px;
+}
+
+.leaderboard-box-title {
+  font-size: 13px;
+  font-weight: 900;
+  color: #34D399;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  margin-bottom: 10px;
+}
+
+.leaderboard-form {
+  display: flex;
+  gap: 8px;
+}
+
+.leaderboard-input {
+  flex: 1;
+  background: #0F172A;
+  border: 1.5px solid #334155;
+  border-radius: 10px;
+  padding: 8px 12px;
+  font-size: 13px;
+  font-weight: 700;
+  color: #FFFFFF;
+  outline: none;
+  transition: all 0.2s;
+}
+
+.leaderboard-input:focus {
+  border-color: #10B981;
+  box-shadow: 0 0 8px rgba(16, 185, 129, 0.3);
+}
+
+.leaderboard-input::placeholder {
+  color: #64748B;
+}
+
+.leaderboard-submit-btn {
+  background: #10B981;
+  color: #FFFFFF;
+  border: none;
+  border-radius: 10px;
+  padding: 8px 14px;
+  font-size: 13px;
+  font-weight: 800;
+  cursor: pointer;
+  white-space: nowrap;
+  transition: all 0.2s;
+}
+
+.leaderboard-submit-btn:hover:not(:disabled) {
+  background: #059669;
+  transform: scale(1.03);
+}
+
+.leaderboard-submit-btn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+/* Rule: Score <= 100 Notice */
+.low-score-notice {
+  background: rgba(239, 68, 68, 0.08);
+  border: 1px dashed rgba(239, 68, 68, 0.3);
+  color: #F87171;
+  font-size: 12px;
+  font-weight: 700;
+  padding: 10px 14px;
+  border-radius: 10px;
+  width: 100%;
+  margin-bottom: 16px;
+}
+
+/* Action Buttons */
+.gameover-btn-row {
+  display: flex;
+  gap: 10px;
+  width: 100%;
+}
+
+.retry-action-btn {
+  flex: 1;
+  background: linear-gradient(135deg, #F59E0B, #D97706);
+  border: none;
+  color: #FFFFFF;
+  font-size: 15px;
+  font-weight: 900;
+  padding: 11px;
+  border-radius: 12px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  box-shadow: 0 4px 14px rgba(245, 158, 11, 0.4);
+  transition: all 0.2s;
+}
+
+.retry-action-btn:hover {
+  background: linear-gradient(135deg, #FBBF24, #F59E0B);
+  transform: translateY(-2px);
+}
+
+.hall-action-btn {
+  background: rgba(255, 255, 255, 0.1);
+  border: 1.5px solid rgba(255, 255, 255, 0.2);
+  color: #F1F5F9;
+  font-size: 14px;
+  font-weight: 800;
+  padding: 11px 16px;
+  border-radius: 12px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  transition: all 0.2s;
+}
+
+.hall-action-btn:hover {
+  background: rgba(255, 255, 255, 0.2);
+}
+
+/* ==========================================================================
+   5. How To Play Modal Styles
+   ========================================================================== */
+.baseball-modal-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.75);
+  backdrop-filter: blur(6px);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 16px;
+  z-index: 9999;
+  animation: modal-fadein 0.25s ease-out;
+}
+
+@keyframes modal-fadein {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+.baseball-modal-card {
+  width: 100%;
+  max-width: 560px;
+  max-height: 90vh;
+  background: #0F172A;
+  border: 2px solid #334155;
+  border-radius: 20px;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  box-shadow: 0 20px 50px rgba(0, 0, 0, 0.8);
+}
+
+.baseball-modal-header {
+  padding: 16px 20px;
+  background: #1E293B;
+  border-bottom: 1px solid #334155;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.baseball-modal-title-box {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.baseball-modal-icon-wrap {
+  width: 40px;
+  height: 40px;
+  background: rgba(251, 191, 36, 0.15);
+  border: 1px solid rgba(251, 191, 36, 0.4);
+  border-radius: 10px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.baseball-modal-title {
+  font-size: 17px;
+  font-weight: 900;
+  color: #F8FAFC;
+  margin: 0;
+}
+
+.baseball-modal-subtitle {
+  font-size: 11px;
+  color: #94A3B8;
+  margin: 2px 0 0;
+}
+
+.baseball-modal-close-btn {
+  background: rgba(255, 255, 255, 0.1);
+  border: none;
+  color: #94A3B8;
+  width: 32px;
+  height: 32px;
+  border-radius: 8px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.baseball-modal-close-btn:hover {
+  background: rgba(255, 255, 255, 0.2);
+  color: #FFFFFF;
+}
+
+.baseball-modal-body {
+  padding: 18px 20px;
+  overflow-y: auto;
+  display: flex;
+  flex-direction: column;
+  gap: 18px;
+}
+
+.baseball-guide-section {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.baseball-guide-heading {
+  font-size: 14px;
+  font-weight: 800;
+  color: #F1F5F9;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin: 0;
+}
+
+.baseball-guide-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 10px;
+}
+
+.baseball-guide-card {
+  background: #1E293B;
+  border: 1px solid #334155;
+  border-radius: 12px;
+  padding: 10px 12px;
+  display: flex;
+  gap: 10px;
+}
+
+.baseball-guide-card-icon {
+  font-size: 20px;
+}
+
+.baseball-guide-card-text strong {
+  font-size: 12px;
+  color: #F8FAFC;
+  display: block;
+}
+
+.baseball-guide-card-text p {
+  font-size: 11px;
+  color: #94A3B8;
+  margin: 2px 0 0;
+  line-height: 1.3;
+}
+
+.baseball-guide-card-text kbd {
+  background: #334155;
+  color: #FBBF24;
+  padding: 1px 4px;
+  border-radius: 4px;
+  font-size: 10px;
+  font-weight: 800;
+}
+
+/* Timing table */
+.baseball-timing-table {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.timing-row {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  background: #1E293B;
+  border: 1px solid #334155;
+  border-radius: 8px;
+  padding: 6px 10px;
+}
+
+.timing-badge {
+  font-size: 10px;
+  font-weight: 900;
+  padding: 2px 8px;
+  border-radius: 6px;
+  min-width: 65px;
+  text-align: center;
+}
+
+.homerun-row .timing-badge { background: #FBBF24; color: #0F172A; }
+.great-row .timing-badge { background: #38BDF8; color: #0F172A; }
+.good-row .timing-badge { background: #60A5FA; color: #0F172A; }
+.foul-row .timing-badge { background: #F97316; color: #0F172A; }
+.strike-row .timing-badge { background: #EF4444; color: #FFFFFF; }
+
+.timing-desc {
+  font-size: 11px;
+  color: #CBD5E1;
+}
+
+/* Pitch Types Grid */
+.pitch-types-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 8px;
+}
+
+.pitch-card {
+  background: #1E293B;
+  border: 1px solid #334155;
+  border-radius: 8px;
+  padding: 6px 10px;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  font-size: 10px;
+  color: #94A3B8;
+}
+
+.pitch-badge {
+  display: inline-block;
+  font-size: 10px;
+  font-weight: 800;
+  width: fit-content;
+  padding: 1px 6px;
+  border-radius: 4px;
+}
+
+.pitch-badge.fastball { background: rgba(255, 255, 255, 0.2); color: #FFFFFF; }
+.pitch-badge.slowball { background: rgba(110, 231, 183, 0.2); color: #6EE7B7; }
+.pitch-badge.changeup { background: rgba(96, 165, 250, 0.2); color: #60A5FA; }
+.pitch-badge.curve { background: rgba(245, 158, 11, 0.2); color: #F59E0B; }
+.pitch-badge.sinker { background: rgba(236, 72, 153, 0.2); color: #EC4899; }
+.pitch-badge.zigzag { background: rgba(168, 85, 247, 0.2); color: #A855F7; }
+.pitch-badge.ghost { background: rgba(56, 189, 248, 0.2); color: #38BDF8; }
+.pitch-badge.fireball { background: rgba(239, 68, 68, 0.2); color: #EF4444; }
+
+/* Tips Box */
+.baseball-tips-box {
+  background: rgba(251, 191, 36, 0.05);
+  border: 1px solid rgba(251, 191, 36, 0.2);
+  border-radius: 12px;
+  padding: 10px 12px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.tip-item {
+  display: flex;
+  align-items: flex-start;
+  gap: 8px;
+  font-size: 11px;
+  color: #CBD5E1;
+  line-height: 1.4;
+}
+
+.baseball-modal-footer {
+  padding: 12px 20px;
+  background: #1E293B;
+  border-top: 1px solid #334155;
+}
+
+.baseball-start-btn {
+  width: 100%;
+  background: linear-gradient(135deg, #10B981, #059669);
+  border: none;
+  color: #FFFFFF;
+  font-size: 15px;
+  font-weight: 900;
+  padding: 10px;
+  border-radius: 12px;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.baseball-start-btn:hover {
+  background: linear-gradient(135deg, #34D399, #10B981);
+}
+
+/* Responsive breakpoint adjustments */
+@media (max-width: 640px) {
+  .scoreboard-score-card .scoreboard-value-score {
+    font-size: 19px;
+  }
+  .scoreboard-center {
+    padding: 3px 8px;
+    gap: 10px;
+  }
+  .mini-diamond-box {
+    width: 36px;
+    height: 36px;
+  }
+  .mini-diamond-outline {
+    width: 22px;
+    height: 22px;
+    top: 7px;
+    left: 7px;
+  }
+  .base-dot {
+    width: 8px;
+    height: 8px;
+  }
+  .base-dot.b-home { bottom: 0px; left: 14px; }
+  .base-dot.b-first { right: 0px; top: 14px; }
+  .base-dot.b-second { top: 0px; left: 14px; }
+  .base-dot.b-third { left: 0px; top: 14px; }
+  
+  .hit-feedback-title {
+    font-size: 30px;
+  }
+  .hit-feedback-desc {
+    font-size: 14px;
+  }
+  .pitch-types-grid {
+    grid-template-columns: 1fr;
+  }
+  .baseball-guide-grid {
+    grid-template-columns: 1fr;
+  }
+}

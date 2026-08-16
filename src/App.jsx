@@ -4,6 +4,7 @@ import DinoGame from './components/games/dino/DinoGame';
 import SnakeGame from './components/games/snake/SnakeGame';
 import SolitaireGame from './components/games/solitaire/SolitaireGame';
 import MinesweeperGame from './components/games/minesweeper/MinesweeperGame';
+import BaseballGame from './components/games/baseball/BaseballGame';
 import GameCard from './components/GameCard';
 import LeaderboardModal from './components/LeaderboardModal';
 import ChangelogModal from './components/ChangelogModal';
@@ -22,9 +23,9 @@ export default function App() {
   const [favorites, setFavorites] = useState(() => {
     try {
       const saved = localStorage.getItem('dochon_favorites');
-      return saved ? JSON.parse(saved) : ['pacman', 'dino', 'snake', 'solitaire', 'minesweeper'];
+      return saved ? JSON.parse(saved) : ['pacman', 'dino', 'snake', 'solitaire', 'minesweeper', 'baseball'];
     } catch (e) {
-      return ['pacman', 'dino', 'snake', 'solitaire', 'minesweeper'];
+      return ['pacman', 'dino', 'snake', 'solitaire', 'minesweeper', 'baseball'];
     }
   });
 
@@ -132,6 +133,7 @@ export default function App() {
     if (game.id === 'snake') return '🔥 스네이크 챔피언에 도전하기';
     if (game.id === 'solitaire') return '🔥 솔리테어 챔피언에 도전하기';
     if (game.id === 'minesweeper') return '🔥 지뢰찾기 챔피언에 도전하기';
+    if (game.id === 'baseball') return '🔥 야구왕 챔피언에 도전하기';
     return `🔥 ${game.title.replace('도촌 ', '')} 챔피언에 도전하기`;
   };
 
@@ -417,6 +419,9 @@ export default function App() {
               )}
               {activeGame === 'minesweeper' && (
                 <MinesweeperGame onScoreSubmitted={() => openInPageLeaderboardModal('minesweeper')} />
+              )}
+              {activeGame === 'baseball' && (
+                <BaseballGame onScoreSubmitted={() => openInPageLeaderboardModal('baseball')} />
               )}
             </div>
           </div>

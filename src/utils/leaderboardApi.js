@@ -265,6 +265,14 @@ function getLocalLeaderboardFallback(gameKey) {
       { id: '4', name: '정수빈 (3C)', score: 1250, date: '2026-08-15' },
       { id: '5', name: '최강우 (5B)', score: 850, date: '2026-08-14' }
     ]);
+  } else if (gameKey === 'baseball') {
+    return deduplicateLeaderboard([
+      { id: '1', name: '이홈런 (6A)', score: 4850, date: '2026-08-16' },
+      { id: '2', name: '김도촌 (5A)', score: 3620, date: '2026-08-16' },
+      { id: '3', name: '박타자 (4B)', score: 2750, date: '2026-08-16' },
+      { id: '4', name: '최안타 (5C)', score: 1980, date: '2026-08-15' },
+      { id: '5', name: '강슬러거 (3A)', score: 1240, date: '2026-08-15' }
+    ]);
   } else {
     return deduplicateLeaderboard([
       { id: '1', name: '박민준 (6C)', score: 3450, date: '2026-08-12' },

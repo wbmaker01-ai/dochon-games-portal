@@ -46,19 +46,21 @@ export const PLAYABLE_GAMES = [
     category: '퍼즐',
     imageSrc: getThumb('minesweeper.jpg'),
     isPlayable: true,
-    badgeText: '💣 NEW 5위',
+    badgeText: '💣 5위',
     description: '지뢰를 피해 잔디밭을 탐색하고 도촌 추리 마스터가 되어보세요!'
+  },
+  {
+    id: 'baseball',
+    title: '도촌 야구왕',
+    category: '스포츠',
+    imageSrc: getThumb('baseball.jpg'),
+    isPlayable: true,
+    badgeText: '⚾ NEW 6위',
+    description: '구속과 변화구를 예측하고 만루홈런을 날려 도촌 야구왕이 되어보세요!'
   }
 ];
 
 export const COMING_SOON_GAMES = [
-  {
-    id: 'baseball',
-    title: '야구',
-    category: '스포츠',
-    imageSrc: getThumb('baseball.jpg'),
-    isPlayable: false
-  },
   {
     id: 'gnome',
     title: '정원 요정',
