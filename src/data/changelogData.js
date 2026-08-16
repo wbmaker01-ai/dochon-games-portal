@@ -3,11 +3,30 @@
 
 export const CHANGELOG_DATA = [
   {
+    version: 'v1.10.1',
+    date: '2026-08-16',
+    title: '[도촌 컬러 타일] 타일 재배치 무한 반복 오류 긴급 핫픽스 & 종료 정산 최적화',
+    badge: 'LATEST',
+    badgeColor: 'emerald',
+    items: [
+      {
+        tag: 'HOTFIX',
+        tagColor: 'purple',
+        text: '[타일 재배치 무한 반복 버그 완벽 수정] 게임 후반부 서로 다른 색상의 고아 타일만 남아 더 이상 동일 색상 쌍이 없을 때 자동 재배치가 무한 루프로 실행되던 문제를 수정하고, 색상 빈도수 검사(hasAnyMatchingColorPairs)를 통해 매칭 가능 타일 소진 시 정상 완료(ALL MATCHED) 화면으로 부드럽게 전환되도록 개선'
+      },
+      {
+        tag: 'OPTIMIZATION',
+        tagColor: 'blue',
+        text: '[결정론적 라운드 종료 & 정산 보너스 추가] 남은 타일 개수 및 클리어 유형(퍼펙트 클리어 / 매칭 완료)에 따른 정산 보너스 시스템을 안정화하여 쾌적한 플레이 환경 보장'
+      }
+    ]
+  },
+  {
     version: 'v1.10.0',
     date: '2026-08-16',
     title: '신규 8번째 게임 [도촌 컬러 타일 (Color Tile)] 정식 출시 & 교차 매칭 엔진 탑재',
-    badge: 'LATEST',
-    badgeColor: 'emerald',
+    badge: 'UPDATE',
+    badgeColor: 'blue',
     items: [
       {
         tag: 'NEW GAME',

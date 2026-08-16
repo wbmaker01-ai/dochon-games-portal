@@ -193,6 +193,32 @@ export function countRemainingTiles(board) {
 }
 
 /**
+ * Calculates frequency count of each color currently on the board
+ */
+export function getColorFrequencyMap(board) {
+  const counts = {};
+  for (let r = 0; r < board.length; r++) {
+    for (let c = 0; c < board[r].length; c++) {
+      const colorId = board[r][c];
+      if (colorId !== null) {
+        counts[colorId] = (counts[colorId] || 0) + 1;
+      }
+    }
+  }
+  return counts;
+}
+
+/**
+ * Checks if there is AT LEAST ONE color with >= 2 tiles remaining on the board.
+ * If all remaining colors have count < 2 (e.g. 1 red, 1 blue, 1 yellow, 1 pink),
+ * NO MATCH IS MATHEMATICALLY POSSIBLE regardless of shuffling.
+ */
+export function hasAnyMatchingColorPairs(board) {
+  const freq = getColorFrequencyMap(board);
+  return Object.values(freq).some(count => count >= 2);
+}
+
+/**
  * Shuffles all existing tiles into random vacant positions
  */
 export function shuffleExistingTiles(board) {
@@ -232,6 +258,27 @@ export function shuffleExistingTiles(board) {
   }
 
   return newBoard;
+}
+
+/**
+ * Shuffles existing tiles and guarantees valid moves if matching pairs exist.
+ */
+export function shuffleExistingTilesWithValidation(board, maxTries = 30) {
+  if (!hasAnyMatchingColorPairs(board)) {
+    return { board, success: false, reason: 'no_pairs_left' };
+  }
+
+  let bestBoard = board;
+  for (let i = 0; i < maxTries; i++) {
+    const candidate = shuffleExistingTiles(board);
+    const validMoves = findValidMoves(candidate);
+    if (validMoves.length > 0) {
+      return { board: candidate, success: true, validMovesCount: validMoves.length };
+    }
+    bestBoard = candidate;
+  }
+
+  return { board: bestBoard, success: false, reason: 'unsolvable_layout' };
 }
 
 // ----------------------------------------------------

@@ -10,7 +10,8 @@ import {
   findValidMoves,
   getHintMove,
   countRemainingTiles,
-  shuffleExistingTiles,
+  hasAnyMatchingColorPairs,
+  shuffleExistingTilesWithValidation,
   soundManager
 } from './colortileLogic';
 import { submitScoreToDB } from '../../../utils/leaderboardApi';
@@ -42,6 +43,7 @@ export default function ColorTileGame({ onScoreSubmitted }) {
   const [maxCombo, setMaxCombo] = useState(1);
   const [matchCountTotal, setMatchCountTotal] = useState(0);
   const [gameState, setGameState] = useState('playing'); // 'playing' | 'gameover' | 'cleared'
+  const [clearDetails, setClearDetails] = useState({ type: 'perfect', remaining: 0 });
 
   // Items & Helpers
   const [hintsLeft, setHintsLeft] = useState(GAME_SETTINGS.INITIAL_HINTS);
@@ -90,27 +92,8 @@ export default function ColorTileGame({ onScoreSubmitted }) {
     return () => clearInterval(timer);
   }, [gameState, gameMode]);
 
-  // Check Remaining Tiles & Auto-Clear Condition
+  // Remaining Tiles Count
   const remainingTiles = countRemainingTiles(board);
-
-  useEffect(() => {
-    if (remainingTiles === 0 && gameState === 'playing') {
-      handleGameClear();
-    } else if (gameState === 'playing') {
-      // Check if valid moves exist
-      const validMoves = findValidMoves(board);
-      if (validMoves.length === 0 && remainingTiles > 0) {
-        // No valid moves left: Auto shuffle if available, or force shuffle
-        if (shufflesLeft > 0) {
-          handleShuffle(true);
-        } else {
-          // If no shuffles left, give one emergency shuffle
-          setBoard(prev => shuffleExistingTiles(prev));
-          triggerFloatingText('자동 재배치!', '#38BDF8', 50, 50);
-        }
-      }
-    }
-  }, [board, remainingTiles, gameState]);
 
   // Reset & Start New Game
   const startNewGame = useCallback((mode = gameMode) => {
@@ -122,6 +105,7 @@ export default function ColorTileGame({ onScoreSubmitted }) {
     setMaxCombo(1);
     setMatchCountTotal(0);
     setGameState('playing');
+    setClearDetails({ type: 'perfect', remaining: 0 });
     setHintsLeft(GAME_SETTINGS.INITIAL_HINTS);
     setShufflesLeft(GAME_SETTINGS.INITIAL_SHUFFLES);
     setHintCell(null);
@@ -140,14 +124,20 @@ export default function ColorTileGame({ onScoreSubmitted }) {
     soundManager.playGameOver();
   };
 
-  // Handle All Tiles Cleared Victory
-  const handleGameClear = () => {
+  // Handle Game Clear (All cleared or all matching pairs cleared)
+  const handleGameClear = (type = 'perfect', remaining = 0) => {
     setGameState('cleared');
+    setClearDetails({ type, remaining });
     soundManager.playVictory();
+
     const timeBonus = gameMode === 'timeattack' ? Math.floor(timeLeft * 100) : 1000;
-    const finalBonus = GAME_SETTINGS.CLEARED_ALL_BONUS + timeBonus;
+    const clearedTilesBonus = Math.max(0, (196 - remaining) * 30);
+    const perfectExtra = type === 'perfect' ? GAME_SETTINGS.CLEARED_ALL_BONUS : 2000;
+    const finalBonus = perfectExtra + timeBonus + clearedTilesBonus;
+
     setScore(prev => prev + finalBonus);
-    triggerFloatingText(`PERFECT CLEAR! +${finalBonus}`, '#FBBF24', 50, 50);
+    const msg = type === 'perfect' ? `PERFECT CLEAR! +${finalBonus}` : `ALL MATCHED! +${finalBonus}`;
+    triggerFloatingText(msg, '#FBBF24', 50, 50);
   };
 
   // Trigger floating Juice text
@@ -228,14 +218,11 @@ export default function ColorTileGame({ onScoreSubmitted }) {
       setActiveRays(matchResult.rays);
       setTimeout(() => setActiveRays([]), 300);
 
-      // Remove matched tiles from board
-      setBoard(prev => {
-        const nextBoard = prev.map(r => [...r]);
-        for (const t of matchResult.matchedTiles) {
-          nextBoard[t.r][t.c] = null;
-        }
-        return nextBoard;
-      });
+      // Compute Next Board
+      const nextBoard = board.map(r => [...r]);
+      for (const t of matchResult.matchedTiles) {
+        nextBoard[t.r][t.c] = null;
+      }
 
       // Clear Hint if this move was the hint
       if (hintCell && hintCell.r === row && hintCell.c === col) {
@@ -254,6 +241,34 @@ export default function ColorTileGame({ onScoreSubmitted }) {
       else if (currentCombo >= 3) textMsg = `🔥 COMBO x${currentCombo}! +${earnedScore}`;
 
       triggerFloatingText(textMsg, glowCol, clickPercentX, clickPercentY);
+
+      // Deterministic Completion Check
+      const nextRemaining = countRemainingTiles(nextBoard);
+
+      if (nextRemaining === 0) {
+        setBoard(nextBoard);
+        handleGameClear('perfect', 0);
+      } else if (!hasAnyMatchingColorPairs(nextBoard)) {
+        // No matching pairs left anywhere on the board
+        setBoard(nextBoard);
+        handleGameClear('all_matched', nextRemaining);
+      } else {
+        // Pairs exist, check if current layout has valid moves
+        const validMoves = findValidMoves(nextBoard);
+        if (validMoves.length === 0) {
+          // Layout has no line of sight -> perform smart shuffle
+          const shuffleRes = shuffleExistingTilesWithValidation(nextBoard, 30);
+          if (shuffleRes.success) {
+            setBoard(shuffleRes.board);
+            triggerFloatingText('🔀 타일 자동 재배치!', '#38BDF8', 50, 50);
+          } else {
+            setBoard(shuffleRes.board);
+            handleGameClear('all_matched', nextRemaining);
+          }
+        } else {
+          setBoard(nextBoard);
+        }
+      }
 
     } else {
       // 2. Miss Click (No match from this empty cell)
@@ -286,19 +301,24 @@ export default function ColorTileGame({ onScoreSubmitted }) {
       setTimeout(() => {
         setHintCell(null);
       }, 4000);
+    } else {
+      triggerFloatingText('현재 가능한 힌트가 없습니다!', '#EF4444', 50, 50);
     }
   };
 
   // Shuffle Button Handler
-  const handleShuffle = (isAuto = false) => {
-    if (!isAuto && (shufflesLeft <= 0 || gameState !== 'playing')) return;
+  const handleShuffle = () => {
+    if (shufflesLeft <= 0 || gameState !== 'playing') return;
     
-    if (!isAuto) {
-      setShufflesLeft(prev => prev - 1);
+    if (!hasAnyMatchingColorPairs(board)) {
+      triggerFloatingText('매칭 가능한 타일 쌍이 없습니다!', '#EF4444', 50, 50);
+      return;
     }
-    
+
+    setShufflesLeft(prev => prev - 1);
     soundManager.playShuffle();
-    setBoard(prev => shuffleExistingTiles(prev));
+    const res = shuffleExistingTilesWithValidation(board, 30);
+    setBoard(res.board);
     setHintCell(null);
     triggerFloatingText('🔀 타일 재배치 완료!', '#8B5CF6', 50, 50);
   };
@@ -330,7 +350,6 @@ export default function ColorTileGame({ onScoreSubmitted }) {
 
   const isHitTargetTile = (r, c) => {
     if (!hoveredCell || board[hoveredCell.r][hoveredCell.c] !== null) return false;
-    // Check if (r, c) is one of the 4 first tiles hit by the hover
     const hitTiles = getMatchingTilesForCell(board, hoveredCell.r, hoveredCell.c).allHitTiles;
     return hitTiles?.some(t => t.r === r && t.c === c);
   };
@@ -473,7 +492,7 @@ export default function ColorTileGame({ onScoreSubmitted }) {
         </button>
 
         <button
-          onClick={() => handleShuffle(false)}
+          onClick={handleShuffle}
           disabled={shufflesLeft <= 0 || gameState !== 'playing'}
           className="colortile-action-btn"
           title="타일 위치 무작위 셔플 (2회 제공)"
@@ -582,16 +601,20 @@ export default function ColorTileGame({ onScoreSubmitted }) {
         {gameState !== 'playing' && (
           <div className="colortile-overlay-modal">
             <div className="colortile-modal-icon">
-              {gameState === 'cleared' ? '🏆' : '⏰'}
+              {gameState === 'cleared' ? (clearDetails.type === 'perfect' ? '👑' : '🏆') : '⏰'}
             </div>
             
             <h2 className="colortile-modal-title">
-              {gameState === 'cleared' ? 'ALL CLEARED! 완벽 클리어!' : 'GAME OVER! 시간 종료!'}
+              {gameState === 'cleared'
+                ? (clearDetails.type === 'perfect' ? 'PERFECT CLEAR! 완전 클리어!' : 'ALL MATCHED! 매칭 완료!')
+                : 'GAME OVER! 시간 종료!'}
             </h2>
             
             <p className="colortile-modal-subtitle">
               {gameState === 'cleared'
-                ? '모든 컬러 타일을 완벽하게 정리했습니다! 최고의 집중력입니다!'
+                ? (clearDetails.type === 'perfect'
+                    ? '판 위의 100% 모든 컬러 타일을 완벽하게 정리했습니다! 최고의 집중력입니다!'
+                    : `더 이상 맞출 수 있는 쌍이 없을 때까지 모든 조합을 완벽히 정리했습니다! (남은 타일: ${clearDetails.remaining}개)`)
                 : '제한 시간이 모두 소진되었습니다. 멋진 도전이었습니다!'}
             </p>
 
