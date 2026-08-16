@@ -6,17 +6,17 @@ export const CANVAS_WIDTH = 960;
 export const CANVAS_HEIGHT = 540;
 export const GROUND_Y = 460; // Base ground baseline in world coords
 
-// World & Physics simulation parameters
+// World & Physics simulation parameters (Soaring floaty flight)
 export const PHYSICS_CONFIG = {
-  GRAVITY: 0.38,
-  AIR_DRAG: 0.9965,
-  GROUND_FRICTION: 0.93,
+  GRAVITY: 0.18,
+  AIR_DRAG: 0.9982,
+  GROUND_FRICTION: 0.92,
   BOUNCE_MIN_VELOCITY: 1.2,
   STOP_VELOCITY_THRESHOLD: 0.35,
   MIN_LAUNCH_ANGLE: 25, // degrees
   MAX_LAUNCH_ANGLE: 65, // degrees
-  LAUNCH_POWER_MIN: 12,
-  LAUNCH_POWER_MAX: 34,
+  LAUNCH_POWER_MIN: 18,
+  LAUNCH_POWER_MAX: 40,
   PERFECT_POWER_THRESHOLD: 0.92, // 92%~100% is PERFECT
 };
 
@@ -29,9 +29,9 @@ export const GNOME_CHARACTERS = [
     hatColor: '#e53e3e',
     hatName: '빨간 모자',
     mass: 1.0,
-    bounceCoeff: 0.62,
-    drag: 0.993,
-    dropSpeed: 11.5,
+    bounceCoeff: 0.70,
+    drag: 0.9975,
+    dropSpeed: 12.0,
     avatarBadge: '🧙‍♂️',
     spriteFile: 'gnome_classic.jpg',
     stats: {
@@ -47,10 +47,10 @@ export const GNOME_CHARACTERS = [
     subtitle: '슈퍼 바운스형',
     hatColor: '#ecc94b',
     hatName: '노란 모자',
-    mass: 1.35,
-    bounceCoeff: 0.74,
-    drag: 0.991,
-    dropSpeed: 15.0,
+    mass: 1.25,
+    bounceCoeff: 0.82,
+    drag: 0.996,
+    dropSpeed: 16.0,
     avatarBadge: '🧝',
     spriteFile: 'gnome_heavy.jpg',
     stats: {
@@ -58,7 +58,7 @@ export const GNOME_CHARACTERS = [
       bounce: 95,
       glide: 60,
     },
-    description: '무겁지만 지형이나 버섯을 밟았을 때 엄청난 반발력으로 높이 튕겨 오릅니다.'
+    description: '무겁지만 지형이나 버섯을 밟았을 때 엄청난 반발력으로 하늘 높이 튕겨 오릅니다.'
   },
   {
     id: 'butterfly',
@@ -67,9 +67,9 @@ export const GNOME_CHARACTERS = [
     hatColor: '#ed64a6',
     hatName: '분홍 꽃 모자',
     mass: 0.75,
-    bounceCoeff: 0.55,
-    drag: 0.996,
-    dropSpeed: 8.5,
+    bounceCoeff: 0.64,
+    drag: 0.9988,
+    dropSpeed: 9.0,
     avatarBadge: '🧚',
     spriteFile: 'gnome_butterfly.jpg',
     stats: {
@@ -90,7 +90,7 @@ export const TERRAIN_ITEM_TYPES = {
     color: '#e53e3e',
     width: 48,
     height: 42,
-    bounceBoostY: -16.5,
+    bounceBoostY: -21.0,
     bounceBoostX: 1.15,
     points: 100,
     message: '🍄 버섯 슈퍼 점프!'
@@ -102,9 +102,9 @@ export const TERRAIN_ITEM_TYPES = {
     color: '#8b5a2b',
     width: 60,
     height: 32,
-    bounceBoostY: -6.0,
-    bounceBoostX: 1.45,
-    minSpeedX: 18.0,
+    bounceBoostY: -9.0,
+    bounceBoostX: 1.35,
+    minSpeedX: 20.0,
     points: 120,
     message: '🪵 통나무 부스트 가속!'
   },
@@ -126,8 +126,8 @@ export const TERRAIN_ITEM_TYPES = {
     color: '#63b3ed',
     width: 70,
     height: 38,
-    bounceBoostY: -14.0,
-    bounceBoostX: 1.2,
+    bounceBoostY: -19.0,
+    bounceBoostX: 1.25,
     points: 200,
     message: '☁️ 구름 퐁퐁 도약!'
   },
@@ -138,8 +138,8 @@ export const TERRAIN_ITEM_TYPES = {
     color: '#9f7aea',
     width: 60,
     height: 60,
-    bounceBoostY: -8.0,
-    boostSpeedX: 7.0,
+    bounceBoostY: -12.0,
+    boostSpeedX: 11.0,
     points: 300,
     message: '🌈 무지개 초음속 돌파!'
   },

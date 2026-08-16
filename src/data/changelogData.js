@@ -10,6 +10,11 @@ export const CHANGELOG_DATA = [
     badgeColor: 'emerald',
     items: [
       {
+        tag: 'CAMERA & SKY VIEW',
+        tagColor: 'blue',
+        text: '[카메라 동적 수직 추적 & 고고도 비행 시야 최적화] 요정이 비행하는 동안 항상 화면 중앙에 요정 캐릭터가 명확히 잡히도록 동적 카메라 Y축 추적을 구축하고, 고공 비행 시 땅이 화면을 가리는 문제를 해결하여 광활한 푸른 하늘과 부스터 아이템 시야 확보'
+      },
+      {
         tag: 'INTERACTIVE METER',
         tagColor: 'amber',
         text: '[실시간 발사 파워/각도 왕복 게이지 & 재시작 초기화 개선] 재시작 시 이전 파워가 잔존하던 문제를 수정하고, 좌우로 부드럽게 왕복하는 실시간 네온 바늘(Needle) 및 동적 파워 판정 뱃지(기본/부스트/슈퍼/PERFECT) 인터랙티브 UI 전면 적용'

@@ -82,16 +82,26 @@ export function generateGardenTerrain(maxDistance = 5500) {
     });
   }
 
-  // Sky items (Clouds, Rainbow Rings, Airborne Seeds)
-  let nextSkyX = 350;
+  // Sky items (Clouds, Rainbow Rings, Airborne Seeds) across low, mid, and high altitude bands
+  let nextSkyX = 300;
   while (nextSkyX < maxDistance) {
-    const gap = 180 + Math.random() * 260;
+    const gap = 120 + Math.random() * 180;
     nextSkyX += gap;
 
-    const rand = Math.random();
-    const skyY = 120 + Math.random() * 200; // Heights between 120 and 320
+    // Distribute across altitudes: Low (120~260), Mid (-120~80), High (-500~-150)
+    const altBand = Math.random();
+    let skyY;
+    if (altBand < 0.45) {
+      skyY = 100 + Math.random() * 160; // Low-mid sky
+    } else if (altBand < 0.8) {
+      skyY = -120 + Math.random() * 180; // Mid-high sky
+    } else {
+      skyY = -450 + Math.random() * 300; // High stratosphere
+    }
 
-    if (rand < 0.35) {
+    const rand = Math.random();
+
+    if (rand < 0.38) {
       items.push({
         id: `sky_${items.length}`,
         type: TERRAIN_ITEM_TYPES.CLOUD.id,
@@ -103,7 +113,7 @@ export function generateGardenTerrain(maxDistance = 5500) {
         active: true,
         data: TERRAIN_ITEM_TYPES.CLOUD
       });
-    } else if (rand < 0.65) {
+    } else if (rand < 0.68) {
       items.push({
         id: `sky_${items.length}`,
         type: TERRAIN_ITEM_TYPES.RAINBOW.id,
@@ -122,8 +132,8 @@ export function generateGardenTerrain(maxDistance = 5500) {
           id: `seed_${items.length}_${s}`,
           type: TERRAIN_ITEM_TYPES.SEED.id,
           name: TERRAIN_ITEM_TYPES.SEED.name,
-          x: nextSkyX + s * 45,
-          y: skyY - Math.sin((s / 2) * Math.PI) * 30,
+          x: nextSkyX + s * 40,
+          y: skyY - Math.sin((s / 2) * Math.PI) * 28,
           width: TERRAIN_ITEM_TYPES.SEED.width,
           height: TERRAIN_ITEM_TYPES.SEED.height,
           active: true,
@@ -304,102 +314,140 @@ export class ParticleSystem {
 }
 
 /**
- * Draws the rich multi-layered Parallax Garden Background
+ * Draws the rich multi-layered Parallax Garden Background with dynamic high-altitude sky
  */
 export function drawParallaxGarden(ctx, cameraX, cameraY, bgImg) {
   const width = CANVAS_WIDTH;
   const height = CANVAS_HEIGHT;
 
-  // 1. Sky Gradient Background (if image not loaded or high altitude)
+  // 1. Dynamic Altitude Sky Gradient Background
+  const altitude = Math.max(0, -cameraY);
+  const altitudeRatio = Math.min(1, altitude / 1200);
+
   const skyGrad = ctx.createLinearGradient(0, 0, 0, height);
-  skyGrad.addColorStop(0, '#70c5ff');
-  skyGrad.addColorStop(0.55, '#c2e9fb');
-  skyGrad.addColorStop(0.85, '#e0f7fa');
-  skyGrad.addColorStop(1, '#9ae6b4');
+  if (altitudeRatio > 0.1) {
+    // High Altitude Stratosphere (Deep Azure -> Sky Blue -> Radiant Cyan)
+    skyGrad.addColorStop(0, `hsl(215, 90%, ${Math.max(25, 48 - altitudeRatio * 20)}%)`);
+    skyGrad.addColorStop(0.5, `hsl(205, 85%, ${Math.max(45, 62 - altitudeRatio * 15)}%)`);
+    skyGrad.addColorStop(1, `hsl(195, 80%, ${Math.max(60, 78 - altitudeRatio * 15)}%)`);
+  } else {
+    // Normal Garden Sky
+    skyGrad.addColorStop(0, '#56b6ff');
+    skyGrad.addColorStop(0.5, '#bae6fd');
+    skyGrad.addColorStop(0.85, '#e0f2fe');
+    skyGrad.addColorStop(1, '#86efac');
+  }
   ctx.fillStyle = skyGrad;
   ctx.fillRect(0, 0, width, height);
 
-  // 2. Sun with gentle halo
+  // 2. High Altitude Celestial Elements (Stars / Sun)
   const sunScreenX = 760 - (cameraX * 0.02) % (width + 200);
-  const sunScreenY = 90 - (cameraY * 0.02);
-  const sunHalo = ctx.createRadialGradient(sunScreenX, sunScreenY, 15, sunScreenX, sunScreenY, 85);
-  sunHalo.addColorStop(0, 'rgba(255, 236, 128, 0.95)');
-  sunHalo.addColorStop(0.4, 'rgba(255, 215, 0, 0.45)');
-  sunHalo.addColorStop(1, 'rgba(255, 255, 255, 0)');
-  ctx.fillStyle = sunHalo;
-  ctx.beginPath();
-  ctx.arc(sunScreenX, sunScreenY, 85, 0, Math.PI * 2);
-  ctx.fill();
+  const sunScreenY = 90 - cameraY * 0.15;
 
-  ctx.fillStyle = '#ffea60';
-  ctx.beginPath();
-  ctx.arc(sunScreenX, sunScreenY, 32, 0, Math.PI * 2);
-  ctx.fill();
+  if (sunScreenY > -100 && sunScreenY < height + 100) {
+    const sunHalo = ctx.createRadialGradient(sunScreenX, sunScreenY, 15, sunScreenX, sunScreenY, 85);
+    sunHalo.addColorStop(0, 'rgba(255, 236, 128, 0.95)');
+    sunHalo.addColorStop(0.4, 'rgba(255, 215, 0, 0.45)');
+    sunHalo.addColorStop(1, 'rgba(255, 255, 255, 0)');
+    ctx.fillStyle = sunHalo;
+    ctx.beginPath();
+    ctx.arc(sunScreenX, sunScreenY, 85, 0, Math.PI * 2);
+    ctx.fill();
 
-  // 3. Parallax Image Layer (if loaded)
-  if (bgImg && bgImg.complete && bgImg.naturalWidth > 0) {
-    const bgScale = height / bgImg.height;
-    const scaledWidth = bgImg.width * bgScale;
-    const parallaxOffset = -(cameraX * 0.25) % scaledWidth;
+    ctx.fillStyle = '#ffea60';
+    ctx.beginPath();
+    ctx.arc(sunScreenX, sunScreenY, 32, 0, Math.PI * 2);
+    ctx.fill();
+  }
 
+  // 3. High Altitude Drifting Atmospheric Clouds (when in sky)
+  if (altitude > 100) {
     ctx.save();
-    ctx.globalAlpha = 0.92;
-    ctx.drawImage(bgImg, parallaxOffset, 0, scaledWidth, height);
-    if (parallaxOffset + scaledWidth < width) {
-      ctx.drawImage(bgImg, parallaxOffset + scaledWidth, 0, scaledWidth, height);
-    }
-    if (parallaxOffset > 0) {
-      ctx.drawImage(bgImg, parallaxOffset - scaledWidth, 0, scaledWidth, height);
+    ctx.globalAlpha = Math.min(0.7, altitudeRatio * 0.85);
+    ctx.fillStyle = '#ffffff';
+
+    const cloudBaseX = -(cameraX * 0.12) % 600;
+    for (let cx = cloudBaseX - 600; cx < width + 600; cx += 320) {
+      const cy = 80 + Math.sin(cx * 0.01) * 40;
+      ctx.beginPath();
+      ctx.arc(cx, cy, 38, 0, Math.PI * 2);
+      ctx.arc(cx + 32, cy - 14, 46, 0, Math.PI * 2);
+      ctx.arc(cx + 70, cy, 36, 0, Math.PI * 2);
+      ctx.fill();
     }
     ctx.restore();
   }
 
-  // 4. Wooden Picket Fence Layer (Parallax 0.5)
-  const fenceOffset = (cameraX * 0.5) % 60;
-  ctx.fillStyle = '#fbd38d';
-  ctx.strokeStyle = '#c05621';
-  ctx.lineWidth = 1.5;
-  const fenceBaseY = GROUND_Y - 30 - cameraY;
+  // 4. Parallax Image Layer (Attached to Garden Ground level)
+  const groundScreenY = GROUND_Y - cameraY;
 
-  for (let x = -60 - fenceOffset; x < width + 60; x += 28) {
-    ctx.fillRect(x, fenceBaseY - 32, 14, 32);
-    ctx.strokeRect(x, fenceBaseY - 32, 14, 32);
+  if (bgImg && bgImg.complete && bgImg.naturalWidth > 0 && groundScreenY > -200) {
+    const bgScale = height / bgImg.height;
+    const scaledWidth = bgImg.width * bgScale;
+    const parallaxOffset = -(cameraX * 0.25) % scaledWidth;
+    const bgY = groundScreenY - height + 40;
 
-    // Fence tip triangle
-    ctx.beginPath();
-    ctx.moveTo(x, fenceBaseY - 32);
-    ctx.lineTo(x + 7, fenceBaseY - 42);
-    ctx.lineTo(x + 14, fenceBaseY - 32);
-    ctx.closePath();
-    ctx.fill();
-    ctx.stroke();
+    ctx.save();
+    ctx.globalAlpha = 0.92;
+    ctx.drawImage(bgImg, parallaxOffset, bgY, scaledWidth, height);
+    if (parallaxOffset + scaledWidth < width) {
+      ctx.drawImage(bgImg, parallaxOffset + scaledWidth, bgY, scaledWidth, height);
+    }
+    if (parallaxOffset > 0) {
+      ctx.drawImage(bgImg, parallaxOffset - scaledWidth, bgY, scaledWidth, height);
+    }
+    ctx.restore();
   }
 
-  // Fence cross rails
-  ctx.fillRect(-60, fenceBaseY - 24, width + 120, 5);
-  ctx.strokeRect(-60, fenceBaseY - 24, width + 120, 5);
-  ctx.fillRect(-60, fenceBaseY - 10, width + 120, 5);
-  ctx.strokeRect(-60, fenceBaseY - 10, width + 120, 5);
+  // 5. Wooden Picket Fence Layer (Only visible when near ground)
+  if (groundScreenY > -60 && groundScreenY < height + 100) {
+    const fenceOffset = (cameraX * 0.5) % 60;
+    ctx.fillStyle = '#fbd38d';
+    ctx.strokeStyle = '#c05621';
+    ctx.lineWidth = 1.5;
+    const fenceBaseY = groundScreenY - 30;
 
-  // 5. Lush Main Ground Baseline
-  const groundScreenY = GROUND_Y - cameraY;
-  const groundGrad = ctx.createLinearGradient(0, groundScreenY, 0, height);
-  groundGrad.addColorStop(0, '#48bb78'); // Top grass
-  groundGrad.addColorStop(0.12, '#38a169');
-  groundGrad.addColorStop(0.3, '#744210'); // Earth soil
-  groundGrad.addColorStop(1, '#4a2503');
-  ctx.fillStyle = groundGrad;
-  ctx.fillRect(0, groundScreenY, width, height - groundScreenY + 200);
+    for (let x = -60 - fenceOffset; x < width + 60; x += 28) {
+      ctx.fillRect(x, fenceBaseY - 32, 14, 32);
+      ctx.strokeRect(x, fenceBaseY - 32, 14, 32);
 
-  // Grass tufts along the ground top
-  ctx.fillStyle = '#68d391';
-  const tuftOffset = (cameraX * 1.0) % 24;
-  for (let x = -24 - tuftOffset; x < width + 24; x += 18) {
-    ctx.beginPath();
-    ctx.moveTo(x, groundScreenY);
-    ctx.lineTo(x + 4, groundScreenY - 8);
-    ctx.lineTo(x + 8, groundScreenY);
-    ctx.fill();
+      // Fence tip triangle
+      ctx.beginPath();
+      ctx.moveTo(x, fenceBaseY - 32);
+      ctx.lineTo(x + 7, fenceBaseY - 42);
+      ctx.lineTo(x + 14, fenceBaseY - 32);
+      ctx.closePath();
+      ctx.fill();
+      ctx.stroke();
+    }
+
+    // Fence cross rails
+    ctx.fillRect(-60, fenceBaseY - 24, width + 120, 5);
+    ctx.strokeRect(-60, fenceBaseY - 24, width + 120, 5);
+    ctx.fillRect(-60, fenceBaseY - 10, width + 120, 5);
+    ctx.strokeRect(-60, fenceBaseY - 10, width + 120, 5);
+  }
+
+  // 6. Lush Main Ground Baseline (Only rendered when in viewport)
+  if (groundScreenY < height) {
+    const groundGrad = ctx.createLinearGradient(0, groundScreenY, 0, Math.max(height, groundScreenY + 120));
+    groundGrad.addColorStop(0, '#48bb78'); // Top grass
+    groundGrad.addColorStop(0.12, '#38a169');
+    groundGrad.addColorStop(0.3, '#744210'); // Earth soil
+    groundGrad.addColorStop(1, '#4a2503');
+    ctx.fillStyle = groundGrad;
+    ctx.fillRect(0, groundScreenY, width, Math.max(height - groundScreenY + 200, 200));
+
+    // Grass tufts along the ground top
+    ctx.fillStyle = '#68d391';
+    const tuftOffset = (cameraX * 1.0) % 24;
+    for (let x = -24 - tuftOffset; x < width + 24; x += 18) {
+      ctx.beginPath();
+      ctx.moveTo(x, groundScreenY);
+      ctx.lineTo(x + 4, groundScreenY - 8);
+      ctx.lineTo(x + 8, groundScreenY);
+      ctx.fill();
+    }
   }
 }
 

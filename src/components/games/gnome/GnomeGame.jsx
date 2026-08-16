@@ -455,11 +455,12 @@ export default function GnomeGame({ onScoreSubmitted }) {
         setBonusScore(gnome.bonusScore);
       }
 
-      // 4. Smooth Camera Tracking
-      const targetCamX = Math.max(0, gnome.x - 280);
-      const targetCamY = Math.max(0, Math.min(220, (GROUND_Y - gnome.y - 180) * 0.5));
-      cameraXRef.current += (targetCamX - cameraXRef.current) * 0.12;
-      cameraYRef.current += (targetCamY - cameraYRef.current) * 0.12;
+      // 4. Smooth Dynamic Camera Tracking
+      // Keep gnome positioned comfortably in the forward-center of the screen
+      const targetCamX = Math.max(0, gnome.x - 260);
+      const targetCamY = Math.min(0, gnome.y - 240);
+      cameraXRef.current += (targetCamX - cameraXRef.current) * 0.14;
+      cameraYRef.current += (targetCamY - cameraYRef.current) * 0.14;
 
       // 5. Update Particles
       particles.update();
