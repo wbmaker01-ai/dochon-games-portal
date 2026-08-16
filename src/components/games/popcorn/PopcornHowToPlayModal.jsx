@@ -61,7 +61,7 @@ export default function PopcornHowToPlayModal({ isOpen, onClose }) {
                   <img
                     src={cls.avatar}
                     alt={cls.name}
-                    className="w-14 h-14 rounded-full object-cover border-2 border-amber-400/40 mb-2"
+                    className="popcorn-howto-avatar"
                   />
                   <div className="font-bold text-slate-100 text-sm">{cls.name}</div>
                   <span

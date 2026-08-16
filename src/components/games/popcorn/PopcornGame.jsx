@@ -806,13 +806,13 @@ export default function PopcornGame({ onScoreSubmitted }) {
                 <img
                   src={getPopcornAsset('corn_popped.jpg')}
                   alt="Popped Popcorn"
-                  className="w-20 h-20 mx-auto rounded-full object-cover border-2 border-amber-400/50 mb-2 shadow-lg animate-bounce"
+                  className="popcorn-result-avatar"
                 />
               ) : (
                 <img
                   src={selectedClass.avatar}
                   alt={selectedClass.name}
-                  className="w-20 h-20 mx-auto rounded-full object-cover border-2 border-amber-400/50 mb-2 shadow-lg"
+                  className="popcorn-result-avatar"
                 />
               )}
               <h2 className="text-2xl font-black text-amber-400 mb-1">

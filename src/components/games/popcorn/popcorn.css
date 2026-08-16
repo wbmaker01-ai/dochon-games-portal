@@ -240,10 +240,13 @@
 .popcorn-char-img {
   width: 84px;
   height: 84px;
+  max-width: 84px;
+  max-height: 84px;
   border-radius: 50%;
   object-fit: cover;
   border: 2px solid rgba(255, 255, 255, 0.2);
   margin-bottom: 10px;
+  display: block;
 }
 
 .popcorn-start-btn {
@@ -285,7 +288,7 @@
 }
 
 .popcorn-result-card {
-  background: rgba(30, 41, 59, 0.9);
+  background: rgba(30, 41, 59, 0.95);
   border: 2px solid rgba(251, 191, 36, 0.4);
   border-radius: 20px;
   padding: 24px;
@@ -293,6 +296,35 @@
   max-width: 440px;
   text-align: center;
   box-shadow: 0 20px 40px rgba(0, 0, 0, 0.6);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  box-sizing: border-box;
+}
+
+.popcorn-result-avatar {
+  width: 80px;
+  height: 80px;
+  max-width: 80px;
+  max-height: 80px;
+  border-radius: 50%;
+  object-fit: cover;
+  margin: 0 auto 10px;
+  display: block;
+  border: 3px solid rgba(251, 191, 36, 0.6);
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.5);
+}
+
+.popcorn-howto-avatar {
+  width: 56px;
+  height: 56px;
+  max-width: 56px;
+  max-height: 56px;
+  border-radius: 50%;
+  object-fit: cover;
+  border: 2px solid rgba(251, 191, 36, 0.4);
+  margin-bottom: 8px;
+  display: block;
 }
 
 .popcorn-rank-form {
@@ -300,6 +332,7 @@
   display: flex;
   flex-direction: column;
   gap: 10px;
+  width: 100%;
 }
 
 .popcorn-input {
