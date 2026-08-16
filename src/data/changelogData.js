@@ -10,6 +10,11 @@ export const CHANGELOG_DATA = [
     badgeColor: 'emerald',
     items: [
       {
+        tag: 'INTERACTIVE METER',
+        tagColor: 'amber',
+        text: '[실시간 발사 파워/각도 왕복 게이지 & 재시작 초기화 개선] 재시작 시 이전 파워가 잔존하던 문제를 수정하고, 좌우로 부드럽게 왕복하는 실시간 네온 바늘(Needle) 및 동적 파워 판정 뱃지(기본/부스트/슈퍼/PERFECT) 인터랙티브 UI 전면 적용'
+      },
+      {
         tag: 'UI/UX',
         tagColor: 'teal',
         text: '[메인 챔피언 배너 가독성 개선] 게임 타이틀과 챔피언 학생 이름 사이 간격(2칸 공백) 및 뱃지 스타일을 최적화하여 텍스트 겹침 완벽 해소'

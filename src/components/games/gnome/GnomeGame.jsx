@@ -54,10 +54,11 @@ export default function GnomeGame({ onScoreSubmitted }) {
   const selectedCharRef = useRef(GNOME_CHARACTERS[0]);
 
   // Angle & Power Aiming
-  const angleDegRef = useRef(45);
+  const angleDegRef = useRef(30);
   const angleDirRef = useRef(1); // 1 = increasing, -1 = decreasing
   const powerPercentRef = useRef(0);
   const powerDirRef = useRef(1);
+  const lastPhaseChangeTimeRef = useRef(0);
 
   // Gnome Physical State
   const gnomeRef = useRef({
@@ -98,7 +99,7 @@ export default function GnomeGame({ onScoreSubmitted }) {
   const [totalScore, setTotalScore] = useState(0);
 
   // Aiming UI
-  const [uiAngle, setUiAngle] = useState(45);
+  const [uiAngle, setUiAngle] = useState(30);
   const [uiPower, setUiPower] = useState(0);
 
   // Feedback Toast & Modals
@@ -189,6 +190,10 @@ export default function GnomeGame({ onScoreSubmitted }) {
     angleDirRef.current = 1;
     powerPercentRef.current = 0;
     powerDirRef.current = 1;
+    lastPhaseChangeTimeRef.current = performance.now();
+
+    setUiAngle(30);
+    setUiPower(0);
 
     gameStateRef.current = 'AIM_ANGLE';
     setGameState('AIM_ANGLE');
@@ -204,11 +209,21 @@ export default function GnomeGame({ onScoreSubmitted }) {
     const state = gameStateRef.current;
 
     if (state === 'AIM_ANGLE') {
-      // Lock angle, transition to power meter
+      // Lock angle, transition to power meter with clean reset
+      powerPercentRef.current = 0;
+      powerDirRef.current = 1;
+      setUiPower(0);
+      lastPhaseChangeTimeRef.current = performance.now();
+
       gameStateRef.current = 'AIM_POWER';
       setGameState('AIM_POWER');
       soundFx.playGnomeTension();
     } else if (state === 'AIM_POWER') {
+      // Safety Debounce: Prevent instant click right after angle lock
+      if (performance.now() - lastPhaseChangeTimeRef.current < 250) {
+        return;
+      }
+
       // Launch the Gnome!
       const angle = angleDegRef.current;
       const power = powerPercentRef.current / 100;
@@ -235,7 +250,7 @@ export default function GnomeGame({ onScoreSubmitted }) {
         particleSystemRef.current.addBounceExplosion(gnome.x, gnome.y, '#ecc94b', 24);
       } else {
         soundFx.playGnomeLaunch();
-        showToast(`🚀 ${Math.round(angle)}° 각도로 발사!`);
+        showToast(`🚀 ${Math.round(angle)}° 각도 / ${Math.round(power * 100)}% 파워 발사!`);
       }
     } else if (state === 'FLYING') {
       // Air Drop / Slam
@@ -584,17 +599,43 @@ export default function GnomeGame({ onScoreSubmitted }) {
         {/* Aiming Step 1: Angle Meter */}
         {gameState === 'AIM_ANGLE' && (
           <div className="gnome-aim-overlay">
-            <div className="gnome-meter-title">
-              <span>📐 발사 각도 조절: {uiAngle}°</span>
-            </div>
-            <div className="gnome-meter-bar-track">
+            <div className="gnome-meter-header">
+              <div className="gnome-meter-title">
+                <span>📐 발사 각도 조절: {uiAngle}°</span>
+              </div>
               <div
-                className="gnome-meter-bar-fill"
+                className={`gnome-meter-status-tag ${
+                  uiAngle >= 42 && uiAngle <= 52 ? 'golden' : ''
+                }`}
+              >
+                {uiAngle >= 42 && uiAngle <= 52 ? '🎯 황금 각도!' : '각도 조절 중...'}
+              </div>
+            </div>
+
+            <div className="gnome-meter-bar-track">
+              <div className="gnome-meter-bar-fill-container">
+                <div
+                  className="gnome-meter-bar-fill"
+                  style={{
+                    width: `${((uiAngle - PHYSICS_CONFIG.MIN_LAUNCH_ANGLE) / (PHYSICS_CONFIG.MAX_LAUNCH_ANGLE - PHYSICS_CONFIG.MIN_LAUNCH_ANGLE)) * 100}%`
+                  }}
+                />
+              </div>
+
+              {/* Ticks */}
+              <div className="gnome-meter-tick" style={{ left: '25%' }} />
+              <div className="gnome-meter-tick" style={{ left: '50%' }} />
+              <div className="gnome-meter-tick" style={{ left: '75%' }} />
+
+              {/* Real-time Oscillating Needle */}
+              <div
+                className="gnome-meter-needle"
                 style={{
-                  width: `${((uiAngle - PHYSICS_CONFIG.MIN_LAUNCH_ANGLE) / (PHYSICS_CONFIG.MAX_LAUNCH_ANGLE - PHYSICS_CONFIG.MIN_LAUNCH_ANGLE)) * 100}%`
+                  left: `${((uiAngle - PHYSICS_CONFIG.MIN_LAUNCH_ANGLE) / (PHYSICS_CONFIG.MAX_LAUNCH_ANGLE - PHYSICS_CONFIG.MIN_LAUNCH_ANGLE)) * 100}%`
                 }}
               />
             </div>
+
             <div className="gnome-meter-action-hint">
               <kbd>Space</kbd> 또는 화면을 클릭하여 각도 확정!
             </div>
@@ -604,18 +645,50 @@ export default function GnomeGame({ onScoreSubmitted }) {
         {/* Aiming Step 2: Power Meter */}
         {gameState === 'AIM_POWER' && (
           <div className="gnome-aim-overlay">
-            <div className="gnome-meter-title">
-              <span>⚡ 발사 파워 충전: {uiPower}%</span>
-            </div>
-            <div className="gnome-meter-bar-track">
+            <div className="gnome-meter-header">
+              <div className="gnome-meter-title">
+                <span>⚡ 발사 파워 충전: {uiPower}%</span>
+              </div>
               <div
-                className="gnome-meter-bar-fill"
-                style={{ width: `${uiPower}%` }}
-              />
-              <div className="gnome-meter-perfect-zone">PERFECT</div>
+                className={`gnome-meter-status-tag ${
+                  uiPower >= 92 ? 'perfect' : uiPower >= 75 ? 'golden' : ''
+                }`}
+              >
+                {uiPower >= 92
+                  ? '🌟 PERFECT! (125%)'
+                  : uiPower >= 75
+                  ? '🔥 슈퍼 파워'
+                  : uiPower >= 40
+                  ? '⚡ 부스트 파워'
+                  : '🟢 기본 파워'}
+              </div>
             </div>
+
+            <div className="gnome-meter-bar-track">
+              <div className="gnome-meter-bar-fill-container">
+                <div
+                  className="gnome-meter-bar-fill"
+                  style={{ width: `${uiPower}%` }}
+                />
+              </div>
+
+              {/* Ticks */}
+              <div className="gnome-meter-tick" style={{ left: '25%' }} />
+              <div className="gnome-meter-tick" style={{ left: '50%' }} />
+              <div className="gnome-meter-tick" style={{ left: '75%' }} />
+
+              {/* Perfect Zone */}
+              <div className="gnome-meter-perfect-zone">PERFECT</div>
+
+              {/* Real-time Oscillating Needle */}
+              <div
+                className="gnome-meter-needle"
+                style={{ left: `${uiPower}%` }}
+              />
+            </div>
+
             <div className="gnome-meter-action-hint">
-              <kbd>Space</kbd> 또는 화면을 클릭하여 힘차게 발사!
+              <kbd>Space</kbd> 또는 화면을 클릭하여 완벽한 타이밍에 발사!
             </div>
           </div>
         )}
