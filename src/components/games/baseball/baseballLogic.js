@@ -91,7 +91,7 @@ export function selectNextPitch(score, combo) {
 }
 
 /**
- * Calculate instantaneous 3D ball coordinates and rendering parameters
+ * Calculate instantaneous 3D perspective ball coordinates and shadow mapping
  */
 export function calculateBallState(pitchConfig, elapsedMs, totalDuration) {
   let progress = Math.min(1, Math.max(0, elapsedMs / totalDuration));
@@ -101,68 +101,72 @@ export function calculateBallState(pitchConfig, elapsedMs, totalDuration) {
     if (progress > pitchConfig.deceleratePoint) {
       const p1 = pitchConfig.deceleratePoint;
       const rem = (progress - p1) / (1 - p1);
-      // Slower progress curve in the second half
       progress = p1 + Math.pow(rem, pitchConfig.decelerateFactor || 1.8) * (1 - p1);
     }
   }
 
-  // 3D Perspective Scaling (Z-depth)
-  const z = progress; // 0 = Pitcher, 1 = Home Plate
-  const radius = 6 + z * 18; // Ball size expands as it approaches
-  const shadowRadius = radius * 0.9;
+  // 3D Perspective Scaling (Z: 0 = Pitcher Mound, 1 = Home Plate)
+  const z = progress;
+  const radius = 5 + z * 21; // Ball expands from 5px to 26px
+  const shadowRadiusX = 4 + z * 18;
+  const shadowRadiusY = (4 + z * 18) * 0.45;
 
-  // Base linear path from Pitcher to Home Plate
-  const startX = PITCHER_POS.x + 35; // Pitcher hand release position
-  const startY = PITCHER_POS.y - 10;
-  const targetX = HOME_PLATE_POS.x;
-  const targetY = HOME_PLATE_POS.y - 30; // Strike zone height
+  // 1. Ground Surface Track (Perspective line from Mound to Home Plate)
+  const groundStartY = PITCHER_POS.y + 10; // Y = 165
+  const groundTargetY = HOME_PLATE_POS.y;   // Y = 460
+  let groundX = PITCHER_POS.x;              // X = 480
+  let groundY = groundStartY + (groundTargetY - groundStartY) * z;
 
-  let currentX = startX + (targetX - startX) * z;
-  let currentY = startY + (targetY - startY) * z;
-
-  // Parabolic vertical arc for realistic gravity feel
-  const arcHeight = pitchConfig.id === 'SLOWBALL' ? 90 : 35;
-  currentY -= Math.sin(progress * Math.PI) * arcHeight;
-
-  // Special trajectory modifications based on pitch type
+  // Lateral curve movement on ground X
   if (pitchConfig.id === 'CURVE') {
-    const amp = pitchConfig.curveAmplitude || 140;
-    currentX += Math.sin(progress * Math.PI) * amp;
-  } else if (pitchConfig.id === 'SINKER') {
-    if (progress > 0.6) {
-      const sinkProgress = (progress - 0.6) / 0.4;
-      currentY += Math.pow(sinkProgress, 2) * (pitchConfig.verticalDrop || 90);
-    }
+    const amp = pitchConfig.curveAmplitude || 120;
+    groundX += Math.sin(progress * Math.PI) * amp;
   } else if (pitchConfig.id === 'ZIGZAG') {
     const freq = pitchConfig.zigzagFreq || 4;
-    const amp = pitchConfig.zigzagAmp || 90;
-    currentX += Math.sin(progress * Math.PI * freq) * amp * (1 - progress * 0.2);
+    const amp = pitchConfig.zigzagAmp || 75;
+    groundX += Math.sin(progress * Math.PI * freq) * amp * (1 - progress * 0.2);
   }
+
+  // 2. 3D Elevation / Ball Flight Height above ground
+  const maxArc = pitchConfig.id === 'SLOWBALL' ? 110 : (pitchConfig.id === 'FASTBALL' ? 40 : 55);
+  let flightHeight = Math.sin(progress * Math.PI) * maxArc + (1 - progress) * 20;
+
+  // Sinker drops sharply near plate
+  if (pitchConfig.id === 'SINKER' && progress > 0.55) {
+    const sinkProgress = (progress - 0.55) / 0.45;
+    flightHeight -= Math.pow(sinkProgress, 2) * (pitchConfig.verticalDrop || 60);
+    flightHeight = Math.max(0, flightHeight);
+  }
+
+  // 3. Final 2D Screen Projected Position
+  const ballX = groundX;
+  const ballY = groundY - flightHeight;
 
   // Ghost ball opacity handling
   let opacity = 1;
   if (pitchConfig.id === 'GHOST' && pitchConfig.disappearRange) {
     const [dStart, dEnd] = pitchConfig.disappearRange;
     if (progress >= dStart && progress <= dEnd) {
-      opacity = 0.05; // Almost invisible
-    } else if (progress > dEnd && progress < dEnd + 0.1) {
-      opacity = (progress - dEnd) / 0.1;
+      opacity = 0.05; // Invisible
+    } else if (progress > dEnd && progress < dEnd + 0.12) {
+      opacity = (progress - dEnd) / 0.12;
     }
   }
 
-  // Ground shadow Y coordinate
-  const shadowY = HOME_PLATE_POS.y + (progress * 15);
-  const shadowX = currentX;
+  // Sweet spot convergence ring on home plate
+  const timingRingRadius = Math.max(0, (1 - progress) * 50);
 
   return {
-    x: currentX,
-    y: currentY,
-    shadowX,
-    shadowY,
+    x: ballX,
+    y: ballY,
+    shadowX: groundX,
+    shadowY: groundY,
     radius,
-    shadowRadius,
+    shadowRadiusX,
+    shadowRadiusY,
     progress,
     opacity,
+    timingRingRadius,
     isAtSweetSpot: progress >= 0.88 && progress <= 1.05
   };
 }

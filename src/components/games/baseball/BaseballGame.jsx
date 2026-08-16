@@ -281,7 +281,7 @@ export default function BaseballGame({ onScoreSubmitted }) {
       setTimeout(() => setShowHomerunBadge(false), 2200);
     } else {
       soundFx.playBaseballHit();
-      particleSystemRef.current.addHitSparks(BATTER_POS.x - 40, BATTER_POS.y - 20, 25, result.color);
+      particleSystemRef.current.addHitSparks(HOME_PLATE_POS.x, HOME_PLATE_POS.y - 15, 25, result.color);
     }
 
     // Advance Runners
@@ -334,7 +334,7 @@ export default function BaseballGame({ onScoreSubmitted }) {
     return () => window.removeEventListener('keydown', handleKeyDown);
   }, [handleSwing]);
 
-  // 5. Main Canvas Rendering Loop
+  // 5. Main 3D Perspective Canvas Rendering Loop
   useEffect(() => {
     const canvas = canvasRef.current;
     if (!canvas) return;
@@ -343,26 +343,160 @@ export default function BaseballGame({ onScoreSubmitted }) {
     const render = () => {
       ctx.clearRect(0, 0, CANVAS_WIDTH, CANVAS_HEIGHT);
 
-      // A. Draw Stadium Background
+      // =========================================================================
+      // A. Draw 3D Perspective Stadium Background & Field
+      // =========================================================================
       if (bgImgRef.current) {
+        // Draw top stadium sky & crowd portion
         ctx.drawImage(bgImgRef.current, 0, 0, CANVAS_WIDTH, CANVAS_HEIGHT);
       } else {
-        // Fallback Grass Background
+        // Fallback Sky & Bleachers
+        ctx.fillStyle = '#38BDF8';
+        ctx.fillRect(0, 0, CANVAS_WIDTH, 140);
         ctx.fillStyle = '#22C55E';
-        ctx.fillRect(0, 0, CANVAS_WIDTH, CANVAS_HEIGHT);
+        ctx.fillRect(0, 140, CANVAS_WIDTH, CANVAS_HEIGHT - 140);
       }
 
-      // B. Draw Pitcher
+      // Draw 3D Elevated Infield Diamond (Trapezoid from Mound down to Home Plate)
+      ctx.save();
+      
+      // 1. Infield Dirt Area (Perspective Diamond Fan)
+      ctx.fillStyle = '#E2B184';
+      ctx.beginPath();
+      ctx.moveTo(PITCHER_POS.x, PITCHER_POS.y - 10);
+      ctx.lineTo(820, CANVAS_HEIGHT);
+      ctx.lineTo(140, CANVAS_HEIGHT);
+      ctx.closePath();
+      ctx.fill();
+
+      // 2. Perspective Diamond Turf / Checked Grid Lines
+      ctx.strokeStyle = 'rgba(255, 255, 255, 0.25)';
+      ctx.lineWidth = 1.5;
+      
+      // Radial perspective lines from Mound vanishing point
+      const radialAngles = [-0.55, -0.38, -0.20, 0, 0.20, 0.38, 0.55];
+      radialAngles.forEach(ang => {
+        ctx.beginPath();
+        ctx.moveTo(PITCHER_POS.x, PITCHER_POS.y + 5);
+        ctx.lineTo(PITCHER_POS.x + Math.sin(ang) * 580, CANVAS_HEIGHT);
+        ctx.stroke();
+      });
+
+      // Horizontal depth rings (Logarithmic spacing for 3D depth)
+      const depthSteps = [0.15, 0.32, 0.50, 0.70, 0.88, 1.0];
+      depthSteps.forEach(ratio => {
+        const y = PITCHER_POS.y + 10 + (HOME_PLATE_POS.y - PITCHER_POS.y - 10) * ratio;
+        const halfW = 80 + ratio * 320;
+        ctx.beginPath();
+        ctx.moveTo(PITCHER_POS.x - halfW, y);
+        ctx.lineTo(PITCHER_POS.x + halfW, y);
+        ctx.stroke();
+      });
+
+      // 3. 3D Foul Lines
+      ctx.strokeStyle = '#FFFFFF';
+      ctx.lineWidth = 3.5;
+      ctx.beginPath();
+      ctx.moveTo(HOME_PLATE_POS.x, HOME_PLATE_POS.y);
+      ctx.lineTo(80, 240); // 3rd base foul line
+      ctx.moveTo(HOME_PLATE_POS.x, HOME_PLATE_POS.y);
+      ctx.lineTo(880, 240); // 1st base foul line
+      ctx.stroke();
+
+      // 4. Distant Infield Bases (2B, 3B, 1B) in 3D
+      // 2nd Base (Behind Pitcher)
+      ctx.fillStyle = '#FFFFFF';
+      ctx.save();
+      ctx.translate(PITCHER_POS.x, PITCHER_POS.y - 30);
+      ctx.rotate(Math.PI / 4);
+      ctx.fillRect(-6, -6, 12, 12);
+      ctx.restore();
+
+      // 3rd Base (Left Infield)
+      ctx.save();
+      ctx.translate(280, 310);
+      ctx.rotate(Math.PI / 4);
+      ctx.fillRect(-8, -8, 16, 16);
+      ctx.restore();
+
+      // 1st Base (Right Infield)
+      ctx.save();
+      ctx.translate(680, 310);
+      ctx.rotate(Math.PI / 4);
+      ctx.fillRect(-8, -8, 16, 16);
+      ctx.restore();
+
+      // 5. Pitcher Mound Dirt Circle & Rubber Plate
+      ctx.fillStyle = '#C89360';
+      ctx.beginPath();
+      ctx.ellipse(PITCHER_POS.x, PITCHER_POS.y + 12, 45, 18, 0, 0, Math.PI * 2);
+      ctx.fill();
+      ctx.fillStyle = '#FFFFFF';
+      ctx.fillRect(PITCHER_POS.x - 12, PITCHER_POS.y + 6, 24, 5);
+
+      // 6. Left & Right Batter's Boxes Chalk Outlines
+      ctx.strokeStyle = 'rgba(255, 255, 255, 0.7)';
+      ctx.lineWidth = 2.5;
+      // Left Batter's Box (where our batter stands)
+      ctx.strokeRect(BATTER_POS.x - 70, BATTER_POS.y - 20, 140, 110);
+      // Right Batter's Box
+      ctx.strokeRect(620, BATTER_POS.y - 20, 140, 110);
+
+      // 7. 3D Home Plate Pentagon
+      ctx.fillStyle = '#FFFFFF';
+      ctx.strokeStyle = '#334155';
+      ctx.lineWidth = 2;
+      ctx.beginPath();
+      ctx.moveTo(HOME_PLATE_POS.x - 28, HOME_PLATE_POS.y - 12);
+      ctx.lineTo(HOME_PLATE_POS.x + 28, HOME_PLATE_POS.y - 12);
+      ctx.lineTo(HOME_PLATE_POS.x + 28, HOME_PLATE_POS.y + 6);
+      ctx.lineTo(HOME_PLATE_POS.x, HOME_PLATE_POS.y + 22);
+      ctx.lineTo(HOME_PLATE_POS.x - 28, HOME_PLATE_POS.y + 6);
+      ctx.closePath();
+      ctx.fill();
+      ctx.stroke();
+
+      // 8. Home Plate Sweet Spot Target Circle (Google Doodle Baseball Indicator)
+      ctx.fillStyle = '#3B82F6';
+      ctx.beginPath();
+      ctx.arc(HOME_PLATE_POS.x, HOME_PLATE_POS.y + 2, 18, 0, Math.PI * 2);
+      ctx.fill();
+      ctx.strokeStyle = '#FFFFFF';
+      ctx.lineWidth = 2;
+      ctx.stroke();
+      // Bat icon on target
+      ctx.fillStyle = '#FFFFFF';
+      ctx.font = '12px sans-serif';
+      ctx.textAlign = 'center';
+      ctx.textBaseline = 'middle';
+      ctx.fillText('⚾', HOME_PLATE_POS.x, HOME_PLATE_POS.y + 3);
+
+      ctx.restore();
+
+      // =========================================================================
+      // B. Draw Distant Pitcher (At Vanishing Point Y=155)
+      // =========================================================================
       if (pitcherSpriteRef.current) {
         const pScale = PITCHER_POS.scale;
         const pW = pitcherSpriteRef.current.width * pScale;
         const pH = pitcherSpriteRef.current.height * pScale;
         const pX = PITCHER_POS.x - pW / 2;
-        const pY = PITCHER_POS.y - pH / 2;
+        const pY = PITCHER_POS.y - pH + 12;
+
+        // Shadow under pitcher
+        ctx.save();
+        ctx.fillStyle = 'rgba(0, 0, 0, 0.25)';
+        ctx.beginPath();
+        ctx.ellipse(PITCHER_POS.x, PITCHER_POS.y + 12, 16, 6, 0, 0, Math.PI * 2);
+        ctx.fill();
+        ctx.restore();
+
         ctx.drawImage(pitcherSpriteRef.current, pX, pY, pW, pH);
       }
 
-      // C. Draw Ball in Flight
+      // =========================================================================
+      // C. Draw 3D Ball & Dynamic Shadow in Flight
+      // =========================================================================
       if (gameState === 'PITCHING' && currentPitchRef.current) {
         const now = performance.now();
         const elapsed = now - pitchStartTimeRef.current;
@@ -371,7 +505,6 @@ export default function BaseballGame({ onScoreSubmitted }) {
         // Auto Miss if ball travels past plate
         if (elapsed > duration + 200 && !isSwungRef.current) {
           isSwungRef.current = true;
-          // Trigger Looking Strike
           soundFx.playBaseballSwingMiss();
           setHitFeedback({
             label: 'STRIKE! ❌',
@@ -406,29 +539,49 @@ export default function BaseballGame({ onScoreSubmitted }) {
             particleSystemRef.current.addFireballTrail(ball.x, ball.y);
           }
 
-          // 1. Draw Shadow on ground
+          // 1. Sweet Spot Converging Timing Ring on Home Plate
+          if (ball.timingRingRadius > 2 && ball.opacity > 0.3) {
+            ctx.save();
+            ctx.strokeStyle = ball.isAtSweetSpot ? '#FBBF24' : 'rgba(251, 191, 36, 0.6)';
+            ctx.lineWidth = ball.isAtSweetSpot ? 3.5 : 2;
+            ctx.beginPath();
+            ctx.arc(HOME_PLATE_POS.x, HOME_PLATE_POS.y + 2, 18 + ball.timingRingRadius, 0, Math.PI * 2);
+            ctx.stroke();
+            ctx.restore();
+          }
+
+          // 2. Draw 3D Ground Shadow on Field Surface
           ctx.save();
-          ctx.globalAlpha = 0.35 * ball.opacity;
+          ctx.globalAlpha = 0.4 * ball.opacity;
           ctx.fillStyle = '#000000';
           ctx.beginPath();
-          ctx.ellipse(ball.shadowX, ball.shadowY, ball.shadowRadius * 1.2, ball.shadowRadius * 0.5, 0, 0, Math.PI * 2);
+          ctx.ellipse(ball.shadowX, ball.shadowY, ball.shadowRadiusX, ball.shadowRadiusY, 0, 0, Math.PI * 2);
           ctx.fill();
           ctx.restore();
 
-          // 2. Draw Ball
+          // 3. Draw 3D Ball with Perspective Lighting
           ctx.save();
           ctx.globalAlpha = ball.opacity;
+
+          // Outer Glow for Special Balls
+          if (currentPitchRef.current.id !== 'FASTBALL') {
+            ctx.shadowColor = currentPitchRef.current.color;
+            ctx.shadowBlur = 12;
+          }
+
+          // Ball Body
           ctx.fillStyle = currentPitchRef.current.color || '#FFFFFF';
-          ctx.strokeStyle = '#334155';
-          ctx.lineWidth = 1.5;
+          ctx.strokeStyle = '#1E293B';
+          ctx.lineWidth = 1.8;
           ctx.beginPath();
           ctx.arc(ball.x, ball.y, ball.radius, 0, Math.PI * 2);
           ctx.fill();
           ctx.stroke();
 
-          // Ball Stitches Pattern
+          // Red Seam Stitches
+          ctx.shadowBlur = 0;
           ctx.strokeStyle = '#EF4444';
-          ctx.lineWidth = 1.2;
+          ctx.lineWidth = Math.max(1, ball.radius * 0.1);
           ctx.beginPath();
           ctx.arc(ball.x - ball.radius * 0.35, ball.y, ball.radius * 0.75, -0.6, 0.6);
           ctx.stroke();
@@ -439,7 +592,9 @@ export default function BaseballGame({ onScoreSubmitted }) {
         }
       }
 
-      // D. Draw Batter
+      // =========================================================================
+      // D. Draw Batter in Left Batter's Box (Completely clears the middle view!)
+      // =========================================================================
       const activeBatterSprite = batterStateRef.current === 'SWING'
         ? batterSwingSpriteRef.current
         : batterReadySpriteRef.current;
@@ -450,10 +605,33 @@ export default function BaseballGame({ onScoreSubmitted }) {
         const bH = activeBatterSprite.height * bScale;
         const bX = BATTER_POS.x - bW / 2;
         const bY = BATTER_POS.y - bH / 2;
+
+        // Batter shadow on ground
+        ctx.save();
+        ctx.fillStyle = 'rgba(0, 0, 0, 0.3)';
+        ctx.beginPath();
+        ctx.ellipse(BATTER_POS.x, BATTER_POS.y + bH * 0.38, bW * 0.32, 14, 0, 0, Math.PI * 2);
+        ctx.fill();
+        ctx.restore();
+
+        // Draw Batter Sprite
         ctx.drawImage(activeBatterSprite, bX, bY, bW, bH);
+
+        // If swinging, draw a dynamic high-speed bat motion trail sweeping toward plate
+        if (batterStateRef.current === 'SWING') {
+          ctx.save();
+          ctx.strokeStyle = 'rgba(255, 255, 255, 0.65)';
+          ctx.lineWidth = 4;
+          ctx.beginPath();
+          ctx.arc(BATTER_POS.x + 30, BATTER_POS.y - 10, 110, -0.3, 0.8);
+          ctx.stroke();
+          ctx.restore();
+        }
       }
 
+      // =========================================================================
       // E. Update & Draw Particles
+      // =========================================================================
       particleSystemRef.current.update();
       particleSystemRef.current.render(ctx);
 

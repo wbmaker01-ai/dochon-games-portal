@@ -3,11 +3,40 @@
 
 export const CHANGELOG_DATA = [
   {
+    version: 'v1.7.1',
+    date: '2026-08-16',
+    title: 'Google 야구 스타일 [3D 입체 원근 뷰 & 시야 100% 개방] 전면 업그레이드',
+    badge: 'LATEST',
+    badgeColor: 'emerald',
+    items: [
+      {
+        tag: '3D PERSPECTIVE',
+        tagColor: 'blue',
+        text: '[3D 입체 원근 뷰 도입] 구글 두들 야구와 동일한 소실점 기반 3D 다이아몬드 그라운드 & Elevated Perspective 렌더링 구축'
+      },
+      {
+        tag: 'CLEAR VIEW',
+        tagColor: 'emerald',
+        text: '[시야 완전 개방 (좌측 타석 배치)] 타자를 홈플레이트 왼쪽 아래로 배치하여 투수-홈플레이트 간 중앙 투구 궤적이 가려지지 않도록 전면 개선'
+      },
+      {
+        tag: '3D SHADOW',
+        tagColor: 'purple',
+        text: '[3D 포물선 & 실시간 바닥 그림자] 공의 3D 고도와 지표면 그림자를 분리 렌더링하여 비행 높이와 착지 타이밍을 직관적으로 확인 가능'
+      },
+      {
+        tag: 'SWEET SPOT',
+        tagColor: 'amber',
+        text: '[홈플레이트 타이밍 수렴 링] 공이 타격 존에 진입할 때 홈플레이트 위로 링이 수렴하는 시각 인디케이터 추가로 타격감 강화'
+      }
+    ]
+  },
+  {
     version: 'v1.7.0',
     date: '2026-08-16',
     title: 'Google 두들 스타일 캐주얼 스포츠 [도촌 야구왕] 정식 출시 & 타이밍 배팅 시스템',
-    badge: 'LATEST',
-    badgeColor: 'emerald',
+    badge: 'UPDATE',
+    badgeColor: 'blue',
     items: [
       {
         tag: 'NEW GAME',
