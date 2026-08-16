@@ -64,19 +64,21 @@ export const PLAYABLE_GAMES = [
     category: '액션',
     imageSrc: getThumb('gnome.jpg'),
     isPlayable: true,
-    badgeText: '🌿 NEW 7위',
+    badgeText: '🌿 7위',
     description: '투석기로 요정을 힘차게 날려 꽃을 심고 최고 비행 거리를 달성하세요!'
+  },
+  {
+    id: 'colortile',
+    title: '도촌 컬러 타일',
+    category: '퍼즐',
+    imageSrc: getThumb('colortile.jpg'),
+    isPlayable: true,
+    badgeText: '🧩 NEW 8위',
+    description: '빈 칸을 클릭하여 십자 방향 같은 색 타일을 찾아 없애는 도촌 두뇌 퍼즐!'
   }
 ];
 
 export const COMING_SOON_GAMES = [
-  {
-    id: 'colortile',
-    title: '컬러 타일',
-    category: '퍼즐',
-    imageSrc: getThumb('colortile.jpg'),
-    isPlayable: false
-  },
   {
     id: 'popcorn',
     title: '팝콘',

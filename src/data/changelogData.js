@@ -3,11 +3,50 @@
 
 export const CHANGELOG_DATA = [
   {
+    version: 'v1.10.0',
+    date: '2026-08-16',
+    title: '신규 8번째 게임 [도촌 컬러 타일 (Color Tile)] 정식 출시 & 교차 매칭 엔진 탑재',
+    badge: 'LATEST',
+    badgeColor: 'emerald',
+    items: [
+      {
+        tag: 'NEW GAME',
+        tagColor: 'emerald',
+        text: '[도촌 컬러 타일 정식 출시] 빈 공간을 클릭하여 상·하·좌·우 십자 방향에서 마주치는 동일한 색상의 타일들을 파괴하는 클래식 명작 교차 매칭 퍼즐 게임 신규 오픈'
+      },
+      {
+        tag: 'GAMEPLAY ENGINE',
+        tagColor: 'blue',
+        text: '[정밀 십자 레이캐스팅 & 콤보 시스템] 14×14 정방형 반응형 보드, 실시간 십자 가이드라인(Hover/Touch), 레이저 빔 광선 연출, 연속 매칭 시 배수가 상승하는 폭발적 콤보(Combo) 엔진 구축'
+      },
+      {
+        tag: 'COLOR & SYMBOLS',
+        tagColor: 'purple',
+        text: '[6종 캔디 보석 & 색각 이상 배려 심볼] 루비(하트♥), 사파이어(다이아몬드◆), 에메랄드(클로버♣), 골드(별★), 아메시스트(달🌙), 핑크(원●) 6종의 선명한 글래스모피즘 타일 및 고유 심볼 적용'
+      },
+      {
+        tag: 'DUAL GAME MODES',
+        tagColor: 'amber',
+        text: '[타임어택 & 힐링 퍼즐 듀얼 모드] 매칭 시 시간 보너스(+1.5s~4.0s)를 획득하며 랭킹을 겨루는 60초 타임어택 모드와 시간 제한 없이 편안하게 모든 타일을 지우는 힐링 퍼즐 모드 제공'
+      },
+      {
+        tag: 'ITEMS & ASSIST',
+        tagColor: 'teal',
+        text: '[힌트 & 셔플 스마트 도우미 시스템] 막힐 때 최적의 매칭 빈 칸을 짚어주는 힌트(3회) 및 타일 위치를 재배치하는 셔플(2회/자동) 보조 도구 탑재'
+      },
+      {
+        tag: 'WEB AUDIO & HALL OF FAME',
+        tagColor: 'pink',
+        text: '[Web Audio 효과음 및 명예의 전당 연동] 마림바/실로폰 상승 콤보음, 레이저 광선음, 클리어 팡파르 및 100점 초과 달성 시 실시간 학교 랭킹 점수 등록 완벽 지원'
+      }
+    ]
+  },
+  {
     version: 'v1.9.0',
     date: '2026-08-16',
     title: '신규 7번째 게임 [도촌 정원 요정 (Garden Gnomes)] 정식 출시 & 물리 엔진 탑재',
-    badge: 'LATEST',
-    badgeColor: 'emerald',
+    badge: 'UPDATE',
+    badgeColor: 'blue',
     items: [
       {
         tag: 'COMFORT CAMERA 4-IN-1',
