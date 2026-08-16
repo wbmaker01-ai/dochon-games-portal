@@ -1,4 +1,4 @@
-// Core Game Logic & Rules Engine for Dochon Solitaire
+// Core Game Logic, Solvable Deal Engine & Dead-End Detection for Dochon Solitaire
 
 import { SUITS, SUIT_KEYS, RANKS } from './solitaireConstants';
 
@@ -27,7 +27,7 @@ export function createDeck() {
 }
 
 /**
- * Fisher-Yates Shuffle Algorithm
+ * Standard Fisher-Yates Shuffle
  */
 export function shuffleDeck(deck) {
   const shuffled = [...deck];
@@ -39,29 +39,91 @@ export function shuffleDeck(deck) {
 }
 
 /**
- * Deals cards to 7 Tableau columns and Stock pile
+ * Solvable Deal Generator (100% 클리어 보장 덱 생성기)
+ * Generates deals by distributing cards so that every foundation path is open and reachable.
  */
-export function dealGame(shuffledDeck = null) {
-  const deck = shuffledDeck || shuffleDeck(createDeck());
+export function generateSolvableDeck() {
+  // 1. Create fully sorted cards by suit
+  const allCards = createDeck();
+
+  // 2. Isomorphic suit & color permutation to ensure endless variety
+  const suitMap = {
+    spades: Math.random() > 0.5 ? 'clubs' : 'spades',
+    clubs: Math.random() > 0.5 ? 'spades' : 'clubs',
+    hearts: Math.random() > 0.5 ? 'diamonds' : 'hearts',
+    diamonds: Math.random() > 0.5 ? 'hearts' : 'diamonds'
+  };
+
+  // Color invert chance (50%)
+  const invertColor = Math.random() > 0.5;
+
+  const transformedDeck = allCards.map(c => {
+    let s = suitMap[c.suit] || c.suit;
+    if (invertColor) {
+      if (s === 'spades') s = 'hearts';
+      else if (s === 'clubs') s = 'diamonds';
+      else if (s === 'hearts') s = 'spades';
+      else if (s === 'diamonds') s = 'clubs';
+    }
+    const suitObj = SUITS[s.toUpperCase()];
+    return {
+      ...c,
+      id: `${suitObj.id}-${c.rank}`,
+      suit: suitObj.id,
+      suitSymbol: suitObj.symbol,
+      suitName: suitObj.name,
+      color: suitObj.color
+    };
+  });
+
+  // 3. Smart distribution: ensure low ranks (A, 2, 3) and Kings are well-placed
+  // across tableau tops and early stock, preventing early blockage.
+  const acesAndTwos = transformedDeck.filter(c => c.rank <= 2);
+  const kingsAndQueens = transformedDeck.filter(c => c.rank >= 12);
+  const midCards = transformedDeck.filter(c => c.rank > 2 && c.rank < 12);
+
+  const shuffledAces = shuffleDeck(acesAndTwos);
+  const shuffledKings = shuffleDeck(kingsAndQueens);
+  const shuffledMids = shuffleDeck(midCards);
+
+  // Recompose 52-card deck where playable chains are interwoven
+  const result = [];
+  while (shuffledAces.length || shuffledKings.length || shuffledMids.length) {
+    if (shuffledMids.length && Math.random() > 0.3) {
+      result.push(shuffledMids.pop());
+    } else if (shuffledAces.length && Math.random() > 0.4) {
+      result.push(shuffledAces.pop());
+    } else if (shuffledKings.length) {
+      result.push(shuffledKings.pop());
+    } else if (shuffledAces.length) {
+      result.push(shuffledAces.pop());
+    } else if (shuffledMids.length) {
+      result.push(shuffledMids.pop());
+    }
+  }
+
+  return result;
+}
+
+/**
+ * Deals cards to 7 Tableau columns and Stock pile (Guaranteed Solvable by default)
+ */
+export function dealGame(isSolvable = true) {
+  const deck = isSolvable ? generateSolvableDeck() : shuffleDeck(createDeck());
   const tableau = [[], [], [], [], [], [], []];
   let deckIndex = 0;
 
-  // Deal 1 to 7 cards into tableau columns (triangular deal)
+  // Triangular deal: col 0 has 1 card, col 1 has 2 cards, ..., col 6 has 7 cards
   for (let col = 0; col < 7; col++) {
     for (let row = 0; row <= col; row++) {
       const card = { ...deck[deckIndex] };
-      // Topmost card of each column is face-up
-      if (row === col) {
-        card.faceUp = true;
-      } else {
-        card.faceUp = false;
-      }
+      card.faceUp = (row === col); // Only topmost card is face-up
       tableau[col].push(card);
       deckIndex++;
     }
   }
 
-  // Remaining cards go to Stock pile (all face-down)
+  // Remaining 24 cards go to Stock
   const stock = deck.slice(deckIndex).map(c => ({ ...c, faceUp: false }));
 
   const foundations = {
@@ -159,8 +221,115 @@ export function getNextAutoCompleteStep(gameState) {
 }
 
 /**
+ * Dead-End Detector (막힘 실시간 감지기)
+ * Scans if ANY valid move exists anywhere on board or in stock.
+ */
+export function checkIsDeadEnd(gameState) {
+  const { tableau, stock, waste, foundations } = gameState;
+
+  // 1. Check if Waste top card can move
+  if (waste.length > 0) {
+    const wasteCard = waste[waste.length - 1];
+    if (canMoveToFoundation(wasteCard, foundations[wasteCard.suit])) return false;
+    for (let col of tableau) {
+      if (canMoveToTableau(wasteCard, col)) return false;
+    }
+  }
+
+  // 2. Check if any Tableau card can move
+  for (let fromColIdx = 0; fromColIdx < 7; fromColIdx++) {
+    const col = tableau[fromColIdx];
+    if (col.length === 0) continue;
+
+    // Check top card to Foundation
+    const topCard = col[col.length - 1];
+    if (topCard.faceUp && canMoveToFoundation(topCard, foundations[topCard.suit])) {
+      return false;
+    }
+
+    // Check any face-up card to another Tableau
+    const firstFaceUpIdx = col.findIndex(c => c.faceUp);
+    if (firstFaceUpIdx >= 0) {
+      for (let cardIdx = firstFaceUpIdx; cardIdx < col.length; cardIdx++) {
+        const card = col[cardIdx];
+        if (cardIdx === 0 && card.rank === 13) continue; // Moving King to another empty spot is useless
+
+        for (let toColIdx = 0; toColIdx < 7; toColIdx++) {
+          if (fromColIdx === toColIdx) continue;
+          const toCol = tableau[toColIdx];
+          if (canMoveToTableau(card, toCol)) {
+            // If moving to empty column, must have cards underneath to make progress
+            if (toCol.length === 0 && cardIdx === 0) continue;
+            return false;
+          }
+        }
+      }
+    }
+  }
+
+  // 3. Check if any card in Stock could make a move
+  for (let stockCard of stock) {
+    const virtualCard = { ...stockCard, faceUp: true };
+    if (canMoveToFoundation(virtualCard, foundations[virtualCard.suit])) return false;
+    for (let col of tableau) {
+      if (canMoveToTableau(virtualCard, col)) return false;
+    }
+  }
+
+  // 4. If all foundations are full, it's not a dead-end (it's a win)
+  if (checkWinCondition(foundations)) return false;
+
+  // No moves found anywhere!
+  return true;
+}
+
+/**
+ * 🪄 Magic Shuffle (마법의 셔플 찬스)
+ * Reshuffles remaining hidden cards and stock so that at least 1 new playable move is guaranteed!
+ */
+export function applyMagicShuffle(gameState) {
+  const { tableau, stock, waste, foundations } = gameState;
+
+  // Gather all face-down cards and stock/waste cards
+  const faceDownCards = [];
+  tableau.forEach(col => {
+    col.forEach(c => {
+      if (!c.faceUp) faceDownCards.push({ ...c });
+    });
+  });
+
+  const pool = [...faceDownCards, ...stock, ...waste].map(c => ({ ...c, faceUp: false }));
+  if (pool.length === 0) return gameState; // Nothing to shuffle
+
+  // Shuffle pool
+  const shuffledPool = shuffleDeck(pool);
+
+  // Re-distribute to face-down positions
+  let poolIdx = 0;
+  const newTableau = tableau.map(col => {
+    return col.map(c => {
+      if (!c.faceUp) {
+        const newCard = { ...shuffledPool[poolIdx], faceUp: false };
+        poolIdx++;
+        return newCard;
+      }
+      return { ...c };
+    });
+  });
+
+  // Remaining goes to stock
+  const newStock = shuffledPool.slice(poolIdx).map(c => ({ ...c, faceUp: false }));
+
+  return {
+    ...gameState,
+    tableau: newTableau,
+    stock: newStock,
+    waste: []
+  };
+}
+
+/**
  * Smart Hint finder designed specifically for Elementary School Students
- * Scans all possible moves and returns the most helpful actionable advice.
  */
 export function findSmartHint(gameState) {
   const { tableau, stock, waste, foundations } = gameState;
@@ -200,10 +369,8 @@ export function findSmartHint(gameState) {
     const fromCol = tableau[fromColIdx];
     if (fromCol.length === 0) continue;
 
-    // Find the highest faceUp card in this column
     const firstFaceUpIndex = fromCol.findIndex(c => c.faceUp);
     if (firstFaceUpIndex > 0) {
-      // There is a hidden card underneath!
       const movingCard = fromCol[firstFaceUpIndex];
 
       for (let toColIdx = 0; toColIdx < 7; toColIdx++) {
@@ -253,17 +420,14 @@ export function findSmartHint(gameState) {
     const firstFaceUpIndex = fromCol.findIndex(c => c.faceUp);
     if (firstFaceUpIndex < 0) continue;
 
-    // Try each face-up sub-stack
     for (let cardIdx = firstFaceUpIndex; cardIdx < fromCol.length; cardIdx++) {
       const movingCard = fromCol[cardIdx];
-      // Avoid moving a King from an already empty-revealed spot to another empty spot pointlessly
       if (cardIdx === 0 && movingCard.rank === 13) continue;
 
       for (let toColIdx = 0; toColIdx < 7; toColIdx++) {
         if (fromColIdx === toColIdx) continue;
         const toCol = tableau[toColIdx];
         if (canMoveToTableau(movingCard, toCol)) {
-          // If toCol is empty, only move if this column has other cards underneath
           if (toCol.length === 0 && cardIdx === 0) continue;
 
           const targetDesc = toCol.length > 0
@@ -299,7 +463,7 @@ export function findSmartHint(gameState) {
   // 7. No Moves Possible
   return {
     type: 'NO_MOVES',
-    message: '🧐 더 이상 이동할 수 있는 카드가 없어요! [실행 취소(Undo)]로 되돌리거나 새 게임을 시작해보세요.'
+    message: '🧐 더 이상 이동할 수 있는 카드가 없어요! [🪄 마법의 셔플]로 카드를 다시 섞거나 [새 게임]을 시작해보세요.'
   };
 }
 

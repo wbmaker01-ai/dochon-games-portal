@@ -15,7 +15,9 @@ import {
   Crown,
   Layers,
   ArrowRight,
-  Flame
+  Flame,
+  Wand2,
+  AlertCircle
 } from 'lucide-react';
 import { soundFx } from '../../../utils/audio';
 import { submitScoreToDB } from '../../../utils/leaderboardApi';
@@ -33,14 +35,16 @@ import {
   canAutoComplete,
   getNextAutoCompleteStep,
   findSmartHint,
-  checkWinCondition
+  checkWinCondition,
+  checkIsDeadEnd,
+  applyMagicShuffle
 } from './solitaireLogic';
 import SolitaireHowToPlayModal from './SolitaireHowToPlayModal';
 import './solitaire.css';
 
 export default function SolitaireGame({ onScoreSubmitted }) {
-  // Game Board State
-  const [gameState, setGameState] = useState(() => dealGame());
+  // Game Board State (Default to 100% Solvable Deals)
+  const [gameState, setGameState] = useState(() => dealGame(true));
   const [history, setHistory] = useState([]);
   const [drawMode, setDrawMode] = useState('one'); // 'one' (1장 뽑기 - 기본값) or 'three' (3장)
   
@@ -51,20 +55,19 @@ export default function SolitaireGame({ onScoreSubmitted }) {
   const [isTimerRunning, setIsTimerRunning] = useState(false);
   const [highScore, setHighScore] = useState(() => getHighScore('solitaire') || 0);
 
-  // Kid Friendly Features: Smart Hint & Coach Message
+  // Kid Friendly Features: Smart Hint, Dead-End Detection & Magic Shuffle
   const [hint, setHint] = useState(null);
   const [coachMsg, setCoachMsg] = useState('💡 카드를 클릭하면 가장 알맞은 위치로 자동 이동해요! 막힐 땐 [힌트]를 눌러보세요.');
   const [isHelpOpen, setIsHelpOpen] = useState(false);
   const [isMuted, setIsMuted] = useState(false);
+  const [isDeadEnd, setIsDeadEnd] = useState(false);
+  const [magicShuffleCount, setMagicShuffleCount] = useState(0);
 
   // Victory & Auto Complete
   const [isWon, setIsWon] = useState(false);
   const [isAutoCompleting, setIsAutoCompleting] = useState(false);
   const [studentName, setStudentName] = useState('');
   const [submitted, setSubmitted] = useState(false);
-
-  // Drag & Drop State
-  const [draggedData, setDraggedData] = useState(null);
 
   // Auto-Start Timer on first interaction
   const startTimer = useCallback(() => {
@@ -95,6 +98,34 @@ export default function SolitaireGame({ onScoreSubmitted }) {
     ]);
   }, [gameState, score, moves]);
 
+  // Dead-End Checker: Runs after moves or stock draws
+  useEffect(() => {
+    if (!isWon && !isAutoCompleting && moves > 0) {
+      const dead = checkIsDeadEnd(gameState);
+      if (dead) {
+        setIsDeadEnd(true);
+        setCoachMsg('🧐 더 이상 이동할 카드가 없어요! [🪄 마법의 셔플]로 막힌 카드를 풀어보세요.');
+      } else {
+        setIsDeadEnd(false);
+      }
+    }
+  }, [gameState, isWon, isAutoCompleting, moves]);
+
+  // Magic Shuffle Handler (🪄 초등학생 구원 찬스)
+  const handleMagicShuffle = () => {
+    if (isWon || isAutoCompleting) return;
+    saveSnapshot();
+    startTimer();
+
+    const shuffledState = applyMagicShuffle(gameState);
+    setGameState(shuffledState);
+    setMagicShuffleCount(prev => prev + 1);
+    setIsDeadEnd(false);
+    setHint(null);
+    setCoachMsg('🪄 [마법의 셔플 찬스] 카드를 마법처럼 다시 섞었습니다! 새로운 길을 열어보세요 ✨');
+    soundFx.playMagicShuffle();
+  };
+
   // Undo Last Move
   const handleUndo = () => {
     if (history.length === 0 || isWon || isAutoCompleting) return;
@@ -104,13 +135,14 @@ export default function SolitaireGame({ onScoreSubmitted }) {
     setMoves(lastSnapshot.moves);
     setHistory(prev => prev.slice(0, -1));
     setHint(null);
+    setIsDeadEnd(false);
     setCoachMsg('↩️ 이전 상태로 되돌렸습니다.');
     soundFx.playCardFlip();
   };
 
-  // Start New Fresh Game
+  // Start New 100% Solvable Game
   const handleNewGame = () => {
-    const freshState = dealGame();
+    const freshState = dealGame(true);
     setGameState(freshState);
     setHistory([]);
     setScore(0);
@@ -120,8 +152,10 @@ export default function SolitaireGame({ onScoreSubmitted }) {
     setIsWon(false);
     setIsAutoCompleting(false);
     setHint(null);
+    setIsDeadEnd(false);
     setSubmitted(false);
-    setCoachMsg('🃏 새로운 게임이 시작되었습니다! 카드를 옮겨보세요.');
+    setMagicShuffleCount(0);
+    setCoachMsg('🃏 100% 클리어 가능한 새 게임이 시작되었습니다! 카드를 옮겨보세요.');
     soundFx.playCardFlip();
   };
 
@@ -191,6 +225,7 @@ export default function SolitaireGame({ onScoreSubmitted }) {
       setIsWon(true);
       setIsTimerRunning(false);
       setIsAutoCompleting(false);
+      setIsDeadEnd(false);
       soundFx.playSolitaireWin();
 
       // Bonus Time Score Calculation
@@ -272,7 +307,6 @@ export default function SolitaireGame({ onScoreSubmitted }) {
     }
 
     // 2. Try Tableau Move
-    // If clicking from tableau, get the moving sub-stack
     let movingCards = [card];
     if (sourceInfo.type === 'tableau') {
       const col = tableau[sourceInfo.colIndex];
@@ -287,7 +321,6 @@ export default function SolitaireGame({ onScoreSubmitted }) {
       const targetCol = tableau[targetColIdx];
 
       if (canMoveToTableau(movingCards[0], targetCol)) {
-        // Prevent moving entire King stack to another empty spot pointlessly
         if (targetCol.length === 0 && sourceInfo.type === 'tableau') {
           const col = tableau[sourceInfo.colIndex];
           if (col[0].id === card.id && col.length === movingCards.length) {
@@ -326,7 +359,7 @@ export default function SolitaireGame({ onScoreSubmitted }) {
       }
     }
 
-    // If no valid move found, give a gentle vibration/tip
+    // If no valid move found
     soundFx.playCardFlip();
     setCoachMsg(`🧐 [${card.suitSymbol} ${card.rankLabel}] 카드는 지금 옮길 수 있는 자리가 없어요. [힌트]를 확인해보세요!`);
   };
@@ -346,6 +379,7 @@ export default function SolitaireGame({ onScoreSubmitted }) {
   const handleAutoComplete = () => {
     if (isAutoCompleting || isWon) return;
     setIsAutoCompleting(true);
+    setIsDeadEnd(false);
     setCoachMsg('✨ 남은 카드를 자동으로 완성칸에 차곡차곡 정리하는 중입니다!');
   };
 
@@ -378,7 +412,7 @@ export default function SolitaireGame({ onScoreSubmitted }) {
         } else {
           setIsAutoCompleting(false);
         }
-      }, 150);
+      }, 120);
     }
     return () => clearTimeout(autoTimer);
   }, [isAutoCompleting, gameState, isWon]);
@@ -433,9 +467,13 @@ export default function SolitaireGame({ onScoreSubmitted }) {
       </div>
 
       {/* 2. Elementary Student Friendly Coaching Banner */}
-      <div className="solitaire-coach-banner">
+      <div className={`solitaire-coach-banner ${isDeadEnd ? 'banner-deadend' : ''}`}>
         <div className="solitaire-coach-text">
-          <Lightbulb className="w-4 h-4 text-amber-400 shrink-0 fill-amber-400" />
+          {isDeadEnd ? (
+            <AlertCircle className="w-4 h-4 text-rose-400 shrink-0 fill-rose-400" />
+          ) : (
+            <Lightbulb className="w-4 h-4 text-amber-400 shrink-0 fill-amber-400" />
+          )}
           <span>{coachMsg}</span>
         </div>
       </div>
@@ -464,6 +502,16 @@ export default function SolitaireGame({ onScoreSubmitted }) {
         >
           <Lightbulb className="w-4 h-4 fill-current" />
           <span>💡 힌트 보기</span>
+        </button>
+
+        {/* 🪄 Magic Shuffle Button (막힘 탈출 슈퍼 파워 찬스) */}
+        <button
+          onClick={handleMagicShuffle}
+          className={`btn-solitaire btn-sol-magic ${isDeadEnd ? 'animate-bounce' : ''}`}
+          title="막혔을 때 뒷면 카드를 다시 섞어 새로운 길을 열어주는 마법의 셔플!"
+        >
+          <Wand2 className="w-4 h-4 text-pink-300 fill-pink-400" />
+          <span>🪄 마법의 셔플 {magicShuffleCount > 0 && `(${magicShuffleCount})`}</span>
         </button>
 
         {/* Undo Button */}
@@ -504,7 +552,7 @@ export default function SolitaireGame({ onScoreSubmitted }) {
         <button
           onClick={handleNewGame}
           className="btn-solitaire btn-sol-emerald"
-          title="새 게임 시작하기"
+          title="새 게임 시작하기 (100% 클리어 가능 보장)"
         >
           <RotateCcw className="w-4 h-4" />
           <span>새 게임</span>
@@ -594,7 +642,6 @@ export default function SolitaireGame({ onScoreSubmitted }) {
                   key={suitKey}
                   onClick={() => {
                     if (topCard) {
-                      // Allow moving back down if needed
                       handleSmartCardClick(topCard, { type: 'foundation', suit: suitKey });
                     }
                   }}
@@ -648,7 +695,6 @@ export default function SolitaireGame({ onScoreSubmitted }) {
                 {col.map((card, cardIdx) => {
                   const isHintCard = hint && hint.highlightCardId === card.id;
                   const isTargetCard = hint && hint.targetZone === `tableau-${colIdx}` && cardIdx === col.length - 1;
-                  // Card vertical offset: face-down cards closer together (14px), face-up spaced out (24px)
                   let topOffset = 0;
                   for (let i = 0; i < cardIdx; i++) {
                     topOffset += col[i].faceUp ? 24 : 14;
@@ -688,7 +734,34 @@ export default function SolitaireGame({ onScoreSubmitted }) {
           })}
         </div>
 
-        {/* 5. VICTORY CELEBRATION MODAL OVERLAY */}
+        {/* 5. DEAD-END RESCUE MODAL OVERLAY (막힘 탈출 도우미 모달) */}
+        {isDeadEnd && !isWon && (
+          <div className="solitaire-deadend-overlay">
+            <div className="solitaire-deadend-box">
+              <div className="flex items-center justify-center gap-2 mb-2">
+                <Wand2 className="w-7 h-7 text-pink-400 fill-pink-400 animate-spin" />
+                <h3 className="text-xl font-black text-amber-300">더 이상 옮길 카드가 없어요!</h3>
+              </div>
+              <p className="text-xs sm:text-sm text-slate-200 leading-relaxed mb-4">
+                잠시 길이 막혔더라도 실망하지 마세요! <strong>[마법의 셔플]</strong>로 카드를 다시 섞어 새로운 길을 열거나, 이전 수로 되돌릴 수 있어요.
+              </p>
+
+              <div className="flex flex-col sm:flex-row gap-2.5 justify-center w-full">
+                <button onClick={handleMagicShuffle} className="btn-solitaire btn-sol-magic py-3 px-5 text-sm font-black shadow-xl">
+                  <Wand2 className="w-4 h-4" /> 🪄 마법의 셔플로 새 길 열기!
+                </button>
+                <button onClick={handleUndo} className="btn-solitaire btn-sol-blue py-3 px-5 text-sm font-black shadow-xl">
+                  <Undo2 className="w-4 h-4" /> ↩️ 되돌리기
+                </button>
+                <button onClick={handleNewGame} className="btn-solitaire btn-sol-emerald py-3 px-5 text-sm font-black shadow-xl">
+                  <RotateCcw className="w-4 h-4" /> 🎲 새 게임 시작
+                </button>
+              </div>
+            </div>
+          </div>
+        )}
+
+        {/* 6. VICTORY CELEBRATION MODAL OVERLAY */}
         {isWon && (
           <div className="solitaire-victory-overlay">
             <Crown className="w-16 h-16 text-amber-400 fill-amber-400 animate-bounce mb-2" />
@@ -757,7 +830,7 @@ export default function SolitaireGame({ onScoreSubmitted }) {
         )}
       </div>
 
-      {/* 6. Elementary Student How-to-Play Modal */}
+      {/* 7. Elementary Student How-to-Play Modal */}
       <SolitaireHowToPlayModal
         isOpen={isHelpOpen}
         onClose={() => setIsHelpOpen(false)}

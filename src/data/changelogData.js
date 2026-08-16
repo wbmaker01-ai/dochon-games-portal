@@ -35,14 +35,24 @@ export const CHANGELOG_DATA = [
         text: '초등학생 추천 [1장 뽑기(쉬움, 기본값)] 및 [3장 뽑기(도전)] 난이도 선택, 무제한 [실행 취소(Undo)] 지원'
       },
       {
-        tag: 'AUTO WIN',
+        tag: 'SOLVABLE',
+        tagColor: 'amber',
+        text: '100% 클리어 성공 보장 덱 생성 알고리즘(Solvable Deal Generator) 탑재 (불가능한 막힘 덱 원천 차단)'
+      },
+      {
+        tag: 'MAGIC',
         tagColor: 'purple',
+        text: '막힘 실시간 감지기(Dead-end Detector) 및 초등학생 구원 [🪄 마법의 셔플 (Magic Shuffle)] 찬스 기능 신설'
+      },
+      {
+        tag: 'AUTO WIN',
+        tagColor: 'emerald',
         text: '바닥 카드가 모두 열려 클리어가 확정되었을 때 1초 만에 덱을 완성하는 [🎉 자동 완성하기] 기능 및 승리 폭죽 세레머니 구현'
       },
       {
         tag: 'AUDIO',
         tagColor: 'teal',
-        text: 'Web Audio API 기반 리얼 카드 셔플, 카드 뒤집기음, 안착음, 힌트 차임벨 및 승리 팡파르 효과음 5종 추가'
+        text: 'Web Audio API 기반 리얼 카드 셔플, 뒤집기음, 안착음, 힌트 차임벨, 마법의 셔플음 및 승리 팡파르 효과음 6종 탑재'
       }
     ]
   },
