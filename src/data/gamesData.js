@@ -73,19 +73,21 @@ export const PLAYABLE_GAMES = [
     category: '퍼즐',
     imageSrc: getThumb('colortile.jpg'),
     isPlayable: true,
-    badgeText: '🧩 NEW 8위',
+    badgeText: '🧩 8위',
     description: '빈 칸을 클릭하여 십자 방향 같은 색 타일을 찾아 없애는 도촌 두뇌 퍼즐!'
+  },
+  {
+    id: 'popcorn',
+    title: '도촌 팝콘',
+    category: '액션',
+    imageSrc: getThumb('popcorn.jpg'),
+    isPlayable: true,
+    badgeText: '🍿 NEW 9위',
+    description: '달궈진 프라이팬 위에서 쏟아지는 불꽃과 버터를 피해 생존하는 탄막 서바이벌!'
   }
 ];
 
 export const COMING_SOON_GAMES = [
-  {
-    id: 'popcorn',
-    title: '팝콘',
-    category: '멀티플레이어',
-    imageSrc: getThumb('popcorn.jpg'),
-    isPlayable: false
-  },
   {
     id: 'tictactoe',
     title: '틱택토',

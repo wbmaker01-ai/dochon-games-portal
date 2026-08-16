@@ -3,11 +3,40 @@
 
 export const CHANGELOG_DATA = [
   {
+    version: 'v1.12.0',
+    date: '2026-08-16',
+    title: '신규 9호 아케이드 [도촌 팝콘 서바이벌] 공식 오픈 & 3종 알갱이 클래스 탑재',
+    badge: 'LATEST',
+    badgeColor: 'emerald',
+    items: [
+      {
+        tag: 'NEW GAME',
+        tagColor: 'amber',
+        text: '[신규 게임 팝콘(Popcorn) 정식 출시] 달궈진 프라이팬 위에서 쏟아지는 탄막과 보스의 열 공격을 피해 생존하는 아케이드 탄막 액션 게임 공식 런칭'
+      },
+      {
+        tag: 'CLASSES',
+        tagColor: 'purple',
+        text: '[3대 옥수수 알갱이 클래스 시스템] 실드 나이트(투사체 반사), 힐링 위저드(하트 회복 및 탄막 정화), 스피드 러너(무적 질주 대시) 등 고유 특수 능력 탑재'
+      },
+      {
+        tag: 'BOSS BATTLE',
+        tagColor: 'rose',
+        text: '[단계별 보스 스테이지] 거대 버터 킹과 화염 정령 보스의 공격 패턴 및 아슬아슬한 스침(Graze) 점수 보너스 시스템 도입'
+      },
+      {
+        tag: 'HALL OF FAME',
+        tagColor: 'teal',
+        text: '[명예의 전당 랭킹 연동] 100점 초과 달성 시 최고 생존 점수를 등록하고 전교생과 랭킹을 겨루는 실시간 명예의 전당 시스템 지원'
+      }
+    ]
+  },
+  {
     version: 'v1.11.0',
     date: '2026-08-16',
     title: '즉시 플레이 게임 [실시간 랭킹 활성도 + 신작 부스트] 하이브리드 인기 순위 알고리즘 탑재',
-    badge: 'LATEST',
-    badgeColor: 'emerald',
+    badge: 'UPDATE',
+    badgeColor: 'blue',
     items: [
       {
         tag: 'ALGORITHM',

@@ -7,6 +7,7 @@ import MinesweeperGame from './components/games/minesweeper/MinesweeperGame';
 import BaseballGame from './components/games/baseball/BaseballGame';
 import GnomeGame from './components/games/gnome/GnomeGame';
 import ColorTileGame from './components/games/colortile/ColorTileGame';
+import PopcornGame from './components/games/popcorn/PopcornGame';
 import GameCard from './components/GameCard';
 import LeaderboardModal from './components/LeaderboardModal';
 import ChangelogModal from './components/ChangelogModal';
@@ -26,9 +27,9 @@ export default function App() {
   const [favorites, setFavorites] = useState(() => {
     try {
       const saved = localStorage.getItem('dochon_favorites');
-      return saved ? JSON.parse(saved) : ['pacman', 'dino', 'snake', 'solitaire', 'minesweeper', 'baseball', 'gnome', 'colortile'];
+      return saved ? JSON.parse(saved) : ['pacman', 'dino', 'snake', 'solitaire', 'minesweeper', 'baseball', 'gnome', 'colortile', 'popcorn'];
     } catch (e) {
-      return ['pacman', 'dino', 'snake', 'solitaire', 'minesweeper', 'baseball', 'gnome', 'colortile'];
+      return ['pacman', 'dino', 'snake', 'solitaire', 'minesweeper', 'baseball', 'gnome', 'colortile', 'popcorn'];
     }
   });
 
@@ -419,6 +420,7 @@ export default function App() {
                   {activeGame === 'baseball' && '⚾ 도촌 야구왕 (DOCHON BASEBALL KING)'}
                   {activeGame === 'gnome' && '🌿 도촌 정원 요정 (DOCHON GARDEN GNOMES)'}
                   {activeGame === 'colortile' && '🧩 도촌 컬러 타일 (DOCHON COLOR TILE)'}
+                  {activeGame === 'popcorn' && '🍿 도촌 팝콘 (DOCHON POPCORN SURVIVAL)'}
                 </span>
                 <span style={{
                   backgroundColor: 'rgba(251, 191, 36, 0.2)',
@@ -469,6 +471,9 @@ export default function App() {
               )}
               {activeGame === 'colortile' && (
                 <ColorTileGame onScoreSubmitted={() => openInPageLeaderboardModal('colortile')} />
+              )}
+              {activeGame === 'popcorn' && (
+                <PopcornGame onScoreSubmitted={() => openInPageLeaderboardModal('popcorn')} />
               )}
             </div>
           </div>
