@@ -257,6 +257,14 @@ function getLocalLeaderboardFallback(gameKey) {
       { id: '4', name: '박지훈 (3B)', score: 190, date: '2026-08-12' },
       { id: '5', name: '최예은 (5C)', score: 150, date: '2026-08-11' }
     ]);
+  } else if (gameKey === 'minesweeper') {
+    return deduplicateLeaderboard([
+      { id: '1', name: '이지뢰 (6B)', score: 3200, date: '2026-08-16' },
+      { id: '2', name: '김도촌 (5A)', score: 2450, date: '2026-08-16' },
+      { id: '3', name: '박하늘 (4A)', score: 1800, date: '2026-08-15' },
+      { id: '4', name: '정수빈 (3C)', score: 1250, date: '2026-08-15' },
+      { id: '5', name: '최강우 (5B)', score: 850, date: '2026-08-14' }
+    ]);
   } else {
     return deduplicateLeaderboard([
       { id: '1', name: '박민준 (6C)', score: 3450, date: '2026-08-12' },

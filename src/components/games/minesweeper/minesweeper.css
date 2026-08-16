@@ -1,0 +1,548 @@
+/* Dochon Minesweeper Modern Google Grass Grid Theme */
+
+.minesweeper-wrapper {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  width: 100%;
+  max-width: 960px;
+  margin: 0 auto;
+  user-select: none;
+  font-family: 'Pretendard', system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+  color: #F8FAFC;
+}
+
+/* 1. Header Bar: Level Selector & Dashboard */
+.minesweeper-header-bar {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  width: 100%;
+  background: linear-gradient(180deg, #1E293B 0%, #0F172A 100%);
+  border: 1px solid rgba(251, 191, 36, 0.2);
+  border-radius: 16px;
+  padding: 14px 18px;
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.4);
+  margin-bottom: 14px;
+}
+
+.minesweeper-controls-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+/* Difficulty Selector Chips */
+.minesweeper-diff-chips {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  flex-wrap: wrap;
+}
+
+.minesweeper-diff-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  padding: 6px 12px;
+  border-radius: 10px;
+  font-size: 12px;
+  font-weight: 800;
+  cursor: pointer;
+  transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+  background: rgba(51, 65, 85, 0.6);
+  border: 1px solid rgba(148, 163, 184, 0.2);
+  color: #94A3B8;
+}
+
+.minesweeper-diff-chip:hover {
+  background: rgba(71, 85, 105, 0.8);
+  color: #FFFFFF;
+  transform: translateY(-1px);
+}
+
+.minesweeper-diff-chip.active {
+  background: linear-gradient(135deg, #10B981 0%, #059669 100%);
+  color: #FFFFFF;
+  border-color: #34D399;
+  box-shadow: 0 0 14px rgba(16, 185, 129, 0.4);
+}
+
+/* Quick Tools in Header */
+.minesweeper-tools-group {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.minesweeper-tool-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  padding: 6px 12px;
+  border-radius: 10px;
+  font-size: 12px;
+  font-weight: 800;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  border: 1px solid transparent;
+}
+
+.btn-ms-hint {
+  background: linear-gradient(135deg, #F59E0B 0%, #D97706 100%);
+  color: #0F172A;
+  border-color: #FCD34D;
+}
+.btn-ms-hint:hover:not(:disabled) {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 14px rgba(245, 158, 11, 0.4);
+}
+.btn-ms-hint:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.btn-ms-rule {
+  background: rgba(51, 65, 85, 0.8);
+  color: #38BDF8;
+  border-color: rgba(56, 189, 248, 0.3);
+}
+.btn-ms-rule:hover {
+  background: rgba(56, 189, 248, 0.15);
+  transform: translateY(-1px);
+}
+
+.btn-ms-audio {
+  background: rgba(51, 65, 85, 0.8);
+  color: #CBD5E1;
+  padding: 6px 8px;
+}
+
+/* 2. Google Style Dashboard Banner */
+.minesweeper-dashboard {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  background: #15803D;
+  border: 2px solid #22C55E;
+  border-radius: 14px;
+  padding: 8px 16px;
+  box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.3), 0 4px 12px rgba(0, 0, 0, 0.2);
+}
+
+.ms-counter-box {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  background: #0F172A;
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  padding: 4px 12px;
+  border-radius: 8px;
+  font-family: 'Courier New', Courier, monospace;
+  font-size: 16px;
+  font-weight: 900;
+  color: #EF4444;
+  letter-spacing: 1px;
+}
+
+.ms-counter-box.time {
+  color: #38BDF8;
+}
+
+.ms-counter-box.score {
+  color: #FBBF24;
+}
+
+/* Smiley Center Reset Button */
+.ms-smiley-btn {
+  width: 44px;
+  height: 44px;
+  border-radius: 50%;
+  background: linear-gradient(135deg, #FDE047 0%, #F59E0B 100%);
+  border: 3px solid #FEF08A;
+  font-size: 24px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: transform 0.15s ease, box-shadow 0.2s ease;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3), inset 0 2px 4px rgba(255, 255, 255, 0.6);
+}
+
+.ms-smiley-btn:hover {
+  transform: scale(1.1);
+  box-shadow: 0 6px 16px rgba(245, 158, 11, 0.5);
+}
+
+.ms-smiley-btn:active {
+  transform: scale(0.95);
+}
+
+/* 3. Mobile Mode Switcher & Safety Guard Badge */
+.minesweeper-subbar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  width: 100%;
+  margin-bottom: 10px;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+.ms-mobile-mode-group {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  background: rgba(30, 41, 59, 0.8);
+  border: 1px solid rgba(148, 163, 184, 0.3);
+  padding: 3px;
+  border-radius: 12px;
+}
+
+.ms-mode-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  padding: 6px 12px;
+  border-radius: 9px;
+  font-size: 11px;
+  font-weight: 800;
+  cursor: pointer;
+  background: transparent;
+  color: #94A3B8;
+  border: none;
+  transition: all 0.2s ease;
+}
+
+.ms-mode-btn.active.dig {
+  background: #22C55E;
+  color: #052E16;
+  font-weight: 900;
+  box-shadow: 0 2px 8px rgba(34, 197, 94, 0.4);
+}
+
+.ms-mode-btn.active.flag {
+  background: #EF4444;
+  color: #FFFFFF;
+  font-weight: 900;
+  box-shadow: 0 2px 8px rgba(239, 68, 68, 0.4);
+}
+
+/* Shield Badge */
+.ms-shield-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  background: rgba(59, 130, 246, 0.15);
+  border: 1px solid rgba(96, 165, 250, 0.4);
+  color: #93C5FD;
+  padding: 5px 10px;
+  border-radius: 9999px;
+  font-size: 11px;
+  font-weight: 800;
+}
+
+.ms-shield-badge.used {
+  opacity: 0.5;
+  color: #64748B;
+  border-color: #334155;
+  background: rgba(15, 23, 42, 0.4);
+}
+
+/* 4. The Grass Grid Board */
+.minesweeper-board-container {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  padding: 10px;
+  background: #14532D;
+  border: 4px solid #166534;
+  border-radius: 18px;
+  box-shadow: 0 12px 36px rgba(0, 0, 0, 0.5), inset 0 2px 8px rgba(0, 0, 0, 0.3);
+  max-width: 100%;
+  overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
+}
+
+.minesweeper-grid {
+  display: grid;
+  user-select: none;
+  touch-action: manipulation;
+}
+
+/* Tiles Styling (Checkerboard Grass & Dirt) */
+.ms-tile {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: 900;
+  font-size: 18px;
+  cursor: pointer;
+  transition: filter 0.1s ease, transform 0.05s ease;
+  position: relative;
+}
+
+.ms-tile:hover {
+  filter: brightness(1.1);
+}
+
+.ms-tile:active {
+  transform: scale(0.96);
+}
+
+/* Unopened Grass Checkerboard (Google style vibrant greens) */
+.ms-tile.hidden.light-grass {
+  background-color: #A2D149;
+}
+.ms-tile.hidden.dark-grass {
+  background-color: #AAD751;
+}
+
+/* Opened Dirt Checkerboard */
+.ms-tile.revealed.light-dirt {
+  background-color: #E5C29F;
+}
+.ms-tile.revealed.dark-dirt {
+  background-color: #D7B899;
+}
+
+/* Flagged Tile */
+.ms-tile.flagged {
+  animation: flagPop 0.25s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+}
+
+/* Exploded Tile */
+.ms-tile.exploded {
+  background-color: #EF4444 !important;
+  animation: explodeShake 0.4s ease;
+}
+
+/* Saved by Shield Tile */
+.ms-tile.shield-saved {
+  background-color: #3B82F6 !important;
+  animation: shieldGlow 1s infinite alternate;
+}
+
+/* Wrong Flag Tile */
+.ms-tile.wrong-flag {
+  background-color: #F87171 !important;
+  position: relative;
+}
+.ms-tile.wrong-flag::after {
+  content: '❌';
+  position: absolute;
+  font-size: 12px;
+}
+
+/* Hint Highlighting */
+.ms-tile.hinted {
+  box-shadow: inset 0 0 0 3px #FBBF24, 0 0 16px #FBBF24;
+  animation: hintPulse 0.8s infinite alternate;
+  z-index: 2;
+}
+
+@keyframes hintPulse {
+  0% { transform: scale(1); filter: brightness(1.2); }
+  100% { transform: scale(1.08); filter: brightness(1.4); }
+}
+
+@keyframes flagPop {
+  0% { transform: scale(0.5); }
+  70% { transform: scale(1.2); }
+  100% { transform: scale(1); }
+}
+
+@keyframes explodeShake {
+  0%, 100% { transform: translate(0, 0); }
+  20%, 60% { transform: translate(-3px, 2px); }
+  40%, 80% { transform: translate(3px, -2px); }
+}
+
+@keyframes shieldGlow {
+  0% { box-shadow: inset 0 0 0 2px #60A5FA, 0 0 8px #3B82F6; }
+  100% { box-shadow: inset 0 0 0 3px #93C5FD, 0 0 16px #60A5FA; }
+}
+
+/* 5. Coach Message Banner */
+.ms-coach-banner {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  width: 100%;
+  background: rgba(30, 41, 59, 0.7);
+  border: 1px solid rgba(251, 191, 36, 0.25);
+  border-radius: 12px;
+  padding: 10px 14px;
+  margin-top: 12px;
+  font-size: 12px;
+  font-weight: 600;
+  color: #E2E8F0;
+  line-height: 1.4;
+}
+
+/* 6. Victory & Game Over Modals */
+.ms-result-overlay {
+  position: absolute;
+  inset: 0;
+  background: rgba(15, 23, 42, 0.88);
+  backdrop-filter: blur(6px);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 24px;
+  border-radius: 18px;
+  z-index: 10;
+  animation: fadeIn 0.3s ease-out;
+  text-align: center;
+}
+
+.ms-result-box {
+  background: linear-gradient(180deg, #1E293B 0%, #0F172A 100%);
+  border: 2px solid #F59E0B;
+  border-radius: 20px;
+  padding: 24px 28px;
+  max-width: 440px;
+  width: 90%;
+  box-shadow: 0 16px 40px rgba(0, 0, 0, 0.7);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 14px;
+}
+
+.ms-result-box.gameover {
+  border-color: #EF4444;
+}
+
+.ms-result-title {
+  font-size: 1.4rem;
+  font-weight: 900;
+  color: #FBBF24;
+  margin: 0;
+}
+
+.ms-result-title.gameover {
+  color: #F87171;
+}
+
+.ms-stats-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 8px;
+  width: 100%;
+  background: rgba(15, 23, 42, 0.6);
+  padding: 10px;
+  border-radius: 12px;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.ms-stat-card {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.ms-stat-label {
+  font-size: 10px;
+  color: #94A3B8;
+  font-weight: 700;
+}
+
+.ms-stat-val {
+  font-size: 16px;
+  font-weight: 900;
+  color: #FFFFFF;
+}
+
+/* Hall of Fame Score Submission Form */
+.ms-score-form {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  width: 100%;
+  margin-top: 4px;
+}
+
+.ms-score-input {
+  width: 100%;
+  background: #0F172A;
+  border: 1.5px solid #F59E0B;
+  border-radius: 10px;
+  padding: 8px 14px;
+  font-size: 13px;
+  font-weight: 800;
+  color: #FFFFFF;
+  text-align: center;
+  outline: none;
+}
+
+.ms-score-input:focus {
+  border-color: #34D399;
+  box-shadow: 0 0 10px rgba(52, 211, 153, 0.4);
+}
+
+.btn-ms-submit {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  background: linear-gradient(135deg, #F59E0B 0%, #D97706 100%);
+  color: #0F172A;
+  border: none;
+  padding: 10px 16px;
+  border-radius: 10px;
+  font-size: 13px;
+  font-weight: 900;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  box-shadow: 0 4px 12px rgba(245, 158, 11, 0.3);
+}
+
+.btn-ms-submit:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 16px rgba(245, 158, 11, 0.5);
+}
+
+.btn-ms-retry {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  background: linear-gradient(135deg, #10B981 0%, #059669 100%);
+  color: #FFFFFF;
+  border: none;
+  padding: 10px 20px;
+  border-radius: 10px;
+  font-size: 13px;
+  font-weight: 900;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  width: 100%;
+}
+
+.btn-ms-retry:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 16px rgba(16, 185, 129, 0.4);
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; transform: scale(0.95); }
+  to { opacity: 1; transform: scale(1); }
+}
+
+/* Responsive Tile Sizing */
+@media (max-width: 640px) {
+  .ms-tile {
+    font-size: 14px;
+  }
+  .minesweeper-header-bar {
+    padding: 10px 12px;
+  }
+  .minesweeper-diff-chip {
+    padding: 4px 8px;
+    font-size: 11px;
+  }
+}

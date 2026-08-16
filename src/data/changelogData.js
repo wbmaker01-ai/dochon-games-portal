@@ -3,11 +3,55 @@
 
 export const CHANGELOG_DATA = [
   {
+    version: 'v1.6.0',
+    date: '2026-08-16',
+    title: 'Google 스타일 클래식 퍼즐 [도촌 지뢰찾기] 정식 출시 & 안심 보호막 시스템 탑재',
+    badge: 'LATEST',
+    badgeColor: 'emerald',
+    items: [
+      {
+        tag: 'NEW GAME',
+        tagColor: 'amber',
+        text: '도촌초등학교 5번째 즉시 플레이 가능 게임 [도촌 지뢰찾기 (Dochon Minesweeper)] 신규 출시 및 독립 모듈(src/components/games/minesweeper/) 구축'
+      },
+      {
+        tag: 'SAFE FIRST',
+        tagColor: 'emerald',
+        text: '[첫 클릭 100% 안전 보장] 시스템 탑재 (첫 클릭 칸과 주변 8칸의 지뢰 배치를 원천 배제하여 시원한 0-영역 개방 보장)'
+      },
+      {
+        tag: 'SHIELD',
+        tagColor: 'blue',
+        text: '[🛡️ 안심 보호막 (1회 실수 구원)] 기능 신설 (지뢰를 밟아도 1회 자동 방어 후 깃발로 안전하게 해체해주는 초등학생 맞춤형 보호 시스템)'
+      },
+      {
+        tag: 'SMART HINT',
+        tagColor: 'amber',
+        text: '[💡 스마트 힌트 코칭] 기능 탑재 (막혔을 때 100% 안전한 잔디밭이나 지뢰 위치를 찾아내어 반짝임 및 논리적 이유 설명 제공)'
+      },
+      {
+        tag: 'CONTROLS',
+        tagColor: 'teal',
+        text: '[PC / 모바일 하이브리드 조작계] 완성 (PC 좌클릭/우클릭/Chording 번개오픈 & 모바일 원터치 [⛏️ 파기] / [🚩 깃발] 모드 스위치 및 롱터치 깃발 지원)'
+      },
+      {
+        tag: 'RULEBOOK',
+        tagColor: 'purple',
+        text: '[초등학생 눈높이 룰북 모달(📖 룰북)] 제공 (숫자의 비밀, 깃발 꽂기, 번개 동시 오픈 및 1-1 패턴 꿀팁 안내)'
+      },
+      {
+        tag: 'LEADERBOARD',
+        tagColor: 'amber',
+        text: '실시간 클라우드 DB 연동 [도촌 명예의 전당] 5번째 지뢰찾기 탭 신설 및 100점 룰 / 홍길동 플레이스홀더 표준 준수'
+      }
+    ]
+  },
+  {
     version: 'v1.5.0',
     date: '2026-08-16',
     title: '초등학생 맞춤형 카드 퍼즐 [도촌 솔리테어] 정식 출시 & 스마트 코칭 시스템 신설',
-    badge: 'LATEST',
-    badgeColor: 'emerald',
+    badge: 'UPDATE',
+    badgeColor: 'blue',
     items: [
       {
         tag: 'NEW GAME',

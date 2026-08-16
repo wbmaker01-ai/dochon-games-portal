@@ -37,19 +37,21 @@ export const PLAYABLE_GAMES = [
     category: '카드',
     imageSrc: getThumb('solitaire.jpg'),
     isPlayable: true,
-    badgeText: '🃏 NEW 4위',
+    badgeText: '🃏 4위',
     description: 'A부터 K까지 카드를 정리하는 초등학생 맞춤형 솔리테어 퍼즐!'
+  },
+  {
+    id: 'minesweeper',
+    title: '도촌 지뢰찾기',
+    category: '퍼즐',
+    imageSrc: getThumb('minesweeper.jpg'),
+    isPlayable: true,
+    badgeText: '💣 NEW 5위',
+    description: '지뢰를 피해 잔디밭을 탐색하고 도촌 추리 마스터가 되어보세요!'
   }
 ];
 
 export const COMING_SOON_GAMES = [
-  {
-    id: 'minesweeper',
-    title: '지뢰찾기',
-    category: '퍼즐',
-    imageSrc: getThumb('minesweeper.jpg'),
-    isPlayable: false
-  },
   {
     id: 'baseball',
     title: '야구',
