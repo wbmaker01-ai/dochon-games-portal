@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useMemo } from 'react';
 import PacManGame from './components/games/pacman/PacManGame';
 import DinoGame from './components/games/dino/DinoGame';
 import SnakeGame from './components/games/snake/SnakeGame';
@@ -13,6 +13,7 @@ import ChangelogModal from './components/ChangelogModal';
 import { PLAYABLE_GAMES, COMING_SOON_GAMES, CATEGORY_DEFINITIONS } from './data/gamesData';
 import { getLatestVersion } from './data/changelogData';
 import { getLeaderboardFromDB } from './utils/leaderboardApi';
+import { getRankedPlayableGames } from './utils/rankingAlgorithm';
 import { Trophy, X, Search, Lock, Gamepad2, Dices, Sparkles, Heart, Crown, Flame, History } from 'lucide-react';
 
 export default function App() {
@@ -31,22 +32,36 @@ export default function App() {
     }
   });
 
-  // Top Champions Data for Playable Games
+  // Local Play Counts Tracking for Engagement Score
+  const [playCounts, setPlayCounts] = useState(() => {
+    try {
+      const saved = localStorage.getItem('dochon_play_counts');
+      return saved ? JSON.parse(saved) : {};
+    } catch (e) {
+      return {};
+    }
+  });
+
+  // Top Champions Data & Activity Count for Playable Games
   const [topScores, setTopScores] = useState({});
+  const [leaderboardCounts, setLeaderboardCounts] = useState({});
 
   useEffect(() => {
-    // Fetch top scores for playable games
+    // Fetch top scores and activity counts for playable games
     async function fetchTopScores() {
-      const results = {};
+      const topResults = {};
+      const countResults = {};
       for (const game of PLAYABLE_GAMES) {
         try {
           const list = await getLeaderboardFromDB(game.id);
           if (list && list.length > 0) {
-            results[game.id] = list[0];
+            topResults[game.id] = list[0];
+            countResults[game.id] = list.length;
           }
         } catch (e) {}
       }
-      setTopScores(results);
+      setTopScores(topResults);
+      setLeaderboardCounts(countResults);
     }
     fetchTopScores();
   }, [isLeaderboardOpen]);
@@ -73,16 +88,37 @@ export default function App() {
     });
   };
 
+  const handlePlayGame = (gameId) => {
+    setPlayCounts(prev => {
+      const next = { ...prev, [gameId]: (prev[gameId] || 0) + 1 };
+      try {
+        localStorage.setItem('dochon_play_counts', JSON.stringify(next));
+      } catch (e) {}
+      return next;
+    });
+    setActiveGame(gameId);
+  };
+
+  // 🚀 [추천 1: 실시간 랭킹 등록 활성도] + [추천 3: 신작 부스트] 하이브리드 인기 순위 계산
+  const rankedPlayableGames = useMemo(() => {
+    return getRankedPlayableGames(PLAYABLE_GAMES, {
+      leaderboardCounts,
+      topScores,
+      playCounts,
+      favorites,
+    });
+  }, [leaderboardCounts, topScores, playCounts, favorites]);
+
   // Lucky Random Game Picker (🎲)
   const handleRandomPlay = () => {
     const randomGame = PLAYABLE_GAMES[Math.floor(Math.random() * PLAYABLE_GAMES.length)];
     if (randomGame) {
-      setActiveGame(randomGame.id);
+      handlePlayGame(randomGame.id);
     }
   };
 
   // Filtering Logic
-  const allGames = [...PLAYABLE_GAMES, ...COMING_SOON_GAMES];
+  const allGames = [...rankedPlayableGames, ...COMING_SOON_GAMES];
 
   const filterGame = (game) => {
     let matchesCategory = true;
@@ -98,7 +134,7 @@ export default function App() {
     return matchesCategory && matchesSearch;
   };
 
-  const filteredPlayable = PLAYABLE_GAMES.filter(filterGame);
+  const filteredPlayable = rankedPlayableGames.filter(filterGame);
   const filteredComingSoon = COMING_SOON_GAMES.filter(filterGame);
 
   // Category counts calculation
@@ -247,7 +283,7 @@ export default function App() {
 
             <div className="portal-hero-actions">
               <button
-                onClick={() => setActiveGame(featuredGame.id)}
+                onClick={() => handlePlayGame(featuredGame.id)}
                 className="btn-hero-play"
               >
                 <span>{getChallengeBtnText(featuredGame)}</span>
@@ -318,7 +354,7 @@ export default function App() {
                   isFavorite={favorites.includes(game.id)}
                   onToggleFavorite={toggleFavorite}
                   topScore={topScores[game.id]}
-                  onPlay={() => setActiveGame(game.id)}
+                  onPlay={() => handlePlayGame(game.id)}
                 />
               ))}
             </div>

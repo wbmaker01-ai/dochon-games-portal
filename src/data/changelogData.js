@@ -3,11 +3,35 @@
 
 export const CHANGELOG_DATA = [
   {
+    version: 'v1.11.0',
+    date: '2026-08-16',
+    title: '즉시 플레이 게임 [실시간 랭킹 활성도 + 신작 부스트] 하이브리드 인기 순위 알고리즘 탑재',
+    badge: 'LATEST',
+    badgeColor: 'emerald',
+    items: [
+      {
+        tag: 'ALGORITHM',
+        tagColor: 'amber',
+        text: '[하이브리드 인기 순위 추천 엔진 탑재] Firebase 실시간 랭킹 등록 활성도(Activity Heat) + 신규 출시작 가중치(New Release Boost) + 학생 플레이 참여도를 종합 연산하는 동적 랭킹 차트 가동'
+      },
+      {
+        tag: 'DYNAMIC BADGE',
+        tagColor: 'purple',
+        text: '[실시간 동적 순위 뱃지] 고정 텍스트 대신 실시간 연산 결과에 따라 🔥 핫인기 1위, ⚡ 핫배틀 2위, ✨ NEW 3위 등 생동감 넘치는 뱃지 자동 부여'
+      },
+      {
+        tag: 'ENGAGEMENT',
+        tagColor: 'teal',
+        text: '[학생 실시간 플레이 카운팅] 게임 플레이 및 즐겨찾기(❤️) 인터랙션이 실시간으로 차트에 반영되어 학생들이 가장 좋아하는 게임이 상위권으로 자연스럽게 부상'
+      }
+    ]
+  },
+  {
     version: 'v1.10.2',
     date: '2026-08-16',
     title: '[도촌 솔리테어] 카드 유실/증발 버그 긴급 핫픽스 & [🔍 52장 카드 탐색기] 신설',
-    badge: 'LATEST',
-    badgeColor: 'emerald',
+    badge: 'UPDATE',
+    badgeColor: 'blue',
     items: [
       {
         tag: 'HOTFIX',

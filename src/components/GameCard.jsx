@@ -75,8 +75,8 @@ export default function GameCard({
         
         {/* Top Score or Category Display */}
         {isPlayable && topScore ? (
-          <div className="game-tile-champion-chip" title={`최고 점수: ${topScore.name} (${topScore.score.toLocaleString()}점)`}>
-            👑 {topScore.score.toLocaleString()}점
+          <div className="game-tile-champion-chip" title={`최고 점수: ${topScore.name} (${topScore.score.toLocaleString()}${id === 'dino' || id === 'gnome' ? 'm' : '점'})`}>
+            👑 {topScore.score.toLocaleString()}{id === 'dino' || id === 'gnome' ? 'm' : '점'}
           </div>
         ) : (
           <div className="game-tile-category">
