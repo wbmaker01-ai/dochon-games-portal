@@ -781,6 +781,45 @@ class SoundEngine {
       osc.stop(now + delays[idx] + durations[idx] + 0.02);
     });
   }
+
+  playFavoriteAdd() {
+    if (this.muted) return;
+    this.init();
+    if (!this.ctx) return;
+    const now = this.ctx.currentTime;
+    // Pleasant sparkling chime: E6 (1318.5Hz) -> G#6 (1661.2Hz) -> B6 (1975.5Hz)
+    const notes = [1318.5, 1661.2, 1975.5];
+    notes.forEach((freq, i) => {
+      const osc = this.ctx.createOscillator();
+      const gain = this.ctx.createGain();
+      osc.type = 'sine';
+      osc.frequency.setValueAtTime(freq, now + i * 0.04);
+      gain.gain.setValueAtTime(0.18, now + i * 0.04);
+      gain.gain.exponentialRampToValueAtTime(0.001, now + i * 0.04 + 0.18);
+      osc.connect(gain);
+      gain.connect(this.ctx.destination);
+      osc.start(now + i * 0.04);
+      osc.stop(now + i * 0.04 + 0.2);
+    });
+  }
+
+  playFavoriteRemove() {
+    if (this.muted) return;
+    this.init();
+    if (!this.ctx) return;
+    const now = this.ctx.currentTime;
+    const osc = this.ctx.createOscillator();
+    const gain = this.ctx.createGain();
+    osc.type = 'sine';
+    osc.frequency.setValueAtTime(523.25, now);
+    osc.frequency.exponentialRampToValueAtTime(392.00, now + 0.12);
+    gain.gain.setValueAtTime(0.12, now);
+    gain.gain.exponentialRampToValueAtTime(0.001, now + 0.12);
+    osc.connect(gain);
+    gain.connect(this.ctx.destination);
+    osc.start(now);
+    osc.stop(now + 0.13);
+  }
 }
 
 export const soundFx = new SoundEngine();

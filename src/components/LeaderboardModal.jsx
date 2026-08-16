@@ -278,6 +278,7 @@ export default function LeaderboardModal({ isOpen, onClose, activeTab = 'pacman'
             if (game.id === 'gnome') iconEmoji = '🌿';
             if (game.id === 'colortile') iconEmoji = '🧩';
             if (game.id === 'popcorn') iconEmoji = '🍿';
+            if (game.id === 'tictactoe') iconEmoji = '🍩';
 
             // Remove '도촌 ' prefix for compact and clean layout
             const shortTitle = game.title.replace(/^도촌\s*/, '');
@@ -293,6 +294,7 @@ export default function LeaderboardModal({ isOpen, onClose, activeTab = 'pacman'
               else if (game.id === 'gnome') activeCustomStyle = { background: 'linear-gradient(135deg, #48BB78, #2F855A)', color: '#FFFFFF' };
               else if (game.id === 'colortile') activeCustomStyle = { background: 'linear-gradient(135deg, #EC4899, #8B5CF6)', color: '#FFFFFF' };
               else if (game.id === 'popcorn') activeCustomStyle = { background: 'linear-gradient(135deg, #F59E0B, #EF4444)', color: '#FFFFFF' };
+              else if (game.id === 'tictactoe') activeCustomStyle = { background: 'linear-gradient(135deg, #F472B6, #FB7185)', color: '#FFFFFF' };
             }
 
             return (

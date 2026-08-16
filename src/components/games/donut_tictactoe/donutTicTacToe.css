@@ -1,0 +1,629 @@
+/* ========================================================
+   🍩 도넛 틱택토 (Donut Tic-Tac-Toe) 전용 스타일시트
+   ======================================================== */
+
+.donut-game-container {
+  width: 100%;
+  max-width: 680px;
+  margin: 0 auto;
+  min-height: 520px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  position: relative;
+  border-radius: 24px;
+  overflow: hidden;
+  background-color: #1e1528;
+  background-image: linear-gradient(180deg, rgba(30, 21, 40, 0.82) 0%, rgba(18, 12, 24, 0.95) 100%);
+  background-size: cover;
+  background-position: center;
+  border: 2px solid rgba(244, 114, 182, 0.35);
+  box-shadow: 0 16px 40px rgba(0, 0, 0, 0.6), 0 0 30px rgba(244, 114, 182, 0.15);
+  user-select: none;
+  font-family: inherit;
+  color: #ffffff;
+  padding: 16px 14px;
+  box-sizing: border-box;
+}
+
+/* 상단 제어 바 */
+.donut-top-bar {
+  width: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  margin-bottom: 12px;
+  flex-wrap: wrap;
+}
+
+.donut-title-pill {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  background: rgba(255, 255, 255, 0.1);
+  backdrop-filter: blur(8px);
+  padding: 6px 14px;
+  border-radius: 9999px;
+  border: 1px solid rgba(255, 255, 255, 0.2);
+}
+
+.donut-title-pill h2 {
+  margin: 0;
+  font-size: 15px;
+  font-weight: 900;
+  background: linear-gradient(135deg, #F472B6, #FBBF24);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  letter-spacing: -0.3px;
+}
+
+.donut-top-actions {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.donut-icon-btn {
+  background: rgba(255, 255, 255, 0.12);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  color: #ffffff;
+  padding: 6px 12px;
+  border-radius: 12px;
+  font-size: 12px;
+  font-weight: 700;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  transition: all 0.2s cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+
+.donut-icon-btn:hover {
+  background: rgba(244, 114, 182, 0.3);
+  border-color: rgba(244, 114, 182, 0.6);
+  transform: translateY(-2px);
+}
+
+.donut-icon-btn.primary {
+  background: linear-gradient(135deg, #ec4899, #db2777);
+  border-color: #f472b6;
+  box-shadow: 0 4px 12px rgba(219, 39, 119, 0.4);
+}
+
+.donut-icon-btn.primary:hover {
+  background: linear-gradient(135deg, #f472b6, #ec4899);
+  box-shadow: 0 6px 16px rgba(219, 39, 119, 0.6);
+}
+
+/* 모드 & 난이도 선택 탭 */
+.donut-mode-selector-row {
+  width: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  margin-bottom: 12px;
+  flex-wrap: wrap;
+}
+
+.donut-chip-group {
+  display: flex;
+  background: rgba(0, 0, 0, 0.4);
+  backdrop-filter: blur(6px);
+  padding: 3px;
+  border-radius: 9999px;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  gap: 2px;
+}
+
+.donut-chip-btn {
+  background: transparent;
+  border: none;
+  color: #94a3b8;
+  padding: 4px 11px;
+  border-radius: 9999px;
+  font-size: 11px;
+  font-weight: 700;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.donut-chip-btn.active {
+  background: linear-gradient(135deg, #f472b6, #ec4899);
+  color: #ffffff;
+  box-shadow: 0 2px 8px rgba(244, 114, 182, 0.5);
+}
+
+.donut-chip-btn.active.gold {
+  background: linear-gradient(135deg, #f59e0b, #d97706);
+  box-shadow: 0 2px 8px rgba(245, 158, 11, 0.5);
+}
+
+/* 대전 상태 정보 바 */
+.donut-status-bar {
+  width: 100%;
+  max-width: 440px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  background: rgba(0, 0, 0, 0.5);
+  backdrop-filter: blur(10px);
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  border-radius: 16px;
+  padding: 8px 14px;
+  margin-bottom: 14px;
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.3);
+}
+
+.donut-player-card {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 4px 10px;
+  border-radius: 12px;
+  transition: all 0.3s ease;
+  opacity: 0.6;
+}
+
+.donut-player-card.turn {
+  opacity: 1;
+  background: rgba(244, 114, 182, 0.2);
+  border: 1px solid rgba(244, 114, 182, 0.5);
+  box-shadow: 0 0 12px rgba(244, 114, 182, 0.3);
+  transform: scale(1.04);
+}
+
+.donut-player-card.turn.choco {
+  background: rgba(217, 119, 6, 0.2);
+  border-color: rgba(217, 119, 6, 0.5);
+  box-shadow: 0 0 12px rgba(217, 119, 6, 0.3);
+}
+
+.donut-mini-avatar {
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  object-fit: cover;
+  border: 2px solid rgba(255, 255, 255, 0.4);
+}
+
+.donut-player-name {
+  font-size: 12px;
+  font-weight: 800;
+  color: #f8fafc;
+}
+
+.donut-player-sub {
+  font-size: 10px;
+  color: #cbd5e1;
+}
+
+.donut-score-badge {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 2px;
+}
+
+.donut-score-num {
+  font-size: 16px;
+  font-weight: 900;
+  color: #fde047;
+  text-shadow: 0 0 8px rgba(253, 224, 71, 0.4);
+}
+
+.donut-score-label {
+  font-size: 9px;
+  color: #94a3b8;
+  font-weight: 700;
+}
+
+/* 3x3 격자 게임 보드 */
+.donut-board-wrapper {
+  position: relative;
+  width: 100%;
+  max-width: 360px;
+  aspect-ratio: 1 / 1;
+  margin-bottom: 14px;
+}
+
+.donut-board {
+  width: 100%;
+  height: 100%;
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  grid-template-rows: repeat(3, 1fr);
+  gap: 10px;
+  background: rgba(255, 255, 255, 0.08);
+  backdrop-filter: blur(12px);
+  border-radius: 24px;
+  padding: 12px;
+  border: 3px solid rgba(244, 114, 182, 0.4);
+  box-shadow: inset 0 0 20px rgba(0, 0, 0, 0.5), 0 12px 32px rgba(0, 0, 0, 0.5);
+  box-sizing: border-box;
+}
+
+.donut-cell {
+  position: relative;
+  background: rgba(255, 255, 255, 0.06);
+  border: 1.5px solid rgba(255, 255, 255, 0.12);
+  border-radius: 16px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: all 0.2s cubic-bezier(0.34, 1.56, 0.64, 1);
+  overflow: hidden;
+}
+
+.donut-cell:hover:not(:disabled) {
+  background: rgba(244, 114, 182, 0.18);
+  border-color: rgba(244, 114, 182, 0.6);
+  transform: scale(1.04);
+}
+
+.donut-cell:disabled {
+  cursor: default;
+}
+
+.donut-cell.win-highlight {
+  background: linear-gradient(135deg, rgba(253, 224, 71, 0.35), rgba(244, 114, 182, 0.35));
+  border-color: #fde047;
+  box-shadow: 0 0 18px rgba(253, 224, 71, 0.7);
+  animation: cellPulse 1.2s infinite alternate ease-in-out;
+}
+
+@keyframes cellPulse {
+  0% { transform: scale(1); filter: brightness(1); }
+  100% { transform: scale(1.05); filter: brightness(1.2); }
+}
+
+/* 도넛 말 그래픽 */
+.donut-piece-img {
+  width: 82%;
+  height: 82%;
+  object-fit: contain;
+  border-radius: 50%;
+  filter: drop-shadow(0 6px 12px rgba(0, 0, 0, 0.5));
+  animation: donutDropIn 0.35s cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+
+@keyframes donutDropIn {
+  0% {
+    transform: scale(0.2) rotate(-30deg);
+    opacity: 0;
+  }
+  70% {
+    transform: scale(1.15) rotate(10deg);
+    opacity: 1;
+  }
+  100% {
+    transform: scale(1) rotate(0deg);
+    opacity: 1;
+  }
+}
+
+/* 결과 안내 및 점수 등록 바 */
+.donut-result-banner {
+  width: 100%;
+  max-width: 440px;
+  background: rgba(15, 23, 42, 0.85);
+  backdrop-filter: blur(10px);
+  border: 2px solid rgba(244, 114, 182, 0.5);
+  border-radius: 18px;
+  padding: 12px 16px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 8px;
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.6);
+  animation: bannerSlideUp 0.3s ease-out;
+}
+
+@keyframes bannerSlideUp {
+  from { opacity: 0; transform: translateY(12px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+.donut-result-text {
+  font-size: 16px;
+  font-weight: 900;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+/* 점수 등록 폼 (100점 초과 시에만 노출) */
+.donut-score-submit-box {
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  margin-top: 4px;
+}
+
+.donut-score-submit-form {
+  display: flex;
+  gap: 6px;
+  width: 100%;
+}
+
+.donut-score-input {
+  flex: 1;
+  background: rgba(255, 255, 255, 0.12);
+  border: 1.5px solid rgba(255, 255, 255, 0.25);
+  border-radius: 10px;
+  padding: 8px 12px;
+  color: #ffffff;
+  font-size: 12px;
+  font-weight: 700;
+  outline: none;
+}
+
+.donut-score-input:focus {
+  border-color: #f472b6;
+  background: rgba(255, 255, 255, 0.18);
+  box-shadow: 0 0 10px rgba(244, 114, 182, 0.4);
+}
+
+.donut-score-submit-btn {
+  background: linear-gradient(135deg, #f59e0b, #d97706);
+  color: #0f172a;
+  border: none;
+  border-radius: 10px;
+  padding: 8px 14px;
+  font-size: 12px;
+  font-weight: 900;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  transition: all 0.2s ease;
+  white-space: nowrap;
+}
+
+.donut-score-submit-btn:hover {
+  background: linear-gradient(135deg, #fbbf24, #f59e0b);
+  transform: translateY(-1px);
+  box-shadow: 0 4px 12px rgba(245, 158, 11, 0.4);
+}
+
+/* ========================================================
+   설명 모달 (How to play)
+   ======================================================== */
+.donut-howto-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.75);
+  backdrop-filter: blur(8px);
+  z-index: 9999;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 16px;
+}
+
+.donut-howto-modal {
+  background: #1e1528;
+  border: 2px solid rgba(244, 114, 182, 0.5);
+  border-radius: 24px;
+  width: 100%;
+  max-width: 520px;
+  max-height: 90vh;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  box-shadow: 0 20px 50px rgba(0, 0, 0, 0.8), 0 0 40px rgba(244, 114, 182, 0.2);
+  animation: modalPop 0.25s cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+
+@keyframes modalPop {
+  0% { transform: scale(0.9); opacity: 0; }
+  100% { transform: scale(1); opacity: 1; }
+}
+
+.donut-howto-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 16px 20px;
+  background: rgba(255, 255, 255, 0.05);
+  border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.donut-howto-title-box {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.donut-howto-title-box h2 {
+  margin: 0;
+  font-size: 17px;
+  font-weight: 900;
+  color: #f472b6;
+}
+
+.donut-howto-close-btn {
+  background: rgba(255, 255, 255, 0.1);
+  border: none;
+  color: #cbd5e1;
+  padding: 6px;
+  border-radius: 50%;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.2s;
+}
+
+.donut-howto-close-btn:hover {
+  background: rgba(244, 114, 182, 0.3);
+  color: #ffffff;
+}
+
+.donut-howto-body {
+  padding: 18px 20px;
+  overflow-y: auto;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.donut-howto-section {
+  background: rgba(255, 255, 255, 0.04);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 14px;
+  padding: 12px 14px;
+}
+
+.donut-howto-sec-title {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 8px;
+}
+
+.donut-badge {
+  width: 20px;
+  height: 20px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 11px;
+  font-weight: 900;
+  color: #ffffff;
+}
+
+.donut-badge.pink { background: #ec4899; }
+.donut-badge.gold { background: #d97706; }
+.donut-badge.green { background: #059669; }
+
+.donut-howto-sec-title h3 {
+  margin: 0;
+  font-size: 14px;
+  font-weight: 800;
+  color: #f8fafc;
+}
+
+.donut-howto-section p {
+  margin: 0;
+  font-size: 12px;
+  line-height: 1.5;
+  color: #cbd5e1;
+}
+
+.donut-howto-pieces-preview {
+  display: flex;
+  align-items: center;
+  justify-content: space-around;
+  margin-top: 10px;
+  background: rgba(0, 0, 0, 0.3);
+  padding: 8px 12px;
+  border-radius: 12px;
+}
+
+.donut-piece-card {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 11px;
+  font-weight: 700;
+  color: #f1f5f9;
+}
+
+.donut-piece-card img {
+  width: 28px;
+  height: 28px;
+  border-radius: 50%;
+}
+
+.donut-mode-cards {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  margin-top: 6px;
+}
+
+.donut-mode-box {
+  background: rgba(0, 0, 0, 0.25);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 10px;
+  padding: 8px 10px;
+}
+
+.donut-mode-box.torus {
+  border-color: rgba(244, 114, 182, 0.3);
+  background: rgba(244, 114, 182, 0.08);
+}
+
+.donut-score-rules-list {
+  list-style: none;
+  padding: 0;
+  margin: 6px 0 0 0;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.donut-score-rules-list li {
+  display: flex;
+  align-items: flex-start;
+  gap: 6px;
+  font-size: 11.5px;
+  line-height: 1.4;
+  color: #cbd5e1;
+}
+
+.rule-bullet {
+  font-size: 12px;
+  shrink: 0;
+}
+
+.donut-howto-footer {
+  padding: 12px 20px;
+  background: rgba(255, 255, 255, 0.03);
+  border-top: 1px solid rgba(255, 255, 255, 0.08);
+  display: flex;
+  justify-content: flex-end;
+}
+
+.donut-howto-ok-btn {
+  background: linear-gradient(135deg, #ec4899, #db2777);
+  color: #ffffff;
+  border: none;
+  border-radius: 12px;
+  padding: 8px 18px;
+  font-size: 13px;
+  font-weight: 800;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.donut-howto-ok-btn:hover {
+  background: linear-gradient(135deg, #f472b6, #ec4899);
+  transform: translateY(-1px);
+  box-shadow: 0 4px 14px rgba(236, 72, 153, 0.4);
+}
+
+/* 반응형 모바일 조정 */
+@media (max-width: 480px) {
+  .donut-board-wrapper {
+    max-width: 290px;
+  }
+  .donut-player-card {
+    padding: 2px 6px;
+  }
+  .donut-player-name {
+    font-size: 11px;
+  }
+  .donut-mini-avatar {
+    width: 26px;
+    height: 26px;
+  }
+}

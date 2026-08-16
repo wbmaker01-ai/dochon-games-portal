@@ -82,19 +82,21 @@ export const PLAYABLE_GAMES = [
     category: '액션',
     imageSrc: getThumb('popcorn.jpg'),
     isPlayable: true,
-    badgeText: '🍿 NEW 9위',
+    badgeText: '🍿 9위',
     description: '달궈진 프라이팬 위에서 쏟아지는 불꽃과 버터를 피해 생존하는 탄막 서바이벌!'
+  },
+  {
+    id: 'tictactoe',
+    title: '도촌 도넛 틱택토',
+    category: '퍼즐',
+    imageSrc: getThumb('donut-tictactoe.jpg'),
+    isPlayable: true,
+    badgeText: '🍩 NEW 10위',
+    description: '벽을 뚫고 순환하는 도넛 토러스 룰과 달콤한 딸기/초코 도넛의 두뇌 대결!'
   }
 ];
 
 export const COMING_SOON_GAMES = [
-  {
-    id: 'tictactoe',
-    title: '틱택토',
-    category: '퍼즐',
-    imageSrc: getThumb('tictactoe.jpg'),
-    isPlayable: false
-  },
   {
     id: 'champion',
     title: '챔피언 아일랜드',

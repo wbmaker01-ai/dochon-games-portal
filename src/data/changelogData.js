@@ -3,11 +3,45 @@
 
 export const CHANGELOG_DATA = [
   {
+    version: 'v1.13.0',
+    date: '2026-08-16',
+    title: '신규 10호 두뇌 퍼즐 [도촌 도넛 틱택토] 공식 출시 & 도넛 토러스 룰 탑재',
+    badge: 'LATEST',
+    badgeColor: 'emerald',
+    items: [
+      {
+        tag: 'UI/UX EFFECT',
+        tagColor: 'rose',
+        text: '[즐겨찾기 하트 아이콘 & 인터랙션 이펙트 전면 개편] 고화질 베지어 곡선 SVG 루비 하트 디자인 적용, 설정/해제 시 통통 튀는 스프링 바운스·스파클 파티클 버스트·네온 링 파동 및 기분 좋은 차임 사운드 효과 탑재'
+      },
+      {
+        tag: 'NEW GAME',
+        tagColor: 'amber',
+        text: '[신규 게임 도넛 틱택토(Donut Tic-Tac-Toe) 정식 출시] 달콤한 딸기 스프링클 도넛과 초코 글레이즈 도넛의 아기자기한 두뇌 전략 퍼즐 게임 런칭'
+      },
+      {
+        tag: 'TORUS MODE',
+        tagColor: 'purple',
+        text: '[도넛 토러스 순환 룰 도입] 상하좌우가 도넛 표면처럼 연결되어 벽을 뚫고 지나가는 순환 대각선 4종 추가 (총 12개 승리 패턴)'
+      },
+      {
+        tag: 'AI & 2P BATTLE',
+        tagColor: 'blue',
+        text: '[3단계 스마트 AI & 2인 로컬 대전] 초보·보통·마스터 난이도 인공지능 대전 및 친구와 함께 즐기는 2인용 보드게임 모드 완비'
+      },
+      {
+        tag: 'HALL OF FAME',
+        tagColor: 'teal',
+        text: '[명예의 전당 랭킹 연동] 연승 콤보 및 마스터 보너스로 100점 초과 달성 시 실시간 도촌초 명예의 전당 점수 등록 지원'
+      }
+    ]
+  },
+  {
     version: 'v1.12.0',
     date: '2026-08-16',
     title: '신규 9호 아케이드 [도촌 팝콘 서바이벌] 공식 오픈 & 3종 알갱이 클래스 탑재',
-    badge: 'LATEST',
-    badgeColor: 'emerald',
+    badge: 'UPDATE',
+    badgeColor: 'blue',
     items: [
       {
         tag: 'NEW GAME',

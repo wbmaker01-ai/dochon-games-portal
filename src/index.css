@@ -650,33 +650,187 @@ body {
   display: block;
 }
 
-/* ❤️ Favorite Heart Button */
+/* ❤️ Premium Favorite Heart Button & Micro-Interactions */
 .game-favorite-btn {
   position: absolute;
   top: 6px;
   right: 6px;
-  width: 24px;
-  height: 24px;
+  width: 28px;
+  height: 28px;
   border-radius: 50%;
-  background: rgba(15, 23, 42, 0.7);
-  backdrop-filter: blur(4px);
-  border: 1px solid rgba(255, 255, 255, 0.25);
+  background: rgba(15, 23, 42, 0.75);
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+  border: 1.5px solid rgba(255, 255, 255, 0.3);
   display: flex;
   align-items: center;
   justify-content: center;
   cursor: pointer;
   z-index: 10;
-  transition: all 0.15s ease;
+  padding: 0;
+  transition: transform 0.2s cubic-bezier(0.34, 1.56, 0.64, 1), background-color 0.25s ease, border-color 0.25s ease, box-shadow 0.25s ease;
+  outline: none;
+  user-select: none;
 }
 
 .game-favorite-btn:hover {
-  transform: scale(1.15);
-  background: rgba(15, 23, 42, 0.9);
+  transform: scale(1.18);
+  background: rgba(30, 41, 59, 0.95);
+  border-color: rgba(255, 255, 255, 0.6);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.4);
+}
+
+.game-favorite-btn:active {
+  transform: scale(0.9);
 }
 
 .game-favorite-btn.active {
-  background: rgba(255, 255, 255, 0.9);
-  border-color: #F43F5E;
+  background: rgba(255, 255, 255, 0.95);
+  border-color: #FDA4AF;
+  box-shadow: 0 0 14px rgba(244, 63, 94, 0.5), 0 2px 6px rgba(0, 0, 0, 0.3);
+}
+
+.game-favorite-btn.active:hover {
+  background: #FFFFFF;
+  border-color: #FB7185;
+  box-shadow: 0 0 18px rgba(244, 63, 94, 0.7), 0 4px 10px rgba(0, 0, 0, 0.35);
+}
+
+/* SVG Heart Icon */
+.heart-svg {
+  width: 17px;
+  height: 17px;
+  display: block;
+  pointer-events: none;
+  transition: transform 0.2s cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+
+.heart-path-outline {
+  transition: stroke 0.2s ease, fill 0.2s ease;
+}
+
+.game-favorite-btn:hover .heart-path-outline {
+  stroke: #FDA4AF;
+}
+
+/* Ripple ring */
+.heart-ripple-ring {
+  position: absolute;
+  inset: -4px;
+  border-radius: 50%;
+  border: 2px solid #FF2E63;
+  opacity: 0;
+  pointer-events: none;
+  transform: scale(0.6);
+}
+
+/* Animation: Like (Pop & Sparkle) */
+.game-favorite-btn.anim-like {
+  animation: heartButtonPop 0.55s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards;
+}
+
+.game-favorite-btn.anim-like .heart-svg {
+  animation: heartIconBounce 0.55s cubic-bezier(0.175, 0.885, 0.32, 1.4) forwards;
+}
+
+.game-favorite-btn.anim-like .heart-ripple-ring {
+  animation: heartRippleBurst 0.55s cubic-bezier(0.1, 0.8, 0.3, 1) forwards;
+}
+
+/* Animation: Unlike (Deflate & Shake) */
+.game-favorite-btn.anim-unlike {
+  animation: heartButtonUnlike 0.45s ease-out forwards;
+}
+
+.game-favorite-btn.anim-unlike .heart-svg {
+  animation: heartIconDeflate 0.45s ease-out forwards;
+}
+
+/* Sparkle Burst Container */
+.heart-sparkle-container {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.heart-sparkle {
+  position: absolute;
+  font-size: 11px;
+  pointer-events: none;
+  user-select: none;
+  line-height: 1;
+}
+
+.heart-sparkle.s1 {
+  animation: sparkleFlyTopRight 0.55s cubic-bezier(0.1, 0.9, 0.2, 1) forwards;
+}
+.heart-sparkle.s2 {
+  animation: sparkleFlyTopLeft 0.55s cubic-bezier(0.1, 0.9, 0.2, 1) forwards;
+}
+.heart-sparkle.s3 {
+  animation: sparkleFlyBottomRight 0.55s cubic-bezier(0.1, 0.9, 0.2, 1) forwards;
+}
+.heart-sparkle.s4 {
+  animation: sparkleFlyBottomLeft 0.55s cubic-bezier(0.1, 0.9, 0.2, 1) forwards;
+}
+
+/* Keyframes */
+@keyframes heartButtonPop {
+  0% { transform: scale(1); }
+  25% { transform: scale(0.8); }
+  55% { transform: scale(1.32); }
+  75% { transform: scale(0.95); }
+  100% { transform: scale(1); }
+}
+
+@keyframes heartIconBounce {
+  0% { transform: scale(0.6) rotate(-15deg); }
+  50% { transform: scale(1.4) rotate(8deg); }
+  75% { transform: scale(0.92) rotate(-3deg); }
+  100% { transform: scale(1) rotate(0deg); }
+}
+
+@keyframes heartRippleBurst {
+  0% { transform: scale(0.5); opacity: 1; border-color: #FF2E63; }
+  50% { opacity: 0.8; }
+  100% { transform: scale(2); opacity: 0; border-color: #FDA4AF; }
+}
+
+@keyframes heartButtonUnlike {
+  0% { transform: scale(1); }
+  35% { transform: scale(0.82) rotate(-8deg); }
+  70% { transform: scale(1.08) rotate(4deg); }
+  100% { transform: scale(1) rotate(0deg); }
+}
+
+@keyframes heartIconDeflate {
+  0% { transform: scale(1); }
+  40% { transform: scale(0.7) rotate(-12deg); }
+  80% { transform: scale(1.08) rotate(6deg); }
+  100% { transform: scale(1) rotate(0deg); }
+}
+
+@keyframes sparkleFlyTopRight {
+  0% { transform: translate(0, 0) scale(0.3); opacity: 1; }
+  100% { transform: translate(16px, -18px) scale(1.1); opacity: 0; }
+}
+
+@keyframes sparkleFlyTopLeft {
+  0% { transform: translate(0, 0) scale(0.3); opacity: 1; }
+  100% { transform: translate(-16px, -17px) scale(1); opacity: 0; }
+}
+
+@keyframes sparkleFlyBottomRight {
+  0% { transform: translate(0, 0) scale(0.3); opacity: 1; }
+  100% { transform: translate(15px, 16px) scale(0.9); opacity: 0; }
+}
+
+@keyframes sparkleFlyBottomLeft {
+  0% { transform: translate(0, 0) scale(0.3); opacity: 1; }
+  100% { transform: translate(-15px, 15px) scale(0.9); opacity: 0; }
 }
 
 /* Hover Overlay */
