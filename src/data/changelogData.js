@@ -506,11 +506,6 @@ export const CHANGELOG_DATA = [
         text: 'Firebase Realtime DB 실시간 클라우드 랭킹 시스템 연동 및 0초 즉시 반영(낙관적 UI) 구현'
       },
       {
-        tag: 'ADMIN',
-        tagColor: 'purple',
-        text: '트로피 아이콘 위장 히든 버튼 기반 관리자 모드(암호: 8582) 및 점수 수정/삭제 실시간 동기화 구현'
-      },
-      {
         tag: 'MODAL',
         tagColor: 'teal',
         text: '새 창 팝업 차단 문제를 완벽 해결한 순수 HTML/CSS 반응형 인페이지 오버레이 모달 시스템 적용'
