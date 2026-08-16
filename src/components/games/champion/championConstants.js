@@ -60,8 +60,8 @@ export const SPORTS = {
     area: '안개 호수 사격장',
     color: '#F59E0B',
     scrollName: '명사수의 양궁 두루마리',
-    targetScore: 600,
-    desc: '움직이는 표적과 바람을 계산하여 정밀하게 과녁의 텐링(10점)을 명중시키세요!'
+    targetScore: 100,
+    desc: '움직이는 표적과 바람을 계산하여 과녁을 명중시키고 100점 이상을 달성하세요!'
   },
   MARATHON: {
     id: 'marathon',

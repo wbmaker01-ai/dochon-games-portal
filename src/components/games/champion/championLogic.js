@@ -287,7 +287,7 @@ export class ArcheryEngine {
       { x: 740, y: 350, radius: 28, vy: 3.0, minY: 70, maxY: 430, points: [200, 100, 50, 30] }
     ];
     this.hitFeedbacks = [];
-    this.winner = null; // 'player' if score >= 600
+    this.winner = null; // 'player' if score >= 100
   }
 
   update(keys, isMobileShoot = false) {
@@ -384,9 +384,9 @@ export class ArcheryEngine {
       }
     }
 
-    // End of match evaluation
+    // End of match evaluation (Victory if score >= 100)
     if (this.arrowsLeft <= 0 && !this.activeArrow && this.winner === null) {
-      if (this.score >= 500) {
+      if (this.score >= 100) {
         this.winner = 'player';
         championAudio.playScrollWin();
       } else {

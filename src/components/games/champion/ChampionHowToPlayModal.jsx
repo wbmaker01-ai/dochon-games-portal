@@ -79,7 +79,7 @@ export default function ChampionHowToPlayModal({ isOpen, onClose }) {
                   <span className="boss-tag">보스: {SPORTS.ARCHERY.boss}</span>
                 </div>
                 <p className="sport-desc">{SPORTS.ARCHERY.desc}</p>
-                <div className="tip-badge">💡 팁: 바람의 방향과 표적의 이동 속도를 예측해 <code>스페이스바</code>를 길게 눌러 게이지를 모아 쏘세요!</div>
+                <div className="tip-badge">💡 팁: 10발 중 <strong>100점 이상만 획득하면 승리</strong>하며 두루마리를 획득합니다! (불스아이 1~2발로도 손쉽게 달성 가능)</div>
               </div>
 
               <div className="sport-card">
