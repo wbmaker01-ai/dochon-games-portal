@@ -148,6 +148,10 @@
   color: #f687b3;
 }
 
+.gnome-hud-stat-value.purple {
+  color: #d6bcfa;
+}
+
 /* Toast Alerts on Screen */
 .gnome-toast-alert {
   position: absolute;

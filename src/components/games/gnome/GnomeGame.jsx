@@ -101,6 +101,8 @@ export default function GnomeGame({ onScoreSubmitted }) {
   // Aiming UI
   const [uiAngle, setUiAngle] = useState(30);
   const [uiPower, setUiPower] = useState(0);
+  const [flowersPlanted, setFlowersPlanted] = useState(0);
+  const lastFlowerXRef = useRef(0);
 
   // Feedback Toast & Modals
   const [toastAlert, setToastAlert] = useState(null);
@@ -191,9 +193,11 @@ export default function GnomeGame({ onScoreSubmitted }) {
     powerPercentRef.current = 0;
     powerDirRef.current = 1;
     lastPhaseChangeTimeRef.current = performance.now();
+    lastFlowerXRef.current = 0;
 
     setUiAngle(30);
     setUiPower(0);
+    setFlowersPlanted(0);
 
     gameStateRef.current = 'AIM_ANGLE';
     setGameState('AIM_ANGLE');
@@ -371,7 +375,16 @@ export default function GnomeGame({ onScoreSubmitted }) {
               gnome.isAirDropping = false;
               soundFx.playGnomeMushroomBounce();
               showToast(data.message);
-              particles.addBounceExplosion(item.x + item.width / 2, item.y, '#e53e3e', 20);
+              particles.addBounceExplosion(item.x + item.width / 2, item.y, '#e53e3e', 22);
+            } else if (item.type === 'TRAMPOLINE') {
+              gnome.vy = data.bounceBoostY;
+              gnome.vx = Math.max(gnome.vx * data.bounceBoostX, 16);
+              gnome.bouncesCount += 1;
+              gnome.bonusScore += data.points;
+              gnome.isAirDropping = false;
+              soundFx.playGnomeCloudBounce();
+              showToast(data.message);
+              particles.addBounceExplosion(item.x + item.width / 2, item.y, '#48bb78', 24);
             } else if (item.type === 'LOG') {
               gnome.vy = data.bounceBoostY;
               gnome.vx = Math.max(gnome.vx * data.bounceBoostX, data.minSpeedX);
@@ -382,8 +395,8 @@ export default function GnomeGame({ onScoreSubmitted }) {
               showToast(data.message);
               particles.addLogSparks(item.x + item.width / 2, item.y, 16);
             } else if (item.type === 'SUNFLOWER') {
-              gnome.vx = Math.max(gnome.vx * 1.05, 12);
-              gnome.vy = -3;
+              gnome.vx = Math.max(gnome.vx * 1.05, 13);
+              gnome.vy = -4;
               gnome.bonusScore += data.points;
               soundFx.playGnomeFlowerSeed();
               showToast(data.message);
@@ -396,6 +409,13 @@ export default function GnomeGame({ onScoreSubmitted }) {
               showToast(data.message);
               particles.addBounceExplosion(item.x + item.width / 2, item.y, '#63b3ed', 18);
             } else if (item.type === 'RAINBOW') {
+              gnome.vy = data.bounceBoostY;
+              gnome.vx += data.boostSpeedX;
+              gnome.bonusScore += data.points;
+              soundFx.playGnomeRainbowBoost();
+              showToast(data.message);
+              particles.addRainbowTrail(item.x, item.y);
+            } else if (item.type === 'BUTTERFLY_SWARM') {
               gnome.vy = data.bounceBoostY;
               gnome.vx += data.boostSpeedX;
               gnome.bonusScore += data.points;
@@ -416,22 +436,26 @@ export default function GnomeGame({ onScoreSubmitted }) {
           gnome.y = GROUND_Y - 24;
           gnome.isAirDropping = false;
 
-          // Plant flower on ground contact
-          particles.addFlower(gnome.x, GROUND_Y - 4);
-          gnome.flowersPlanted += 1;
+          // Continuous Flower Planting along the ground turf
+          if (gnome.x - lastFlowerXRef.current >= 15) {
+            lastFlowerXRef.current = gnome.x;
+            particles.addFlower(gnome.x, GROUND_Y - 4);
+            gnome.flowersPlanted += 1;
+            soundFx.playGnomeFlowerSeed();
+          }
 
           if (Math.abs(gnome.vy) > 2.5) {
             // Bounce up
             gnome.vy = -gnome.vy * gnome.bounceCoeff;
-            gnome.vx *= 0.86;
+            gnome.vx *= 0.88;
             gnome.bouncesCount += 1;
             soundFx.playGnomeLand();
-            particles.addBounceExplosion(gnome.x, GROUND_Y - 4, '#48bb78', 6);
+            particles.addBounceExplosion(gnome.x, GROUND_Y - 4, '#48bb78', 8);
           } else {
             // Sliding along the ground with steady turf deceleration
             gnome.vy = 0;
-            gnome.vx *= 0.85;
-            gnome.vx = Math.max(0, gnome.vx - 0.4);
+            gnome.vx *= 0.86;
+            gnome.vx = Math.max(0, gnome.vx - 0.35);
 
             // Full Stop Detection
             if (gnome.vx <= 0.6) {
@@ -453,6 +477,7 @@ export default function GnomeGame({ onScoreSubmitted }) {
         setAltitude(currentAlt);
         setSpeedKmh(currentSpeed);
         setBonusScore(gnome.bonusScore);
+        setFlowersPlanted(gnome.flowersPlanted);
       }
 
       // 4. Smooth Dynamic Camera Tracking
@@ -590,6 +615,10 @@ export default function GnomeGame({ onScoreSubmitted }) {
             <div className="gnome-hud-stat-pill">
               <span className="gnome-hud-stat-label">속도</span>
               <span className="gnome-hud-stat-value pink">{speedKmh} km/h</span>
+            </div>
+            <div className="gnome-hud-stat-pill">
+              <span className="gnome-hud-stat-label">🌸 심은 꽃</span>
+              <span className="gnome-hud-stat-value purple">{flowersPlanted} 송이</span>
             </div>
           </div>
         )}

@@ -48,22 +48,24 @@ export function createTransparentSprite(img) {
 }
 
 /**
- * Generates interactive garden objects and collectibles across the 5000m path.
+ * Generates rich interactive garden objects and collectibles across the 5000m path.
  */
 export function generateGardenTerrain(maxDistance = 5500) {
   const items = [];
-  let nextGroundX = 220;
+  let nextGroundX = 180;
 
-  // Ground items distribution
+  // Ground items distribution (Dense & varied every 80~180px)
   while (nextGroundX < maxDistance) {
-    const gap = 120 + Math.random() * 180;
+    const gap = 80 + Math.random() * 110;
     nextGroundX += gap;
 
     const rand = Math.random();
     let type;
-    if (rand < 0.40) {
+    if (rand < 0.30) {
       type = TERRAIN_ITEM_TYPES.MUSHROOM;
-    } else if (rand < 0.70) {
+    } else if (rand < 0.55) {
+      type = TERRAIN_ITEM_TYPES.TRAMPOLINE;
+    } else if (rand < 0.80) {
       type = TERRAIN_ITEM_TYPES.LOG;
     } else {
       type = TERRAIN_ITEM_TYPES.SUNFLOWER;
@@ -82,26 +84,26 @@ export function generateGardenTerrain(maxDistance = 5500) {
     });
   }
 
-  // Sky items (Clouds, Rainbow Rings, Airborne Seeds) across low, mid, and high altitude bands
-  let nextSkyX = 300;
+  // Sky items (Clouds, Rainbow Rings, Butterfly Swarms, Airborne Seeds) across all altitude bands
+  let nextSkyX = 220;
   while (nextSkyX < maxDistance) {
-    const gap = 120 + Math.random() * 180;
+    const gap = 60 + Math.random() * 95;
     nextSkyX += gap;
 
-    // Distribute across altitudes: Low (120~260), Mid (-120~80), High (-500~-150)
+    // Distribute across altitudes: Low (120~260), Mid (-140~80), High (-520~-150)
     const altBand = Math.random();
     let skyY;
-    if (altBand < 0.45) {
-      skyY = 100 + Math.random() * 160; // Low-mid sky
-    } else if (altBand < 0.8) {
-      skyY = -120 + Math.random() * 180; // Mid-high sky
+    if (altBand < 0.40) {
+      skyY = 90 + Math.random() * 160; // Low sky
+    } else if (altBand < 0.75) {
+      skyY = -140 + Math.random() * 200; // Mid sky
     } else {
-      skyY = -450 + Math.random() * 300; // High stratosphere
+      skyY = -500 + Math.random() * 320; // High stratosphere
     }
 
     const rand = Math.random();
 
-    if (rand < 0.38) {
+    if (rand < 0.30) {
       items.push({
         id: `sky_${items.length}`,
         type: TERRAIN_ITEM_TYPES.CLOUD.id,
@@ -113,7 +115,7 @@ export function generateGardenTerrain(maxDistance = 5500) {
         active: true,
         data: TERRAIN_ITEM_TYPES.CLOUD
       });
-    } else if (rand < 0.68) {
+    } else if (rand < 0.55) {
       items.push({
         id: `sky_${items.length}`,
         type: TERRAIN_ITEM_TYPES.RAINBOW.id,
@@ -125,15 +127,27 @@ export function generateGardenTerrain(maxDistance = 5500) {
         active: true,
         data: TERRAIN_ITEM_TYPES.RAINBOW
       });
+    } else if (rand < 0.75) {
+      items.push({
+        id: `sky_${items.length}`,
+        type: TERRAIN_ITEM_TYPES.BUTTERFLY_SWARM.id,
+        name: TERRAIN_ITEM_TYPES.BUTTERFLY_SWARM.name,
+        x: nextSkyX,
+        y: skyY - 15,
+        width: TERRAIN_ITEM_TYPES.BUTTERFLY_SWARM.width,
+        height: TERRAIN_ITEM_TYPES.BUTTERFLY_SWARM.height,
+        active: true,
+        data: TERRAIN_ITEM_TYPES.BUTTERFLY_SWARM
+      });
     } else {
-      // Golden seed arc / cluster
+      // Golden seed arc / constellation
       for (let s = 0; s < 3; s++) {
         items.push({
           id: `seed_${items.length}_${s}`,
           type: TERRAIN_ITEM_TYPES.SEED.id,
           name: TERRAIN_ITEM_TYPES.SEED.name,
-          x: nextSkyX + s * 40,
-          y: skyY - Math.sin((s / 2) * Math.PI) * 28,
+          x: nextSkyX + s * 38,
+          y: skyY - Math.sin((s / 2) * Math.PI) * 26,
           width: TERRAIN_ITEM_TYPES.SEED.width,
           height: TERRAIN_ITEM_TYPES.SEED.height,
           active: true,
@@ -161,17 +175,52 @@ export class ParticleSystem {
   }
 
   addFlower(x, y, color) {
-    if (this.plantedFlowers.length > 300) {
+    if (this.plantedFlowers.length > 400) {
       this.plantedFlowers.shift();
     }
-    const colors = ['#f56565', '#ed64a6', '#9f7aea', '#ecc94b', '#48bb78', '#ed8936', '#4299e1'];
+    const colors = ['#ff4081', '#f50057', '#e040fb', '#7c4dff', '#ff5252', '#ffab00', '#00e676', '#00b0ff'];
+    const chosenColor = color || colors[Math.floor(Math.random() * colors.length)];
+    const stemHeight = 12 + Math.random() * 14;
+
+    // 1. Add persistent blooming flower object
     this.plantedFlowers.push({
       x,
       y: y || GROUND_Y - 4,
-      size: 6 + Math.random() * 8,
-      color: color || colors[Math.floor(Math.random() * colors.length)],
-      petals: Math.floor(4 + Math.random() * 3),
-      stemHeight: 10 + Math.random() * 12
+      size: 8 + Math.random() * 6,
+      color: chosenColor,
+      petals: 5,
+      stemHeight,
+      growth: 0.1,
+      maxGrowth: 1.0
+    });
+
+    // 2. Add sparkling pollen particles
+    for (let i = 0; i < 4; i++) {
+      this.particles.push({
+        x: x + (Math.random() - 0.5) * 12,
+        y: (y || GROUND_Y - 4) - stemHeight,
+        vx: (Math.random() - 0.5) * 3,
+        vy: -(1.5 + Math.random() * 2.5),
+        size: 3 + Math.random() * 3,
+        color: '#ffeb3b',
+        life: 1.0,
+        decay: 0.04,
+        type: 'sparkle'
+      });
+    }
+
+    // 3. Add visible floating "+1 🌸" Text Particle
+    this.particles.push({
+      x: x + (Math.random() - 0.5) * 6,
+      y: (y || GROUND_Y - 4) - stemHeight - 10,
+      vx: (Math.random() - 0.5) * 0.5,
+      vy: -1.6,
+      text: '+1 🌸',
+      color: '#ff69b4',
+      size: 14,
+      life: 1.0,
+      decay: 0.028,
+      type: 'floating_text'
     });
   }
 
@@ -260,34 +309,55 @@ export class ParticleSystem {
   }
 
   draw(ctx, cameraX, cameraY) {
-    // 1. Draw Persistent Planted Flowers
+    // 1. Draw Persistent Planted Flowers with Beautiful Blooming & Leaves
     for (const f of this.plantedFlowers) {
       if (f.x < cameraX - 100 || f.x > cameraX + CANVAS_WIDTH + 100) continue;
       const screenX = f.x - cameraX;
       const screenY = f.y - cameraY;
 
-      // Stem
-      ctx.strokeStyle = '#38a169';
-      ctx.lineWidth = 2.5;
+      // Sprouting growth animation
+      if (f.growth < f.maxGrowth) {
+        f.growth += (f.maxGrowth - f.growth) * 0.25;
+      }
+      const curStemHeight = f.stemHeight * f.growth;
+      const curSize = f.size * f.growth;
+
+      // Leafy green stem
+      ctx.strokeStyle = '#2f855a';
+      ctx.lineWidth = 3;
       ctx.beginPath();
       ctx.moveTo(screenX, screenY + 4);
-      ctx.lineTo(screenX, screenY - f.stemHeight);
+      ctx.lineTo(screenX, screenY - curStemHeight);
       ctx.stroke();
 
-      // Flower Head
-      ctx.fillStyle = f.color;
+      // Stem leaves
+      ctx.fillStyle = '#48bb78';
       ctx.beginPath();
-      ctx.arc(screenX, screenY - f.stemHeight, f.size, 0, Math.PI * 2);
+      ctx.ellipse(screenX - 5, screenY - curStemHeight * 0.4, 5, 2.5, -Math.PI / 6, 0, Math.PI * 2);
+      ctx.ellipse(screenX + 5, screenY - curStemHeight * 0.6, 5, 2.5, Math.PI / 6, 0, Math.PI * 2);
       ctx.fill();
 
-      // Center Eye
-      ctx.fillStyle = '#fff566';
+      // 5 Petal Lobes
+      ctx.fillStyle = f.color;
+      const headY = screenY - curStemHeight;
+      const petalDist = curSize * 0.65;
+      for (let p = 0; p < 5; p++) {
+        const pAngle = (p / 5) * Math.PI * 2;
+        const px = screenX + Math.cos(pAngle) * petalDist;
+        const py = headY + Math.sin(pAngle) * petalDist;
+        ctx.beginPath();
+        ctx.arc(px, py, curSize * 0.55, 0, Math.PI * 2);
+        ctx.fill();
+      }
+
+      // Golden Center Pistil
+      ctx.fillStyle = '#ffeb3b';
       ctx.beginPath();
-      ctx.arc(screenX, screenY - f.stemHeight, f.size * 0.4, 0, Math.PI * 2);
+      ctx.arc(screenX, headY, curSize * 0.42, 0, Math.PI * 2);
       ctx.fill();
     }
 
-    // 2. Draw Dynamic Particles
+    // 2. Draw Dynamic Particles & Floating Text
     for (const p of this.particles) {
       const screenX = p.x - cameraX;
       const screenY = p.y - cameraY;
@@ -295,15 +365,25 @@ export class ParticleSystem {
 
       ctx.save();
       ctx.globalAlpha = Math.max(0, p.life);
-      ctx.fillStyle = p.color;
 
-      if (p.type === 'sparkle') {
+      if (p.type === 'floating_text') {
+        ctx.font = `900 ${p.size}px sans-serif`;
+        ctx.textAlign = 'center';
+        ctx.fillStyle = p.color;
+        ctx.strokeStyle = '#ffffff';
+        ctx.lineWidth = 3.5;
+        ctx.strokeText(p.text, screenX, screenY);
+        ctx.fillText(p.text, screenX, screenY);
+      } else if (p.type === 'sparkle') {
+        ctx.fillStyle = p.color;
         ctx.beginPath();
         ctx.arc(screenX, screenY, p.size, 0, Math.PI * 2);
         ctx.fill();
       } else if (p.type === 'wind') {
+        ctx.fillStyle = p.color;
         ctx.fillRect(screenX, screenY, p.size * 3, p.size);
       } else {
+        ctx.fillStyle = p.color;
         ctx.beginPath();
         ctx.arc(screenX, screenY, p.size, 0, Math.PI * 2);
         ctx.fill();
@@ -730,6 +810,80 @@ export function drawTerrainItem(ctx, item, cameraX, cameraY) {
       ctx.beginPath();
       ctx.arc(cx, cy, 3.5, 0, Math.PI * 2);
       ctx.fill();
+      break;
+    }
+
+    case 'TRAMPOLINE': {
+      // Spring Trampoline (Super Rocket Bounce)
+      const cx = screenX + item.width / 2;
+      const cy = screenY + item.height / 2;
+
+      // Sturdy steel legs
+      ctx.strokeStyle = '#718096';
+      ctx.lineWidth = 3;
+      ctx.beginPath();
+      ctx.moveTo(screenX + 8, screenY + item.height);
+      ctx.lineTo(screenX + 16, screenY + 8);
+      ctx.lineTo(screenX + item.width - 16, screenY + 8);
+      ctx.lineTo(screenX + item.width - 8, screenY + item.height);
+      ctx.stroke();
+
+      // Middle support
+      ctx.beginPath();
+      ctx.moveTo(cx, screenY + item.height);
+      ctx.lineTo(cx, screenY + 8);
+      ctx.stroke();
+
+      // Glowing spring mat
+      ctx.fillStyle = '#48bb78';
+      ctx.strokeStyle = '#276749';
+      ctx.lineWidth = 2.5;
+      ctx.beginPath();
+      ctx.roundRect(screenX + 4, screenY + 2, item.width - 8, 12, 6);
+      ctx.fill();
+      ctx.stroke();
+
+      // Upward bounce arrow
+      ctx.fillStyle = '#ffeb3b';
+      ctx.beginPath();
+      ctx.moveTo(cx, screenY - 4);
+      ctx.lineTo(cx - 8, screenY + 4);
+      ctx.lineTo(cx + 8, screenY + 4);
+      ctx.closePath();
+      ctx.fill();
+      break;
+    }
+
+    case 'BUTTERFLY_SWARM': {
+      // Magical Butterfly Swarm in Sky
+      const cx = screenX + item.width / 2;
+      const cy = screenY + item.height / 2;
+      const butterflyColors = ['#ed64a6', '#4299e1', '#ecc94b'];
+
+      [-18, 0, 18].forEach((offset, idx) => {
+        const bx = cx + offset;
+        const by = cy + (idx % 2 === 0 ? -6 : 6);
+        const bColor = butterflyColors[idx];
+
+        ctx.fillStyle = bColor;
+        // Left & Right Wings
+        ctx.beginPath();
+        ctx.ellipse(bx - 6, by - 4, 7, 10, -Math.PI / 5, 0, Math.PI * 2);
+        ctx.ellipse(bx + 6, by - 4, 7, 10, Math.PI / 5, 0, Math.PI * 2);
+        ctx.fill();
+
+        // Body
+        ctx.fillStyle = '#2d3748';
+        ctx.beginPath();
+        ctx.ellipse(bx, by, 2, 8, 0, 0, Math.PI * 2);
+        ctx.fill();
+
+        // Sparkle
+        ctx.fillStyle = '#ffffff';
+        ctx.beginPath();
+        ctx.arc(bx, by - 7, 2, 0, Math.PI * 2);
+        ctx.fill();
+      });
       break;
     }
 

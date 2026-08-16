@@ -152,5 +152,29 @@ export const TERRAIN_ITEM_TYPES = {
     height: 24,
     points: 50,
     message: '✨ 꽃씨 수집 +50점'
+  },
+  TRAMPOLINE: {
+    id: 'TRAMPOLINE',
+    name: '스프링 트램펄린',
+    icon: '🎪',
+    color: '#48bb78',
+    width: 56,
+    height: 28,
+    bounceBoostY: -25.0,
+    bounceBoostX: 1.22,
+    points: 180,
+    message: '🎪 슈퍼 스프링 로켓 도약!'
+  },
+  BUTTERFLY_SWARM: {
+    id: 'BUTTERFLY_SWARM',
+    name: '요정 나비 떼',
+    icon: '🦋',
+    color: '#ed64a6',
+    width: 64,
+    height: 52,
+    bounceBoostY: -15.0,
+    boostSpeedX: 9.0,
+    points: 250,
+    message: '🦋 요정 나비단 날개짓 부스트!'
   }
 };
