@@ -271,7 +271,7 @@
 .popcorn-gameover-overlay {
   position: absolute;
   inset: 0;
-  background: rgba(15, 23, 42, 0.92);
+  background: rgba(15, 23, 42, 0.94);
   backdrop-filter: blur(10px);
   display: flex;
   flex-direction: column;
@@ -290,12 +290,12 @@
 .popcorn-result-card {
   background: rgba(30, 41, 59, 0.95);
   border: 2px solid rgba(251, 191, 36, 0.4);
-  border-radius: 20px;
-  padding: 24px;
+  border-radius: 24px;
+  padding: 24px 28px;
   width: 100%;
-  max-width: 440px;
+  max-width: 480px;
   text-align: center;
-  box-shadow: 0 20px 40px rgba(0, 0, 0, 0.6);
+  box-shadow: 0 20px 50px rgba(0, 0, 0, 0.7);
   display: flex;
   flex-direction: column;
   align-items: center;
@@ -327,30 +327,144 @@
   display: block;
 }
 
-.popcorn-rank-form {
-  margin-top: 16px;
+/* Leaderboard Form Box */
+.popcorn-leaderboard-form {
+  width: 100%;
   display: flex;
   flex-direction: column;
   gap: 10px;
-  width: 100%;
-}
-
-.popcorn-input {
-  width: 100%;
-  padding: 10px 14px;
-  border-radius: 10px;
-  background: rgba(15, 23, 42, 0.8);
-  border: 1px solid rgba(255, 255, 255, 0.2);
-  color: #FFFFFF;
-  font-size: 0.95rem;
-  font-weight: 700;
+  margin: 14px 0 8px;
+  padding: 14px 16px;
+  background: rgba(245, 158, 11, 0.08);
+  border: 1px dashed rgba(245, 158, 11, 0.4);
+  border-radius: 16px;
   box-sizing: border-box;
 }
 
-.popcorn-input:focus {
+.popcorn-form-title {
+  font-size: 13px;
+  font-weight: 800;
+  color: #FBBF24;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+}
+
+.popcorn-form-row {
+  display: flex;
+  gap: 8px;
+  width: 100%;
+  box-sizing: border-box;
+}
+
+.popcorn-name-input {
+  flex: 1;
+  padding: 10px 14px;
+  background: rgba(15, 23, 42, 0.85);
+  border: 1.5px solid rgba(251, 191, 36, 0.35);
+  border-radius: 12px;
+  color: #FFFFFF;
+  font-size: 14px;
+  font-weight: 700;
   outline: none;
+  transition: all 0.2s ease;
+  box-sizing: border-box;
+}
+
+.popcorn-name-input:focus {
   border-color: #FBBF24;
-  box-shadow: 0 0 10px rgba(245, 158, 11, 0.5);
+  box-shadow: 0 0 12px rgba(245, 158, 11, 0.45);
+}
+
+.popcorn-submit-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  padding: 10px 18px;
+  background: linear-gradient(135deg, #F59E0B 0%, #D97706 100%);
+  color: #0F172A;
+  border: none;
+  border-radius: 12px;
+  font-size: 14px;
+  font-weight: 900;
+  cursor: pointer;
+  transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+  box-shadow: 0 4px 12px rgba(245, 158, 11, 0.35);
+  white-space: nowrap;
+}
+
+.popcorn-submit-btn:hover:not(:disabled) {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 18px rgba(245, 158, 11, 0.55);
+  background: linear-gradient(135deg, #FBBF24 0%, #F59E0B 100%);
+}
+
+.popcorn-submit-btn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.popcorn-success-msg {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  background: rgba(16, 185, 129, 0.15);
+  border: 1px solid rgba(16, 185, 129, 0.4);
+  color: #34D399;
+  font-size: 13px;
+  font-weight: 800;
+  padding: 10px 14px;
+  border-radius: 12px;
+}
+
+/* Action Buttons */
+.popcorn-res-actions {
+  display: flex;
+  gap: 12px;
+  width: 100%;
+  margin-top: 14px;
+}
+
+.popcorn-btn-action {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  padding: 12px 16px;
+  border-radius: 14px;
+  font-size: 14px;
+  font-weight: 800;
+  cursor: pointer;
+  transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+  border: none;
+}
+
+.popcorn-btn-action.secondary {
+  background: rgba(51, 65, 85, 0.85);
+  color: #E2E8F0;
+  border: 1px solid rgba(255, 255, 255, 0.15);
+}
+
+.popcorn-btn-action.secondary:hover {
+  background: rgba(71, 85, 105, 0.95);
+  color: #FFFFFF;
+  transform: translateY(-2px);
+}
+
+.popcorn-btn-action.primary {
+  background: linear-gradient(135deg, #10B981 0%, #059669 100%);
+  color: #FFFFFF;
+  box-shadow: 0 4px 14px rgba(16, 185, 129, 0.35);
+}
+
+.popcorn-btn-action.primary:hover {
+  background: linear-gradient(135deg, #34D399 0%, #10B981 100%);
+  transform: translateY(-2px);
+  box-shadow: 0 6px 20px rgba(16, 185, 129, 0.5);
 }
 
 /* Mobile Virtual Controls */

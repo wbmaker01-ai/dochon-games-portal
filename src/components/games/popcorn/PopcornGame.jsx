@@ -40,7 +40,10 @@ import {
   Award,
   Crown,
   Play,
-  Pause
+  Pause,
+  Send,
+  User,
+  CheckCircle2
 } from 'lucide-react';
 
 export default function PopcornGame({ onScoreSubmitted }) {
@@ -841,16 +844,19 @@ export default function PopcornGame({ onScoreSubmitted }) {
 
               {/* Hall of Fame Score Submission Form (Only if score > 100 as per rule!) */}
               {score > 100 && (
-                <div className="popcorn-rank-form">
+                <div className="popcorn-leaderboard-form">
+                  <div className="popcorn-form-title">
+                    <Sparkles style={{ width: '15px', height: '15px' }} />
+                    <span>명예의 전당 등록 (최종 점수: {score.toLocaleString()}점)</span>
+                  </div>
+
                   {submitSuccess ? (
-                    <div className="p-2.5 bg-emerald-500/20 border border-emerald-500/40 rounded-xl text-emerald-300 text-xs font-bold">
-                      ✅ 명예의 전당 랭킹 등록 완료!
+                    <div className="popcorn-success-msg">
+                      <CheckCircle2 style={{ width: '16px', height: '16px' }} />
+                      <span>명예의 전당에 성공적으로 등록되었습니다!</span>
                     </div>
                   ) : (
-                    <form onSubmit={handleScoreSubmit} className="space-y-2">
-                      <div className="text-xs text-amber-300 font-bold text-left">
-                        🏆 명예의 전당 점수 등록 (100점 초과 달성!)
-                      </div>
+                    <form onSubmit={handleScoreSubmit} className="popcorn-form-row">
                       <input
                         type="text"
                         value={playerName}
@@ -858,32 +864,36 @@ export default function PopcornGame({ onScoreSubmitted }) {
                         placeholder="예: 홍길동"
                         maxLength={12}
                         required
-                        className="popcorn-input"
+                        className="popcorn-name-input"
                       />
                       <button
                         type="submit"
                         disabled={isSubmitting || !playerName.trim()}
-                        className="w-full py-2 bg-gradient-to-r from-amber-500 to-amber-600 hover:from-amber-400 hover:to-amber-500 text-slate-950 font-black text-sm rounded-xl transition disabled:opacity-50"
+                        className="popcorn-submit-btn"
                       >
-                        {isSubmitting ? '등록 중...' : '명예의 전당 등록하기'}
+                        <Send style={{ width: '14px', height: '14px' }} />
+                        <span>{isSubmitting ? '등록 중...' : '등록'}</span>
                       </button>
                     </form>
                   )}
                 </div>
               )}
 
-              <div className="flex gap-2 mt-4">
+              {/* Action Buttons */}
+              <div className="popcorn-res-actions">
                 <button
                   onClick={() => setGameState('select')}
-                  className="flex-1 py-2 bg-slate-700 hover:bg-slate-600 text-slate-200 font-bold rounded-xl text-xs transition"
+                  className="popcorn-btn-action secondary"
                 >
-                  캐릭터 변경
+                  <User style={{ width: '16px', height: '16px' }} />
+                  <span>캐릭터 변경</span>
                 </button>
                 <button
                   onClick={() => startGame(selectedClass)}
-                  className="flex-1 py-2 bg-amber-500 hover:bg-amber-400 text-slate-950 font-black rounded-xl text-xs transition"
+                  className="popcorn-btn-action primary"
                 >
-                  다시 도전
+                  <RotateCcw style={{ width: '16px', height: '16px' }} />
+                  <span>다시 도전</span>
                 </button>
               </div>
             </div>
