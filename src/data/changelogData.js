@@ -50,6 +50,16 @@ export const CHANGELOG_DATA = [
         text: '상단 카드 영역(덱, 뽑은 카드, 완성칸 4개)을 바닥 7열과 동일한 7열 대칭 그리드로 전면 개편하여 카드 크기 확대 및 시각적 시인성 대폭 개선'
       },
       {
+        tag: 'MAGIC FLIP',
+        tagColor: 'teal',
+        text: '남은 덱이 소진되어 바닥 카드만으로 막혔을 때 숨겨진 카드를 바로 열어주는 [🔮 카드 뒤집기] 구원 기능 탑재'
+      },
+      {
+        tag: 'RULE',
+        tagColor: 'indigo',
+        text: '상단 완성칸(Foundation)에 올렸던 카드를 바닥 열로 다시 내려 길을 뚫을 수 있는 [완성칸 ➔ 바닥 이동] 지원 및 힌트 연동'
+      },
+      {
         tag: 'AUTO WIN',
         tagColor: 'emerald',
         text: '바닥 카드가 모두 열려 클리어가 확정되었을 때 1초 만에 덱을 완성하는 [🎉 자동 완성하기] 기능 및 승리 폭죽 세레머니 구현'

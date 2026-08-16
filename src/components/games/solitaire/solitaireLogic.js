@@ -341,11 +341,49 @@ export function applyMagicShuffle(gameState) {
   // Remaining goes to stock
   const newStock = shuffledPool.slice(poolIdx).map(c => ({ ...c, faceUp: false }));
 
+  // If stock was empty, automatically flip 1 hidden card to guarantee a breakthrough
+  if (stock.length === 0 && waste.length === 0 && faceDownCards.length > 0) {
+    for (let col of newTableau) {
+      const hIdx = col.findIndex(c => !c.faceUp);
+      if (hIdx >= 0) {
+        col[hIdx].faceUp = true;
+        break;
+      }
+    }
+  }
+
   return {
     ...gameState,
     tableau: newTableau,
     stock: newStock,
     waste: []
+  };
+}
+
+/**
+ * 🔮 Flips the topmost hidden card in any tableau column
+ */
+export function flipFirstHiddenCard(gameState) {
+  const { tableau } = gameState;
+  let flipped = false;
+  const newTableau = tableau.map(col => {
+    if (flipped) return col;
+    const hiddenIdx = col.findIndex(c => !c.faceUp);
+    if (hiddenIdx >= 0) {
+      flipped = true;
+      return col.map((c, idx) => {
+        if (idx === hiddenIdx) {
+          return { ...c, faceUp: true };
+        }
+        return c;
+      });
+    }
+    return col;
+  });
+
+  return {
+    ...gameState,
+    tableau: newTableau
   };
 }
 
@@ -466,7 +504,33 @@ export function findSmartHint(gameState) {
     }
   }
 
-  // 6. Stock Advice
+  // 6. Check Foundation to Tableau moves (완성칸 카드를 바닥으로 내려 길 뚫기)
+  for (let suitKey of SUIT_KEYS) {
+    const pile = foundations[suitKey];
+    if (pile && pile.length > 0) {
+      const topCard = pile[pile.length - 1];
+      // Don't pull Aces down
+      if (topCard.rank > 1) {
+        for (let toColIdx = 0; toColIdx < 7; toColIdx++) {
+          const toCol = tableau[toColIdx];
+          if (canMoveToTableau(topCard, toCol)) {
+            const targetDesc = toCol.length > 0
+              ? `[${toCol[toCol.length - 1].suitSymbol} ${toCol[toCol.length - 1].rankLabel}] 아래`
+              : '빈 자리';
+            return {
+              type: 'FOUNDATION_TO_TABLEAU',
+              highlightCardId: topCard.id,
+              highlightZone: `foundation-${suitKey}`,
+              targetZone: `tableau-${toColIdx}`,
+              message: `💡 상단 완성칸의 [${topCard.suitSymbol} ${topCard.rankLabel}] 카드를 클릭하여 바닥 ${targetDesc}로 내려보세요!`
+            };
+          }
+        }
+      }
+    }
+  }
+
+  // 7. Stock Advice
   if (stock.length > 0) {
     return {
       type: 'STOCK_DRAW',
@@ -481,10 +545,23 @@ export function findSmartHint(gameState) {
     };
   }
 
-  // 7. No Moves Possible
+  // 8. Direct Hidden Card Flip Advice (학생 구원: 뒷면 카드 직접 뒤집기 힌트)
+  for (let colIdx = 0; colIdx < 7; colIdx++) {
+    const col = tableau[colIdx];
+    const hasHidden = col.some(c => !c.faceUp);
+    if (hasHidden) {
+      return {
+        type: 'FLIP_HIDDEN_CARD',
+        highlightZone: `tableau-${colIdx}`,
+        message: `🔮 [${colIdx + 1}번째 열]의 파란 뒷면 카드를 직접 클릭하거나 [🔮 카드 뒤집기]를 눌러 바로 열어보세요!`
+      };
+    }
+  }
+
+  // 9. No Moves Possible
   return {
     type: 'NO_MOVES',
-    message: '🧐 더 이상 이동할 수 있는 카드가 없어요! [🪄 마법의 셔플]로 카드를 다시 섞거나 [새 게임]을 시작해보세요.'
+    message: '🧐 더 이상 이동할 수 있는 카드가 없어요! [🪄 마법의 셔플]로 카드를 다시 섞거나 [🔮 카드 뒤집기]를 사용해보세요.'
   };
 }
 
