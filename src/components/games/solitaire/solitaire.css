@@ -292,6 +292,17 @@
   border-color: rgba(255, 255, 255, 0.2);
 }
 
+.solitaire-card-slot.slot-free-cell {
+  border-color: #34D399 !important;
+  background: rgba(16, 185, 129, 0.12) !important;
+  box-shadow: 0 0 16px rgba(52, 211, 153, 0.35) !important;
+}
+.solitaire-card-slot.slot-free-cell:hover {
+  border-color: #10B981 !important;
+  background: rgba(16, 185, 129, 0.22) !important;
+  box-shadow: 0 0 22px rgba(52, 211, 153, 0.6) !important;
+}
+
 .solitaire-card-slot.slot-highlight {
   border-color: #FBBF24 !important;
   background: rgba(251, 191, 36, 0.25) !important;

@@ -180,14 +180,28 @@ export function canMoveToFoundation(card, foundationPile) {
 }
 
 /**
- * Checks if a card/stack can be moved onto a Tableau column
+ * Checks if a card/stack can be moved onto a Tableau column.
+ * [🌟 4-King Free Slot Rule]: If all 4 Kings are already placed as column bases,
+ * remaining empty columns can accept ANY card to prevent deadlocks!
  */
-export function canMoveToTableau(movingCard, targetColumn) {
+export function canMoveToTableau(movingCard, targetColumn, gameState = null) {
   if (!movingCard || !movingCard.faceUp) return false;
 
-  // If column is empty, only a King (rank === 13) can be placed
+  // If column is empty
   if (!targetColumn || targetColumn.length === 0) {
-    return movingCard.rank === 13;
+    // Kings can always be placed on empty columns
+    if (movingCard.rank === 13) return true;
+
+    // 4-King Free Slot Rule: If 4 Kings are already anchoring columns, ANY card can be placed!
+    if (gameState && gameState.tableau) {
+      const kingColumnsCount = gameState.tableau.filter(
+        col => col.length > 0 && col[0].rank === 13
+      ).length;
+      if (kingColumnsCount >= 4) {
+        return true;
+      }
+    }
+    return false;
   }
 
   const targetCard = targetColumn[targetColumn.length - 1];
@@ -252,7 +266,7 @@ export function checkIsDeadEnd(gameState) {
     const wasteCard = waste[waste.length - 1];
     if (canMoveToFoundation(wasteCard, foundations[wasteCard.suit])) return false;
     for (let col of tableau) {
-      if (canMoveToTableau(wasteCard, col)) return false;
+      if (canMoveToTableau(wasteCard, col, gameState)) return false;
     }
   }
 
@@ -277,7 +291,7 @@ export function checkIsDeadEnd(gameState) {
         for (let toColIdx = 0; toColIdx < 7; toColIdx++) {
           if (fromColIdx === toColIdx) continue;
           const toCol = tableau[toColIdx];
-          if (canMoveToTableau(card, toCol)) {
+          if (canMoveToTableau(card, toCol, gameState)) {
             // If moving to empty column, must have cards underneath to make progress
             if (toCol.length === 0 && cardIdx === 0) continue;
             return false;
@@ -292,7 +306,7 @@ export function checkIsDeadEnd(gameState) {
     const virtualCard = { ...stockCard, faceUp: true };
     if (canMoveToFoundation(virtualCard, foundations[virtualCard.suit])) return false;
     for (let col of tableau) {
-      if (canMoveToTableau(virtualCard, col)) return false;
+      if (canMoveToTableau(virtualCard, col, gameState)) return false;
     }
   }
 
@@ -435,10 +449,10 @@ export function findSmartHint(gameState) {
       for (let toColIdx = 0; toColIdx < 7; toColIdx++) {
         if (fromColIdx === toColIdx) continue;
         const toCol = tableau[toColIdx];
-        if (canMoveToTableau(movingCard, toCol)) {
+        if (canMoveToTableau(movingCard, toCol, gameState)) {
           const targetName = toCol.length > 0
             ? `[${toCol[toCol.length - 1].suitSymbol} ${toCol[toCol.length - 1].rankLabel}] 아래`
-            : '빈 열';
+            : '자유 빈칸';
           return {
             type: 'TABLEAU_TO_TABLEAU_REVEAL',
             highlightCardId: movingCard.id,
@@ -456,10 +470,10 @@ export function findSmartHint(gameState) {
     const wasteCard = waste[waste.length - 1];
     for (let toColIdx = 0; toColIdx < 7; toColIdx++) {
       const toCol = tableau[toColIdx];
-      if (canMoveToTableau(wasteCard, toCol)) {
+      if (canMoveToTableau(wasteCard, toCol, gameState)) {
         const targetDesc = toCol.length > 0
           ? `[${toCol[toCol.length - 1].suitSymbol} ${toCol[toCol.length - 1].rankLabel}] 아래`
-          : '빈 자리';
+          : '자유 빈칸';
         return {
           type: 'WASTE_TO_TABLEAU',
           highlightCardId: wasteCard.id,
@@ -486,12 +500,12 @@ export function findSmartHint(gameState) {
       for (let toColIdx = 0; toColIdx < 7; toColIdx++) {
         if (fromColIdx === toColIdx) continue;
         const toCol = tableau[toColIdx];
-        if (canMoveToTableau(movingCard, toCol)) {
+        if (canMoveToTableau(movingCard, toCol, gameState)) {
           if (toCol.length === 0 && cardIdx === 0) continue;
 
           const targetDesc = toCol.length > 0
             ? `[${toCol[toCol.length - 1].suitSymbol} ${toCol[toCol.length - 1].rankLabel}] 아래`
-            : '빈 자리';
+            : '자유 빈칸';
           return {
             type: 'TABLEAU_TO_TABLEAU',
             highlightCardId: movingCard.id,
@@ -513,7 +527,7 @@ export function findSmartHint(gameState) {
       if (topCard.rank > 1) {
         for (let toColIdx = 0; toColIdx < 7; toColIdx++) {
           const toCol = tableau[toColIdx];
-          if (canMoveToTableau(topCard, toCol)) {
+          if (canMoveToTableau(topCard, toCol, gameState)) {
             const targetDesc = toCol.length > 0
               ? `[${toCol[toCol.length - 1].suitSymbol} ${toCol[toCol.length - 1].rankLabel}] 아래`
               : '빈 자리';

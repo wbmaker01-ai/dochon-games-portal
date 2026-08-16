@@ -70,6 +70,10 @@ export default function SolitaireGame({ onScoreSubmitted }) {
   const [studentName, setStudentName] = useState('');
   const [submitted, setSubmitted] = useState(false);
 
+  // 🌟 4-King Free Slot Rule Check
+  const kingColumnsCount = gameState.tableau.filter(col => col.length > 0 && col[0].rank === 13).length;
+  const isAllKingsPlaced = kingColumnsCount >= 4;
+
   // Auto-Start Timer on first interaction
   const startTimer = useCallback(() => {
     if (!isTimerRunning && !isWon) {
@@ -318,7 +322,7 @@ export default function SolitaireGame({ onScoreSubmitted }) {
     if (sourceInfo.type === 'foundation') {
       for (let targetColIdx = 0; targetColIdx < 7; targetColIdx++) {
         const targetCol = tableau[targetColIdx];
-        if (canMoveToTableau(card, targetCol)) {
+        if (canMoveToTableau(card, targetCol, gameState)) {
           saveSnapshot();
           const newFoundations = {
             ...foundations,
@@ -397,7 +401,7 @@ export default function SolitaireGame({ onScoreSubmitted }) {
       if (sourceInfo.type === 'tableau' && sourceInfo.colIndex === targetColIdx) continue;
       const targetCol = tableau[targetColIdx];
 
-      if (canMoveToTableau(movingCards[0], targetCol)) {
+      if (canMoveToTableau(movingCards[0], targetCol, gameState)) {
         if (targetCol.length === 0 && sourceInfo.type === 'tableau') {
           const col = tableau[sourceInfo.colIndex];
           if (col[0].id === card.id && col.length === movingCards.length) {
@@ -777,10 +781,21 @@ export default function SolitaireGame({ onScoreSubmitted }) {
                 key={colIdx}
                 className={`solitaire-tableau-col ${isColTargetHint && col.length === 0 ? 'slot-highlight' : ''}`}
               >
-                {/* Empty slot placeholder for King */}
+                {/* Empty slot placeholder for King or Free Slot */}
                 {col.length === 0 && (
-                  <div className={`solitaire-card-slot slot-tableau ${isColTargetHint ? 'slot-highlight' : ''}`}>
-                    <span className="text-xs font-black opacity-40">👑 K</span>
+                  <div
+                    className={`solitaire-card-slot slot-tableau ${
+                      isAllKingsPlaced ? 'slot-free-cell' : ''
+                    } ${isColTargetHint ? 'slot-highlight' : ''}`}
+                  >
+                    {isAllKingsPlaced ? (
+                      <div className="flex flex-col items-center justify-center text-center p-1">
+                        <span className="text-xs font-black text-amber-300 animate-pulse">🌟 자유</span>
+                        <span className="text-[9px] text-emerald-300 font-extrabold leading-tight">어떤 카드든 OK</span>
+                      </div>
+                    ) : (
+                      <span className="text-xs font-black opacity-40">👑 K</span>
+                    )}
                   </div>
                 )}
 
