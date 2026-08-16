@@ -83,15 +83,16 @@ export class TableTennisEngine {
   reset() {
     this.playerY = CANVAS_HEIGHT / 2;
     this.tenguY = CANVAS_HEIGHT / 2;
-    this.paddleHeight = 80;
+    this.playerPaddleHeight = 104; // Player gets a generous, larger paddle
+    this.tenguPaddleHeight = 72;   // Tengu paddle is slightly smaller
     this.paddleWidth = 14;
 
     this.ballX = CANVAS_WIDTH / 2;
     this.ballY = CANVAS_HEIGHT / 2;
     this.ballRadius = 9;
-    this.ballVX = 5.5;
-    this.ballVY = 2.5;
-    this.ballSpeed = 6.0;
+    this.ballVX = 4.6;
+    this.ballVY = 1.8;
+    this.ballSpeed = 5.0;
 
     this.playerScore = 0;
     this.tenguScore = 0;
@@ -100,6 +101,7 @@ export class TableTennisEngine {
     this.maxRally = 0;
     this.isSmashReady = false;
     this.smashCooldown = 0;
+    this.lastHitWasSmash = false;
     this.effectParticles = [];
     this.winner = null; // 'player' | 'boss'
   }
@@ -107,31 +109,31 @@ export class TableTennisEngine {
   update(keys, isMobileSmash = false) {
     if (this.winner) return;
 
-    // Player Paddle Movement (Up / Down)
-    const moveSpeed = 7;
+    // Player Paddle Movement (Up / Down) - Snappy & Responsive Speed
+    const moveSpeed = 8.5;
     if (keys.ArrowUp || keys.KeyW) {
-      this.playerY = Math.max(this.paddleHeight / 2 + 30, this.playerY - moveSpeed);
+      this.playerY = Math.max(this.playerPaddleHeight / 2 + 30, this.playerY - moveSpeed);
     }
     if (keys.ArrowDown || keys.KeyS) {
-      this.playerY = Math.min(CANVAS_HEIGHT - this.paddleHeight / 2 - 30, this.playerY + moveSpeed);
+      this.playerY = Math.min(CANVAS_HEIGHT - this.playerPaddleHeight / 2 - 30, this.playerY + moveSpeed);
     }
 
-    // Smash trigger
+    // Smash trigger (Space / Mobile Smash)
     if ((keys.Space || isMobileSmash) && this.smashCooldown <= 0) {
       this.isSmashReady = true;
     }
 
     if (this.smashCooldown > 0) this.smashCooldown--;
 
-    // Tengu AI Movement (Tracks ball with slight delay)
-    const tenguSpeed = 5.2 + Math.min(this.rallyCount * 0.15, 2.5);
-    const targetY = this.ballY + (Math.sin(Date.now() / 200) * 12);
-    if (this.tenguY < targetY - 6) {
+    // Tengu AI Movement (Gentler reaction speed & slight error margin so player can win comfortably)
+    const tenguSpeed = 3.8 + Math.min(this.rallyCount * 0.1, 1.8);
+    const targetY = this.ballY + (Math.sin(Date.now() / 240) * 22);
+    if (this.tenguY < targetY - 8) {
       this.tenguY += tenguSpeed;
-    } else if (this.tenguY > targetY + 6) {
+    } else if (this.tenguY > targetY + 8) {
       this.tenguY -= tenguSpeed;
     }
-    this.tenguY = Math.max(this.paddleHeight / 2 + 30, Math.min(CANVAS_HEIGHT - this.paddleHeight / 2 - 30, this.tenguY));
+    this.tenguY = Math.max(this.tenguPaddleHeight / 2 + 30, Math.min(CANVAS_HEIGHT - this.tenguPaddleHeight / 2 - 30, this.tenguY));
 
     // Ball Movement
     this.ballX += this.ballVX;
@@ -154,28 +156,29 @@ export class TableTennisEngine {
       this.ballVX < 0 &&
       this.ballX - this.ballRadius <= playerPaddleX + this.paddleWidth / 2 &&
       this.ballX + this.ballRadius >= playerPaddleX - this.paddleWidth / 2 &&
-      Math.abs(this.ballY - this.playerY) <= this.paddleHeight / 2 + 6
+      Math.abs(this.ballY - this.playerY) <= this.playerPaddleHeight / 2 + 8
     ) {
       this.rallyCount++;
       if (this.rallyCount > this.maxRally) this.maxRally = this.rallyCount;
-      const hitOffset = (this.ballY - this.playerY) / (this.paddleHeight / 2); // -1 to 1
+      const hitOffset = (this.ballY - this.playerY) / (this.playerPaddleHeight / 2); // -1 to 1
 
       const isSmash = this.isSmashReady;
       this.isSmashReady = false;
-      if (isSmash) this.smashCooldown = 60;
+      this.lastHitWasSmash = isSmash;
+      if (isSmash) this.smashCooldown = 30; // Shorter smash cooldown
 
-      const baseSpeed = isSmash ? 11 : Math.min(6 + this.rallyCount * 0.35, 10.5);
+      const baseSpeed = isSmash ? 11.5 : Math.min(5.2 + this.rallyCount * 0.25, 9.0);
       this.ballVX = Math.abs(baseSpeed);
-      this.ballVY = hitOffset * (baseSpeed * 0.75);
+      this.ballVY = hitOffset * (baseSpeed * 0.65);
 
       championAudio.playPingPongHit(isSmash);
 
       // Create Hit Particles
-      for (let i = 0; i < (isSmash ? 12 : 5); i++) {
+      for (let i = 0; i < (isSmash ? 14 : 6); i++) {
         this.effectParticles.push({
           x: this.ballX,
           y: this.ballY,
-          vx: (Math.random() * 4) * (isSmash ? 2 : 1),
+          vx: (Math.random() * 4) * (isSmash ? 2.5 : 1),
           vy: (Math.random() - 0.5) * 6,
           color: isSmash ? '#EF4444' : '#FDE047',
           life: 20
@@ -189,26 +192,32 @@ export class TableTennisEngine {
       this.ballVX > 0 &&
       this.ballX + this.ballRadius >= tenguPaddleX - this.paddleWidth / 2 &&
       this.ballX - this.ballRadius <= tenguPaddleX + this.paddleWidth / 2 &&
-      Math.abs(this.ballY - this.tenguY) <= this.paddleHeight / 2 + 6
+      Math.abs(this.ballY - this.tenguY) <= this.tenguPaddleHeight / 2 + 4
     ) {
-      this.rallyCount++;
-      if (this.rallyCount > this.maxRally) this.maxRally = this.rallyCount;
-      const hitOffset = (this.ballY - this.tenguY) / (this.paddleHeight / 2);
-      const baseSpeed = Math.min(6 + this.rallyCount * 0.3, 10);
-      this.ballVX = -Math.abs(baseSpeed);
-      this.ballVY = hitOffset * (baseSpeed * 0.7);
+      // If player used a powerful smash, Tengu has difficulty returning it
+      if (this.lastHitWasSmash && Math.random() < 0.45) {
+        // Tengu misses smash! Let ball pass through
+      } else {
+        this.lastHitWasSmash = false;
+        this.rallyCount++;
+        if (this.rallyCount > this.maxRally) this.maxRally = this.rallyCount;
+        const hitOffset = (this.ballY - this.tenguY) / (this.tenguPaddleHeight / 2);
+        const baseSpeed = Math.min(5.0 + this.rallyCount * 0.2, 8.5);
+        this.ballVX = -Math.abs(baseSpeed);
+        this.ballVY = hitOffset * (baseSpeed * 0.65);
 
-      championAudio.playPingPongHit(false);
+        championAudio.playPingPongHit(false);
 
-      for (let i = 0; i < 6; i++) {
-        this.effectParticles.push({
-          x: this.ballX,
-          y: this.ballY,
-          vx: -Math.random() * 4,
-          vy: (Math.random() - 0.5) * 5,
-          color: '#38BDF8',
-          life: 18
-        });
+        for (let i = 0; i < 6; i++) {
+          this.effectParticles.push({
+            x: this.ballX,
+            y: this.ballY,
+            vx: -Math.random() * 4,
+            vy: (Math.random() - 0.5) * 5,
+            color: '#38BDF8',
+            life: 18
+          });
+        }
       }
     }
 
@@ -246,9 +255,10 @@ export class TableTennisEngine {
   resetServe(direction) {
     this.ballX = CANVAS_WIDTH / 2;
     this.ballY = CANVAS_HEIGHT / 2;
-    this.ballVX = direction * 5.5;
-    this.ballVY = (Math.random() - 0.5) * 4;
+    this.ballVX = direction * 4.6;
+    this.ballVY = (Math.random() - 0.5) * 3;
     this.rallyCount = 0;
+    this.lastHitWasSmash = false;
   }
 }
 

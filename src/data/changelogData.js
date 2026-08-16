@@ -33,6 +33,11 @@ export const CHANGELOG_DATA = [
         tag: 'HALL OF FAME',
         tagColor: 'teal',
         text: '[도촌초 명예의 전당 실시간 랭킹 연동] 100점 초과 달성 시 챔피언 아일랜드 글로벌 랭킹 실시간 기록 및 자동 탭 동기화 지원'
+      },
+      {
+        tag: 'BALANCE',
+        tagColor: 'emerald',
+        text: '[탁구 경기장 난이도 밸런스 완화] 플레이어 패들 크기 30% 확장, 이동 속도 향상, 공 기본 속도 완화, 스매시 쿨다운 단축(30F) 및 텐구 AI 반응 오차 개선으로 경쾌한 승리 플레이 지원'
       }
     ]
   },

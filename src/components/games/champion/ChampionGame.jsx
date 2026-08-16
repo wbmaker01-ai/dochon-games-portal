@@ -453,21 +453,21 @@ export default function ChampionGame({ onScoreSubmitted }) {
 
     // Player Paddle (Left side, Team Color)
     ctx.fillStyle = selectedTeam.color;
-    ctx.fillRect(70 - engine.paddleWidth / 2, engine.playerY - engine.paddleHeight / 2, engine.paddleWidth, engine.paddleHeight);
+    ctx.fillRect(70 - engine.paddleWidth / 2, engine.playerY - engine.playerPaddleHeight / 2, engine.paddleWidth, engine.playerPaddleHeight);
     ctx.strokeStyle = '#FFFFFF';
     ctx.lineWidth = 2;
-    ctx.strokeRect(70 - engine.paddleWidth / 2, engine.playerY - engine.paddleHeight / 2, engine.paddleWidth, engine.paddleHeight);
+    ctx.strokeRect(70 - engine.paddleWidth / 2, engine.playerY - engine.playerPaddleHeight / 2, engine.paddleWidth, engine.playerPaddleHeight);
 
     // Player Cat Icon
     ctx.font = '20px sans-serif';
-    ctx.fillText('🐱 럭키', 70, engine.playerY - engine.paddleHeight / 2 - 12);
+    ctx.fillText('🐱 럭키', 70, engine.playerY - engine.playerPaddleHeight / 2 - 12);
 
     // Tengu Paddle (Right side, Red Boss)
     ctx.fillStyle = '#EF4444';
-    ctx.fillRect(CANVAS_WIDTH - 70 - engine.paddleWidth / 2, engine.tenguY - engine.paddleHeight / 2, engine.paddleWidth, engine.paddleHeight);
+    ctx.fillRect(CANVAS_WIDTH - 70 - engine.paddleWidth / 2, engine.tenguY - engine.tenguPaddleHeight / 2, engine.paddleWidth, engine.tenguPaddleHeight);
     ctx.strokeStyle = '#FCA5A5';
     ctx.lineWidth = 2;
-    ctx.strokeRect(CANVAS_WIDTH - 70 - engine.paddleWidth / 2, engine.tenguY - engine.paddleHeight / 2, engine.paddleWidth, engine.paddleHeight);
+    ctx.strokeRect(CANVAS_WIDTH - 70 - engine.paddleWidth / 2, engine.tenguY - engine.tenguPaddleHeight / 2, engine.paddleWidth, engine.tenguPaddleHeight);
 
     // Tengu Boss Icon
     ctx.fillText('👺 텐구', CANVAS_WIDTH - 70, engine.tenguY - engine.paddleHeight / 2 - 12);
