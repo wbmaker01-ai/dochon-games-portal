@@ -177,6 +177,11 @@
   transition: all 0.2s ease;
 }
 
+.count-lamp.ball.on {
+  background: #10B981;
+  box-shadow: 0 0 6px #10B981;
+}
+
 .count-lamp.strike.on {
   background: #FBBF24;
   box-shadow: 0 0 6px #FBBF24;

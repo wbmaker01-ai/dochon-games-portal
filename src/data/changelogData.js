@@ -3,11 +3,40 @@
 
 export const CHANGELOG_DATA = [
   {
+    version: 'v1.8.0',
+    date: '2026-08-16',
+    title: '도촌 야구왕 [긴장감 극대화 난이도 밸런스 대패치 (플라이/땅볼 아웃 & 선구안 시스템)]',
+    badge: 'LATEST',
+    badgeColor: 'emerald',
+    items: [
+      {
+        tag: 'FLY/GROUND OUT',
+        tagColor: 'rose',
+        text: '[빗맞은 타구 즉시 아웃제] 타이밍이 너무 빠르거나 늦어 빗맞은 공은 외야 뜬공(FLY OUT) 또는 내야 땅볼(GROUND OUT)로 판정되어 즉시 아웃 카운트 +1'
+      },
+      {
+        tag: 'DYNAMIC TIMING',
+        tagColor: 'amber',
+        text: '[점수/레벨 비례 타이밍 판정 창 수축] 고득점(Lv.1~Lv.6)으로 올라갈수록 홈런/안타 허용 오차폭이 점진적으로 좁아져 정밀한 타격 집중력 요구'
+      },
+      {
+        tag: 'HYPER SPEED',
+        tagColor: 'purple',
+        text: '[최고 구속 1.85x 대폭 상향 & 마구 낙폭 강화] 고득점 구간 투구 속도를 최대 1.85배(950ms 한계)까지 가속하고 싱커/커브/지그재그 마구의 궤적을 더욱 날카롭게 강화'
+      },
+      {
+        tag: 'EYE OF TIGER',
+        tagColor: 'emerald',
+        text: '[가짜 유인구 & 선구안(BALL) 시스템 도입] 스트라이크 존을 벗어나는 유인구에 스윙 시 헛스윙/아웃 처리, 참아내면 볼(BALL) 판정 및 4볼 밀어내기 득점 지원 (B/S/O 카운트 미터 전면 개편)'
+      }
+    ]
+  },
+  {
     version: 'v1.7.7',
     date: '2026-08-16',
     title: '도촌 야구왕 [400점 스피드 레벨업 시 발생하던 투구 정지 버그 긴급 해결]',
-    badge: 'LATEST',
-    badgeColor: 'emerald',
+    badge: 'UPDATE',
+    badgeColor: 'blue',
     items: [
       {
         tag: 'BUG FIX',

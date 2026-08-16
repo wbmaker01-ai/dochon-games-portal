@@ -148,41 +148,49 @@ export function createTransparentSprite(img, threshold = 225) {
 }
 
 /**
- * Select the next pitch type based on score progression and combo
+ * Select the next pitch type based on score progression, combo, and deceptive ball probability
  */
 export function selectNextPitch(score, combo) {
   const roll = Math.random();
 
+  // Idea 5: Deceptive Bad Ball (15% ~ 22% chance after score >= 400)
+  if (score >= 400 && Math.random() < (score >= 2000 ? 0.22 : 0.15)) {
+    const badRoll = Math.random();
+    if (badRoll < 0.35) return PITCH_TYPES.BAD_BALL_HIGH;
+    if (badRoll < 0.7) return PITCH_TYPES.BAD_BALL_LOW;
+    return PITCH_TYPES.BAD_BALL_WIDE;
+  }
+
   if (score < 400) {
-    // Beginner: Mostly Fastball & Slowball
+    // Beginner: Fastball & Slowball
     if (roll < 0.65) return PITCH_TYPES.FASTBALL;
     return PITCH_TYPES.SLOWBALL;
   } else if (score < 1000) {
     // Intermediate: Fastball, Slowball, Changeup, Curve
-    if (roll < 0.4) return PITCH_TYPES.FASTBALL;
-    if (roll < 0.65) return PITCH_TYPES.CHANGEUP;
+    if (roll < 0.35) return PITCH_TYPES.FASTBALL;
+    if (roll < 0.6) return PITCH_TYPES.CHANGEUP;
     if (roll < 0.85) return PITCH_TYPES.CURVE;
     return PITCH_TYPES.SLOWBALL;
   } else if (score < 2000) {
-    // Advanced: Fastball, Changeup, Curve, Sinker
-    if (roll < 0.3) return PITCH_TYPES.FASTBALL;
-    if (roll < 0.55) return PITCH_TYPES.CHANGEUP;
-    if (roll < 0.75) return PITCH_TYPES.CURVE;
-    if (roll < 0.9) return PITCH_TYPES.SINKER;
+    // Advanced: Fastball, Changeup, Curve, Sinker, Zigzag
+    if (roll < 0.25) return PITCH_TYPES.FASTBALL;
+    if (roll < 0.5) return PITCH_TYPES.CHANGEUP;
+    if (roll < 0.7) return PITCH_TYPES.CURVE;
+    if (roll < 0.88) return PITCH_TYPES.SINKER;
     return PITCH_TYPES.ZIGZAG;
   } else if (score < 3500) {
-    // Master: All types + Zigzag & Ghost
+    // Master: Zigzag, Ghost, Sinker, Fireball
     if (roll < 0.25) return PITCH_TYPES.ZIGZAG;
     if (roll < 0.5) return PITCH_TYPES.GHOST;
-    if (roll < 0.7) return PITCH_TYPES.CHANGEUP;
-    if (roll < 0.85) return PITCH_TYPES.CURVE;
+    if (roll < 0.7) return PITCH_TYPES.SINKER;
+    if (roll < 0.85) return PITCH_TYPES.CHANGEUP;
     return PITCH_TYPES.FIREBALL;
   } else {
     // Grandmaster: Fast Fireball, Ghost, Zigzag, Sinker
-    if (roll < 0.3) return PITCH_TYPES.FIREBALL;
-    if (roll < 0.55) return PITCH_TYPES.GHOST;
+    if (roll < 0.35) return PITCH_TYPES.FIREBALL;
+    if (roll < 0.6) return PITCH_TYPES.GHOST;
     if (roll < 0.8) return PITCH_TYPES.ZIGZAG;
-    return PITCH_TYPES.CHANGEUP;
+    return PITCH_TYPES.SINKER;
   }
 }
 
@@ -199,7 +207,7 @@ export function calculateBallState(pitchConfig, elapsedMs, totalDuration) {
     const p1 = pitchConfig.deceleratePoint || 0.5;
     if (progress > p1) {
       const rem = Math.max(0, Math.min(1, (progress - p1) / (1 - p1)));
-      const factor = pitchConfig.decelerateFactor || 1.6;
+      const factor = pitchConfig.decelerateFactor || 1.9;
       progress = p1 + Math.pow(rem, factor) * (1 - p1);
     }
   }
@@ -218,12 +226,15 @@ export function calculateBallState(pitchConfig, elapsedMs, totalDuration) {
 
   // Lateral curve movement on ground X
   if (pitchConfig?.id === 'CURVE') {
-    const amp = pitchConfig.curveAmplitude || 60;
+    const amp = pitchConfig.curveAmplitude || 70;
     groundX += Math.sin(progress * Math.PI) * amp;
   } else if (pitchConfig?.id === 'ZIGZAG') {
-    const freq = pitchConfig.zigzagFreq || 4;
-    const amp = pitchConfig.zigzagAmp || 40;
+    const freq = pitchConfig.zigzagFreq || 4.5;
+    const amp = pitchConfig.zigzagAmp || 45;
     groundX += Math.sin(progress * Math.PI * freq) * amp * (1 - progress * 0.2);
+  } else if (pitchConfig?.lateralOffset) {
+    // Bad Ball Lateral Drift
+    groundX += pitchConfig.lateralOffset * Math.pow(progress, 1.8);
   }
 
   // 2. 3D Elevation / Ball Flight Height above ground
@@ -233,8 +244,11 @@ export function calculateBallState(pitchConfig, elapsedMs, totalDuration) {
   // Sinker drops sharply near plate
   if (pitchConfig?.id === 'SINKER' && progress > 0.55) {
     const sinkProgress = (progress - 0.55) / 0.45;
-    flightHeight -= Math.pow(sinkProgress, 2) * (pitchConfig.verticalDrop || 35);
+    flightHeight -= Math.pow(sinkProgress, 2) * (pitchConfig.verticalDrop || 45);
     flightHeight = Math.max(0, flightHeight);
+  } else if (pitchConfig?.verticalOffset) {
+    // Bad Ball Elevation Drift (High or Low into the dirt)
+    flightHeight += pitchConfig.verticalOffset * Math.pow(progress, 1.5);
   }
 
   // 3. Final 2D Screen Projected Position
@@ -274,35 +288,61 @@ export function calculateBallState(pitchConfig, elapsedMs, totalDuration) {
 
 /**
  * Judge Batting Swing Timing and calculate Hit Result
+ * Incorporates:
+ * 1. Idea 2: Fly Out & Ground Out for mistimed swings
+ * 2. Idea 3: Dynamic Timing Window Scale based on Speed Tier
+ * 3. Idea 5: Deceptive Bad Ball Swing Penalty
  */
-export function judgeSwing(swingTimeMs, targetArrivalMs, pitchConfig, currentRunners = [false, false, false]) {
+export function judgeSwing(swingTimeMs, targetArrivalMs, pitchConfig, currentRunners = [false, false, false], speedLevel = SPEED_LEVELS[0]) {
   const diffMs = swingTimeMs - targetArrivalMs; // Negative = Early, Positive = Late
   const absDiff = Math.abs(diffMs);
 
+  // If swinging at a Bad Ball (유인구):
+  if (pitchConfig?.isBadBall) {
+    if (Math.random() < 0.6) {
+      const isFly = Math.random() < 0.5;
+      return {
+        ...(isFly ? HIT_RESULTS.FLY_OUT : HIT_RESULTS.GROUND_OUT),
+        diffMs,
+        distance: Math.floor(30 + Math.random() * 25),
+        exitAngle: isFly ? -45 : -15,
+        timingFeedback: '유인구에 속았습니다! 빗맞은 아웃! 🚫'
+      };
+    } else {
+      return {
+        ...HIT_RESULTS.STRIKE,
+        diffMs,
+        distance: 0,
+        exitAngle: 0,
+        timingFeedback: '스트라이크 존 밖의 유인구에 헛스윙! ❌'
+      };
+    }
+  }
+
+  // Dynamic Scale from Speed Tier (1.0 -> 0.42)
+  const scale = speedLevel?.timingScale || 1.0;
+  const thPerfect = Math.round(TIMING_THRESHOLDS.PERFECT * scale);
+  const thGreat = Math.round(TIMING_THRESHOLDS.GREAT * scale);
+  const thGood = Math.round(TIMING_THRESHOLDS.GOOD * scale);
+  const thOut = Math.round(TIMING_THRESHOLDS.OUT * scale);
+  const thFoul = Math.round(TIMING_THRESHOLDS.FOUL * scale);
+
   let resultType = null;
   let distance = 0;
-  let exitAngle = 0; // Degrees
+  let exitAngle = 0;
   let timingFeedback = '';
 
-  if (diffMs < -TIMING_THRESHOLDS.FOUL) {
-    // Too Early
-    resultType = HIT_RESULTS.STRIKE;
-    timingFeedback = '너무 빨랐어요! (TOO EARLY)';
-  } else if (diffMs > TIMING_THRESHOLDS.FOUL) {
-    // Too Late
-    resultType = HIT_RESULTS.STRIKE;
-    timingFeedback = '너무 늦었어요! (TOO LATE)';
-  } else if (absDiff <= TIMING_THRESHOLDS.PERFECT) {
+  if (absDiff <= thPerfect) {
     // Perfect Homerun
     const isBasesLoaded = currentRunners[0] && currentRunners[1] && currentRunners[2];
     resultType = isBasesLoaded ? HIT_RESULTS.GRAND_SLAM : HIT_RESULTS.HOMERUN;
-    distance = Math.floor(115 + Math.random() * 35 + (35 - absDiff) * 0.5); // 115m ~ 150m
+    distance = Math.floor(120 + Math.random() * 35 + (thPerfect - absDiff) * 0.5);
     exitAngle = -45 + (Math.random() * 10 - 5);
     timingFeedback = isBasesLoaded ? '🔥 대폭발 만루 홈런!! PERFECT!!' : '💥 장외 대형 홈런!! PERFECT!!';
-  } else if (absDiff <= TIMING_THRESHOLDS.GREAT) {
+  } else if (absDiff <= thGreat) {
     // Great Hit: Double or Triple
     const roll = Math.random();
-    if (roll < 0.45) {
+    if (roll < 0.4) {
       resultType = HIT_RESULTS.TRIPLE;
       distance = Math.floor(85 + Math.random() * 20);
       timingFeedback = '⚡ 총알같은 3루타! GREAT!!';
@@ -312,18 +352,31 @@ export function judgeSwing(swingTimeMs, targetArrivalMs, pitchConfig, currentRun
       timingFeedback = '✨ 펜스 직격 2루타! GREAT!';
     }
     exitAngle = diffMs < 0 ? -30 : -60;
-  } else if (absDiff <= TIMING_THRESHOLDS.GOOD) {
-    // Good Hit: Single
+  } else if (absDiff <= thGood) {
+    // Single Hit
     resultType = HIT_RESULTS.SINGLE;
     distance = Math.floor(40 + Math.random() * 22);
-    timingFeedback = '⚾ 깔끔한 안타! GOOD!';
+    timingFeedback = '⚾ 깔끔한 1루타 안타! GOOD!';
     exitAngle = diffMs < 0 ? -20 : -70;
-  } else {
+  } else if (absDiff <= thOut) {
+    // Mistimed Swing: Fly Out or Ground Out! (Idea 2)
+    const isFly = diffMs < 0; // Early swing -> Sky-high Pop Fly, Late swing -> Weak Chopper Grounder
+    resultType = isFly ? HIT_RESULTS.FLY_OUT : HIT_RESULTS.GROUND_OUT;
+    distance = Math.floor(35 + Math.random() * 25);
+    exitAngle = isFly ? -65 : -15;
+    timingFeedback = isFly ? '빗맞은 외야 뜬공 플라이 아웃! 🧤' : '타이밍 빗나간 내야 땅볼 아웃! 🧤';
+  } else if (absDiff <= thFoul) {
     // Foul Ball
     resultType = HIT_RESULTS.FOUL;
     distance = Math.floor(25 + Math.random() * 20);
     timingFeedback = diffMs < 0 ? '⚠️ 당겨친 파울 (EARLY FOUL)' : '⚠️ 밀어친 파울 (LATE FOUL)';
     exitAngle = diffMs < 0 ? -10 : -80;
+  } else {
+    // Complete Miss Strike
+    resultType = HIT_RESULTS.STRIKE;
+    distance = 0;
+    exitAngle = 0;
+    timingFeedback = diffMs < 0 ? '너무 빠른 헛스윙! (TOO EARLY)' : '너무 늦은 헛스윙! (TOO LATE)';
   }
 
   return {

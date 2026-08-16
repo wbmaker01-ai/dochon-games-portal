@@ -63,6 +63,7 @@ export default function BaseballGame({ onScoreSubmitted }) {
   const longestDistanceRef = useRef(0);
   const comboRef = useRef(0);
   const maxComboRef = useRef(0);
+  const ballsRef = useRef(0);
   const strikesRef = useRef(0);
   const outsRef = useRef(0);
   const runnersRef = useRef([false, false, false]); // [1B, 2B, 3B]
@@ -86,6 +87,7 @@ export default function BaseballGame({ onScoreSubmitted }) {
   const [homeruns, setHomeruns] = useState(0);
   const [longestDistance, setLongestDistance] = useState(0);
   const [combo, setCombo] = useState(0);
+  const [balls, setBalls] = useState(0);
   const [strikes, setStrikes] = useState(0);
   const [outs, setOuts] = useState(0);
   const [runners, setRunners] = useState([false, false, false]);
@@ -113,6 +115,7 @@ export default function BaseballGame({ onScoreSubmitted }) {
     setHomeruns(homerunsRef.current);
     setLongestDistance(longestDistanceRef.current);
     setCombo(comboRef.current);
+    setBalls(ballsRef.current);
     setStrikes(strikesRef.current);
     setOuts(outsRef.current);
     setRunners([...runnersRef.current]);
@@ -237,6 +240,7 @@ export default function BaseballGame({ onScoreSubmitted }) {
     longestDistanceRef.current = 0;
     comboRef.current = 0;
     maxComboRef.current = 0;
+    ballsRef.current = 0;
     strikesRef.current = 0;
     outsRef.current = 0;
     runnersRef.current = [false, false, false];
@@ -286,7 +290,7 @@ export default function BaseballGame({ onScoreSubmitted }) {
     batterStateRef.current = 'SWING';
 
     const pitch = currentPitchRef.current || PITCH_TYPES.FASTBALL;
-    const result = judgeSwing(elapsed, targetArrival, pitch, runnersRef.current);
+    const result = judgeSwing(elapsed, targetArrival, pitch, runnersRef.current, speedLevelRef.current);
 
     // Revert batter swing sprite back to ready after 350ms
     if (swingDisplayTimerRef.current) clearTimeout(swingDisplayTimerRef.current);
@@ -294,9 +298,41 @@ export default function BaseballGame({ onScoreSubmitted }) {
       batterStateRef.current = 'READY';
     }, 350);
 
+    // Handle Immediate Fly Out / Ground Out (Idea 2)
+    if (result.isOut) {
+      particleSystemRef.current.addHitSparks(HOME_PLATE_POS.x, HOME_PLATE_POS.y - 15, 18, '#E11D48');
+      const nextOuts = outsRef.current + 1;
+      strikesRef.current = 0;
+      outsRef.current = nextOuts;
+      comboRef.current = 0;
+
+      if (nextOuts >= 3) {
+        gameStateRef.current = 'GAME_OVER';
+        try { soundFx?.playPacmanGameOver?.(); } catch (e) {}
+        syncUiState();
+        return;
+      } else {
+        try { soundFx?.playBaseballSwingMiss?.(); } catch (e) {}
+        setHitFeedback({
+          label: result.label,
+          desc: `${result.timingFeedback} (아웃 ${nextOuts}/3)`,
+          color: result.color
+        });
+      }
+
+      gameStateRef.current = 'MISS_ANIMATION';
+      syncUiState();
+
+      nextPitchTimeoutRef.current = setTimeout(() => {
+        setHitFeedback(null);
+        startNextPitch();
+      }, 1400);
+      return;
+    }
+
     // Handle Strike / Miss
     if (result.bases === 0 && result.label.includes('STRIKE')) {
-      soundFx.playBaseballSwingMiss();
+      try { soundFx?.playBaseballSwingMiss?.(); } catch (e) {}
       setHitFeedback({
         label: 'STRIKE! ❌',
         desc: result.timingFeedback,
@@ -312,7 +348,7 @@ export default function BaseballGame({ onScoreSubmitted }) {
 
         if (nextOuts >= 3) {
           gameStateRef.current = 'GAME_OVER';
-          soundFx.playPacmanGameOver();
+          try { soundFx?.playPacmanGameOver?.(); } catch (e) {}
           syncUiState();
           return;
         } else {
@@ -338,7 +374,7 @@ export default function BaseballGame({ onScoreSubmitted }) {
 
     // Handle Foul
     if (result.bases === 0 && result.label.includes('FOUL')) {
-      soundFx.playBaseballHit();
+      try { soundFx?.playBaseballHit?.(); } catch (e) {}
       setHitFeedback({
         label: 'FOUL ⚠️',
         desc: result.timingFeedback,
@@ -514,36 +550,75 @@ export default function BaseballGame({ onScoreSubmitted }) {
           // Auto Miss if ball travels past plate
           if (elapsed > duration + 200 && !isSwungRef.current) {
             isSwungRef.current = true;
-            soundFx.playBaseballSwingMiss();
-            setHitFeedback({
-              label: 'STRIKE! ❌',
-              desc: '루킹 스트라이크! 공을 지켜보았습니다.',
-              color: '#EF4444'
-            });
 
-            const nextStrikes = strikesRef.current + 1;
-            if (nextStrikes >= 3) {
-              const nextOuts = outsRef.current + 1;
-              strikesRef.current = 0;
-              outsRef.current = nextOuts;
-              comboRef.current = 0;
+            // Idea 5: If it was a Bad Ball (유인구), letting it pass awards a BALL!
+            if (currentPitchRef.current.isBadBall) {
+              const nextBalls = ballsRef.current + 1;
+              if (nextBalls >= 4) {
+                // Four-Ball Walk!
+                ballsRef.current = 0;
+                const advanceResult = advanceRunners(runnersRef.current, 1);
+                runnersRef.current = advanceResult.newRunners;
+                runsRef.current += advanceResult.runsScored;
+                scoreRef.current += 100 + (advanceResult.runsScored * 100);
 
-              if (nextOuts >= 3) {
-                gameStateRef.current = 'GAME_OVER';
-                soundFx.playPacmanGameOver();
-                syncUiState();
+                try { soundFx?.playPacmanEatGhost?.(); } catch (e) {}
+                setHitFeedback({
+                  label: 'FOUR BALL! 🚶',
+                  desc: '4볼 달성! 밀어내기 1루 진루 & 득점 성공!',
+                  color: '#10B981',
+                  points: 100
+                });
+              } else {
+                ballsRef.current = nextBalls;
+                try { soundFx?.playPacmanWaka?.(); } catch (e) {}
+                setHitFeedback({
+                  label: 'BALL! 👁️',
+                  desc: `침착한 선구안! 볼 카운트 (${nextBalls}/4)`,
+                  color: '#10B981'
+                });
               }
-            } else {
-              strikesRef.current = nextStrikes;
-            }
 
-            if (gameStateRef.current !== 'GAME_OVER') {
               gameStateRef.current = 'MISS_ANIMATION';
               syncUiState();
+
               nextPitchTimeoutRef.current = setTimeout(() => {
                 setHitFeedback(null);
                 startNextPitch();
               }, 1200);
+            } else {
+              // Normal Looking Strike
+              try { soundFx?.playBaseballSwingMiss?.(); } catch (e) {}
+              setHitFeedback({
+                label: 'STRIKE! ❌',
+                desc: '루킹 스트라이크! 공을 지켜보았습니다.',
+                color: '#EF4444'
+              });
+
+              const nextStrikes = strikesRef.current + 1;
+              if (nextStrikes >= 3) {
+                const nextOuts = outsRef.current + 1;
+                strikesRef.current = 0;
+                outsRef.current = nextOuts;
+                comboRef.current = 0;
+
+                if (nextOuts >= 3) {
+                  gameStateRef.current = 'GAME_OVER';
+                  try { soundFx?.playPacmanGameOver?.(); } catch (e) {}
+                  syncUiState();
+                }
+              } else {
+                strikesRef.current = nextStrikes;
+              }
+
+              if (gameStateRef.current !== 'GAME_OVER') {
+                gameStateRef.current = 'MISS_ANIMATION';
+                syncUiState();
+                nextPitchTimeoutRef.current = setTimeout(() => {
+                  setHitFeedback(null);
+                  startNextPitch();
+                }, 1200);
+              }
             }
           } else {
             const ball = calculateBallState(currentPitchRef.current, elapsed, duration);
@@ -705,14 +780,22 @@ export default function BaseballGame({ onScoreSubmitted }) {
 
           <div className="count-meters-box">
             <div className="count-row">
-              <span className="count-name">S</span>
+              <span className="count-name" style={{ color: '#10B981' }}>B</span>
+              <div className="count-dots">
+                <div className={`count-lamp ball ${balls >= 1 ? 'on' : ''}`} />
+                <div className={`count-lamp ball ${balls >= 2 ? 'on' : ''}`} />
+                <div className={`count-lamp ball ${balls >= 3 ? 'on' : ''}`} />
+              </div>
+            </div>
+            <div className="count-row">
+              <span className="count-name" style={{ color: '#FBBF24' }}>S</span>
               <div className="count-dots">
                 <div className={`count-lamp strike ${strikes >= 1 ? 'on' : ''}`} />
                 <div className={`count-lamp strike ${strikes >= 2 ? 'on' : ''}`} />
               </div>
             </div>
             <div className="count-row">
-              <span className="count-name">O</span>
+              <span className="count-name" style={{ color: '#EF4444' }}>O</span>
               <div className="count-dots">
                 <div className={`count-lamp out ${outs >= 1 ? 'on' : ''}`} />
                 <div className={`count-lamp out ${outs >= 2 ? 'on' : ''}`} />

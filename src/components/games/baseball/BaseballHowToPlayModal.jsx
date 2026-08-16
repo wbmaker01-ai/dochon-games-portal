@@ -68,13 +68,17 @@ export default function BaseballHowToPlayModal({ isOpen, onClose }) {
                 <span className="timing-badge">GOOD</span>
                 <span className="timing-desc">내야를 가르는 깨끗한 <strong>1루타 안타</strong>로 주자 진루!</span>
               </div>
+              <div className="timing-row out-row" style={{ background: 'rgba(225, 29, 72, 0.1)', border: '1px solid rgba(225, 29, 72, 0.3)' }}>
+                <span className="timing-badge" style={{ background: '#E11D48' }}>FLY / GROUND OUT</span>
+                <span className="timing-desc">타이밍이 빗맞으면 <strong>외야 뜬공/내야 땅볼로 즉시 1아웃!</strong></span>
+              </div>
               <div className="timing-row foul-row">
                 <span className="timing-badge">FOUL</span>
-                <span className="timing-desc">살짝 빠르거나 늦으면 파울 라인 밖으로 벗어납니다.</span>
+                <span className="timing-desc">파울 라인 밖으로 벗어나는 파울볼입니다.</span>
               </div>
               <div className="timing-row strike-row">
                 <span className="timing-badge">STRIKE</span>
-                <span className="timing-desc">타이밍을 크게 놓치거나 헛스윙 시 스트라이크! (3스트라이크 = 1아웃)</span>
+                <span className="timing-desc">헛스윙 또는 루킹 스트라이크! (3스트라이크 = 1아웃)</span>
               </div>
             </div>
           </div>
@@ -83,9 +87,9 @@ export default function BaseballHowToPlayModal({ isOpen, onClose }) {
           <div className="baseball-guide-section">
             <h3 className="baseball-guide-heading">
               <Zap style={{ width: '18px', height: '18px', color: '#A855F7' }} />
-              <span>3. 투수의 다양한 마구와 변화구</span>
+              <span>3. 투수의 다양한 마구와 유인구 (선구안)</span>
             </h3>
-            <p className="baseball-guide-p">점수가 높아질수록 투수가 던지는 구종이 점점 다양해집니다!</p>
+            <p className="baseball-guide-p">점수가 높아질수록 투구 속도가 빨라지며 고난도 마구와 유인구가 날아옵니다!</p>
             <div className="pitch-types-grid">
               <div className="pitch-card">
                 <span className="pitch-badge fastball">직구</span>
@@ -113,11 +117,15 @@ export default function BaseballHowToPlayModal({ isOpen, onClose }) {
               </div>
               <div className="pitch-card">
                 <span className="pitch-badge ghost">유령 마구</span>
-                <span>공중에서 투명해졌다가 타석 앞에서 다시 나타나는 마구!</span>
+                <span>공중에서 반투명해졌다가 타석 앞에서 나타나는 마구!</span>
               </div>
               <div className="pitch-card">
                 <span className="pitch-badge fireball">불꽃 광속구</span>
                 <span>엄청난 속도로 불꽃을 뿜으며 꽂히는 최고속 마구</span>
+              </div>
+              <div className="pitch-card" style={{ borderColor: 'rgba(132, 204, 22, 0.4)' }}>
+                <span className="pitch-badge" style={{ background: '#84CC16' }}>유인구 (BALL)</span>
+                <span>존을 벗어나는 나쁜 공! 스윙하지 않고 참으면 <strong>볼(BALL) & 4볼 밀어내기 득점!</strong></span>
               </div>
             </div>
           </div>
@@ -129,6 +137,10 @@ export default function BaseballHowToPlayModal({ isOpen, onClose }) {
               <span>4. 고득점 꿀팁 & 명예의 전당 등록</span>
             </h3>
             <div className="baseball-tips-box">
+              <div className="tip-item">
+                <CheckCircle2 style={{ width: '16px', height: '16px', color: '#10B981', flexShrink: 0 }} />
+                <span><strong>스피드 레벨업 (⚡ SPEED Lv.1~6):</strong> 점수가 오를수록 속도가 가속되고 정밀한 타이밍이 요구됩니다.</span>
+              </div>
               <div className="tip-item">
                 <CheckCircle2 style={{ width: '16px', height: '16px', color: '#10B981', flexShrink: 0 }} />
                 <span><strong>만루 찬스를 노리세요:</strong> 1, 2, 3루 주자가 꽉 찼을 때 홈런을 치면 <strong>그랜드 슬램(만루홈런) 대량 득점</strong>이 터집니다!</span>
