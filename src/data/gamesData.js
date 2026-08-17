@@ -143,6 +143,20 @@ export const PLAYABLE_GAMES = [
 
 export const COMING_SOON_GAMES = [
   {
+    id: 'fruitmerge',
+    title: '도촌 과일 합치기',
+    category: '퍼즐',
+    imageSrc: getThumb('fruitmerge.jpg'),
+    isPlayable: false
+  },
+  {
+    id: 'brickbreaker',
+    title: '도촌 벽돌격파왕',
+    category: '액션',
+    imageSrc: getThumb('brickbreaker.jpg'),
+    isPlayable: false
+  },
+  {
     id: 'petanque',
     title: '페탕크',
     category: '스포츠',

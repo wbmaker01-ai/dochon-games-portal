@@ -3,11 +3,30 @@
 
 export const CHANGELOG_DATA = [
   {
+    version: 'v1.19.0',
+    date: '2026-08-17',
+    title: '신규 순차 개장 준비(Coming Soon) 라인업 2종 [도촌 과일 합치기 & 도촌 벽돌격파왕] 등록',
+    badge: 'LATEST',
+    badgeColor: 'emerald',
+    items: [
+      {
+        tag: 'COMING SOON',
+        tagColor: 'amber',
+        text: '[도촌 과일 합치기 (수박게임 모티브) 등록] 떨어지는 과일을 합쳐 거대한 도촌 수박을 만드는 초인기 2D 물리 합성 퍼즐 게임 개장 준비 라인업 등록 및 나노바나나 고화질 3D 썸네일 탑재'
+      },
+      {
+        tag: 'COMING SOON',
+        tagColor: 'blue',
+        text: '[도촌 벽돌격파왕 (알카노이드 / BB-TAN 모티브) 등록] 반사되는 공과 화려한 파워업 아이템으로 형형색색의 블록을 격파하는 클래식 아케이드 게임 개장 준비 라인업 등록 및 고화질 3D 썸네일 탑재'
+      }
+    ]
+  },
+  {
     version: 'v1.18.0',
     date: '2026-08-17',
     title: '신규 15호 드로잉 마법 액션 [도촌 매직 캣 아카데미] 공식 출시 & 대마법서 탈환 작전',
-    badge: 'LATEST',
-    badgeColor: 'emerald',
+    badge: 'UPDATE',
+    badgeColor: 'blue',
     items: [
       {
         tag: 'NEW GAME',
