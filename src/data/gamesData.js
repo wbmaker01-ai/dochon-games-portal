@@ -136,19 +136,21 @@ export const PLAYABLE_GAMES = [
     category: '어드벤처',
     imageSrc: getThumb('magic.jpg'),
     isPlayable: true,
-    badgeText: '🧙 NEW 15위',
+    badgeText: '🧙 15위',
     description: '마법 지팡이로 기호를 화면에 그려 침공한 유령들을 물리치고 대마법서를 되찾으세요!'
-  }
-];
-
-export const COMING_SOON_GAMES = [
+  },
   {
     id: 'fruitmerge',
     title: '도촌 과일 합치기',
     category: '퍼즐',
     imageSrc: getThumb('fruitmerge.jpg'),
-    isPlayable: false
-  },
+    isPlayable: true,
+    badgeText: '🍉 NEW 16위',
+    description: '떨어지는 과일을 합쳐 거대한 도촌 수박을 만드는 초인기 2D 물리 합성 퍼즐!'
+  }
+];
+
+export const COMING_SOON_GAMES = [
   {
     id: 'brickbreaker',
     title: '도촌 벽돌격파왕',

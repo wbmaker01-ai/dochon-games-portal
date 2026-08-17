@@ -3,11 +3,50 @@
 
 export const CHANGELOG_DATA = [
   {
+    version: 'v1.20.0',
+    date: '2026-08-17',
+    title: '신규 16호 2D 물리 합성 퍼즐 [도촌 과일 합치기 (수박게임)] 정식 출시 & 왕수박 대합성',
+    badge: 'LATEST',
+    badgeColor: 'emerald',
+    items: [
+      {
+        tag: 'NEW GAME',
+        tagColor: 'amber',
+        text: '[신규 16호 게임 도촌 과일 합치기 정식 오픈] 작은 체리부터 거대한 왕 수박까지 11단계 과일을 떨어뜨리고 합쳐 나가는 초인기 2D 물리 합성 캐주얼 퍼즐 게임 그랜드 오픈'
+      },
+      {
+        tag: 'PHYSICS ENGINE',
+        tagColor: 'blue',
+        text: '[초정밀 2D 원형 물리 & 충돌 시뮬레이터 탑재] 6단계 서브스텝 물리 적분 연산으로 과일 간의 반발력, 탄성, 구름 마찰력, 쫀득한 탄성 변형(Squash & Stretch) 및 상자 내부 충돌을 완벽하게 재현'
+      },
+      {
+        tag: '11 FRUITS VISUAL',
+        tagColor: 'purple',
+        text: '[11종 카와이 과일 그래픽 & 애니메이션] 체리🍒부터 딸기, 포도, 귤, 감, 사과, 배, 복숭아, 파인애플, 멜론, 수박🍉까지 고화질 2D 캔버스 프로시저럴 렌더링 및 눈 깜빡임 표정 애니메이션 적용'
+      },
+      {
+        tag: 'AUDIO ENGINE',
+        tagColor: 'emerald',
+        text: '[Web Audio API 과즙 팡팡 사운드 신디사이저] 과일 낙하음, 통통 튀는 탄성음, 합성 시 음계가 상승하는 경쾌한 퐁! 효과음, 연속 콤보 하모니, 왕수박 달성 축하 팡파레 탑재'
+      },
+      {
+        tag: 'SPECIAL SKILL',
+        tagColor: 'amber',
+        text: '[비상 상자 흔들기(Shake) 찬스] 구석이나 틈새에 끼인 과일을 탈출시킬 수 있는 흔들기 스킬(게임당 2회) 및 낙하 조준 가이드라인 지원'
+      },
+      {
+        tag: 'LEADERBOARD',
+        tagColor: 'amber',
+        text: '[도촌초 실시간 명예의 전당 연동] 100점 초과 달성 시 실시간 전교 랭킹 등록 및 점수 등록 후 과일 합치기 탭 자동 선택 지원'
+      }
+    ]
+  },
+  {
     version: 'v1.19.0',
     date: '2026-08-17',
     title: '신규 순차 개장 준비(Coming Soon) 라인업 2종 [도촌 과일 합치기 & 도촌 벽돌격파왕] 등록',
-    badge: 'LATEST',
-    badgeColor: 'emerald',
+    badge: 'UPDATE',
+    badgeColor: 'blue',
     items: [
       {
         tag: 'COMING SOON',

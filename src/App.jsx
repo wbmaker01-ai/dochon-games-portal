@@ -14,6 +14,7 @@ import CricketGame from './components/games/cricket/CricketGame';
 import PonyExpressGame from './components/games/ponyexpress/PonyExpressGame';
 import JerryLawsonGame from './components/games/jerrylawson/JerryLawsonGame';
 import MagicCatGame from './components/games/magic/MagicCatGame';
+import FruitMergeGame from './components/games/fruitmerge/FruitMergeGame';
 import GameCard from './components/GameCard';
 import LeaderboardModal from './components/LeaderboardModal';
 import ChangelogModal from './components/ChangelogModal';
@@ -498,6 +499,9 @@ export default function App() {
               )}
               {activeGame === 'magic' && (
                 <MagicCatGame onScoreSubmitted={() => openInPageLeaderboardModal('magic')} />
+              )}
+              {activeGame === 'fruitmerge' && (
+                <FruitMergeGame onScoreSubmitted={() => openInPageLeaderboardModal('fruitmerge')} />
               )}
             </div>
           </div>
