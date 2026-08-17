@@ -2246,6 +2246,90 @@ body {
   }
 }
 
+/* ========================================================================= */
+/* 📱 MOBILE TOUCH & GESTURE OPTIMIZATION (개선안 1)                         */
+/* ========================================================================= */
+
+/* Prevent double-tap zoom delay and unwanted tap highlights */
+button, a, input, [role="button"], .dpad-btn, .btn-dino-jump, .btn-dino-duck, .mobile-swing-btn, .bb-ctrl-btn, .bb-action-btn, .popcorn-dpad-btn, .jerry-vbtn {
+  touch-action: manipulation !important;
+  -webkit-tap-highlight-color: transparent !important;
+}
+
+/* Prevent accidental text selection, pull-to-refresh, and rubber-banding during gameplay */
+.game-overlay,
+.game-modal-box,
+.game-modal-body,
+.game-modal-body canvas,
+.game-canvas-wrapper,
+.baseball-canvas-wrapper,
+.cricket-canvas-wrapper,
+.dpad-panel,
+.popcorn-mobile-controls,
+.bb-mobile-controls,
+.mobile-controls,
+.jerry-controls-bar,
+.pony-virtual-controls {
+  touch-action: none !important;
+  user-select: none !important;
+  -webkit-user-select: none !important;
+  -webkit-touch-callout: none !important;
+  overscroll-behavior: none !important;
+}
+
+/* ========================================================================= */
+/* 📱 IN-GAME MODAL LANDSCAPE ORIENTATION ADVICE (개선안 2)                  */
+/* ========================================================================= */
+
+.in-game-orientation-toast {
+  display: none;
+  background: linear-gradient(90deg, #1E1B4B 0%, #312E81 50%, #1E1B4B 100%) !important;
+  border-bottom: 1.5px solid rgba(129, 140, 248, 0.5) !important;
+  padding: 6px 12px !important;
+  color: #E0E7FF !important;
+  font-size: 0.75rem !important;
+  font-weight: 800 !important;
+  text-align: center !important;
+  align-items: center !important;
+  justify-content: space-between !important;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.4) !important;
+  animation: fadeIn 0.3s cubic-bezier(0.16, 1, 0.3, 1) forwards !important;
+  z-index: 10 !important;
+}
+
+/* Show only on mobile portrait orientation */
+@media (max-width: 820px) and (orientation: portrait) {
+  .in-game-orientation-toast {
+    display: flex !important;
+  }
+}
+
+.in-game-orientation-toast-content {
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  gap: 6px !important;
+  flex: 1 !important;
+}
+
+.in-game-orientation-dismiss {
+  background: transparent !important;
+  border: none !important;
+  color: #A5B4FC !important;
+  cursor: pointer !important;
+  padding: 2px 6px !important;
+  border-radius: 6px !important;
+  font-size: 0.7rem !important;
+  font-weight: 700 !important;
+  transition: all 0.15s ease !important;
+}
+
+.in-game-orientation-dismiss:hover {
+  color: #FFFFFF !important;
+  background: rgba(255, 255, 255, 0.15) !important;
+}
+
+
 
 
 

@@ -3,11 +3,35 @@
 
 export const CHANGELOG_DATA = [
   {
+    version: 'v1.23.0',
+    date: '2026-08-17',
+    title: '모바일 UX 3대 개선안 [터치 제스처 최적화 · 인게임 가로모드 알림 · 스마트폰 손맛 햅틱 진동]',
+    badge: 'LATEST',
+    badgeColor: 'emerald',
+    items: [
+      {
+        tag: 'TOUCH ACTION',
+        tagColor: 'teal',
+        text: '[모바일 브라우저 제스처 간섭 차단] touch-action: none 및 manipulation을 적용하여 빠른 연속 탭 시 화면 더블탭 확대 딜레이, 당겨서 새로고침(Pull-to-Refresh), 텍스트 선택 잔상을 완벽 차단'
+      },
+      {
+        tag: 'ORIENTATION TIP',
+        tagColor: 'amber',
+        text: '[인게임 가로모드 추천 알림 바 신설] 세로 모드 스마트폰으로 게임 진입 시 "스마트폰을 가로로 돌리면 훨씬 넓고 쾌적하게 플레이할 수 있어요! 🔄" 반응형 안내 바 자동 노출'
+      },
+      {
+        tag: 'HAPTIC ENGINE',
+        tagColor: 'purple',
+        text: '[스마트폰 손맛 웹 햅틱 진동 시스템 탑재] 타격, 블록 격파, 과일 합성, 팩맨 파워쿠키, 마법 제스처 성공 시 콘솔 게임기 수준의 미세 손맛 진동(Haptics) 피드백 제공'
+      }
+    ]
+  },
+  {
     version: 'v1.22.1',
     date: '2026-08-17',
     title: '도촌 크리켓 모바일/태블릿 전용 하단 대형 스윙 버튼 컨트롤러 탑재',
-    badge: 'LATEST',
-    badgeColor: 'emerald',
+    badge: 'UPDATE',
+    badgeColor: 'blue',
     items: [
       {
         tag: 'MOBILE CONTROLS',

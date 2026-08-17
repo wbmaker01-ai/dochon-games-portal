@@ -21,6 +21,7 @@ import {
 import BaseballHowToPlayModal from './BaseballHowToPlayModal';
 import { soundFx } from '../../../utils/audio';
 import { submitScoreToDB } from '../../../utils/leaderboardApi';
+import { haptics } from '../../../utils/haptics';
 import {
   Volume2,
   VolumeX,
@@ -278,6 +279,7 @@ export default function BaseballGame({ onScoreSubmitted }) {
 
     // Early swing safety buffer (ignore accidental clicks within 300ms of pitch release)
     if (elapsed < 300) {
+      haptics.light();
       batterStateRef.current = 'SWING';
       if (swingDisplayTimerRef.current) clearTimeout(swingDisplayTimerRef.current);
       swingDisplayTimerRef.current = setTimeout(() => {
@@ -300,6 +302,7 @@ export default function BaseballGame({ onScoreSubmitted }) {
 
     // Handle Immediate Fly Out / Ground Out (Idea 2)
     if (result.isOut) {
+      haptics.warning();
       particleSystemRef.current.addHitSparks(HOME_PLATE_POS.x, HOME_PLATE_POS.y - 15, 18, '#E11D48');
       const nextOuts = outsRef.current + 1;
       strikesRef.current = 0;
@@ -399,12 +402,14 @@ export default function BaseballGame({ onScoreSubmitted }) {
     // Handle Successful Hit (Single, Double, Triple, Homerun, Grand Slam)
     const isHomerun = result.bases >= 4;
     if (isHomerun) {
+      haptics.heavy();
       soundFx?.playBaseballHomerun?.();
       soundFx?.playPacmanEatFruit?.();
       particleSystemRef.current.addHomerunFireworks();
       setShowHomerunBadge(true);
       setTimeout(() => setShowHomerunBadge(false), 2200);
     } else {
+      haptics.medium();
       soundFx?.playBaseballHit?.();
       particleSystemRef.current.addHitSparks(HOME_PLATE_POS.x, HOME_PLATE_POS.y - 15, 25, result.color);
     }

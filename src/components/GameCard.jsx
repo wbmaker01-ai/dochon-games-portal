@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { Play, Lock } from 'lucide-react';
 import { soundFx } from '../utils/audio';
+import { haptics } from '../utils/haptics';
 
 export default function GameCard({
   id,
@@ -21,11 +22,13 @@ export default function GameCard({
     const nextState = !isFavorite;
     setAnimState(nextState ? 'like' : 'unlike');
 
-    // Play sweet chime audio feedback
+    // Play sweet chime audio and haptic feedback
     if (nextState) {
       soundFx.playFavoriteAdd();
+      haptics.medium();
     } else {
       soundFx.playFavoriteRemove();
+      haptics.light();
     }
 
     setTimeout(() => {
@@ -37,9 +40,16 @@ export default function GameCard({
     }
   };
 
+  const handleCardClick = () => {
+    if (isPlayable && onPlay) {
+      haptics.light();
+      onPlay();
+    }
+  };
+
   return (
     <div
-      onClick={isPlayable ? onPlay : undefined}
+      onClick={handleCardClick}
       className={`game-tile-card ${isPlayable ? 'playable' : 'coming-soon'}`}
       style={{ maxWidth: '135px', width: '100%' }}
     >

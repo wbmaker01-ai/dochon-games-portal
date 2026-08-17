@@ -5,6 +5,7 @@ import { magicAudio } from './magicAudio';
 import { CANVAS_WIDTH, CANVAS_HEIGHT, PLAYER_MAX_HP } from './magicConstants';
 import MagicCatHowToPlayModal from './MagicCatHowToPlayModal';
 import { submitScoreToDB } from '../../../utils/leaderboardApi';
+import { haptics } from '../../../utils/haptics';
 import {
   Trophy, RotateCcw, Volume2, VolumeX, HelpCircle,
   Heart, Sparkles, Wand2, Flame, Award, CheckCircle2, User, Send
@@ -139,6 +140,7 @@ export default function MagicCatGame({ onScoreSubmitted }) {
       logicRef.current.currentStroke = strokePointsRef.current;
     }
     magicAudio.playWandDraw();
+    haptics.light();
   };
 
   const handlePointerMove = (e) => {
@@ -158,6 +160,7 @@ export default function MagicCatGame({ onScoreSubmitted }) {
     if (points.length >= 5) {
       const recognizedSymbol = GestureRecognizer.recognize(points);
       if (recognizedSymbol && logicRef.current) {
+        haptics.heavy();
         logicRef.current.onGestureRecognized(recognizedSymbol);
       }
     }

@@ -23,6 +23,7 @@ import {
 import { cricketAudio } from './cricketAudio';
 import CricketHowToPlayModal from './CricketHowToPlayModal';
 import { submitScoreToDB } from '../../../utils/leaderboardApi';
+import { haptics } from '../../../utils/haptics';
 import {
   Volume2,
   VolumeX,
@@ -207,6 +208,7 @@ export default function CricketGame({ onScoreSubmitted }) {
 
     const now = performance.now();
     swingStartTimeRef.current = now;
+    haptics.light();
 
     if (gameStateRef.current !== 'PITCHING' || hasSwungRef.current) {
       // Swung during windup or idle -> early swing miss
@@ -241,6 +243,7 @@ export default function CricketGame({ onScoreSubmitted }) {
 
       // Audio & Particle Effects
       if (judgment.result.id === 'SIX') {
+        haptics.heavy();
         cricketAudio.playBatHit(true);
         cricketAudio.playSixCelebration();
         particleSystemRef.current.addConfetti(
@@ -255,6 +258,7 @@ export default function CricketGame({ onScoreSubmitted }) {
           '#F59E0B'
         );
       } else if (judgment.result.id === 'FOUR') {
+        haptics.heavy();
         cricketAudio.playBatHit(true);
         cricketAudio.playFourBoundary();
         particleSystemRef.current.addHitSparks(
@@ -264,6 +268,7 @@ export default function CricketGame({ onScoreSubmitted }) {
           '#10B981'
         );
       } else {
+        haptics.medium();
         cricketAudio.playBatHit(false);
         cricketAudio.playFootstep();
         particleSystemRef.current.addHitSparks(

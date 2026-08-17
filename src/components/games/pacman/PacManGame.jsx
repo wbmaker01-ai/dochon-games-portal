@@ -3,6 +3,7 @@ import { DOCHON_MAZE_GRID, TILE_SIZE, COLS, ROWS, LETTER_REGIONS } from './mazeD
 import { soundFx } from '../../../utils/audio';
 import { saveScore, getHighScore } from '../../../utils/leaderboard';
 import { submitScoreToDB } from '../../../utils/leaderboardApi';
+import { haptics } from '../../../utils/haptics';
 import { Play, Pause, RotateCcw, Volume2, VolumeX, Trophy, ArrowUp, ArrowDown, ArrowLeft, ArrowRight, Sparkles } from 'lucide-react';
 import confetti from 'canvas-confetti';
 
@@ -46,6 +47,7 @@ export default function PacManGame({ onScoreSubmitted }) {
 
   const setDirection = (dx, dy) => {
     soundFx.init();
+    haptics.light();
     const g = gameStateRef.current;
     g.pacman.nextDx = dx;
     g.pacman.nextDy = dy;

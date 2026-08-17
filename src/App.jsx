@@ -24,13 +24,15 @@ import { PLAYABLE_GAMES, COMING_SOON_GAMES, CATEGORY_DEFINITIONS } from './data/
 import { getLatestVersion } from './data/changelogData';
 import { getLeaderboardFromDB } from './utils/leaderboardApi';
 import { getRankedPlayableGames } from './utils/rankingAlgorithm';
-import { Trophy, X, Search, Lock, Gamepad2, Dices, Sparkles, Heart, Crown, Flame, History, HelpCircle, Smartphone } from 'lucide-react';
+import { haptics } from './utils/haptics';
+import { Trophy, X, Search, Lock, Gamepad2, Dices, Sparkles, Heart, Crown, Flame, History, HelpCircle, Smartphone, RotateCcw } from 'lucide-react';
 
 export default function App() {
   const [activeGame, setActiveGame] = useState(null);
   const [isLeaderboardOpen, setIsLeaderboardOpen] = useState(false);
   const [isChangelogOpen, setIsChangelogOpen] = useState(false);
   const [isGuideOpen, setIsGuideOpen] = useState(false);
+  const [isGameOrientationDismissed, setIsGameOrientationDismissed] = useState(false);
   const [leaderboardTab, setLeaderboardTab] = useState('pacman');
   const [filterCategory, setFilterCategory] = useState('ALL');
   const [searchQuery, setSearchQuery] = useState('');
@@ -450,6 +452,13 @@ export default function App() {
                   {activeGame === 'colortile' && '🧩 도촌 컬러 타일 (DOCHON COLOR TILE)'}
                   {activeGame === 'popcorn' && '🍿 도촌 팝콘 (DOCHON POPCORN SURVIVAL)'}
                   {activeGame === 'brickbreaker' && '🧱 도촌 벽돌 격파왕 (DOCHON BRICK BREAKER)'}
+                  {activeGame === 'tictactoe' && '🍩 도촌 도넛 틱택토 (DONUT TIC-TAC-TOE)'}
+                  {activeGame === 'champion' && '🏆 도촌 챔피언 아일랜드 (CHAMPION ISLAND)'}
+                  {activeGame === 'cricket' && '🏏 도촌 크리켓 (DOCHON CRICKET)'}
+                  {activeGame === 'ponyexpress' && '🐎 도촌 포니 익스프레스 (PONY EXPRESS)'}
+                  {activeGame === 'jerrylawson' && '🕹️ 도촌 제리 로슨 (JERRY LAWSON)'}
+                  {activeGame === 'magic' && '🧙 도촌 마법 고양이 (MAGIC CAT ACADEMY)'}
+                  {activeGame === 'fruitmerge' && '🍉 도촌 과일 합치기 (DOCHON FRUIT MERGE)'}
                 </span>
                 <span style={{
                   backgroundColor: 'rgba(251, 191, 36, 0.2)',
@@ -466,7 +475,10 @@ export default function App() {
               </div>
 
               <button
-                onClick={() => setActiveGame(null)}
+                onClick={() => {
+                  haptics.light();
+                  setActiveGame(null);
+                }}
                 className="game-modal-close-btn"
                 title="게임 종료 및 닫기"
               >
@@ -474,6 +486,26 @@ export default function App() {
                 <span>닫기</span>
               </button>
             </div>
+
+            {/* Mobile / Tablet In-Game Landscape Orientation Advice Toast (개선안 2) */}
+            {!isGameOrientationDismissed && (
+              <div className="in-game-orientation-toast">
+                <div className="in-game-orientation-toast-content">
+                  <Smartphone className="w-3.5 h-3.5 text-amber-400 animate-pulse shrink-0" />
+                  <span>스마트폰을 가로로 돌리면 훨씬 넓고 쾌적하게 플레이할 수 있어요! 🔄</span>
+                </div>
+                <button
+                  onClick={() => {
+                    haptics.light();
+                    setIsGameOrientationDismissed(true);
+                  }}
+                  className="in-game-orientation-dismiss"
+                  title="안내 닫기"
+                >
+                  ✕
+                </button>
+              </div>
+            )}
 
             {/* Modal Game Content Area */}
             <div className="game-modal-body">

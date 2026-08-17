@@ -15,6 +15,7 @@ import { fruitAudio } from './fruitMergeAudio';
 import { PhysicsEngine, Fruit } from './fruitMergePhysics';
 import FruitMergeHowToPlayModal from './FruitMergeHowToPlayModal';
 import { submitScoreToDB } from '../../../utils/leaderboardApi';
+import { haptics } from '../../../utils/haptics';
 import './fruitmerge.css';
 import {
   Volume2,
@@ -99,6 +100,7 @@ export default function FruitMergeGame({ onScoreSubmitted }) {
   // Trigger Box Shake Skill
   const handleShake = useCallback(() => {
     if (shakeCount <= 0 || gameState !== 'playing') return;
+    haptics.heavy();
     engineRef.current.shakeBox();
     setShakeCount(prev => prev - 1);
   }, [shakeCount, gameState]);
@@ -112,6 +114,7 @@ export default function FruitMergeGame({ onScoreSubmitted }) {
 
     fruitAudio.init();
     fruitAudio.playDrop();
+    haptics.light();
 
     const fruitData = FRUITS[currentLevel];
     const clampedX = Math.max(
@@ -207,6 +210,7 @@ export default function FruitMergeGame({ onScoreSubmitted }) {
 
     // Giant Watermelon Celebration!
     if (mergedLevel === 10) {
+      haptics.success();
       try {
         confetti({
           particleCount: 100,
@@ -214,6 +218,8 @@ export default function FruitMergeGame({ onScoreSubmitted }) {
           origin: { y: 0.6 }
         });
       } catch (e) {}
+    } else {
+      haptics.medium();
     }
   }, []);
 
@@ -221,6 +227,7 @@ export default function FruitMergeGame({ onScoreSubmitted }) {
   const handleGameOver = useCallback(() => {
     if (isGameOverRef.current) return;
     isGameOverRef.current = true;
+    haptics.warning();
     setGameState('gameover');
     setCanDrop(false);
   }, []);

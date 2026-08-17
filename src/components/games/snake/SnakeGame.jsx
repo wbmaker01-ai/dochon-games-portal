@@ -2,6 +2,7 @@ import React, { useEffect, useRef, useState, useCallback } from 'react';
 import { soundFx } from '../../../utils/audio';
 import { saveScore, getHighScore } from '../../../utils/leaderboard';
 import { submitScoreToDB } from '../../../utils/leaderboardApi';
+import { haptics } from '../../../utils/haptics';
 import {
   Play,
   Pause,
@@ -110,6 +111,7 @@ export default function SnakeGame({ onScoreSubmitted }) {
     if (currentDir.x + newDir.x === 0 && currentDir.y + newDir.y === 0) {
       return;
     }
+    haptics.light();
     stateRef.current.nextDir = newDir;
     soundFx.playSnakeTurn();
   }, []);
@@ -266,6 +268,7 @@ export default function SnakeGame({ onScoreSubmitted }) {
         setSnakeLength(s.snake.length);
 
         soundFx.playSnakeEat();
+        haptics.medium();
         spawnJuiceParticles(
           s.food.x * CELL_SIZE + CELL_SIZE / 2,
           s.food.y * CELL_SIZE + CELL_SIZE / 2,
@@ -278,6 +281,7 @@ export default function SnakeGame({ onScoreSubmitted }) {
 
         // Milestone Alerts
         if (s.applesCount % 5 === 0) {
+          haptics.heavy();
           soundFx.playMilestone();
           triggerBadge(`🍎 ${s.applesCount}개 사과 달성! (+${s.scoreVal}점)`);
           confetti({

@@ -25,6 +25,7 @@ import {
 } from './popcornLogic';
 import { submitScoreToDB } from '../../../utils/leaderboardApi';
 import PopcornHowToPlayModal from './PopcornHowToPlayModal';
+import { haptics } from '../../../utils/haptics';
 import './popcorn.css';
 import {
   Volume2,
@@ -263,6 +264,7 @@ export default function PopcornGame({ onScoreSubmitted }) {
     const cooldown = selectedClass.skillCooldown;
     if (now - playerRef.current.lastSkillUsed < cooldown) return;
 
+    haptics.heavy();
     playerRef.current.lastSkillUsed = now;
     playerRef.current.skillActiveTimer = selectedClass.skillDuration / 16.6;
 

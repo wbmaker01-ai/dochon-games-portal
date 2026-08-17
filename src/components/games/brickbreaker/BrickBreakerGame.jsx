@@ -8,6 +8,7 @@ import { PhysicsEngine } from './brickBreakerPhysics';
 import { brickAudio } from './brickBreakerAudio';
 import BrickBreakerHowToPlayModal from './BrickBreakerHowToPlayModal';
 import { submitScoreToDB } from '../../../utils/leaderboardApi';
+import { haptics } from '../../../utils/haptics';
 import {
   Volume2,
   VolumeX,
@@ -65,6 +66,7 @@ export default function BrickBreakerGame({ onScoreSubmitted }) {
 
   // Update Best Score
   const handleScoreAdd = useCallback((points) => {
+    haptics.medium();
     setScore(prev => {
       const updated = prev + points;
       setBestScore(best => {
@@ -82,6 +84,7 @@ export default function BrickBreakerGame({ onScoreSubmitted }) {
 
   // Life Lost Callback
   const handleLifeLost = useCallback(() => {
+    haptics.warning();
     setLives(prev => {
       const remaining = prev - 1;
       if (remaining <= 0) {
@@ -95,11 +98,13 @@ export default function BrickBreakerGame({ onScoreSubmitted }) {
 
   // Extra Life Bonus Callback
   const handleExtraLife = useCallback(() => {
+    haptics.light();
     setLives(prev => Math.min(5, prev + 1));
   }, []);
 
   // Stage Clear Callback
   const handleStageClear = useCallback(() => {
+    haptics.success();
     setStageIndex(curr => {
       const nextStage = curr + 1;
       if (nextStage >= STAGE_MAPS.length) {
@@ -167,6 +172,7 @@ export default function BrickBreakerGame({ onScoreSubmitted }) {
   const launchBall = useCallback(() => {
     if (!engineRef.current) return;
     brickAudio.init();
+    haptics.light();
 
     if (gameState === 'READY') {
       setGameState('PLAYING');
@@ -179,6 +185,7 @@ export default function BrickBreakerGame({ onScoreSubmitted }) {
     });
 
     if (engineRef.current.paddle.isLaserActive) {
+      haptics.heavy();
       engineRef.current.paddle.shootLaser(engineRef.current.laserBullets);
     }
   }, [gameState]);
