@@ -1,4 +1,6 @@
-/* Styles for Dochon Magic Cat Academy Game */
+/* =========================================================
+   Styles for Dochon Magic Cat Academy Game (도촌 매직 캣 아카데미)
+   ========================================================= */
 
 .magic-game-wrapper {
   position: relative;
@@ -15,43 +17,141 @@
   font-family: 'Pretendard', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
 }
 
-/* Header HUD Bar */
+/* =========================================================
+   1. Header HUD Bar
+   ========================================================= */
 .magic-hud-bar {
   display: flex;
   align-items: center;
   justify-content: space-between;
   padding: 10px 18px;
-  background: rgba(15, 23, 42, 0.85);
-  backdrop-filter: blur(12px);
-  border-bottom: 1px solid rgba(168, 85, 247, 0.3);
+  background: rgba(15, 23, 42, 0.9);
+  backdrop-filter: blur(14px);
+  border-bottom: 1px solid rgba(168, 85, 247, 0.35);
   color: #ffffff;
   z-index: 10;
+  gap: 10px;
+}
+
+.magic-hud-left,
+.magic-hud-right {
+  display: flex;
+  align-items: center;
+  gap: 8px;
 }
 
 .magic-stat-badge {
   display: flex;
   align-items: center;
   gap: 6px;
-  padding: 4px 12px;
+  padding: 6px 12px;
   border-radius: 12px;
-  background: rgba(30, 27, 75, 0.7);
-  border: 1px solid rgba(168, 85, 247, 0.35);
-  font-size: 13px;
+  background: rgba(30, 27, 75, 0.85);
+  border: 1px solid rgba(168, 85, 247, 0.4);
+  font-size: 12px;
   font-weight: 800;
+  color: #e9d5ff;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
+}
+
+.magic-score-badge {
+  background: linear-gradient(135deg, rgba(30, 27, 75, 0.9), rgba(67, 56, 202, 0.5));
+  border: 1px solid rgba(251, 191, 36, 0.5);
+  color: #fde047;
+  font-size: 13px;
+  font-family: 'Courier New', monospace;
+  letter-spacing: 0.5px;
+}
+
+.magic-hearts-container {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  background: rgba(15, 23, 42, 0.7);
+  padding: 5px 10px;
+  border-radius: 12px;
+  border: 1px solid rgba(244, 63, 94, 0.35);
 }
 
 .magic-combo-pill {
-  animation: pulse 1.5s infinite;
+  animation: magicPulse 1.5s infinite;
   background: linear-gradient(135deg, #f59e0b, #ef4444);
   color: #ffffff;
-  padding: 4px 14px;
+  padding: 5px 14px;
   border-radius: 9999px;
   font-weight: 900;
-  font-size: 13px;
+  font-size: 12px;
   box-shadow: 0 0 15px rgba(245, 158, 11, 0.6);
+  display: flex;
+  align-items: center;
+  gap: 5px;
 }
 
-/* Canvas Area */
+/* Designed HUD Buttons (게임방법, 음소거 등) */
+.magic-hud-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 6px 12px;
+  border-radius: 12px;
+  font-size: 12px;
+  font-weight: 700;
+  cursor: pointer;
+  transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.25);
+  border: 1px solid transparent;
+}
+
+.magic-hud-btn:hover {
+  transform: translateY(-1px);
+}
+
+.magic-hud-btn:active {
+  transform: translateY(1px);
+}
+
+.magic-hud-btn-help {
+  background: rgba(147, 51, 234, 0.2);
+  border-color: rgba(168, 85, 247, 0.5);
+  color: #e9d5ff;
+}
+
+.magic-hud-btn-help:hover {
+  background: rgba(147, 51, 234, 0.35);
+  border-color: #c084fc;
+  color: #ffffff;
+  box-shadow: 0 0 12px rgba(168, 85, 247, 0.4);
+}
+
+.magic-hud-btn-sound {
+  background: rgba(16, 185, 129, 0.2);
+  border-color: rgba(16, 185, 129, 0.5);
+  color: #a7f3d0;
+}
+
+.magic-hud-btn-sound:hover {
+  background: rgba(16, 185, 129, 0.35);
+  border-color: #34d399;
+  color: #ffffff;
+  box-shadow: 0 0 12px rgba(16, 185, 129, 0.4);
+}
+
+.magic-hud-btn-muted {
+  background: rgba(239, 68, 68, 0.2);
+  border-color: rgba(239, 68, 68, 0.5);
+  color: #fca5a5;
+}
+
+.magic-hud-btn-muted:hover {
+  background: rgba(239, 68, 68, 0.35);
+  border-color: #f87171;
+  color: #ffffff;
+  box-shadow: 0 0 12px rgba(239, 68, 68, 0.4);
+}
+
+/* =========================================================
+   2. Canvas Area & In-Game Guide
+   ========================================================= */
 .magic-canvas-container {
   position: relative;
   width: 100%;
@@ -66,16 +166,44 @@
   display: block;
 }
 
+/* Subtle In-Game Hint Bar at Bottom of Canvas */
+.magic-hint-bar {
+  position: absolute;
+  bottom: 12px;
+  left: 50%;
+  transform: translateX(-50%);
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 6px 16px;
+  background: rgba(15, 23, 42, 0.82);
+  backdrop-filter: blur(8px);
+  border: 1px solid rgba(168, 85, 247, 0.35);
+  border-radius: 9999px;
+  color: #cbd5e1;
+  font-size: 11px;
+  font-weight: 600;
+  pointer-events: none;
+  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.4);
+  animation: fadeIn 0.4s ease-out;
+  z-index: 5;
+}
+
+.magic-hint-pill {
+  color: #fde047;
+  font-weight: 800;
+}
+
 /* Stage Announcement Banner */
 .magic-stage-banner {
   position: absolute;
   top: 18%;
   left: 50%;
   transform: translateX(-50%);
-  background: rgba(15, 23, 42, 0.9);
+  background: rgba(15, 23, 42, 0.92);
   border: 2px solid #a855f7;
-  box-shadow: 0 0 25px rgba(168, 85, 247, 0.5);
-  padding: 12px 28px;
+  box-shadow: 0 0 30px rgba(168, 85, 247, 0.6), 0 10px 25px rgba(0, 0, 0, 0.6);
+  padding: 14px 32px;
   border-radius: 20px;
   text-align: center;
   pointer-events: none;
@@ -83,50 +211,214 @@
   z-index: 15;
 }
 
-/* Game Over / Victory Overlay */
+/* =========================================================
+   3. Result Overlay Modal (Game Over / Victory)
+   ========================================================= */
 .magic-result-overlay {
   position: absolute;
   inset: 0;
-  background: rgba(10, 10, 20, 0.88);
-  backdrop-filter: blur(10px);
+  background: rgba(10, 10, 24, 0.9);
+  backdrop-filter: blur(12px);
   display: flex;
   align-items: center;
   justify-content: center;
-  padding: 20px;
+  padding: 16px;
   z-index: 30;
   animation: fadeIn 0.3s ease-out;
 }
 
 .magic-result-card {
   width: 100%;
-  max-width: 440px;
-  background: linear-gradient(145deg, #1e1b4b, #0f172a);
+  max-width: 460px;
+  background: linear-gradient(145deg, #1e1b4b 0%, #0f172a 100%);
   border: 2px solid #a855f7;
   border-radius: 24px;
-  padding: 28px;
+  padding: 24px 26px;
   text-align: center;
-  box-shadow: 0 25px 50px rgba(0, 0, 0, 0.8), 0 0 35px rgba(168, 85, 247, 0.4);
+  box-shadow: 0 25px 60px rgba(0, 0, 0, 0.85), 0 0 40px rgba(168, 85, 247, 0.35);
   color: #ffffff;
 }
 
+.magic-result-icon-box {
+  width: 56px;
+  height: 56px;
+  margin: 0 auto 12px;
+  border-radius: 20px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 0 8px 20px rgba(0, 0, 0, 0.4);
+}
+
+.magic-result-icon-victory {
+  background: rgba(245, 158, 11, 0.2);
+  border: 2px solid rgba(251, 191, 36, 0.6);
+  color: #fbbf24;
+}
+
+.magic-result-icon-defeat {
+  background: rgba(239, 68, 68, 0.2);
+  border: 2px solid rgba(248, 113, 113, 0.6);
+  color: #f87171;
+}
+
 .magic-result-title {
-  font-size: 24px;
+  font-size: 22px;
   font-weight: 900;
   margin-bottom: 6px;
   letter-spacing: -0.5px;
 }
 
 .magic-score-display {
-  display: flex;
-  justify-content: space-around;
-  background: rgba(30, 27, 75, 0.8);
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 8px;
+  background: rgba(30, 27, 75, 0.7);
   border: 1px solid rgba(168, 85, 247, 0.35);
   border-radius: 16px;
-  padding: 14px;
-  margin: 18px 0;
+  padding: 12px 10px;
+  margin: 16px 0;
 }
 
-/* Buttons */
+.magic-score-stat-box {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.magic-score-stat-label {
+  font-size: 10px;
+  color: #94a3b8;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.magic-score-stat-val {
+  font-size: 16px;
+  font-weight: 900;
+  font-family: 'Courier New', monospace;
+  margin-top: 2px;
+}
+
+/* =========================================================
+   4. Designed Leaderboard Name Input Area
+   ========================================================= */
+.magic-leaderboard-box {
+  margin-bottom: 16px;
+  padding: 14px;
+  border-radius: 16px;
+  background: linear-gradient(135deg, rgba(30, 27, 75, 0.9), rgba(15, 23, 42, 0.95));
+  border: 1.5px solid rgba(168, 85, 247, 0.45);
+  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.3);
+  text-align: left;
+}
+
+.magic-leaderboard-header {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 12px;
+  font-weight: 800;
+  color: #fbbf24;
+  margin-bottom: 10px;
+}
+
+.magic-input-form {
+  display: flex;
+  gap: 8px;
+  align-items: center;
+}
+
+.magic-input-wrapper {
+  position: relative;
+  flex: 1;
+  display: flex;
+  align-items: center;
+}
+
+.magic-input-icon {
+  position: absolute;
+  left: 12px;
+  width: 16px;
+  height: 16px;
+  color: #c084fc;
+  pointer-events: none;
+}
+
+.magic-input-field {
+  width: 100%;
+  background: rgba(15, 23, 42, 0.85);
+  border: 1.5px solid rgba(168, 85, 247, 0.45);
+  border-radius: 12px;
+  padding: 10px 12px 10px 36px;
+  font-size: 13px;
+  font-weight: 700;
+  color: #ffffff;
+  transition: all 0.2s ease;
+  box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.3);
+}
+
+.magic-input-field::placeholder {
+  color: #64748b;
+  font-weight: 500;
+  font-style: italic;
+}
+
+.magic-input-field:focus {
+  outline: none;
+  border-color: #fbbf24;
+  box-shadow: 0 0 16px rgba(251, 191, 36, 0.45), inset 0 2px 4px rgba(0, 0, 0, 0.3);
+  background: rgba(15, 23, 42, 0.95);
+}
+
+.magic-submit-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  padding: 10px 18px;
+  border-radius: 12px;
+  font-weight: 900;
+  font-size: 13px;
+  color: #ffffff;
+  background: linear-gradient(135deg, #f59e0b, #d97706);
+  border: 1px solid rgba(253, 230, 138, 0.4);
+  box-shadow: 0 4px 15px rgba(245, 158, 11, 0.4);
+  cursor: pointer;
+  white-space: nowrap;
+  transition: all 0.2s ease;
+}
+
+.magic-submit-btn:hover:not(:disabled) {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 20px rgba(245, 158, 11, 0.6);
+  background: linear-gradient(135deg, #fbbf24, #d97706);
+}
+
+.magic-submit-btn:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+  transform: none;
+}
+
+.magic-submitted-banner {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 12px;
+  font-weight: 800;
+  color: #34d399;
+  background: rgba(6, 78, 59, 0.6);
+  padding: 10px 14px;
+  border-radius: 12px;
+  border: 1px solid rgba(52, 211, 153, 0.4);
+  box-shadow: 0 2px 10px rgba(16, 185, 129, 0.2);
+}
+
+/* =========================================================
+   5. Buttons
+   ========================================================= */
 .magic-btn-primary {
   display: inline-flex;
   align-items: center;
@@ -150,28 +442,20 @@
   background: linear-gradient(135deg, #a855f7, #4f46e5);
 }
 
-.magic-btn-secondary {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  gap: 6px;
-  padding: 8px 14px;
-  border-radius: 10px;
-  font-weight: 700;
-  font-size: 12px;
-  color: #cbd5e1;
-  background: rgba(30, 41, 59, 0.8);
-  border: 1px solid rgba(148, 163, 184, 0.25);
-  cursor: pointer;
-  transition: all 0.15s ease;
+.magic-btn-restart {
+  background: linear-gradient(135deg, #7c3aed, #4f46e5);
+  border: 1px solid rgba(192, 132, 252, 0.5);
+  box-shadow: 0 6px 20px rgba(124, 58, 237, 0.45);
 }
 
-.magic-btn-secondary:hover {
-  background: rgba(51, 65, 85, 0.9);
-  color: #ffffff;
+.magic-btn-restart:hover {
+  background: linear-gradient(135deg, #9333ea, #6366f1);
+  box-shadow: 0 8px 25px rgba(124, 58, 237, 0.65);
 }
 
-/* How to play modal */
+/* =========================================================
+   6. How to Play Modal (게임 방법 모달)
+   ========================================================= */
 .magic-modal-backdrop {
   position: fixed;
   inset: 0;
@@ -229,6 +513,12 @@
   flex-direction: column;
   align-items: center;
   text-align: center;
+  transition: all 0.2s ease;
+}
+
+.magic-symbol-card:hover {
+  border-color: rgba(168, 85, 247, 0.6);
+  transform: translateY(-2px);
 }
 
 .magic-symbol-icon {
@@ -261,7 +551,9 @@
   border-top: 1px solid rgba(168, 85, 247, 0.3);
 }
 
-/* Animations */
+/* =========================================================
+   7. Animations
+   ========================================================= */
 @keyframes fadeIn {
   from { opacity: 0; }
   to { opacity: 1; }
@@ -275,5 +567,16 @@
   to {
     opacity: 1;
     transform: translate(-50%, 0);
+  }
+}
+
+@keyframes magicPulse {
+  0%, 100% {
+    transform: scale(1);
+    box-shadow: 0 0 15px rgba(245, 158, 11, 0.6);
+  }
+  50% {
+    transform: scale(1.05);
+    box-shadow: 0 0 25px rgba(245, 158, 11, 0.9);
   }
 }

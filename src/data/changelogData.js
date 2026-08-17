@@ -33,6 +33,11 @@ export const CHANGELOG_DATA = [
         tag: 'LEADERBOARD',
         tagColor: 'amber',
         text: '[도촌초 실시간 명예의 전당 연동] 100점 초과 득점 시 실시간 전교 랭킹 등록 및 점수 등록 후 해당 게임 리더보드 자동 탭 선택 지원'
+      },
+      {
+        tag: 'UI & HUD',
+        tagColor: 'blue',
+        text: '[게임 UI 및 명예의 전당 입력창 디자인 전면 개편] 다크 글래스모피즘 이름 입력창, 전용 랭킹 등록 버튼, 게임방법 & 음소거 전용 디자인 버튼, 하단 드로잉 힌트 가이드 바 탑재'
       }
     ]
   },

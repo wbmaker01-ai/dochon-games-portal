@@ -1,4 +1,4 @@
-import React, { useRef, useState, useEffect, useCallback } from 'react';
+import React, { useRef, useState, useEffect } from 'react';
 import { MagicGameLogic } from './magicLogic';
 import { GestureRecognizer } from './magicRecognizer';
 import { magicAudio } from './magicAudio';
@@ -7,7 +7,7 @@ import MagicCatHowToPlayModal from './MagicCatHowToPlayModal';
 import { submitScoreToDB } from '../../../utils/leaderboardApi';
 import {
   Trophy, RotateCcw, Volume2, VolumeX, HelpCircle,
-  Heart, Sparkles, Wand2, Flame, Award, Zap, CheckCircle2
+  Heart, Sparkles, Wand2, Flame, Award, CheckCircle2, User, Send
 } from 'lucide-react';
 import './magic.css';
 
@@ -189,24 +189,24 @@ export default function MagicCatGame({ onScoreSubmitted }) {
 
   return (
     <div className="magic-game-wrapper">
-      {/* Top HUD Bar */}
+      {/* 1. Header HUD Bar */}
       <header className="magic-hud-bar">
         {/* Left: Stage info & HP */}
-        <div className="flex items-center gap-3">
-          <div className="magic-stat-badge text-purple-300">
+        <div className="magic-hud-left">
+          <div className="magic-stat-badge">
             <Wand2 className="w-4 h-4 text-amber-300" />
-            <span>{stageIndex + 1}단계: {logicRef.current?.currentStage?.title?.split(':')[1] || '도서관'}</span>
+            <span>{stageIndex + 1}단계: {logicRef.current?.currentStage?.title?.split(':')[1]?.trim() || '도서관'}</span>
           </div>
 
           {/* Player HP Hearts */}
-          <div className="flex items-center gap-1 bg-slate-900/60 px-2.5 py-1 rounded-xl border border-rose-500/30">
+          <div className="magic-hearts-container">
             {Array.from({ length: PLAYER_MAX_HP }).map((_, i) => (
               <Heart
                 key={i}
-                className={`w-4 h-4 transition-all ${
+                className={`w-4 h-4 transition-all duration-300 ${
                   i < playerHp
-                    ? 'text-rose-500 fill-rose-500 scale-100'
-                    : 'text-slate-600 fill-slate-700/50 scale-90'
+                    ? 'text-rose-500 fill-rose-500 scale-100 drop-shadow-[0_0_6px_rgba(244,63,94,0.7)]'
+                    : 'text-slate-600 fill-slate-800/80 scale-90 opacity-40'
                 }`}
               />
             ))}
@@ -215,38 +215,51 @@ export default function MagicCatGame({ onScoreSubmitted }) {
 
         {/* Center: Combo Pill (if active) */}
         {combo > 1 && (
-          <div className="magic-combo-pill flex items-center gap-1">
-            <Flame className="w-4 h-4 animate-bounce text-amber-200" />
+          <div className="magic-combo-pill">
+            <Flame className="w-4 h-4 text-amber-200 animate-bounce" />
             <span>{combo} COMBO! (+{combo * 25})</span>
           </div>
         )}
 
-        {/* Right: Score & Utility Buttons */}
-        <div className="flex items-center gap-2.5">
-          <div className="magic-stat-badge text-amber-300 font-mono text-sm tracking-wider">
+        {/* Right: Score & Designed Action Buttons */}
+        <div className="magic-hud-right">
+          <div className="magic-stat-badge magic-score-badge">
             <Sparkles className="w-4 h-4 text-amber-400" />
             <span>{score.toLocaleString()}점</span>
           </div>
 
+          {/* Help Button */}
           <button
             onClick={() => setShowHowToPlay(true)}
-            className="p-2 rounded-xl bg-slate-800/80 hover:bg-slate-700 text-slate-300 hover:text-white transition-colors border border-slate-700"
-            title="게임 방법"
+            className="magic-hud-btn magic-hud-btn-help"
+            title="게임 방법 및 마법 심볼 안내"
           >
-            <HelpCircle className="w-4 h-4" />
+            <HelpCircle className="w-4 h-4 text-purple-300" />
+            <span>게임방법</span>
           </button>
 
+          {/* Sound Toggle Button */}
           <button
             onClick={toggleMute}
-            className="p-2 rounded-xl bg-slate-800/80 hover:bg-slate-700 text-slate-300 hover:text-white transition-colors border border-slate-700"
+            className={`magic-hud-btn ${isMuted ? 'magic-hud-btn-muted' : 'magic-hud-btn-sound'}`}
             title={isMuted ? '음소거 해제' : '음소거'}
           >
-            {isMuted ? <VolumeX className="w-4 h-4 text-rose-400" /> : <Volume2 className="w-4 h-4 text-emerald-400" />}
+            {isMuted ? (
+              <>
+                <VolumeX className="w-4 h-4 text-rose-400" />
+                <span>음소거</span>
+              </>
+            ) : (
+              <>
+                <Volume2 className="w-4 h-4 text-emerald-400" />
+                <span>소리 켬</span>
+              </>
+            )}
           </button>
         </div>
       </header>
 
-      {/* Main Drawing Canvas Container */}
+      {/* 2. Main Drawing Canvas Container */}
       <main className="magic-canvas-container">
         <canvas
           ref={canvasRef}
@@ -260,6 +273,16 @@ export default function MagicCatGame({ onScoreSubmitted }) {
           onPointerLeave={handlePointerUp}
         />
 
+        {/* In-Game Subtle Hint Guide Bar */}
+        {gameState === 'PLAYING' && (
+          <div className="magic-hint-bar">
+            <span>🪄</span>
+            <span>화면에 마법 기호</span>
+            <span className="magic-hint-pill">( — │ ∧ ∨ ⚡ ❤️ )</span>
+            <span>를 마우스나 터치로 그리세요!</span>
+          </div>
+        )}
+
         {/* Stage Announcement Banner */}
         {stageAnnouncement && (
           <div className="magic-stage-banner">
@@ -267,19 +290,19 @@ export default function MagicCatGame({ onScoreSubmitted }) {
               <Sparkles className="w-4 h-4 text-amber-400" />
               {stageAnnouncement}
             </h3>
-            <p className="text-[11px] text-purple-200 mt-0.5">
+            <p className="text-[11px] text-purple-200 mt-1 font-medium">
               {logicRef.current?.currentStage?.subtitle}
             </p>
           </div>
         )}
 
-        {/* Game Result Overlays (Game Over / Victory) */}
+        {/* 3. Game Result Overlays (Game Over / Victory) */}
         {(gameState === 'GAME_OVER' || gameState === 'VICTORY') && (
           <div className="magic-result-overlay">
             <div className="magic-result-card">
               {gameState === 'VICTORY' ? (
                 <>
-                  <div className="w-14 h-14 mx-auto mb-3 rounded-2xl bg-amber-500/20 border border-amber-400/50 flex items-center justify-center text-amber-400">
+                  <div className="magic-result-icon-box magic-result-icon-victory">
                     <Trophy className="w-8 h-8 animate-bounce" />
                   </div>
                   <h2 className="magic-result-title text-amber-300">
@@ -291,7 +314,7 @@ export default function MagicCatGame({ onScoreSubmitted }) {
                 </>
               ) : (
                 <>
-                  <div className="w-14 h-14 mx-auto mb-3 rounded-2xl bg-rose-500/20 border border-rose-400/50 flex items-center justify-center text-rose-400">
+                  <div className="magic-result-icon-box magic-result-icon-defeat">
                     <Wand2 className="w-8 h-8 rotate-45" />
                   </div>
                   <h2 className="magic-result-title text-rose-400">
@@ -305,56 +328,60 @@ export default function MagicCatGame({ onScoreSubmitted }) {
 
               {/* Score breakdown stats */}
               <div className="magic-score-display">
-                <div>
-                  <div className="text-[11px] text-slate-400 font-bold uppercase">최종 획득 점수</div>
-                  <div className="text-xl font-black text-amber-300 font-mono mt-0.5">
+                <div className="magic-score-stat-box">
+                  <span className="magic-score-stat-label">최종 획득 점수</span>
+                  <span className="magic-score-stat-val text-amber-300">
                     {score.toLocaleString()}점
-                  </div>
+                  </span>
                 </div>
-                <div>
-                  <div className="text-[11px] text-slate-400 font-bold uppercase">최대 콤보</div>
-                  <div className="text-xl font-black text-purple-300 font-mono mt-0.5">
+                <div className="magic-score-stat-box">
+                  <span className="magic-score-stat-label">최대 콤보</span>
+                  <span className="magic-score-stat-val text-purple-300">
                     {maxCombo}x
-                  </div>
+                  </span>
                 </div>
-                <div>
-                  <div className="text-[11px] text-slate-400 font-bold uppercase">도달 스테이지</div>
-                  <div className="text-xl font-black text-emerald-400 font-mono mt-0.5">
+                <div className="magic-score-stat-box">
+                  <span className="magic-score-stat-label">도달 스테이지</span>
+                  <span className="magic-score-stat-val text-emerald-400">
                     {stageIndex + 1}단계
-                  </div>
+                  </span>
                 </div>
               </div>
 
-              {/* Leaderboard Submission (Only if score > 100) */}
+              {/* Designed Leaderboard Submission Box (Only if score > 100) */}
               {score > 100 && (
-                <div className="mb-4 p-3.5 rounded-xl bg-purple-950/70 border border-purple-500/40 text-left">
-                  <div className="flex items-center gap-1.5 text-xs font-bold text-amber-300 mb-2">
+                <div className="magic-leaderboard-box">
+                  <div className="magic-leaderboard-header">
                     <Award className="w-4 h-4 text-amber-400" />
                     <span>도촌초등학교 명예의 전당 점수 등록</span>
                   </div>
 
                   {!isSubmitted ? (
-                    <form onSubmit={handleSubmitScore} className="flex gap-2">
-                      <input
-                        type="text"
-                        value={playerName}
-                        onChange={(e) => setPlayerName(e.target.value)}
-                        placeholder="예: 홍길동"
-                        maxLength={10}
-                        required
-                        className="flex-1 bg-slate-900/90 border border-purple-500/40 rounded-xl px-3 py-2 text-xs text-white placeholder-slate-500 focus:outline-none focus:border-amber-400"
-                      />
+                    <form onSubmit={handleSubmitScore} className="magic-input-form">
+                      <div className="magic-input-wrapper">
+                        <User className="magic-input-icon" />
+                        <input
+                          type="text"
+                          value={playerName}
+                          onChange={(e) => setPlayerName(e.target.value)}
+                          placeholder="예: 홍길동"
+                          maxLength={10}
+                          required
+                          className="magic-input-field"
+                        />
+                      </div>
                       <button
                         type="submit"
                         disabled={isSubmitting || !playerName.trim()}
-                        className="magic-btn-primary !py-2 !px-3 text-xs whitespace-nowrap"
+                        className="magic-submit-btn"
                       >
-                        {isSubmitting ? '등록 중...' : '랭킹 등록'}
+                        <Send className="w-3.5 h-3.5" />
+                        <span>{isSubmitting ? '등록 중...' : '랭킹 등록'}</span>
                       </button>
                     </form>
                   ) : (
-                    <div className="flex items-center gap-1.5 text-xs font-bold text-emerald-400 bg-emerald-950/50 p-2 rounded-lg border border-emerald-500/30">
-                      <CheckCircle2 className="w-4 h-4" />
+                    <div className="magic-submitted-banner">
+                      <CheckCircle2 className="w-4 h-4 text-emerald-400" />
                       <span>명예의 전당 등록이 완료되었습니다!</span>
                     </div>
                   )}
@@ -362,7 +389,7 @@ export default function MagicCatGame({ onScoreSubmitted }) {
               )}
 
               {/* Restart Button */}
-              <button onClick={handleRestart} className="magic-btn-primary w-full">
+              <button onClick={handleRestart} className="magic-btn-primary magic-btn-restart w-full">
                 <RotateCcw className="w-4 h-4" />
                 <span>마법학교 다시 시작하기</span>
               </button>
@@ -371,7 +398,7 @@ export default function MagicCatGame({ onScoreSubmitted }) {
         )}
       </main>
 
-      {/* How to Play Modal */}
+      {/* 4. How to Play Modal */}
       <MagicCatHowToPlayModal
         isOpen={showHowToPlay}
         onClose={() => setShowHowToPlay(false)}
