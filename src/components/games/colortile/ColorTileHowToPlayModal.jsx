@@ -70,6 +70,23 @@ export default function ColorTileHowToPlayModal({ isOpen, onClose }) {
           </button>
         </div>
 
+        {/* 📱 Mobile Landscape Tip */}
+        <div style={{
+          backgroundColor: 'rgba(245, 158, 11, 0.15)',
+          border: '1px solid rgba(251, 191, 36, 0.45)',
+          borderRadius: '12px',
+          padding: '10px 14px',
+          marginBottom: '14px',
+          display: 'flex',
+          alignItems: 'center',
+          gap: '8px',
+          color: '#FEF3C7',
+          fontSize: '0.78rem'
+        }}>
+          <span style={{ fontSize: '1.1rem' }}>📱</span>
+          <span><strong>모바일 이용 팁:</strong> 핸드폰이나 태블릿으로 이용 시 화면을 가로(가로모드)로 돌려 이용해주세요!</span>
+        </div>
+
         {/* 4-Step Rules */}
         <div style={{ display: 'flex', flexDirection: 'column', gap: '12px', marginBottom: '20px' }}>
           

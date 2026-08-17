@@ -19,16 +19,18 @@ import BrickBreakerGame from './components/games/brickbreaker/BrickBreakerGame';
 import GameCard from './components/GameCard';
 import LeaderboardModal from './components/LeaderboardModal';
 import ChangelogModal from './components/ChangelogModal';
+import GuideModal from './components/GuideModal';
 import { PLAYABLE_GAMES, COMING_SOON_GAMES, CATEGORY_DEFINITIONS } from './data/gamesData';
 import { getLatestVersion } from './data/changelogData';
 import { getLeaderboardFromDB } from './utils/leaderboardApi';
 import { getRankedPlayableGames } from './utils/rankingAlgorithm';
-import { Trophy, X, Search, Lock, Gamepad2, Dices, Sparkles, Heart, Crown, Flame, History } from 'lucide-react';
+import { Trophy, X, Search, Lock, Gamepad2, Dices, Sparkles, Heart, Crown, Flame, History, HelpCircle, Smartphone } from 'lucide-react';
 
 export default function App() {
   const [activeGame, setActiveGame] = useState(null);
   const [isLeaderboardOpen, setIsLeaderboardOpen] = useState(false);
   const [isChangelogOpen, setIsChangelogOpen] = useState(false);
+  const [isGuideOpen, setIsGuideOpen] = useState(false);
   const [leaderboardTab, setLeaderboardTab] = useState('pacman');
   const [filterCategory, setFilterCategory] = useState('ALL');
   const [searchQuery, setSearchQuery] = useState('');
@@ -253,6 +255,24 @@ export default function App() {
               <History className="w-3.5 h-3.5 text-amber-400" />
               <span>업데이트</span>
             </button>
+
+            {/* 💡 Portal Guide & Instructions Button */}
+            <button
+              onClick={() => setIsGuideOpen(true)}
+              className="btn-guide shadow-md flex items-center gap-1.5"
+              title="게임 포털 이용안내 및 모바일 권장사항 확인하기"
+            >
+              <HelpCircle className="w-3.5 h-3.5 text-cyan-400" />
+              <span>이용안내</span>
+            </button>
+          </div>
+        </div>
+
+        {/* 📱 Responsive Mobile / Tablet Landscape Notice Banner */}
+        <div className="portal-mobile-orientation-banner">
+          <div className="flex items-center justify-center gap-1.5 flex-wrap">
+            <Smartphone className="w-4 h-4 text-amber-400 animate-pulse shrink-0" />
+            <span><strong>이용 팁:</strong> 핸드폰이나 태블릿으로 이용 시 화면을 가로(가로모드)로 돌려 이용해주세요!</span>
           </div>
         </div>
       </header>
@@ -526,7 +546,13 @@ export default function App() {
         onClose={() => setIsChangelogOpen(false)}
       />
 
-      {/* 8. Centered Footer */}
+      {/* 8. Pure HTML/CSS In-Page Overlay Modal for Portal Guide & Mobile Advice */}
+      <GuideModal
+        isOpen={isGuideOpen}
+        onClose={() => setIsGuideOpen(false)}
+      />
+
+      {/* 9. Centered Footer */}
       <footer className="portal-footer">
         <p className="font-bold text-amber-200/80">도촌초등학교 게임 포털</p>
         <p className="text-[11px] text-slate-500 mt-1">

@@ -685,18 +685,6 @@ export default function CricketGame({ onScoreSubmitted }) {
           className="cricket-canvas"
         />
 
-        {/* Mobile Swing Button */}
-        <button
-          className="cricket-mobile-swing-btn"
-          onClick={(e) => {
-            e.stopPropagation();
-            handleSwing();
-          }}
-        >
-          <span>SWING</span>
-          <span style={{ fontSize: '11px' }}>스윙</span>
-        </button>
-
         {/* Hit Result Announcement Overlay */}
         {activeHitAnnouncement && (
           <div className="cricket-hit-announcement">
@@ -822,7 +810,29 @@ export default function CricketGame({ onScoreSubmitted }) {
         )}
       </div>
 
-      {/* 3. How to Play Modal */}
+      {/* 3. Bottom Action Bar (Mobile Touch Assist & Desktop Hint) */}
+      <div className="cricket-bottom-controls">
+        <button
+          className="cricket-large-swing-btn"
+          onClick={(e) => {
+            e.stopPropagation();
+            handleSwing();
+          }}
+          title="배트 휘두르기 (스페이스바 또는 화면 터치)"
+        >
+          <Zap style={{ width: '22px', height: '22px', color: '#FBBF24' }} />
+          <span>🏏 배트 휘두르기 (SWING)</span>
+        </button>
+        <div className="cricket-desktop-key-hint">
+          <span>🎮 조작:</span>
+          <kbd>Spacebar</kbd>
+          <span>또는</span>
+          <kbd>Enter</kbd>
+          <span>/ 마우스 클릭 / 하단 대형 스윙 버튼 터치</span>
+        </div>
+      </div>
+
+      {/* 4. How to Play Modal */}
       <CricketHowToPlayModal
         isOpen={isHowToPlayOpen}
         onClose={() => setIsHowToPlayOpen(false)}

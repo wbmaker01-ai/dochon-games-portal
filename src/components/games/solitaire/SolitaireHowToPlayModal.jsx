@@ -23,6 +23,12 @@ export default function SolitaireHowToPlayModal({ isOpen, onClose }) {
 
         {/* Content Body */}
         <div className="solitaire-help-body">
+          {/* 📱 Mobile Landscape Tip */}
+          <div className="bg-amber-950/40 border border-amber-500/40 rounded-xl p-3 flex items-center gap-2.5 text-xs text-amber-200">
+            <span className="text-base shrink-0">📱</span>
+            <span><strong>모바일 이용 팁:</strong> 핸드폰이나 태블릿으로 이용 시 화면을 가로(가로모드)로 돌려 이용해주세요!</span>
+          </div>
+
           {/* Main Goal Banner */}
           <div className="solitaire-help-banner">
             <div className="flex items-center gap-2 mb-1">

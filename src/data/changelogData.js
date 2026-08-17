@@ -3,11 +3,44 @@
 
 export const CHANGELOG_DATA = [
   {
+    version: 'v1.22.1',
+    date: '2026-08-17',
+    title: '도촌 크리켓 모바일/태블릿 전용 하단 대형 스윙 버튼 컨트롤러 탑재',
+    badge: 'LATEST',
+    badgeColor: 'emerald',
+    items: [
+      {
+        tag: 'MOBILE CONTROLS',
+        tagColor: 'amber',
+        text: '[모바일/태블릿 전용 대형 스윙 컨트롤러 탑재] 스마트폰 및 태블릿 터치 환경에서 캔버스 화면 가림 없이 쾌적하게 배트를 휘두를 수 있도록 하단 전용 대형 [🏏 배트 휘두르기 (SWING)] 글래스모피즘 액션 버튼 및 키보드 조작 안내 바 신설'
+      }
+    ]
+  },
+  {
+    version: 'v1.22.0',
+    date: '2026-08-17',
+    title: '[도촌 게임 포털 이용안내] 전용 모달 신설 및 모바일·태블릿 가로모드 권장 가이드 탑재',
+    badge: 'UPDATE',
+    badgeColor: 'blue',
+    items: [
+      {
+        tag: 'PORTAL GUIDE',
+        tagColor: 'blue',
+        text: '[메인 툴바 [💡 이용안내] 전용 모달 신설] 포털 메인 상단 툴바에 이용안내 버튼을 신설하여 랭킹 등록 규칙, PC/모바일 조작법, 스마트 도우미 기능, 사운드 설정 등 필수 가이드를 원클릭으로 제공'
+      },
+      {
+        tag: 'MOBILE ADVICE',
+        tagColor: 'amber',
+        text: '[모바일/태블릿 가로모드 권장 배너 탑재] 스마트폰 및 태블릿 접속 시 시원한 화면과 편리한 아케이드 컨트롤러 조작을 위해 "핸드폰이나 태블릿으로 이용 시 가로모드를 이용해주세요." 권장 가이드를 포털 상단 및 이용안내 모달, 게임 설명서에 전면 적용'
+      }
+    ]
+  },
+  {
     version: 'v1.21.0',
     date: '2026-08-17',
     title: '신규 17호 블록 격파 아케이드 [도촌 벽돌 격파왕] 공식 출시 & 전교 랭킹 오픈',
-    badge: 'LATEST',
-    badgeColor: 'emerald',
+    badge: 'UPDATE',
+    badgeColor: 'blue',
     items: [
       {
         tag: 'NEW GAME',

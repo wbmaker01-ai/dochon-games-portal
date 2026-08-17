@@ -2074,5 +2074,178 @@ body {
   text-align: center !important;
 }
 
+/* ------------------------------------------------------------- */
+/* 💡 GUIDE BUTTON & COMPREHENSIVE USER GUIDE MODAL STYLING      */
+/* ------------------------------------------------------------- */
+
+.btn-guide {
+  background: rgba(15, 23, 42, 0.95) !important;
+  color: #E2E8F0 !important;
+  border: 1.5px solid rgba(56, 189, 248, 0.5) !important;
+  padding: 8px 16px !important;
+  border-radius: 9999px !important;
+  font-size: 0.82rem !important;
+  font-weight: 900 !important;
+  cursor: pointer !important;
+  transition: all 0.2s ease !important;
+  display: inline-flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  gap: 6px !important;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.4) !important;
+  user-select: none !important;
+  backdrop-filter: blur(8px) !important;
+  white-space: nowrap !important;
+}
+
+.btn-guide:hover {
+  background: rgba(30, 41, 59, 0.95) !important;
+  color: #38BDF8 !important;
+  border-color: #38BDF8 !important;
+  transform: translateY(-2px) !important;
+  box-shadow: 0 6px 16px rgba(56, 189, 248, 0.35) !important;
+}
+
+.btn-guide:active {
+  transform: scale(0.95) !important;
+}
+
+.guide-modal-box {
+  position: relative !important;
+  width: 100% !important;
+  max-width: 680px !important;
+  background: linear-gradient(150deg, #0F172A 0%, #1E1B4B 50%, #0F172A 100%) !important;
+  border: 2px solid rgba(56, 189, 248, 0.4) !important;
+  border-radius: 24px !important;
+  box-shadow: 0 25px 60px -15px rgba(0, 0, 0, 0.9), 0 0 35px rgba(56, 189, 248, 0.2) !important;
+  padding: 24px !important;
+  display: flex !important;
+  flex-direction: column !important;
+  max-height: 90vh !important;
+  animation: modalScaleIn 0.25s cubic-bezier(0.16, 1, 0.3, 1) !important;
+  color: #FFFFFF !important;
+  box-sizing: border-box !important;
+}
+
+.guide-modal-body {
+  overflow-y: auto !important;
+  padding-right: 6px !important;
+  margin-top: 16px !important;
+  margin-bottom: 16px !important;
+  display: flex !important;
+  flex-direction: column !important;
+  gap: 12px !important;
+}
+
+.guide-modal-body::-webkit-scrollbar {
+  width: 6px !important;
+}
+.guide-modal-body::-webkit-scrollbar-track {
+  background: rgba(255, 255, 255, 0.05) !important;
+  border-radius: 9999px !important;
+}
+.guide-modal-body::-webkit-scrollbar-thumb {
+  background: rgba(56, 189, 248, 0.3) !important;
+  border-radius: 9999px !important;
+}
+
+.guide-highlight-card {
+  background: linear-gradient(135deg, rgba(245, 158, 11, 0.18) 0%, rgba(180, 83, 9, 0.28) 100%) !important;
+  border: 1.5px solid rgba(251, 191, 36, 0.6) !important;
+  border-radius: 18px !important;
+  padding: 16px !important;
+  display: flex !important;
+  align-items: flex-start !important;
+  gap: 14px !important;
+  box-shadow: 0 4px 20px rgba(245, 158, 11, 0.15) !important;
+}
+
+.guide-highlight-icon-wrap {
+  background: rgba(245, 158, 11, 0.25) !important;
+  border: 1px solid rgba(251, 191, 36, 0.5) !important;
+  border-radius: 16px !important;
+  padding: 10px !important;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  flex-shrink: 0 !important;
+}
+
+.guide-section-card {
+  background: rgba(15, 23, 42, 0.75) !important;
+  border: 1px solid rgba(255, 255, 255, 0.1) !important;
+  border-radius: 16px !important;
+  padding: 14px 16px !important;
+  transition: all 0.2s ease !important;
+}
+
+.guide-section-card:hover {
+  background: rgba(30, 41, 59, 0.85) !important;
+  border-color: rgba(56, 189, 248, 0.4) !important;
+  transform: translateY(-1px) !important;
+}
+
+.guide-modal-footer {
+  padding-top: 14px !important;
+  border-top: 1px solid rgba(255, 255, 255, 0.1) !important;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: space-between !important;
+  flex-wrap: wrap !important;
+  gap: 10px !important;
+}
+
+.guide-confirm-btn {
+  background: linear-gradient(135deg, #0284C7 0%, #0369A1 100%) !important;
+  color: #FFFFFF !important;
+  font-weight: 900 !important;
+  font-size: 0.85rem !important;
+  padding: 10px 20px !important;
+  border-radius: 12px !important;
+  border: 1px solid rgba(56, 189, 248, 0.4) !important;
+  cursor: pointer !important;
+  display: inline-flex !important;
+  align-items: center !important;
+  gap: 6px !important;
+  box-shadow: 0 4px 14px rgba(2, 132, 199, 0.4) !important;
+  transition: all 0.2s ease !important;
+}
+
+.guide-confirm-btn:hover {
+  background: linear-gradient(135deg, #0EA5E9 0%, #0284C7 100%) !important;
+  transform: translateY(-2px) !important;
+  box-shadow: 0 6px 20px rgba(14, 165, 233, 0.5) !important;
+}
+
+/* 📱 Responsive Mobile Orientation Notice Banner */
+.portal-mobile-orientation-banner {
+  margin: 10px auto 14px auto !important;
+  max-width: 900px !important;
+  width: 100% !important;
+  background: linear-gradient(90deg, rgba(245, 158, 11, 0.15), rgba(217, 119, 6, 0.25), rgba(245, 158, 11, 0.15)) !important;
+  border: 1px solid rgba(251, 191, 36, 0.45) !important;
+  border-radius: 14px !important;
+  padding: 8px 16px !important;
+  color: #FEF3C7 !important;
+  font-size: 0.78rem !important;
+  font-weight: 700 !important;
+  text-align: center !important;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  gap: 8px !important;
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.3) !important;
+  backdrop-filter: blur(6px) !important;
+  animation: fadeIn 0.4s ease !important;
+}
+
+@media (max-width: 640px) {
+  .portal-mobile-orientation-banner {
+    font-size: 0.72rem !important;
+    padding: 7px 12px !important;
+  }
+}
+
+
 
 
