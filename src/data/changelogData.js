@@ -3,11 +3,40 @@
 
 export const CHANGELOG_DATA = [
   {
+    version: 'v1.16.0',
+    date: '2026-08-17',
+    title: '신규 13호 액션 아케이드 [도촌 포니 익스프레스] 공식 출시 & 100통 편지 배달 대작전',
+    badge: 'LATEST',
+    badgeColor: 'emerald',
+    items: [
+      {
+        tag: 'NEW GAME',
+        tagColor: 'amber',
+        text: '[신규 13호 게임 도촌 포니 익스프레스 정식 오픈] 서부 개척 시대의 전설적인 우편 배달원이 되어 3개 레인을 질주하며 100통의 편지를 수집하여 마을에 배달하는 횡스크롤 액션 러닝 아케이드 게임 출시'
+      },
+      {
+        tag: '3 STAGES',
+        tagColor: 'blue',
+        text: '[3단계 테마 스테이지 & 다이내믹 환경 시스템] 서부 황무지 사막(Stage 1) ➔ 붉은 협곡 & 강(Stage 2) ➔ 설원 산맥 & 웨스턴 타운(Stage 3)으로 이어지는 패럴랙스 배경과 선인장·바위·울타리·무법자 장애물 시스템 탑재'
+      },
+      {
+        tag: 'AUDIO ENGINE',
+        tagColor: 'emerald',
+        text: '[Web Audio API 서부 효과음 합성기 구축] 실감 나는 따가닥 말발굽 리듬 소리, 편지 획득 챠링음, 황금 편지 아르페지오, 피격음 및 웨스턴 승리 축하 팡파르 사운드 완비'
+      },
+      {
+        tag: 'LEADERBOARD',
+        tagColor: 'purple',
+        text: '[도촌초 실시간 명예의 전당 연동] 100점 초과 득점 시 실시간 전교 랭킹 등록 및 점수 등록 후 해당 게임 리더보드 자동 탭 선택 지원'
+      }
+    ]
+  },
+  {
     version: 'v1.15.1',
     date: '2026-08-17',
     title: '크리켓 게임 멈춤 버그 완전 해결 & 위켓 피격 아웃 알림 연출 대폭 강화',
-    badge: 'LATEST',
-    badgeColor: 'emerald',
+    badge: 'UPDATE',
+    badgeColor: 'blue',
     items: [
       {
         tag: 'BUG FIX',

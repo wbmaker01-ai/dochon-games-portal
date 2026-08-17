@@ -109,8 +109,17 @@ export const PLAYABLE_GAMES = [
     category: '스포츠',
     imageSrc: getThumb('cricket.jpg'),
     isPlayable: true,
-    badgeText: '🏏 NEW 12위',
+    badgeText: '🏏 12위',
     description: '귀뚜라미 타자와 함께 달팽이 볼러의 마구를 쳐내고 통쾌한 6점 홈런을 날려보세요!'
+  },
+  {
+    id: 'ponyexpress',
+    title: '도촌 포니 익스프레스',
+    category: '액션',
+    imageSrc: getThumb('ponyexpress.jpg'),
+    isPlayable: true,
+    badgeText: '🐎 NEW 13위',
+    description: '100통의 편지를 싣고 3개 레인의 황무지 사막과 설원을 질주하여 마을에 배달하세요!'
   }
 ];
 
@@ -120,13 +129,6 @@ export const COMING_SOON_GAMES = [
     title: 'Jerry Lawson',
     category: '액션',
     imageSrc: getThumb('jerrylawson.jpg'),
-    isPlayable: false
-  },
-  {
-    id: 'ponyexpress',
-    title: '포니 익스프레스',
-    category: '액션',
-    imageSrc: getThumb('ponyexpress.jpg'),
     isPlayable: false
   },
   {

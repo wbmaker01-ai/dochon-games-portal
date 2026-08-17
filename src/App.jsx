@@ -11,6 +11,7 @@ import PopcornGame from './components/games/popcorn/PopcornGame';
 import DonutTicTacToeGame from './components/games/donut_tictactoe/DonutTicTacToeGame';
 import ChampionGame from './components/games/champion/ChampionGame';
 import CricketGame from './components/games/cricket/CricketGame';
+import PonyExpressGame from './components/games/ponyexpress/PonyExpressGame';
 import GameCard from './components/GameCard';
 import LeaderboardModal from './components/LeaderboardModal';
 import ChangelogModal from './components/ChangelogModal';
@@ -486,6 +487,9 @@ export default function App() {
               )}
               {activeGame === 'cricket' && (
                 <CricketGame onScoreSubmitted={() => openInPageLeaderboardModal('cricket')} />
+              )}
+              {activeGame === 'ponyexpress' && (
+                <PonyExpressGame onScoreSubmitted={() => openInPageLeaderboardModal('ponyexpress')} />
               )}
             </div>
           </div>
