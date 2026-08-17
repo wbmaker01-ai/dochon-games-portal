@@ -59,21 +59,12 @@ export const PLAYABLE_GAMES = [
     description: '구속과 변화구를 예측하고 만루홈런을 날려 도촌 야구왕이 되어보세요!'
   },
   {
-    id: 'gnome',
-    title: '도촌 정원 요정',
-    category: '액션',
-    imageSrc: getThumb('gnome.jpg'),
-    isPlayable: true,
-    badgeText: '🌿 7위',
-    description: '투석기로 요정을 힘차게 날려 꽃을 심고 최고 비행 거리를 달성하세요!'
-  },
-  {
     id: 'colortile',
     title: '도촌 컬러 타일',
     category: '퍼즐',
     imageSrc: getThumb('colortile.jpg'),
     isPlayable: true,
-    badgeText: '🧩 8위',
+    badgeText: '🧩 7위',
     description: '빈 칸을 클릭하여 십자 방향 같은 색 타일을 찾아 없애는 도촌 두뇌 퍼즐!'
   },
   {
@@ -153,7 +144,7 @@ export const PLAYABLE_GAMES = [
 export const COMING_SOON_GAMES = [
   {
     id: 'brickbreaker',
-    title: '도촌 벽돌격파왕',
+    title: '도촌 벽돌 격파왕',
     category: '액션',
     imageSrc: getThumb('brickbreaker.jpg'),
     isPlayable: false

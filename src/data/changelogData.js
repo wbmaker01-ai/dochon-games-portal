@@ -3,11 +3,39 @@
 
 export const CHANGELOG_DATA = [
   {
+    version: 'v1.20.2',
+    date: '2026-08-17',
+    title: '포털 라인업 재정비 및 게임 목록 최적화',
+    badge: 'LATEST',
+    badgeColor: 'emerald',
+    items: [
+      {
+        tag: 'PORTAL UPDATE',
+        tagColor: 'teal',
+        text: '[포털 라인업 재정비] 메인 랜딩페이지 게임 목록에서 정원 요정 항목을 정비하고 플레이어 선호도 기반의 쾌적한 게임 탐색 환경 제공 (게임 원본 소스 보존)'
+      }
+    ]
+  },
+  {
+    version: 'v1.20.1',
+    date: '2026-08-17',
+    title: '순차 개장 라인업 타이틀 표준화 [도촌 벽돌 격파왕]',
+    badge: 'UPDATE',
+    badgeColor: 'blue',
+    items: [
+      {
+        tag: 'TITLE UPDATE',
+        tagColor: 'blue',
+        text: '[게임 타이틀 명칭 표준화] 순차 개장 준비 라인업 액션 아케이드 게임 명칭을 \'도촌 벽돌 격파왕\'으로 공식 수정 및 포털 데이터 동기화'
+      }
+    ]
+  },
+  {
     version: 'v1.20.0',
     date: '2026-08-17',
     title: '신규 16호 2D 물리 합성 퍼즐 [도촌 과일 합치기 (수박게임)] 정식 출시 & 왕수박 대합성',
-    badge: 'LATEST',
-    badgeColor: 'emerald',
+    badge: 'UPDATE',
+    badgeColor: 'blue',
     items: [
       {
         tag: 'NEW GAME',

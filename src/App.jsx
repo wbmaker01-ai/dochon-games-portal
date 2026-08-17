@@ -34,9 +34,9 @@ export default function App() {
   const [favorites, setFavorites] = useState(() => {
     try {
       const saved = localStorage.getItem('dochon_favorites');
-      return saved ? JSON.parse(saved) : ['pacman', 'dino', 'snake', 'solitaire', 'minesweeper', 'baseball', 'gnome', 'colortile', 'popcorn', 'tictactoe', 'champion'];
+      return saved ? JSON.parse(saved) : ['pacman', 'dino', 'snake', 'solitaire', 'minesweeper', 'baseball', 'colortile', 'popcorn', 'tictactoe', 'champion'];
     } catch (e) {
-      return ['pacman', 'dino', 'snake', 'solitaire', 'minesweeper', 'baseball', 'gnome', 'colortile', 'popcorn', 'tictactoe', 'champion'];
+      return ['pacman', 'dino', 'snake', 'solitaire', 'minesweeper', 'baseball', 'colortile', 'popcorn', 'tictactoe', 'champion'];
     }
   });
 
