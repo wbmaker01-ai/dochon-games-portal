@@ -12,6 +12,7 @@ import DonutTicTacToeGame from './components/games/donut_tictactoe/DonutTicTacTo
 import ChampionGame from './components/games/champion/ChampionGame';
 import CricketGame from './components/games/cricket/CricketGame';
 import PonyExpressGame from './components/games/ponyexpress/PonyExpressGame';
+import JerryLawsonGame from './components/games/jerrylawson/JerryLawsonGame';
 import GameCard from './components/GameCard';
 import LeaderboardModal from './components/LeaderboardModal';
 import ChangelogModal from './components/ChangelogModal';
@@ -490,6 +491,9 @@ export default function App() {
               )}
               {activeGame === 'ponyexpress' && (
                 <PonyExpressGame onScoreSubmitted={() => openInPageLeaderboardModal('ponyexpress')} />
+              )}
+              {activeGame === 'jerrylawson' && (
+                <JerryLawsonGame onScoreSubmitted={() => openInPageLeaderboardModal('jerrylawson')} />
               )}
             </div>
           </div>

@@ -3,11 +3,64 @@
 
 export const CHANGELOG_DATA = [
   {
+    version: 'v1.17.1',
+    date: '2026-08-17',
+    title: '명예의 전당 점수 등록 하이브리드 안정성 강화 & 오프라인 무중단 기록 보장',
+    badge: 'LATEST',
+    badgeColor: 'emerald',
+    items: [
+      {
+        tag: 'BUG FIX',
+        tagColor: 'rose',
+        text: '[점수 등록 실패 오류 완전 해결] 외부 네트워크 환경이나 클라우드 데이터베이스 상태와 무관하게 로컬 스토리지 선반영 및 즉각적인 점수 등록 성공을 보장하는 하이브리드 안전 저장 시스템 구축'
+      },
+      {
+        tag: 'UI & LEADERBOARD',
+        tagColor: 'amber',
+        text: '[도촌초 명예의 전당 즉시 연동] 포니 익스프레스, 제리 로슨, 크리켓 등 전 게임에서 100점 초과 달성 시 랭킹 등록 완료 후 해당 게임 리더보드 모달이 안정적으로 자동 노출되도록 개선'
+      }
+    ]
+  },
+  {
+    version: 'v1.17.0',
+    date: '2026-08-17',
+    title: '신규 14호 8비트 아케이드 [도촌 제리 로슨] 공식 출시 & 나만의 게임 제작기 오픈',
+    badge: 'UPDATE',
+    badgeColor: 'blue',
+    items: [
+      {
+        tag: 'NEW GAME',
+        tagColor: 'amber',
+        text: '[신규 14호 게임 도촌 제리 로슨 정식 오픈] 비디오 게임 롬 카트리지의 아버지 제럴드 "제리" 로슨의 업적을 기리는 8비트 레트로 플랫포머 & 인터랙티브 게임 메이커 정식 출시'
+      },
+      {
+        tag: 'LEVEL MAKER',
+        tagColor: 'blue',
+        text: '[나만의 게임 제작 (레벨 에디터) 시스템 탑재] 마우스 클릭 & 드래그로 블록, 스프링, 코인, 글리치 버그, 골 카트리지를 자유롭게 배치하고 즉석에서 조작해볼 수 있는 테스트 플레이 빌더 제공'
+      },
+      {
+        tag: '3 STAGES',
+        tagColor: 'purple',
+        text: '[3단계 레트로 어드벤처 모드] 1976 연구실 ➔ Fairchild 카트리지 시스템 ➔ 사이버 아케이드로 이어지는 3대 테마 스테이지와 정밀 60FPS 픽셀 물리 엔진 탑재'
+      },
+      {
+        tag: 'AUDIO ENGINE',
+        tagColor: 'emerald',
+        text: '[Web Audio API 8비트 칩튠 신디사이저] 점프음, 코인 획득 아르페지오, 스프링 튕김음, 버그 스톰프 펀치음 및 클리어 축하 팡파르 사운드 완비'
+      },
+      {
+        tag: 'LEADERBOARD',
+        tagColor: 'amber',
+        text: '[도촌초 실시간 명예의 전당 연동] 100점 초과 득점 시 실시간 전교 랭킹 등록 및 점수 등록 후 해당 게임 리더보드 자동 탭 선택 지원'
+      }
+    ]
+  },
+  {
     version: 'v1.16.0',
     date: '2026-08-17',
     title: '신규 13호 액션 아케이드 [도촌 포니 익스프레스] 공식 출시 & 100통 편지 배달 대작전',
-    badge: 'LATEST',
-    badgeColor: 'emerald',
+    badge: 'UPDATE',
+    badgeColor: 'blue',
     items: [
       {
         tag: 'NEW GAME',

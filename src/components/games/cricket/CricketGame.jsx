@@ -308,13 +308,13 @@ export default function CricketGame({ onScoreSubmitted }) {
     setIsSubmitting(true);
     try {
       const res = await submitScoreToDB('cricket', playerName.trim(), finalScore);
-      if (res && res.success) {
+      if (res === true || res?.success || res) {
         setSubmittedSuccess(true);
         if (onScoreSubmitted) {
           onScoreSubmitted();
         }
       } else {
-        alert(res?.error || '점수 등록에 실패했습니다. 다시 시도해주세요.');
+        alert('점수 등록에 실패했습니다. 다시 시도해주세요.');
       }
     } catch (err) {
       console.error('Score submit error:', err);

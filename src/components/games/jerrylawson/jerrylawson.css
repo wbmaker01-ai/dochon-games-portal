@@ -1,0 +1,327 @@
+/* Jerry Lawson 8-Bit Cartridge Game & Level Editor Styles */
+
+.jerry-container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  width: 100%;
+  max-width: 860px;
+  margin: 0 auto;
+  user-select: none;
+  font-family: 'Pretendard', system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+}
+
+/* 1. Retro Console Bezel & Screen Wrapper */
+.jerry-console-frame {
+  position: relative;
+  width: 100%;
+  background: #1e1b18;
+  background-image: 
+    radial-gradient(ellipse at 50% 0%, rgba(255, 184, 0, 0.15), transparent 70%),
+    linear-gradient(180deg, #2b2620 0%, #151311 100%);
+  border: 4px solid #4a3e35;
+  border-radius: 20px;
+  padding: 16px;
+  box-shadow: 
+    0 20px 40px rgba(0, 0, 0, 0.7),
+    inset 0 2px 4px rgba(255, 255, 255, 0.15),
+    inset 0 -4px 8px rgba(0, 0, 0, 0.5);
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+/* 2. Top HUD Bar */
+.jerry-hud {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  background: rgba(10, 15, 26, 0.85);
+  backdrop-filter: blur(8px);
+  border: 1px solid rgba(255, 184, 0, 0.3);
+  border-radius: 12px;
+  padding: 8px 16px;
+  color: #fff;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.jerry-hud-stat {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 13px;
+  font-weight: 700;
+  letter-spacing: 0.5px;
+}
+
+.jerry-hud-val {
+  font-family: monospace;
+  font-size: 15px;
+  color: #ffd700;
+}
+
+.jerry-hud-btn {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 6px 12px;
+  background: rgba(255, 255, 255, 0.08);
+  border: 1px solid rgba(255, 255, 255, 0.15);
+  border-radius: 8px;
+  color: #e2e8f0;
+  font-size: 12px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.jerry-hud-btn:hover {
+  background: rgba(255, 184, 0, 0.2);
+  border-color: rgba(255, 184, 0, 0.5);
+  color: #ffb800;
+  transform: translateY(-1px);
+}
+
+.jerry-hud-btn.active {
+  background: #ffb800;
+  color: #111827;
+  border-color: #ffd700;
+  font-weight: 800;
+}
+
+/* 3. Screen Box & Canvas */
+.jerry-screen-box {
+  position: relative;
+  width: 100%;
+  aspect-ratio: 800 / 480;
+  background: #000;
+  border: 3px solid #111;
+  border-radius: 12px;
+  overflow: hidden;
+  box-shadow: inset 0 0 30px rgba(0, 0, 0, 0.9);
+}
+
+.jerry-canvas {
+  width: 100%;
+  height: 100%;
+  display: block;
+  image-rendering: pixelated;
+  cursor: crosshair;
+}
+
+/* 4. Overlays */
+.jerry-overlay {
+  position: absolute;
+  inset: 0;
+  background: rgba(5, 7, 15, 0.85);
+  backdrop-filter: blur(6px);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 24px;
+  text-align: center;
+  z-index: 20;
+}
+
+.jerry-title-card {
+  margin-bottom: 20px;
+}
+
+.jerry-title-text {
+  font-size: 26px;
+  font-weight: 900;
+  background: linear-gradient(135deg, #ffd700, #ff8c00);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  margin-bottom: 6px;
+}
+
+.jerry-subtitle-text {
+  font-size: 13px;
+  color: #cbd5e1;
+  max-width: 460px;
+  line-height: 1.5;
+}
+
+/* 5. Generic Buttons */
+.jerry-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  padding: 10px 20px;
+  background: linear-gradient(135deg, #ffb800, #ff8c00);
+  color: #111827;
+  font-weight: 800;
+  border-radius: 10px;
+  border: none;
+  cursor: pointer;
+  box-shadow: 0 4px 12px rgba(255, 184, 0, 0.35);
+  transition: all 0.2s ease;
+  font-size: 14px;
+}
+
+.jerry-btn:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 16px rgba(255, 184, 0, 0.5);
+  filter: brightness(1.1);
+}
+
+.jerry-btn-secondary {
+  background: rgba(255, 255, 255, 0.1);
+  color: #f1f5f9;
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  box-shadow: none;
+}
+
+.jerry-btn-secondary:hover {
+  background: rgba(255, 255, 255, 0.18);
+  border-color: rgba(255, 255, 255, 0.35);
+  color: #fff;
+}
+
+/* 6. Score Submission Form */
+.jerry-submit-form {
+  background: rgba(15, 23, 42, 0.9);
+  border: 1px solid rgba(255, 184, 0, 0.4);
+  border-radius: 12px;
+  padding: 14px 18px;
+  margin-top: 14px;
+  width: 100%;
+  max-width: 380px;
+}
+
+.jerry-submit-input-group {
+  display: flex;
+  gap: 8px;
+  margin-top: 8px;
+}
+
+.jerry-submit-input {
+  flex: 1;
+  background: rgba(0, 0, 0, 0.6);
+  border: 1px solid rgba(255, 184, 0, 0.3);
+  border-radius: 8px;
+  padding: 8px 12px;
+  color: #fff;
+  font-size: 13px;
+  outline: none;
+  transition: border-color 0.2s;
+}
+
+.jerry-submit-input:focus {
+  border-color: #ffb800;
+  box-shadow: 0 0 0 2px rgba(255, 184, 0, 0.2);
+}
+
+/* 7. Level Editor Toolbar */
+.jerry-editor-bar {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  background: rgba(15, 23, 42, 0.95);
+  border: 1px solid rgba(0, 173, 181, 0.35);
+  border-radius: 12px;
+  padding: 8px 14px;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.jerry-palette-group {
+  display: flex;
+  gap: 6px;
+  flex-wrap: wrap;
+}
+
+.jerry-tool-btn {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  padding: 6px 10px;
+  background: rgba(255, 255, 255, 0.06);
+  border: 1px solid rgba(255, 255, 255, 0.15);
+  border-radius: 8px;
+  color: #cbd5e1;
+  font-size: 12px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.15s ease;
+}
+
+.jerry-tool-btn:hover {
+  background: rgba(0, 173, 181, 0.2);
+  border-color: rgba(0, 173, 181, 0.4);
+  color: #00adb5;
+}
+
+.jerry-tool-btn.selected {
+  background: #00adb5;
+  color: #000;
+  font-weight: 800;
+  border-color: #00fff5;
+  box-shadow: 0 0 10px rgba(0, 173, 181, 0.5);
+}
+
+/* 8. Virtual Controls for Mobile/Touch */
+.jerry-controls-bar {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  width: 100%;
+  padding: 8px 12px;
+  background: rgba(15, 23, 42, 0.6);
+  border-radius: 12px;
+  margin-top: 8px;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.jerry-controls-guide {
+  font-size: 12px;
+  color: #94a3b8;
+}
+
+.jerry-controls-guide kbd {
+  background: rgba(255, 255, 255, 0.12);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  border-radius: 4px;
+  padding: 2px 6px;
+  font-family: monospace;
+  color: #ffb800;
+}
+
+.jerry-virtual-btns {
+  display: flex;
+  gap: 8px;
+}
+
+.jerry-vbtn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 8px 16px;
+  background: rgba(255, 255, 255, 0.1);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  border-radius: 8px;
+  color: #fff;
+  font-size: 13px;
+  font-weight: 700;
+  cursor: pointer;
+  touch-action: manipulation;
+}
+
+.jerry-vbtn:active {
+  background: rgba(255, 184, 0, 0.4);
+  transform: scale(0.95);
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; transform: scale(0.98); }
+  to { opacity: 1; transform: scale(1); }
+}
+
+.animate-fadeIn {
+  animation: fadeIn 0.2s ease-out forwards;
+}

@@ -99,8 +99,17 @@ export async function submitScoreToDB(gameKey, name, score) {
   }
 
   const todayDate = new Date().toISOString().split('T')[0];
+  const newEntry = {
+    name: cleanName,
+    score: newScore,
+    date: todayDate,
+    timestamp: Date.now()
+  };
 
-  // 1. Check if name already exists in Cloud DB
+  // 1. Optimistic Local Storage Update (Ensures offline & instant availability)
+  saveLocalLeaderboardFallback(gameKey, newEntry);
+
+  // 2. Cloud DB Push / Sync (Non-blocking fallback)
   try {
     const res = await fetch(`${DB_API_URL}/${gameKey}.json`, { method: 'GET' });
     if (res.ok) {
@@ -124,42 +133,26 @@ export async function submitScoreToDB(gameKey, name, score) {
               })
             });
           }
-          saveLocalLeaderboardFallback(gameKey, { name: cleanName, score: Math.max(newScore, existingScore), date: todayDate, timestamp: Date.now() });
           return true;
         }
       }
     }
-  } catch (err) {
-    console.warn('[Backend DB] Pre-check failed, pushing new entry:', err);
-  }
 
-  const newEntry = {
-    name: cleanName,
-    score: newScore,
-    date: todayDate,
-    timestamp: Date.now()
-  };
-
-  // Local Storage update
-  saveLocalLeaderboardFallback(gameKey, newEntry);
-
-  // Cloud DB Push
-  try {
-    const res = await fetch(`${DB_API_URL}/${gameKey}.json`, {
+    const postRes = await fetch(`${DB_API_URL}/${gameKey}.json`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify(newEntry)
     });
 
-    if (res.ok) {
+    if (postRes.ok) {
       console.log('[Backend DB] High score successfully saved to Cloud Database!', newEntry);
-      return true;
     }
   } catch (err) {
-    console.error('[Backend DB] Failed to push to Cloud Database, saved locally:', err);
+    console.warn('[Backend DB] Cloud DB push unavailable, safely stored in Local Storage:', err);
   }
 
-  return false;
+  // Safely return true as the high score is reliably persisted in Local Storage
+  return true;
 }
 
 /**

@@ -118,19 +118,21 @@ export const PLAYABLE_GAMES = [
     category: '액션',
     imageSrc: getThumb('ponyexpress.jpg'),
     isPlayable: true,
-    badgeText: '🐎 NEW 13위',
+    badgeText: '🐎 13위',
     description: '100통의 편지를 싣고 3개 레인의 황무지 사막과 설원을 질주하여 마을에 배달하세요!'
+  },
+  {
+    id: 'jerrylawson',
+    title: '도촌 제리 로슨',
+    category: '액션',
+    imageSrc: getThumb('jerrylawson.jpg'),
+    isPlayable: true,
+    badgeText: '🕹️ NEW 14위',
+    description: '비디오 게임 롬 카트리지의 아버지와 함께하는 8비트 레트로 모험 & 나만의 게임 만들기!'
   }
 ];
 
 export const COMING_SOON_GAMES = [
-  {
-    id: 'jerrylawson',
-    title: 'Jerry Lawson',
-    category: '액션',
-    imageSrc: getThumb('jerrylawson.jpg'),
-    isPlayable: false
-  },
   {
     id: 'magic',
     title: '할로윈',
