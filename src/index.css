@@ -2633,23 +2633,27 @@ button, a, input, [role="button"], .dpad-btn, .btn-dino-jump, .btn-dino-duck, .m
 .rules-agreement-section {
   display: flex !important;
   flex-direction: column !important;
-  gap: 8px !important;
+  gap: 6px !important;
   background: rgba(15, 23, 42, 0.9) !important;
   border: 1.5px solid rgba(251, 191, 36, 0.3) !important;
   border-radius: 18px !important;
-  padding: 12px 16px !important;
+  padding: 12px 14px !important;
   margin-top: 2px !important;
 }
 
 .rules-check-label {
   display: flex !important;
   align-items: center !important;
+  justify-content: flex-start !important;
+  text-align: left !important;
   gap: 10px !important;
   cursor: pointer !important;
   user-select: none !important;
-  padding: 6px 8px !important;
-  border-radius: 10px !important;
+  padding: 7px 10px !important;
+  border-radius: 12px !important;
   transition: all 0.2s ease !important;
+  width: 100% !important;
+  box-sizing: border-box !important;
 }
 
 .rules-check-label:hover {
@@ -2661,33 +2665,19 @@ button, a, input, [role="button"], .dpad-btn, .btn-dino-jump, .btn-dino-duck, .m
 }
 
 .rules-checkbox {
-  width: 20px !important;
-  height: 20px !important;
+  width: 18px !important;
+  height: 18px !important;
   accent-color: #F59E0B !important;
   cursor: pointer !important;
   flex-shrink: 0 !important;
+  margin: 0 !important;
 }
 
 .rules-check-text {
-  font-size: 12.5px !important;
+  font-size: 13px !important;
+  line-height: 1.4 !important;
   letter-spacing: -0.01em !important;
-}
-
-.rules-check-label-sub {
-  display: flex !important;
-  align-items: center !important;
-  gap: 8px !important;
-  cursor: pointer !important;
-  user-select: none !important;
-  padding-left: 38px !important;
-}
-
-.rules-checkbox-sub {
-  width: 15px !important;
-  height: 15px !important;
-  accent-color: #94A3B8 !important;
-  cursor: pointer !important;
-  flex-shrink: 0 !important;
+  text-align: left !important;
 }
 
 .rules-modal-footer {

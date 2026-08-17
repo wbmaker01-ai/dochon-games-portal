@@ -1,14 +1,8 @@
 import React, { useState, useEffect } from 'react';
 import { 
   ShieldCheck, 
-  HeartHandshake, 
-  MessageSquareHeart, 
-  Clock, 
-  Sparkles, 
-  CheckCircle2, 
   Lock, 
-  Gamepad2,
-  AlertTriangle
+  Gamepad2
 } from 'lucide-react';
 import { haptics } from '../utils/haptics';
 
@@ -151,16 +145,13 @@ export default function RulesNoticeModal({ isOpen, onClose }) {
               }}
               className="rules-checkbox"
             />
-            <div className="flex flex-col text-left">
-              <span className="rules-check-text text-amber-300 font-black flex items-center gap-1.5">
-                <CheckCircle2 className={`w-4 h-4 ${understoodAgreed ? 'text-amber-400' : 'text-slate-500'}`} />
-                <span>위 내용을 모두 이해했으며, 성실히 실천하겠습니다. (필수)</span>
-              </span>
-            </div>
+            <span className="rules-check-text text-amber-300 font-bold">
+              위 내용을 모두 이해했으며, 성실히 실천하겠습니다. (필수)
+            </span>
           </label>
 
           {/* Checkbox 2 (Optional: Hide Today) */}
-          <label className="rules-check-label-sub">
+          <label className={`rules-check-label ${hideToday ? 'checked' : ''}`}>
             <input
               type="checkbox"
               checked={hideToday}
@@ -168,9 +159,9 @@ export default function RulesNoticeModal({ isOpen, onClose }) {
                 haptics.light();
                 setHideToday(e.target.checked);
               }}
-              className="rules-checkbox-sub"
+              className="rules-checkbox"
             />
-            <span className="text-xs text-slate-300 font-medium">
+            <span className="rules-check-text text-slate-300 font-medium">
               오늘 하루는 이 안내 팝업을 다시 보지 않겠습니다.
             </span>
           </label>
