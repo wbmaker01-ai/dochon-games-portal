@@ -465,8 +465,9 @@ export default function PacManGame({ onScoreSubmitted }) {
 
   return (
     <div className="flex flex-col items-center justify-center w-full max-w-4xl mx-auto p-1.5 sm:p-3 select-none">
-      {/* 1. Header Bar with Cute Arcade Typography */}
-      <div className="flex flex-wrap items-center justify-between w-full mb-2 px-1 gap-2 sm:gap-3">
+      {/* 1. Header Bar */}
+      <div className="flex flex-col items-center w-full mb-2 gap-1.5 px-1">
+        {/* Title */}
         <div className="flex items-center gap-2 sm:gap-3">
           <span className="text-lg sm:text-2xl font-black bg-gradient-to-r from-amber-300 via-yellow-200 to-amber-400 bg-clip-text text-transparent flex items-center gap-1.5 sm:gap-2 drop-shadow">
             🕹️ Dochon Pac-Man&nbsp;&nbsp;
@@ -476,27 +477,31 @@ export default function PacManGame({ onScoreSubmitted }) {
           </span>
         </div>
 
-        {/* Scoreboard Pills */}
-        <div className="flex items-center gap-2 sm:gap-4 font-black text-xs md:text-sm">
-          <div className="bg-slate-900/90 border border-amber-500/40 px-2.5 sm:px-3 py-1 rounded-xl shadow-inner flex items-center gap-1.5">
-            <span className="text-slate-400 text-[11px]">점수</span>
-            <span className="text-amber-400 font-mono text-base md:text-lg">{score.toLocaleString()}</span>
+        {/* Row: 현재 점수 / 최고 점수 — one line */}
+        <div className="flex items-center gap-1.5 font-black text-xs flex-nowrap">
+          <div className="bg-slate-900/90 border border-amber-500/40 px-2 py-0.5 rounded-lg shadow-inner flex items-center gap-1 whitespace-nowrap">
+            <span className="text-slate-400 text-[10px]">현재 점수</span>
+            <span className="text-amber-400 font-mono text-sm">{score.toLocaleString()}점</span>
           </div>
-
-          <div className="bg-slate-900/90 border border-teal-500/40 px-2.5 sm:px-3 py-1 rounded-xl shadow-inner flex items-center gap-1.5">
-            <span className="text-slate-400 text-[11px]">최고</span>
-            <span className="text-teal-300 font-mono text-base md:text-lg">{highScore.toLocaleString()}</span>
+          <span className="text-slate-500 font-black select-none text-xs">/</span>
+          <div className="bg-slate-900/90 border border-teal-500/40 px-2 py-0.5 rounded-lg shadow-inner flex items-center gap-1 whitespace-nowrap">
+            <span className="text-slate-400 text-[10px]">최고 점수</span>
+            <span className="text-teal-300 font-mono text-sm">{highScore.toLocaleString()}점</span>
           </div>
+        </div>
 
-          <div className="bg-slate-900/90 border border-pink-500/40 px-2.5 sm:px-3 py-1 rounded-xl shadow-inner flex items-center gap-1.5">
-            <span className="text-slate-400 text-[11px]">목숨</span>
-            <div className="flex items-center gap-1">
+        {/* Row: 목숨 + 하트 — one line */}
+        <div className="flex items-center gap-1.5 font-black text-xs flex-nowrap">
+          <div className="bg-slate-900/90 border border-pink-500/40 px-2 py-0.5 rounded-lg shadow-inner flex items-center gap-1.5 whitespace-nowrap">
+            <span className="text-slate-400 text-[10px]">목숨</span>
+            <div className="flex items-center gap-0.5">
               {Array.from({ length: 3 }).map((_, i) => (
-                <span key={i} className={`text-base transition-all duration-300 ${i < lives ? 'opacity-100 scale-110 drop-shadow-[0_0_8px_rgba(244,63,94,0.8)]' : 'opacity-20 scale-90 grayscale'}`}>💖</span>
+                <span key={i} className={`text-sm transition-all duration-300 ${i < lives ? 'opacity-100 scale-110 drop-shadow-[0_0_8px_rgba(244,63,94,0.8)]' : 'opacity-20 scale-90 grayscale'}`}>💖</span>
               ))}
             </div>
           </div>
         </div>
+
       </div>
 
       {/* 2. Reserved Fixed-Height Announcement Ribbon (100% Fixed Height, Zero Layout Shift) */}
