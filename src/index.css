@@ -428,16 +428,40 @@ body {
   padding: 10px 16px;
   margin-top: 12px;
   z-index: 20;
+  overflow: hidden;
 }
 
 .portal-categories {
   display: flex;
-  flex-wrap: wrap;
+  flex-wrap: nowrap;
   align-items: center;
-  justify-content: center;
+  justify-content: flex-start;
   gap: 6px;
-  max-width: 860px;
+  max-width: 100%;
   margin: 0 auto;
+  overflow-x: auto;
+  overflow-y: hidden;
+  padding-bottom: 4px;
+  scrollbar-width: thin;
+  scrollbar-color: rgba(251, 191, 36, 0.4) transparent;
+  -webkit-overflow-scrolling: touch;
+  scroll-snap-type: x proximity;
+}
+
+.portal-categories::-webkit-scrollbar {
+  height: 3px;
+}
+.portal-categories::-webkit-scrollbar-track {
+  background: transparent;
+}
+.portal-categories::-webkit-scrollbar-thumb {
+  background-color: rgba(251, 191, 36, 0.35);
+  border-radius: 9999px;
+}
+
+.portal-categories .portal-category-chip {
+  scroll-snap-align: start;
+  flex-shrink: 0;
 }
 
 .portal-category-chip {
