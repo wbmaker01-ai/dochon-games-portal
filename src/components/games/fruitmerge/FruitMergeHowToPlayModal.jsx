@@ -81,13 +81,13 @@ export default function FruitMergeHowToPlayModal({ isOpen, onClose }) {
             <div className="bg-slate-900/50 border border-slate-800 rounded-xl p-3.5">
               <h4 className="text-xs font-bold text-sky-300 flex items-center gap-1.5 mb-1.5">
                 <Zap className="w-4 h-4 text-sky-400" />
-                조작 방법 (PC 키보드 & 마우스 / 모바일)
+                조작 방법 (모바일 버튼 / PC 키보드 & 마우스)
               </h4>
               <ul className="text-xs text-slate-300 space-y-1">
-                <li>• <strong>키보드 이동</strong>: <kbd className="px-1 py-0.5 bg-slate-800 rounded text-amber-300 border border-slate-700">←</kbd> / <kbd className="px-1 py-0.5 bg-slate-800 rounded text-amber-300 border border-slate-700">→</kbd> (또는 A / D)</li>
-                <li>• <strong>키보드 낙하</strong>: <kbd className="px-1.5 py-0.5 bg-slate-800 rounded text-emerald-300 border border-slate-700">Space</kbd> / <kbd className="px-1 py-0.5 bg-slate-800 rounded text-emerald-300 border border-slate-700">↓</kbd></li>
-                <li>• <strong>마우스/터치</strong>: 좌우 드래그로 조준, 클릭/손 떼기로 낙하</li>
-                <li>• <strong>흔들기</strong>: <kbd className="px-1 py-0.5 bg-slate-800 rounded text-sky-300 border border-slate-700">Z</kbd> 키 또는 버튼(🎲) 클릭 (게임당 2회)</li>
+                <li>• <strong>모바일/화면 버튼</strong>: 좌측 <strong>[왼쪽/오른쪽]</strong> 이동 버튼 + 우측 <strong>[과일 낙하]</strong> 버튼</li>
+                <li>• <strong>키보드 조작</strong>: <kbd className="px-1 py-0.5 bg-slate-800 rounded text-amber-300 border border-slate-700">←</kbd> / <kbd className="px-1 py-0.5 bg-slate-800 rounded text-amber-300 border border-slate-700">→</kbd> 이동, <kbd className="px-1.5 py-0.5 bg-slate-800 rounded text-emerald-300 border border-slate-700">Space</kbd> / <kbd className="px-1 py-0.5 bg-slate-800 rounded text-emerald-300 border border-slate-700">↓</kbd> 낙하</li>
+                <li>• <strong>마우스/터치 드래그</strong>: 캔버스 직접 터치 및 드래그로 조준/낙하</li>
+                <li>• <strong>비상 흔들기</strong>: <kbd className="px-1 py-0.5 bg-slate-800 rounded text-sky-300 border border-slate-700">Z</kbd> 키 또는 상단 버튼(🎲) 클릭 (게임당 2회)</li>
               </ul>
             </div>
 

@@ -3,11 +3,30 @@
 
 export const CHANGELOG_DATA = [
   {
+    version: 'v1.20.4',
+    date: '2026-08-17',
+    title: '도촌 과일 합치기 모바일/터치 전용 디자인 버튼 컨트롤러 탑재',
+    badge: 'LATEST',
+    badgeColor: 'emerald',
+    items: [
+      {
+        tag: 'MOBILE CONTROLS',
+        tagColor: 'amber',
+        text: '[모바일 전용 터치 컨트롤러 구현] 스마트폰과 태블릿 환경에서도 쾌적하게 플레이할 수 있도록 좌측 [왼쪽/오른쪽] 방향키 버튼과 우측 대형 [과일 낙하] 액션 버튼을 직관적인 글래스모피즘 아케이드 디자인으로 탑재'
+      },
+      {
+        tag: 'SMOOTH HOLD',
+        tagColor: 'blue',
+        text: '[터치 탭 & 연속 홀드 이동 지원] 이동 버튼을 가볍게 탭하면 단계별 이동, 길게 누르고 있으면 60FPS 부드러운 연속 슬라이드 이동 지원'
+      }
+    ]
+  },
+  {
     version: 'v1.20.3',
     date: '2026-08-17',
     title: '도촌 과일 합치기 키보드 전용 조작계(화살표·스페이스바·단축키) 전격 탑재',
-    badge: 'LATEST',
-    badgeColor: 'emerald',
+    badge: 'UPDATE',
+    badgeColor: 'blue',
     items: [
       {
         tag: 'CONTROLS',

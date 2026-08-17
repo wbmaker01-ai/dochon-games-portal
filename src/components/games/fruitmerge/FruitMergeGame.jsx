@@ -26,7 +26,10 @@ import {
   Dices,
   Send,
   User,
-  CheckCircle2
+  CheckCircle2,
+  ArrowLeft,
+  ArrowRight,
+  ArrowDown
 } from 'lucide-react';
 
 export default function FruitMergeGame({ onScoreSubmitted }) {
@@ -134,6 +137,52 @@ export default function FruitMergeGame({ onScoreSubmitted }) {
       }
     }, DROP_COOLDOWN_MS);
   }, [gameState, canDrop, currentLevel, nextLevel]);
+
+  // Touch / Mobile Button Movement Handlers
+  const moveIntervalRef = useRef(null);
+
+  const startMoving = useCallback((dir, e) => {
+    if (e && e.cancelable) e.preventDefault();
+    fruitAudio.init();
+
+    const curRadius = FRUITS[currentLevel]?.radius || 17;
+    // Immediate step on tap
+    if (dir === 'left') {
+      aimXRef.current = Math.max(BOX_LEFT + curRadius, aimXRef.current - 16);
+    } else {
+      aimXRef.current = Math.min(BOX_RIGHT - curRadius, aimXRef.current + 16);
+    }
+
+    if (moveIntervalRef.current) {
+      clearInterval(moveIntervalRef.current);
+    }
+
+    // Continuous smooth movement on hold
+    moveIntervalRef.current = setInterval(() => {
+      const radius = FRUITS[currentLevel]?.radius || 17;
+      if (dir === 'left') {
+        aimXRef.current = Math.max(BOX_LEFT + radius, aimXRef.current - 8);
+      } else {
+        aimXRef.current = Math.min(BOX_RIGHT - radius, aimXRef.current + 8);
+      }
+    }, 24);
+  }, [currentLevel]);
+
+  const stopMoving = useCallback((e) => {
+    if (e && e.cancelable) e.preventDefault();
+    if (moveIntervalRef.current) {
+      clearInterval(moveIntervalRef.current);
+      moveIntervalRef.current = null;
+    }
+  }, []);
+
+  useEffect(() => {
+    return () => {
+      if (moveIntervalRef.current) {
+        clearInterval(moveIntervalRef.current);
+      }
+    };
+  }, []);
 
   // Score Addition Callback
   const handleScoreAdd = useCallback((addedScore) => {
@@ -480,14 +529,69 @@ export default function FruitMergeGame({ onScoreSubmitted }) {
         )}
       </div>
 
-      {/* 4. Controls Quick Keyboard & Mouse Hint Bar */}
+      {/* 4. On-Screen Touch / Button Controller Bar (Left: Move Buttons, Right: Drop Action Button) */}
+      <div className="fruit-touch-controller">
+        {/* Left: Move Left & Move Right Buttons */}
+        <div className="fruit-dpad-group">
+          <button
+            type="button"
+            className="fruit-ctrl-btn fruit-btn-move"
+            onPointerDown={(e) => startMoving('left', e)}
+            onPointerUp={stopMoving}
+            onPointerLeave={stopMoving}
+            onContextMenu={(e) => e.preventDefault()}
+            title="왼쪽으로 이동"
+            aria-label="왼쪽 이동"
+          >
+            <ArrowLeft className="w-5 h-5 text-emerald-300" />
+            <span className="fruit-btn-text">왼쪽</span>
+          </button>
+
+          <button
+            type="button"
+            className="fruit-ctrl-btn fruit-btn-move"
+            onPointerDown={(e) => startMoving('right', e)}
+            onPointerUp={stopMoving}
+            onPointerLeave={stopMoving}
+            onContextMenu={(e) => e.preventDefault()}
+            title="오른쪽으로 이동"
+            aria-label="오른쪽 이동"
+          >
+            <span className="fruit-btn-text">오른쪽</span>
+            <ArrowRight className="w-5 h-5 text-emerald-300" />
+          </button>
+        </div>
+
+        {/* Right: Big Action Drop Button */}
+        <button
+          type="button"
+          className="fruit-ctrl-btn fruit-btn-drop"
+          onPointerDown={(e) => {
+            if (e && e.cancelable) e.preventDefault();
+            if (gameState === 'playing') {
+              triggerDrop();
+            }
+          }}
+          onContextMenu={(e) => e.preventDefault()}
+          title="과일 떨어뜨리기"
+          aria-label="과일 낙하"
+        >
+          <ArrowDown className="w-5 h-5 text-white animate-bounce shrink-0" />
+          <div className="flex flex-col items-start leading-none">
+            <span className="fruit-drop-main">과일 낙하</span>
+            <span className="fruit-drop-sub">DROP</span>
+          </div>
+        </button>
+      </div>
+
+      {/* 5. Controls Quick Keyboard & Mouse Hint Bar */}
       <div className="fruit-controls-hint">
         <span className="fruit-hint-badge">⌨️ [← / →] 이동</span>
         <span className="fruit-hint-badge">[스페이스바 / ↓] 과일 낙하</span>
         <span className="fruit-hint-badge">[Z] 흔들기</span>
       </div>
 
-      {/* 5. Bottom Fruit Evolution Sequence Rail */}
+      {/* 6. Bottom Fruit Evolution Sequence Rail */}
       <div className="fruit-evolution-rail">
         {FRUITS.map((fruit, idx) => (
           <React.Fragment key={fruit.level}>
