@@ -300,62 +300,131 @@ function getLocalLeaderboardFallback(gameKey) {
     if (stored) return deduplicateLeaderboard(JSON.parse(stored));
   } catch (e) {}
 
-  if (gameKey === 'pacman') {
-    return deduplicateLeaderboard([
-      { id: '1', name: '김도촌 (5A)', score: 12400, date: '2026-08-12' },
-      { id: '2', name: '이슬기 (4B)', score: 9800, date: '2026-08-12' },
-      { id: '3', name: '박민준 (6C)', score: 8500, date: '2026-08-11' },
-      { id: '4', name: '최하은 (3A)', score: 6200, date: '2026-08-10' },
-      { id: '5', name: '정우진 (5B)', score: 4900, date: '2026-08-09' }
-    ]);
-  } else if (gameKey === 'snake') {
-    return deduplicateLeaderboard([
-      { id: '1', name: '강스네이크 (6A)', score: 480, date: '2026-08-14' },
-      { id: '2', name: '김도촌 (5A)', score: 360, date: '2026-08-14' },
-      { id: '3', name: '이민서 (4C)', score: 280, date: '2026-08-13' },
-      { id: '4', name: '박지훈 (3B)', score: 190, date: '2026-08-12' },
-      { id: '5', name: '최예은 (5C)', score: 150, date: '2026-08-11' }
-    ]);
-  } else if (gameKey === 'minesweeper') {
-    return deduplicateLeaderboard([
-      { id: '1', name: '이지뢰 (6B)', score: 3200, date: '2026-08-16' },
-      { id: '2', name: '김도촌 (5A)', score: 2450, date: '2026-08-16' },
-      { id: '3', name: '박하늘 (4A)', score: 1800, date: '2026-08-15' },
-      { id: '4', name: '정수빈 (3C)', score: 1250, date: '2026-08-15' },
-      { id: '5', name: '최강우 (5B)', score: 850, date: '2026-08-14' }
-    ]);
-  } else if (gameKey === 'baseball') {
-    return deduplicateLeaderboard([
-      { id: '1', name: '이홈런 (6A)', score: 4850, date: '2026-08-16' },
-      { id: '2', name: '김도촌 (5A)', score: 3620, date: '2026-08-16' },
-      { id: '3', name: '박타자 (4B)', score: 2750, date: '2026-08-16' },
-      { id: '4', name: '최안타 (5C)', score: 1980, date: '2026-08-15' },
-      { id: '5', name: '강슬러거 (3A)', score: 1240, date: '2026-08-15' }
-    ]);
-  } else if (gameKey === 'colortile') {
-    return deduplicateLeaderboard([
-      { id: '1', name: '김타일 (6C)', score: 8600, date: '2026-08-16' },
-      { id: '2', name: '이퍼즐 (5B)', score: 6400, date: '2026-08-16' },
-      { id: '3', name: '김도촌 (5A)', score: 4950, date: '2026-08-16' },
-      { id: '4', name: '박매칭 (4A)', score: 3200, date: '2026-08-16' },
-      { id: '5', name: '최콤보 (3B)', score: 1800, date: '2026-08-16' }
-    ]);
-  } else if (gameKey === 'champion') {
-    return deduplicateLeaderboard([
-      { id: '1', name: '김럭키 (6A)', score: 3200, date: '2026-08-16' },
-      { id: '2', name: '김도촌 (5A)', score: 2650, date: '2026-08-16' },
-      { id: '3', name: '이닌자 (4B)', score: 2100, date: '2026-08-16' },
-      { id: '4', name: '박챔피언 (5C)', score: 1750, date: '2026-08-15' },
-      { id: '5', name: '최두루마리 (3A)', score: 1200, date: '2026-08-15' }
-    ]);
-  } else {
-    return deduplicateLeaderboard([
-      { id: '1', name: '박민준 (6C)', score: 3450, date: '2026-08-12' },
-      { id: '2', name: '김도촌 (5A)', score: 2890, date: '2026-08-12' },
-      { id: '3', name: '윤서연 (4A)', score: 2100, date: '2026-08-11' },
-      { id: '4', name: '강현우 (6A)', score: 1750, date: '2026-08-10' }
-    ]);
+  const fallbackMap = {
+    pacman: [
+      { id: 'p1', name: '김도촌 (5A)', score: 12400, date: '2026-08-12' },
+      { id: 'p2', name: '이슬기 (4B)', score: 9800, date: '2026-08-12' },
+      { id: 'p3', name: '박민준 (6C)', score: 8500, date: '2026-08-11' },
+      { id: 'p4', name: '최하은 (3A)', score: 6200, date: '2026-08-10' },
+      { id: 'p5', name: '정우진 (5B)', score: 4900, date: '2026-08-09' }
+    ],
+    dino: [
+      { id: 'd1', name: '김홍년선생님', score: 1836, date: '2026-08-17' },
+      { id: 'd2', name: '김도촌 (5A)', score: 1520, date: '2026-08-15' },
+      { id: 'd3', name: '이달려 (4B)', score: 1180, date: '2026-08-15' },
+      { id: 'd4', name: '박익룡 (6C)', score: 890, date: '2026-08-14' },
+      { id: 'd5', name: '최선인장 (3A)', score: 650, date: '2026-08-14' }
+    ],
+    snake: [
+      { id: 's1', name: '강스네이크 (6A)', score: 480, date: '2026-08-14' },
+      { id: 's2', name: '김도촌 (5A)', score: 360, date: '2026-08-14' },
+      { id: 's3', name: '이민서 (4C)', score: 280, date: '2026-08-13' },
+      { id: 's4', name: '박지훈 (3B)', score: 190, date: '2026-08-12' },
+      { id: 's5', name: '최예은 (5C)', score: 150, date: '2026-08-11' }
+    ],
+    solitaire: [
+      { id: 'so1', name: '김홍년선생님', score: 890, date: '2026-08-17' },
+      { id: 'so2', name: '김에이스 (6A)', score: 780, date: '2026-08-15' },
+      { id: 'so3', name: '이스페이드 (5B)', score: 650, date: '2026-08-15' },
+      { id: 'so4', name: '박하트 (4C)', score: 520, date: '2026-08-14' },
+      { id: 'so5', name: '최클로버 (3A)', score: 410, date: '2026-08-14' }
+    ],
+    minesweeper: [
+      { id: 'm1', name: '이지뢰 (6B)', score: 3200, date: '2026-08-16' },
+      { id: 'm2', name: '김도촌 (5A)', score: 2450, date: '2026-08-16' },
+      { id: 'm3', name: '박하늘 (4A)', score: 1800, date: '2026-08-15' },
+      { id: 'm4', name: '정수빈 (3C)', score: 1250, date: '2026-08-15' },
+      { id: 'm5', name: '최강우 (5B)', score: 850, date: '2026-08-14' }
+    ],
+    baseball: [
+      { id: 'b1', name: '이홈런 (6A)', score: 4850, date: '2026-08-16' },
+      { id: 'b2', name: '김도촌 (5A)', score: 3620, date: '2026-08-16' },
+      { id: 'b3', name: '박타자 (4B)', score: 2750, date: '2026-08-16' },
+      { id: 'b4', name: '최안타 (5C)', score: 1980, date: '2026-08-15' },
+      { id: 'b5', name: '강슬러거 (3A)', score: 1240, date: '2026-08-15' }
+    ],
+    colortile: [
+      { id: 'c1', name: '김타일 (6C)', score: 8600, date: '2026-08-16' },
+      { id: 'c2', name: '이퍼즐 (5B)', score: 6400, date: '2026-08-16' },
+      { id: 'c3', name: '김도촌 (5A)', score: 4950, date: '2026-08-16' },
+      { id: 'c4', name: '박매칭 (4A)', score: 3200, date: '2026-08-16' },
+      { id: 'c5', name: '최콤보 (3B)', score: 1800, date: '2026-08-16' }
+    ],
+    popcorn: [
+      { id: 'pop1', name: '김홍년선생님', score: 1775, date: '2026-08-17' },
+      { id: 'pop2', name: '김팝콘 (6A)', score: 1450, date: '2026-08-16' },
+      { id: 'pop3', name: '이버터 (5B)', score: 1180, date: '2026-08-16' },
+      { id: 'pop4', name: '박불꽃 (4C)', score: 890, date: '2026-08-15' },
+      { id: 'pop5', name: '최옥수수 (3A)', score: 620, date: '2026-08-15' }
+    ],
+    tictactoe: [
+      { id: 't1', name: '김홍년선생님', score: 660, date: '2026-08-17' },
+      { id: 't2', name: '김도넛 (6A)', score: 550, date: '2026-08-16' },
+      { id: 't3', name: '이딸기 (5B)', score: 420, date: '2026-08-16' },
+      { id: 't4', name: '박초코 (4C)', score: 310, date: '2026-08-15' },
+      { id: 't5', name: '최글레이즈 (3A)', score: 220, date: '2026-08-15' }
+    ],
+    champion: [
+      { id: 'ch1', name: '김럭키 (6A)', score: 3200, date: '2026-08-16' },
+      { id: 'ch2', name: '김도촌 (5A)', score: 2650, date: '2026-08-16' },
+      { id: 'ch3', name: '이닌자 (4B)', score: 2100, date: '2026-08-16' },
+      { id: 'ch4', name: '박챔피언 (5C)', score: 1750, date: '2026-08-15' },
+      { id: 'ch5', name: '최두루마리 (3A)', score: 1200, date: '2026-08-15' }
+    ],
+    cricket: [
+      { id: 'cr1', name: '김홍년선생님', score: 101, date: '2026-08-17' },
+      { id: 'cr2', name: '김바운더리 (6A)', score: 95, date: '2026-08-17' },
+      { id: 'cr3', name: '이스윙 (5B)', score: 82, date: '2026-08-17' },
+      { id: 'cr4', name: '박볼러 (4C)', score: 68, date: '2026-08-16' },
+      { id: 'cr5', name: '최크리켓 (3A)', score: 54, date: '2026-08-16' }
+    ],
+    ponyexpress: [
+      { id: 'pe1', name: '김홍년선생님', score: 2096, date: '2026-08-17' },
+      { id: 'pe2', name: '김라이더 (6A)', score: 1750, date: '2026-08-17' },
+      { id: 'pe3', name: '이우편 (5B)', score: 1380, date: '2026-08-16' },
+      { id: 'pe4', name: '박포니 (4C)', score: 990, date: '2026-08-16' },
+      { id: 'pe5', name: '최배달 (3A)', score: 680, date: '2026-08-15' }
+    ],
+    jerrylawson: [
+      { id: 'jl1', name: '김홍년선생님', score: 4315, date: '2026-08-17' },
+      { id: 'jl2', name: '김카트리지 (6A)', score: 3600, date: '2026-08-17' },
+      { id: 'jl3', name: '이픽셀 (5B)', score: 2850, date: '2026-08-16' },
+      { id: 'jl4', name: '박도트 (4C)', score: 2100, date: '2026-08-16' },
+      { id: 'jl5', name: '최레트로 (3A)', score: 1450, date: '2026-08-15' }
+    ],
+    magic: [
+      { id: 'mg1', name: '김홍년선생님', score: 35375, date: '2026-08-17' },
+      { id: 'mg2', name: '김매직 (6A)', score: 28400, date: '2026-08-17' },
+      { id: 'mg3', name: '이지팡이 (5B)', score: 21500, date: '2026-08-16' },
+      { id: 'mg4', name: '박스펠 (4C)', score: 15200, date: '2026-08-16' },
+      { id: 'mg5', name: '최위자드 (3A)', score: 9800, date: '2026-08-15' }
+    ],
+    fruitmerge: [
+      { id: 'fm1', name: '김홍년선생님', score: 13020, date: '2026-08-17' },
+      { id: 'fm2', name: '김수박 (6A)', score: 9850, date: '2026-08-17' },
+      { id: 'fm3', name: '이멜론 (5B)', score: 7400, date: '2026-08-16' },
+      { id: 'fm4', name: '박파인애플 (4C)', score: 5200, date: '2026-08-16' },
+      { id: 'fm5', name: '최딸기 (3A)', score: 3100, date: '2026-08-15' }
+    ],
+    brickbreaker: [
+      { id: 'bb1', name: '김홍년선생님', score: 7870, date: '2026-08-17' },
+      { id: 'bb2', name: '김벽돌 (6A)', score: 6200, date: '2026-08-17' },
+      { id: 'bb3', name: '이레이저 (5B)', score: 4850, date: '2026-08-16' },
+      { id: 'bb4', name: '박콤보 (4C)', score: 3400, date: '2026-08-16' },
+      { id: 'bb5', name: '최볼 (3A)', score: 2150, date: '2026-08-15' }
+    ]
+  };
+
+  if (fallbackMap[gameKey]) {
+    return deduplicateLeaderboard(fallbackMap[gameKey]);
   }
+
+  return deduplicateLeaderboard([
+    { id: '1', name: '박민준 (6C)', score: 3450, date: '2026-08-12' },
+    { id: '2', name: '김도촌 (5A)', score: 2890, date: '2026-08-12' },
+    { id: '3', name: '윤서연 (4A)', score: 2100, date: '2026-08-11' },
+    { id: '4', name: '강현우 (6A)', score: 1750, date: '2026-08-10' }
+  ]);
 }
 
 /**
