@@ -22,7 +22,7 @@ import ChangelogModal from './components/ChangelogModal';
 import GuideModal from './components/GuideModal';
 import { PLAYABLE_GAMES, COMING_SOON_GAMES, CATEGORY_DEFINITIONS } from './data/gamesData';
 import { getLatestVersion } from './data/changelogData';
-import { getLeaderboardFromDB } from './utils/leaderboardApi';
+import { getLeaderboardFromDB, syncLocalStorageToCloudDB } from './utils/leaderboardApi';
 import { getRankedPlayableGames } from './utils/rankingAlgorithm';
 import { haptics } from './utils/haptics';
 import { Trophy, X, Lock, Gamepad2, Dices, Heart, Crown, History, HelpCircle, Smartphone, RotateCcw } from 'lucide-react';
@@ -59,6 +59,11 @@ export default function App() {
   const [leaderboardCounts, setLeaderboardCounts] = useState({});
 
   useEffect(() => {
+    // 1. One-time sync from localStorage to Firebase Cloud DB
+    syncLocalStorageToCloudDB().then(() => {
+      fetchTopScores();
+    });
+
     // Fetch top scores and activity counts for playable games
     async function fetchTopScores() {
       const topResults = {};
