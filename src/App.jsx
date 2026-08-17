@@ -32,7 +32,8 @@ export default function App() {
   const [activeGame, setActiveGame] = useState(null);
   const [isRulesOpen, setIsRulesOpen] = useState(() => {
     try {
-      const today = new Date().toISOString().split('T')[0];
+      const d = new Date();
+      const today = `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
       const hideDate = localStorage.getItem('dochon_rules_hide_today');
       return hideDate !== today;
     } catch (e) {
