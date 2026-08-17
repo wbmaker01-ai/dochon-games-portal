@@ -325,3 +325,313 @@
 .animate-fadeIn {
   animation: fadeIn 0.2s ease-out forwards;
 }
+
+/* =========================================================================
+   9. Jerry Lawson How-To-Play & Story Modal (Responsive Floating Overlay)
+   ========================================================================= */
+.jerry-modal-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 99999;
+  background: rgba(5, 8, 18, 0.88);
+  backdrop-filter: blur(10px);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 16px;
+  box-sizing: border-box;
+  animation: jerryModalFadeIn 0.25s ease-out forwards;
+}
+
+.jerry-modal-card {
+  position: relative;
+  width: 100%;
+  max-width: 660px;
+  max-height: 88vh;
+  background: #0f172a;
+  background-image: radial-gradient(circle at 50% 0%, rgba(255, 184, 0, 0.12), transparent 70%);
+  border: 2px solid #ffb800;
+  border-radius: 22px;
+  box-shadow: 
+    0 25px 60px rgba(0, 0, 0, 0.85),
+    0 0 35px rgba(255, 184, 0, 0.25);
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  box-sizing: border-box;
+  animation: jerryModalPopIn 0.25s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+}
+
+.jerry-modal-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 16px 22px;
+  background: linear-gradient(135deg, #2b1c0e 0%, #151d30 100%);
+  border-bottom: 1px solid rgba(255, 184, 0, 0.35);
+  box-sizing: border-box;
+}
+
+.jerry-modal-title-box {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.jerry-modal-icon-wrap {
+  width: 42px;
+  height: 42px;
+  border-radius: 12px;
+  background: rgba(255, 184, 0, 0.15);
+  border: 1.5px solid rgba(255, 184, 0, 0.5);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 22px;
+  box-shadow: 0 0 12px rgba(255, 184, 0, 0.25);
+}
+
+.jerry-modal-title {
+  font-size: 17px;
+  font-weight: 900;
+  color: #ffd700;
+  margin: 0;
+  letter-spacing: -0.3px;
+  text-shadow: 0 2px 4px rgba(0, 0, 0, 0.5);
+}
+
+.jerry-modal-subtitle {
+  font-size: 12px;
+  color: #94a3b8;
+  margin: 2px 0 0 0;
+}
+
+.jerry-modal-close-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 36px;
+  height: 36px;
+  border-radius: 10px;
+  background: rgba(255, 255, 255, 0.08);
+  border: 1px solid rgba(255, 255, 255, 0.18);
+  color: #94a3b8;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.jerry-modal-close-btn:hover {
+  background: rgba(239, 68, 68, 0.25);
+  border-color: rgba(239, 68, 68, 0.6);
+  color: #ef4444;
+  transform: rotate(90deg);
+}
+
+.jerry-modal-body {
+  padding: 20px 22px;
+  overflow-y: auto;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  color: #e2e8f0;
+  font-size: 13px;
+  line-height: 1.6;
+  box-sizing: border-box;
+}
+
+.jerry-cutscene-wrap {
+  border-radius: 14px;
+  border: 1.5px solid rgba(255, 184, 0, 0.4);
+  overflow: hidden;
+  background: #080d1a;
+  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.6);
+}
+
+.jerry-cutscene-img {
+  width: 100%;
+  height: 170px;
+  object-fit: cover;
+  display: block;
+}
+
+.jerry-cutscene-caption {
+  padding: 12px 16px;
+  background: linear-gradient(180deg, rgba(15, 23, 42, 0.9) 0%, #080d1a 100%);
+}
+
+.jerry-cutscene-title {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 13px;
+  font-weight: 800;
+  color: #ffd700;
+  margin-bottom: 4px;
+}
+
+.jerry-cutscene-desc {
+  font-size: 12px;
+  color: #cbd5e1;
+  line-height: 1.5;
+  margin: 0;
+}
+
+.jerry-guide-section {
+  background: rgba(15, 23, 42, 0.7);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 14px;
+  padding: 14px 16px;
+}
+
+.jerry-guide-section.editor-theme {
+  background: linear-gradient(135deg, rgba(0, 173, 181, 0.1) 0%, rgba(15, 23, 42, 0.8) 100%);
+  border-color: rgba(0, 173, 181, 0.35);
+}
+
+.jerry-guide-section.honor-theme {
+  background: linear-gradient(135deg, rgba(255, 184, 0, 0.1) 0%, rgba(15, 23, 42, 0.8) 100%);
+  border-color: rgba(255, 184, 0, 0.35);
+}
+
+.jerry-guide-heading {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 14px;
+  font-weight: 800;
+  color: #ffd700;
+  margin: 0 0 10px 0;
+}
+
+.jerry-guide-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 10px;
+}
+
+@media (max-width: 540px) {
+  .jerry-guide-grid {
+    grid-template-columns: 1fr;
+  }
+}
+
+.jerry-guide-item {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 10px 12px;
+  background: rgba(0, 0, 0, 0.4);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 10px;
+  font-size: 12px;
+}
+
+.jerry-kbd {
+  font-family: monospace;
+  background: rgba(255, 255, 255, 0.12);
+  border: 1px solid rgba(255, 184, 0, 0.4);
+  border-radius: 6px;
+  padding: 3px 8px;
+  color: #ffd700;
+  font-weight: 700;
+  font-size: 11px;
+}
+
+.jerry-item-row {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 8px 12px;
+  background: rgba(0, 0, 0, 0.35);
+  border: 1px solid rgba(255, 255, 255, 0.06);
+  border-radius: 8px;
+  margin-bottom: 6px;
+}
+
+.jerry-item-row:last-child {
+  margin-bottom: 0;
+}
+
+.jerry-item-icon {
+  font-size: 20px;
+  line-height: 1;
+}
+
+.jerry-item-info strong {
+  color: #f1f5f9;
+  font-size: 12px;
+}
+
+.jerry-item-info p {
+  color: #94a3b8;
+  font-size: 11px;
+  margin: 2px 0 0 0;
+}
+
+.jerry-pills-wrap {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  margin-top: 8px;
+}
+
+.jerry-pill {
+  font-size: 11px;
+  font-weight: 700;
+  padding: 4px 10px;
+  background: rgba(0, 0, 0, 0.5);
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  border-radius: 20px;
+  color: #cbd5e1;
+}
+
+.jerry-modal-footer {
+  padding: 14px 22px;
+  background: #080d1a;
+  border-top: 1px solid rgba(255, 255, 255, 0.1);
+  display: flex;
+  justify-content: flex-end;
+  box-sizing: border-box;
+}
+
+.jerry-modal-confirm-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  padding: 12px 28px;
+  background: linear-gradient(135deg, #ffb800 0%, #ff8c00 100%);
+  color: #0f172a;
+  font-weight: 900;
+  font-size: 14px;
+  border-radius: 12px;
+  border: 1px solid #ffd700;
+  cursor: pointer;
+  box-shadow: 
+    0 4px 15px rgba(255, 184, 0, 0.4),
+    inset 0 1px 1px rgba(255, 255, 255, 0.4);
+  transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.jerry-modal-confirm-btn:hover {
+  transform: translateY(-2px);
+  box-shadow: 
+    0 8px 25px rgba(255, 184, 0, 0.6),
+    inset 0 1px 1px rgba(255, 255, 255, 0.6);
+  filter: brightness(1.1);
+}
+
+.jerry-modal-confirm-btn:active {
+  transform: translateY(0);
+  box-shadow: 0 2px 8px rgba(255, 184, 0, 0.4);
+}
+
+@keyframes jerryModalFadeIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+@keyframes jerryModalPopIn {
+  from { opacity: 0; transform: scale(0.92) translateY(12px); }
+  to { opacity: 1; transform: scale(1) translateY(0); }
+}

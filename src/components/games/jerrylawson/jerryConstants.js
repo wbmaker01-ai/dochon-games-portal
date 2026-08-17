@@ -48,13 +48,15 @@ export const SCORE_VALUES = {
   COMBO_MULTIPLIER: 25
 };
 
+const baseUrl = import.meta.env.BASE_URL || '/';
+
 // 3 Story Adventure Preset Stages (25x15 Tile Grid)
 export const STAGE_PRESETS = [
   {
     id: 1,
     name: '1976 연구소 (Lab Workshop)',
     subtitle: '제리 로슨의 실험실에서 롬 칩을 모으고 첫 카트리지를 완성하세요!',
-    bgImage: '/assets/jerrylawson/lab_background.jpg',
+    bgImage: `${baseUrl}assets/jerrylawson/lab_background.jpg`,
     themeColor: '#FFB800',
     timeLimit: 90,
     // S: Solid, P: Platform, ^: Spike, C: Coin, J: Spring, E: Enemy, G: Goal, .: Empty
@@ -80,7 +82,7 @@ export const STAGE_PRESETS = [
     id: 2,
     name: '카트리지 시스템 (Fairchild F)',
     subtitle: '시스템 내부의 글리치 버그를 밟아 처치하고 슈퍼 스프링을 활용하세요!',
-    bgImage: '/assets/jerrylawson/lab_background.jpg',
+    bgImage: `${baseUrl}assets/jerrylawson/lab_background.jpg`,
     themeColor: '#00ADB5',
     timeLimit: 100,
     map: [
@@ -105,7 +107,7 @@ export const STAGE_PRESETS = [
     id: 3,
     name: '사이버 아케이드 (Cyber Matrix)',
     subtitle: '네온 매트릭스 속 최고난도 퍼즐을 돌파하고 마스터 카트리지를 획득하세요!',
-    bgImage: '/assets/jerrylawson/arcade_background.jpg',
+    bgImage: `${baseUrl}assets/jerrylawson/arcade_background.jpg`,
     themeColor: '#FF2E63',
     timeLimit: 120,
     map: [
