@@ -46,6 +46,7 @@ export default function CricketGame({ onScoreSubmitted }) {
   const animFrameRef = useRef(null);
   const particleSystemRef = useRef(new ParticleSystem());
   const wicketEntityRef = useRef(new WicketEntity(WICKET_POS.x, WICKET_POS.y));
+  const timeoutsRef = useRef([]);
 
   // Asset Refs
   const assetsLoadedRef = useRef(false);
@@ -71,12 +72,12 @@ export default function CricketGame({ onScoreSubmitted }) {
   const hasSwungRef = useRef(false);
   const swingStartTimeRef = useRef(0);
   const lastBounceTriggeredRef = useRef(false);
+  const lastStateChangeTimeRef = useRef(performance.now());
 
   // Hit & Flight Animation Refs
   const hitResultRef = useRef(null);
   const hitAnimStartTimeRef = useRef(0);
   const hitBallTrajectoryRef = useRef({ x: 0, y: 0, vx: 0, vy: 0, scale: 1 });
-  const runnerProgressRef = useRef(0); // 0.0 to 1.0 (or 2.0)
 
   // React State for UI HUD
   const [score, setScore] = useState(0);
@@ -93,6 +94,21 @@ export default function CricketGame({ onScoreSubmitted }) {
   const [playerName, setPlayerName] = useState('');
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [submittedSuccess, setSubmittedSuccess] = useState(false);
+
+  // Helper: Managed Timeout tracking to avoid race conditions & memory leaks
+  const safeTimeout = useCallback((fn, ms) => {
+    const id = setTimeout(() => {
+      timeoutsRef.current = timeoutsRef.current.filter((t) => t !== id);
+      fn();
+    }, ms);
+    timeoutsRef.current.push(id);
+    return id;
+  }, []);
+
+  const clearAllTimeouts = useCallback(() => {
+    timeoutsRef.current.forEach((id) => clearTimeout(id));
+    timeoutsRef.current = [];
+  }, []);
 
   // Load High Score from LocalStorage
   useEffect(() => {
@@ -112,6 +128,219 @@ export default function CricketGame({ onScoreSubmitted }) {
   useEffect(() => {
     cricketAudio.setMuted(isMuted);
   }, [isMuted]);
+
+  // =========================================================================
+  // Delivery & State Progression Logic
+  // =========================================================================
+  const scheduleNextDelivery = useCallback(
+    (delayMs = 800) => {
+      if (gameStateRef.current === 'GAME_OVER') return;
+
+      safeTimeout(() => {
+        if (gameStateRef.current === 'GAME_OVER') return;
+
+        // 1. Pick next pitch type
+        const pitch = selectNextPitch(scoreRef.current);
+        currentPitchConfigRef.current = pitch;
+        setCurrentPitchInfo(pitch);
+
+        // 2. Calculate dynamic speed
+        const { actualDuration, speedLevel } = calculatePitchSpeed(
+          scoreRef.current,
+          pitch
+        );
+        pitchTotalDurationRef.current = Math.max(720, actualDuration);
+        currentSpeedLevelRef.current = speedLevel;
+        setSpeedTier(speedLevel);
+
+        // 3. Bowler windup phase
+        gameStateRef.current = 'BOWLER_WINDUP';
+        lastStateChangeTimeRef.current = performance.now();
+        cricketAudio.playWhoosh();
+
+        safeTimeout(() => {
+          if (gameStateRef.current === 'GAME_OVER') return;
+
+          const now = performance.now();
+          pitchStartTimeRef.current = now;
+          expectedContactTimeRef.current =
+            now + pitchTotalDurationRef.current;
+          hasSwungRef.current = false;
+          lastBounceTriggeredRef.current = false;
+          gameStateRef.current = 'PITCHING';
+          lastStateChangeTimeRef.current = now;
+        }, 400);
+      }, delayMs);
+    },
+    [safeTimeout]
+  );
+
+  // =========================================================================
+  // Game Restart
+  // =========================================================================
+  const restartGame = useCallback(() => {
+    clearAllTimeouts();
+    scoreRef.current = 0;
+    setScore(0);
+    setIsGameOver(false);
+    setFinalScore(0);
+    setActiveHitAnnouncement(null);
+    setPlayerName('');
+    setSubmittedSuccess(false);
+    wicketEntityRef.current.reset();
+    particleSystemRef.current.clear();
+    gameStateRef.current = 'IDLE';
+    lastStateChangeTimeRef.current = performance.now();
+    scheduleNextDelivery(400);
+  }, [clearAllTimeouts, scheduleNextDelivery]);
+
+  // =========================================================================
+  // Swing Bat Action
+  // =========================================================================
+  const handleSwing = useCallback(() => {
+    // If Game Over, space/click restarts cleanly
+    if (gameStateRef.current === 'GAME_OVER') {
+      restartGame();
+      return;
+    }
+
+    const now = performance.now();
+    swingStartTimeRef.current = now;
+
+    if (gameStateRef.current !== 'PITCHING' || hasSwungRef.current) {
+      // Swung during windup or idle -> early swing miss
+      hasSwungRef.current = true;
+      cricketAudio.playWhoosh();
+      return;
+    }
+
+    hasSwungRef.current = true;
+    const diff = now - expectedContactTimeRef.current;
+    const judgment = judgeSwing(diff);
+
+    if (judgment.result) {
+      // HIT SUCCESS! (SIX, FOUR, 2 RUNS, 1 RUN)
+      hitResultRef.current = judgment.result;
+      hitAnimStartTimeRef.current = now;
+      gameStateRef.current = 'HIT_ANIMATION';
+      lastStateChangeTimeRef.current = now;
+
+      // Update Score
+      const newScore = scoreRef.current + judgment.result.points;
+      scoreRef.current = newScore;
+      setScore(newScore);
+
+      if (newScore > highScoreRef.current) {
+        highScoreRef.current = newScore;
+        setHighScore(newScore);
+        try {
+          localStorage.setItem('dochon_cricket_high_score', String(newScore));
+        } catch (e) {}
+      }
+
+      // Audio & Particle Effects
+      if (judgment.result.id === 'SIX') {
+        cricketAudio.playBatHit(true);
+        cricketAudio.playSixCelebration();
+        particleSystemRef.current.addConfetti(
+          HIT_ZONE_POS.x,
+          HIT_ZONE_POS.y - 40,
+          80
+        );
+        particleSystemRef.current.addHitSparks(
+          HIT_ZONE_POS.x,
+          HIT_ZONE_POS.y - 20,
+          40,
+          '#F59E0B'
+        );
+      } else if (judgment.result.id === 'FOUR') {
+        cricketAudio.playBatHit(true);
+        cricketAudio.playFourBoundary();
+        particleSystemRef.current.addHitSparks(
+          HIT_ZONE_POS.x,
+          HIT_ZONE_POS.y - 20,
+          30,
+          '#10B981'
+        );
+      } else {
+        cricketAudio.playBatHit(false);
+        cricketAudio.playFootstep();
+        particleSystemRef.current.addHitSparks(
+          HIT_ZONE_POS.x,
+          HIT_ZONE_POS.y - 10,
+          15,
+          '#3B82F6'
+        );
+      }
+
+      // Show Announcement Popup
+      setActiveHitAnnouncement(judgment.result);
+      safeTimeout(
+        () => setActiveHitAnnouncement(null),
+        judgment.result.animationDuration - 300
+      );
+
+      // Initialize Hit Ball Trajectory
+      const angle = -Math.PI * 0.5 + (Math.random() - 0.5) * 0.6;
+      let power = 15;
+      if (judgment.result.id === 'SIX') power = 26;
+      else if (judgment.result.id === 'FOUR') power = 20;
+      else if (judgment.result.id === 'TWO_RUNS') power = 12;
+      else power = 8;
+
+      hitBallTrajectoryRef.current = {
+        x: HIT_ZONE_POS.x,
+        y: HIT_ZONE_POS.y - 10,
+        vx: Math.sin(angle) * power,
+        vy: -Math.cos(angle) * power,
+        scale: 1.0
+      };
+
+      // Schedule next delivery after hit animation
+      safeTimeout(() => {
+        if (gameStateRef.current !== 'GAME_OVER') {
+          gameStateRef.current = 'IDLE';
+          lastStateChangeTimeRef.current = performance.now();
+          scheduleNextDelivery(500);
+        }
+      }, judgment.result.animationDuration);
+    } else {
+      // Swung too early or late -> Whiff whoosh
+      cricketAudio.playWhoosh();
+    }
+  }, [scheduleNextDelivery, restartGame, safeTimeout]);
+
+  // =========================================================================
+  // Trigger Wicket Shatter & Game Over
+  // =========================================================================
+  const triggerWicketOut = useCallback(() => {
+    if (
+      gameStateRef.current === 'GAME_OVER' ||
+      gameStateRef.current === 'WICKET_OUT_ANIMATION'
+    )
+      return;
+
+    clearAllTimeouts();
+    gameStateRef.current = 'WICKET_OUT_ANIMATION';
+    lastStateChangeTimeRef.current = performance.now();
+    wicketEntityRef.current.shatter();
+    particleSystemRef.current.addWicketSplinters(
+      WICKET_POS.x,
+      WICKET_POS.y - 15
+    );
+    cricketAudio.playWicketCrash();
+
+    setActiveHitAnnouncement(HIT_RESULTS.WICKET_OUT);
+
+    safeTimeout(() => {
+      cricketAudio.playGameOver();
+      gameStateRef.current = 'GAME_OVER';
+      lastStateChangeTimeRef.current = performance.now();
+      setFinalScore(scoreRef.current);
+      setIsGameOver(true);
+      setActiveHitAnnouncement(null);
+    }, 1600);
+  }, [clearAllTimeouts, safeTimeout]);
 
   // =========================================================================
   // Load & Process Images
@@ -162,182 +391,19 @@ export default function CricketGame({ onScoreSubmitted }) {
       assetsLoadedRef.current = true;
 
       // Start initial delivery after assets load
-      scheduleNextDelivery(1200);
+      scheduleNextDelivery(800);
     };
 
     loadImages();
 
     return () => {
       isMounted = false;
+      clearAllTimeouts();
       if (animFrameRef.current) {
         cancelAnimationFrame(animFrameRef.current);
       }
     };
-  }, []);
-
-  // =========================================================================
-  // Delivery & State Progression Logic
-  // =========================================================================
-  const scheduleNextDelivery = useCallback((delayMs = 1000) => {
-    if (gameStateRef.current === 'GAME_OVER') return;
-
-    setTimeout(() => {
-      if (gameStateRef.current === 'GAME_OVER') return;
-
-      // 1. Pick next pitch type
-      const pitch = selectNextPitch(scoreRef.current);
-      currentPitchConfigRef.current = pitch;
-      setCurrentPitchInfo(pitch);
-
-      // 2. Calculate dynamic speed
-      const { actualDuration, speedLevel } = calculatePitchSpeed(scoreRef.current, pitch);
-      pitchTotalDurationRef.current = actualDuration;
-      currentSpeedLevelRef.current = speedLevel;
-      setSpeedTier(speedLevel);
-
-      // 3. Bowler windup phase
-      gameStateRef.current = 'BOWLER_WINDUP';
-      cricketAudio.playWhoosh();
-
-      setTimeout(() => {
-        if (gameStateRef.current === 'GAME_OVER') return;
-
-        const now = performance.now();
-        pitchStartTimeRef.current = now;
-        expectedContactTimeRef.current = now + pitchTotalDurationRef.current;
-        hasSwungRef.current = false;
-        lastBounceTriggeredRef.current = false;
-        gameStateRef.current = 'PITCHING';
-      }, 400);
-    }, delayMs);
-  }, []);
-
-  // =========================================================================
-  // Swing Bat Action
-  // =========================================================================
-  const handleSwing = useCallback(() => {
-    // If Game Over, do nothing (or let user restart)
-    if (gameStateRef.current === 'GAME_OVER') return;
-
-    // Start swing animation
-    const now = performance.now();
-    swingStartTimeRef.current = now;
-
-    if (gameStateRef.current !== 'PITCHING' || hasSwungRef.current) {
-      // Swung during windup or idle -> early swing miss
-      hasSwungRef.current = true;
-      cricketAudio.playWhoosh();
-      return;
-    }
-
-    hasSwungRef.current = true;
-    const diff = now - expectedContactTimeRef.current;
-    const judgment = judgeSwing(diff);
-
-    if (judgment.result) {
-      // HIT SUCCESS! (SIX, FOUR, 2 RUNS, 1 RUN)
-      hitResultRef.current = judgment.result;
-      hitAnimStartTimeRef.current = now;
-      gameStateRef.current = 'HIT_ANIMATION';
-
-      // Update Score
-      const newScore = scoreRef.current + judgment.result.points;
-      scoreRef.current = newScore;
-      setScore(newScore);
-
-      if (newScore > highScoreRef.current) {
-        highScoreRef.current = newScore;
-        setHighScore(newScore);
-        try {
-          localStorage.setItem('dochon_cricket_high_score', String(newScore));
-        } catch (e) {}
-      }
-
-      // Audio & Particle Effects
-      if (judgment.result.id === 'SIX') {
-        cricketAudio.playBatHit(true);
-        cricketAudio.playSixCelebration();
-        particleSystemRef.current.addConfetti(HIT_ZONE_POS.x, HIT_ZONE_POS.y - 40, 80);
-        particleSystemRef.current.addHitSparks(HIT_ZONE_POS.x, HIT_ZONE_POS.y - 20, 40, '#F59E0B');
-      } else if (judgment.result.id === 'FOUR') {
-        cricketAudio.playBatHit(true);
-        cricketAudio.playFourBoundary();
-        particleSystemRef.current.addHitSparks(HIT_ZONE_POS.x, HIT_ZONE_POS.y - 20, 30, '#10B981');
-      } else {
-        cricketAudio.playBatHit(false);
-        cricketAudio.playFootstep();
-        particleSystemRef.current.addHitSparks(HIT_ZONE_POS.x, HIT_ZONE_POS.y - 10, 15, '#3B82F6');
-      }
-
-      // Show Announcement Popup
-      setActiveHitAnnouncement(judgment.result);
-      setTimeout(() => setActiveHitAnnouncement(null), judgment.result.animationDuration - 300);
-
-      // Initialize Hit Ball Trajectory
-      const angle = -Math.PI * 0.5 + (Math.random() - 0.5) * 0.6;
-      let power = 15;
-      if (judgment.result.id === 'SIX') power = 26;
-      else if (judgment.result.id === 'FOUR') power = 20;
-      else if (judgment.result.id === 'TWO_RUNS') power = 12;
-      else power = 8;
-
-      hitBallTrajectoryRef.current = {
-        x: HIT_ZONE_POS.x,
-        y: HIT_ZONE_POS.y - 10,
-        vx: Math.sin(angle) * power,
-        vy: -Math.cos(angle) * power,
-        scale: 1.0
-      };
-
-      // Schedule next delivery after hit animation
-      setTimeout(() => {
-        if (gameStateRef.current !== 'GAME_OVER') {
-          gameStateRef.current = 'IDLE';
-          scheduleNextDelivery(600);
-        }
-      }, judgment.result.animationDuration);
-    } else {
-      // Swung too early or late -> Whiff whoosh
-      cricketAudio.playWhoosh();
-    }
-  }, [scheduleNextDelivery]);
-
-  // =========================================================================
-  // Trigger Wicket Shatter & Game Over
-  // =========================================================================
-  const triggerWicketOut = useCallback(() => {
-    if (gameStateRef.current === 'GAME_OVER' || gameStateRef.current === 'WICKET_OUT_ANIMATION') return;
-
-    gameStateRef.current = 'WICKET_OUT_ANIMATION';
-    wicketEntityRef.current.shatter();
-    particleSystemRef.current.addWicketSplinters(WICKET_POS.x, WICKET_POS.y - 15);
-    cricketAudio.playWicketCrash();
-
-    setActiveHitAnnouncement(HIT_RESULTS.WICKET_OUT);
-
-    setTimeout(() => {
-      cricketAudio.playGameOver();
-      gameStateRef.current = 'GAME_OVER';
-      setFinalScore(scoreRef.current);
-      setIsGameOver(true);
-      setActiveHitAnnouncement(null);
-    }, 1800);
-  }, []);
-
-  // =========================================================================
-  // Game Restart
-  // =========================================================================
-  const restartGame = useCallback(() => {
-    scoreRef.current = 0;
-    setScore(0);
-    setIsGameOver(false);
-    setPlayerName('');
-    setSubmittedSuccess(false);
-    wicketEntityRef.current.reset();
-    particleSystemRef.current.clear();
-    gameStateRef.current = 'IDLE';
-    scheduleNextDelivery(600);
-  }, [scheduleNextDelivery]);
+  }, [clearAllTimeouts, scheduleNextDelivery]);
 
   // =========================================================================
   // Leaderboard Score Submission Handler
@@ -391,11 +457,19 @@ export default function CricketGame({ onScoreSubmitted }) {
     const render = () => {
       const now = performance.now();
 
+      // Watchdog: If stuck in IDLE for > 2000ms while not game over, auto recover!
+      if (
+        gameStateRef.current === 'IDLE' &&
+        now - lastStateChangeTimeRef.current > 2000
+      ) {
+        lastStateChangeTimeRef.current = now;
+        scheduleNextDelivery(200);
+      }
+
       // 1. Draw Background Stadium
       if (bgImgRef.current && bgImgRef.current.complete) {
         ctx.drawImage(bgImgRef.current, 0, 0, CANVAS_WIDTH, CANVAS_HEIGHT);
       } else {
-        // Fallback procedural pitch
         ctx.fillStyle = '#22C55E';
         ctx.fillRect(0, 0, CANVAS_WIDTH, CANVAS_HEIGHT);
       }
@@ -491,7 +565,6 @@ export default function CricketGame({ onScoreSubmitted }) {
         ctx.save();
         ctx.beginPath();
         ctx.arc(ball.x, ball.y, ball.radius, 0, Math.PI * 2);
-        // Red leather cricket ball color gradient
         const grad = ctx.createRadialGradient(
           ball.x - ball.radius * 0.3,
           ball.y - ball.radius * 0.3,
@@ -559,7 +632,7 @@ export default function CricketGame({ onScoreSubmitted }) {
         cancelAnimationFrame(animFrameRef.current);
       }
     };
-  }, [triggerWicketOut]);
+  }, [triggerWicketOut, scheduleNextDelivery]);
 
   return (
     <div className="cricket-game-wrapper">
