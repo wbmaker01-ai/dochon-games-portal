@@ -3,11 +3,45 @@
 
 export const CHANGELOG_DATA = [
   {
+    version: 'v1.18.0',
+    date: '2026-08-17',
+    title: '신규 15호 드로잉 마법 액션 [도촌 매직 캣 아카데미] 공식 출시 & 대마법서 탈환 작전',
+    badge: 'LATEST',
+    badgeColor: 'emerald',
+    items: [
+      {
+        tag: 'NEW GAME',
+        tagColor: 'amber',
+        text: '[신규 15호 게임 도촌 매직 캣 아카데미 정식 오픈] 마법학교 신입생 고양이 모모와 함께 마우스 드래그 & 터치로 마법 문양을 그려 침공한 유령 군단을 물리치고 대마법서를 탈환하는 드로잉 제스처 액션 아케이드 출시'
+      },
+      {
+        tag: 'GESTURE ENGINE',
+        tagColor: 'blue',
+        text: '[정밀 실시간 제스처 드로잉 인식 엔진 탑재] 6대 마법 심볼(가로선, 세로선, 산 모양 ∧, 골 모양 ∨, 번개 ⚡ 광역기, 하트 ❤️ 생명력 회복)을 60FPS로 즉시 분석 및 판정하는 기하학적 인식 알고리즘 구현'
+      },
+      {
+        tag: '5 STAGES & BOSS',
+        tagColor: 'purple',
+        text: '[5대 마법학교 테마 스테이지 & 대형 보스전] 도서관 ➔ 식당 ➔ 교실 ➔ 체육관 ➔ 옥상으로 이어지는 고화질 배경과 5단 콤보 패턴을 요구하는 거대 대마법서 보스전 구현'
+      },
+      {
+        tag: 'AUDIO ENGINE',
+        tagColor: 'emerald',
+        text: '[Web Audio API 마법 사운드 신디사이저] 지팡이 스파클링 사운드, 심볼별 독자 음계 캐스팅음, 유령 정화음, 천둥 번개 효과음, 하트 힐링 아르페지오 및 승리 팡파르 완비'
+      },
+      {
+        tag: 'LEADERBOARD',
+        tagColor: 'amber',
+        text: '[도촌초 실시간 명예의 전당 연동] 100점 초과 득점 시 실시간 전교 랭킹 등록 및 점수 등록 후 해당 게임 리더보드 자동 탭 선택 지원'
+      }
+    ]
+  },
+  {
     version: 'v1.17.1',
     date: '2026-08-17',
     title: '명예의 전당 점수 등록 하이브리드 안정성 강화 & 오프라인 무중단 기록 보장',
-    badge: 'LATEST',
-    badgeColor: 'emerald',
+    badge: 'UPDATE',
+    badgeColor: 'blue',
     items: [
       {
         tag: 'BUG FIX',

@@ -701,11 +701,8 @@ export default function JerryLawsonGame({ onScoreSubmitted }) {
 
         {/* Virtual On-Screen Controls for Touch / Mobile */}
         <div className="jerry-controls-bar">
-          <div className="jerry-controls-guide">
-            🎮 <strong>조작법:</strong> <kbd>←</kbd>/<kbd>A</kbd> 좌 <kbd>→</kbd>/<kbd>D</kbd> 우 · <kbd>↑</kbd>/<kbd>W</kbd>/<kbd>Space</kbd> 점프
-          </div>
-
-          <div className="jerry-virtual-btns">
+          {/* Left Hand: Move Left / Right */}
+          <div className="jerry-virtual-left">
             <button
               onMouseDown={() => (inputRef.current.left = true)}
               onMouseUp={() => (inputRef.current.left = false)}
@@ -726,12 +723,21 @@ export default function JerryLawsonGame({ onScoreSubmitted }) {
             >
               <ChevronRight className="w-5 h-5" />
             </button>
+          </div>
+
+          {/* Center: Controls Guide */}
+          <div className="jerry-controls-guide">
+            🎮 <strong>조작법:</strong> <kbd>←</kbd>/<kbd>A</kbd> 좌 <kbd>→</kbd>/<kbd>D</kbd> 우 · <kbd>↑</kbd>/<kbd>W</kbd>/<kbd>Space</kbd> 점프
+          </div>
+
+          {/* Right Hand: Jump Button */}
+          <div className="jerry-virtual-right">
             <button
               onMouseDown={() => (inputRef.current.jump = true)}
               onMouseUp={() => (inputRef.current.jump = false)}
               onTouchStart={() => (inputRef.current.jump = true)}
               onTouchEnd={() => (inputRef.current.jump = false)}
-              className="jerry-vbtn bg-amber-600/30"
+              className="jerry-vbtn jerry-vbtn-jump"
               title="점프"
             >
               <ArrowUp className="w-5 h-5" /> 점프

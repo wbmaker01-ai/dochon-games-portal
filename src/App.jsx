@@ -13,6 +13,7 @@ import ChampionGame from './components/games/champion/ChampionGame';
 import CricketGame from './components/games/cricket/CricketGame';
 import PonyExpressGame from './components/games/ponyexpress/PonyExpressGame';
 import JerryLawsonGame from './components/games/jerrylawson/JerryLawsonGame';
+import MagicCatGame from './components/games/magic/MagicCatGame';
 import GameCard from './components/GameCard';
 import LeaderboardModal from './components/LeaderboardModal';
 import ChangelogModal from './components/ChangelogModal';
@@ -494,6 +495,9 @@ export default function App() {
               )}
               {activeGame === 'jerrylawson' && (
                 <JerryLawsonGame onScoreSubmitted={() => openInPageLeaderboardModal('jerrylawson')} />
+              )}
+              {activeGame === 'magic' && (
+                <MagicCatGame onScoreSubmitted={() => openInPageLeaderboardModal('magic')} />
               )}
             </div>
           </div>

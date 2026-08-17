@@ -127,19 +127,21 @@ export const PLAYABLE_GAMES = [
     category: '액션',
     imageSrc: getThumb('jerrylawson.jpg'),
     isPlayable: true,
-    badgeText: '🕹️ NEW 14위',
+    badgeText: '🕹️ 14위',
     description: '비디오 게임 롬 카트리지의 아버지와 함께하는 8비트 레트로 모험 & 나만의 게임 만들기!'
+  },
+  {
+    id: 'magic',
+    title: '도촌 매직 캣 아카데미',
+    category: '어드벤처',
+    imageSrc: getThumb('magic.jpg'),
+    isPlayable: true,
+    badgeText: '🧙 NEW 15위',
+    description: '마법 지팡이로 기호를 화면에 그려 침공한 유령들을 물리치고 대마법서를 되찾으세요!'
   }
 ];
 
 export const COMING_SOON_GAMES = [
-  {
-    id: 'magic',
-    title: '할로윈',
-    category: '어드벤처',
-    imageSrc: getThumb('magic.jpg'),
-    isPlayable: false
-  },
   {
     id: 'petanque',
     title: '페탕크',

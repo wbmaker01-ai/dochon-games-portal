@@ -279,6 +279,11 @@ export default function LeaderboardModal({ isOpen, onClose, activeTab = 'pacman'
             if (game.id === 'colortile') iconEmoji = '🧩';
             if (game.id === 'popcorn') iconEmoji = '🍿';
             if (game.id === 'tictactoe') iconEmoji = '🍩';
+            if (game.id === 'champion') iconEmoji = '🥋';
+            if (game.id === 'cricket') iconEmoji = '🏏';
+            if (game.id === 'ponyexpress') iconEmoji = '🐎';
+            if (game.id === 'jerrylawson') iconEmoji = '🕹️';
+            if (game.id === 'magic') iconEmoji = '🧙';
 
             // Remove '도촌 ' prefix for compact and clean layout
             const shortTitle = game.title.replace(/^도촌\s*/, '');
@@ -295,6 +300,11 @@ export default function LeaderboardModal({ isOpen, onClose, activeTab = 'pacman'
               else if (game.id === 'colortile') activeCustomStyle = { background: 'linear-gradient(135deg, #EC4899, #8B5CF6)', color: '#FFFFFF' };
               else if (game.id === 'popcorn') activeCustomStyle = { background: 'linear-gradient(135deg, #F59E0B, #EF4444)', color: '#FFFFFF' };
               else if (game.id === 'tictactoe') activeCustomStyle = { background: 'linear-gradient(135deg, #F472B6, #FB7185)', color: '#FFFFFF' };
+              else if (game.id === 'champion') activeCustomStyle = { background: 'linear-gradient(135deg, #6366F1, #4F46E5)', color: '#FFFFFF' };
+              else if (game.id === 'cricket') activeCustomStyle = { background: 'linear-gradient(135deg, #10B981, #059669)', color: '#FFFFFF' };
+              else if (game.id === 'ponyexpress') activeCustomStyle = { background: 'linear-gradient(135deg, #D97706, #B45309)', color: '#FFFFFF' };
+              else if (game.id === 'jerrylawson') activeCustomStyle = { background: 'linear-gradient(135deg, #8B5CF6, #6D28D9)', color: '#FFFFFF' };
+              else if (game.id === 'magic') activeCustomStyle = { background: 'linear-gradient(135deg, #9333EA, #4F46E5)', color: '#FFFFFF' };
             }
 
             return (

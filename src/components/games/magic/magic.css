@@ -1,0 +1,279 @@
+/* Styles for Dochon Magic Cat Academy Game */
+
+.magic-game-wrapper {
+  position: relative;
+  width: 100%;
+  max-width: 960px;
+  margin: 0 auto;
+  background: radial-gradient(circle at center, #1e1b4b 0%, #0f172a 100%);
+  border-radius: 20px;
+  overflow: hidden;
+  box-shadow: 0 20px 50px rgba(0, 0, 0, 0.6), 0 0 30px rgba(168, 85, 247, 0.25);
+  border: 2px solid rgba(168, 85, 247, 0.4);
+  user-select: none;
+  touch-action: none;
+  font-family: 'Pretendard', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+}
+
+/* Header HUD Bar */
+.magic-hud-bar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 10px 18px;
+  background: rgba(15, 23, 42, 0.85);
+  backdrop-filter: blur(12px);
+  border-bottom: 1px solid rgba(168, 85, 247, 0.3);
+  color: #ffffff;
+  z-index: 10;
+}
+
+.magic-stat-badge {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 4px 12px;
+  border-radius: 12px;
+  background: rgba(30, 27, 75, 0.7);
+  border: 1px solid rgba(168, 85, 247, 0.35);
+  font-size: 13px;
+  font-weight: 800;
+}
+
+.magic-combo-pill {
+  animation: pulse 1.5s infinite;
+  background: linear-gradient(135deg, #f59e0b, #ef4444);
+  color: #ffffff;
+  padding: 4px 14px;
+  border-radius: 9999px;
+  font-weight: 900;
+  font-size: 13px;
+  box-shadow: 0 0 15px rgba(245, 158, 11, 0.6);
+}
+
+/* Canvas Area */
+.magic-canvas-container {
+  position: relative;
+  width: 100%;
+  aspect-ratio: 16 / 9;
+  background: #09090b;
+  cursor: crosshair;
+}
+
+.magic-canvas {
+  width: 100%;
+  height: 100%;
+  display: block;
+}
+
+/* Stage Announcement Banner */
+.magic-stage-banner {
+  position: absolute;
+  top: 18%;
+  left: 50%;
+  transform: translateX(-50%);
+  background: rgba(15, 23, 42, 0.9);
+  border: 2px solid #a855f7;
+  box-shadow: 0 0 25px rgba(168, 85, 247, 0.5);
+  padding: 12px 28px;
+  border-radius: 20px;
+  text-align: center;
+  pointer-events: none;
+  animation: fadeInDown 0.4s ease-out;
+  z-index: 15;
+}
+
+/* Game Over / Victory Overlay */
+.magic-result-overlay {
+  position: absolute;
+  inset: 0;
+  background: rgba(10, 10, 20, 0.88);
+  backdrop-filter: blur(10px);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 20px;
+  z-index: 30;
+  animation: fadeIn 0.3s ease-out;
+}
+
+.magic-result-card {
+  width: 100%;
+  max-width: 440px;
+  background: linear-gradient(145deg, #1e1b4b, #0f172a);
+  border: 2px solid #a855f7;
+  border-radius: 24px;
+  padding: 28px;
+  text-align: center;
+  box-shadow: 0 25px 50px rgba(0, 0, 0, 0.8), 0 0 35px rgba(168, 85, 247, 0.4);
+  color: #ffffff;
+}
+
+.magic-result-title {
+  font-size: 24px;
+  font-weight: 900;
+  margin-bottom: 6px;
+  letter-spacing: -0.5px;
+}
+
+.magic-score-display {
+  display: flex;
+  justify-content: space-around;
+  background: rgba(30, 27, 75, 0.8);
+  border: 1px solid rgba(168, 85, 247, 0.35);
+  border-radius: 16px;
+  padding: 14px;
+  margin: 18px 0;
+}
+
+/* Buttons */
+.magic-btn-primary {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  padding: 12px 24px;
+  border-radius: 14px;
+  font-weight: 800;
+  font-size: 14px;
+  color: #ffffff;
+  background: linear-gradient(135deg, #9333ea, #6366f1);
+  border: 1px solid rgba(216, 180, 254, 0.5);
+  box-shadow: 0 4px 15px rgba(147, 51, 234, 0.4);
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.magic-btn-primary:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 20px rgba(147, 51, 234, 0.6);
+  background: linear-gradient(135deg, #a855f7, #4f46e5);
+}
+
+.magic-btn-secondary {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  padding: 8px 14px;
+  border-radius: 10px;
+  font-weight: 700;
+  font-size: 12px;
+  color: #cbd5e1;
+  background: rgba(30, 41, 59, 0.8);
+  border: 1px solid rgba(148, 163, 184, 0.25);
+  cursor: pointer;
+  transition: all 0.15s ease;
+}
+
+.magic-btn-secondary:hover {
+  background: rgba(51, 65, 85, 0.9);
+  color: #ffffff;
+}
+
+/* How to play modal */
+.magic-modal-backdrop {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.85);
+  backdrop-filter: blur(8px);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 16px;
+  z-index: 9999;
+  animation: fadeIn 0.2s ease-out;
+}
+
+.magic-modal-card {
+  width: 100%;
+  max-width: 580px;
+  background: #0f172a;
+  border: 2px solid #a855f7;
+  border-radius: 20px;
+  overflow: hidden;
+  box-shadow: 0 25px 60px rgba(0, 0, 0, 0.9), 0 0 30px rgba(168, 85, 247, 0.3);
+}
+
+.magic-modal-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 16px 20px;
+  background: #1e1b4b;
+  border-bottom: 1px solid rgba(168, 85, 247, 0.3);
+}
+
+.magic-modal-body {
+  padding: 18px 20px;
+}
+
+.magic-symbols-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 10px;
+}
+
+@media (max-width: 520px) {
+  .magic-symbols-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+.magic-symbol-card {
+  padding: 10px;
+  border-radius: 12px;
+  background: rgba(15, 23, 42, 0.9);
+  border: 1px solid rgba(168, 85, 247, 0.25);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+}
+
+.magic-symbol-icon {
+  width: 38px;
+  height: 38px;
+  border-radius: 10px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 18px;
+  font-weight: 900;
+  margin-bottom: 6px;
+}
+
+.magic-callout-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 10px;
+}
+
+@media (max-width: 520px) {
+  .magic-callout-grid {
+    grid-template-columns: 1fr;
+  }
+}
+
+.magic-modal-footer {
+  padding: 14px 20px;
+  background: #1e1b4b;
+  border-top: 1px solid rgba(168, 85, 247, 0.3);
+}
+
+/* Animations */
+@keyframes fadeIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+@keyframes fadeInDown {
+  from {
+    opacity: 0;
+    transform: translate(-50%, -20px);
+  }
+  to {
+    opacity: 1;
+    transform: translate(-50%, 0);
+  }
+}
