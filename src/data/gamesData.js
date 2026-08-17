@@ -100,19 +100,21 @@ export const PLAYABLE_GAMES = [
     category: '어드벤처',
     imageSrc: getThumb('champion.jpg'),
     isPlayable: true,
-    badgeText: '🥋 NEW 11위',
+    badgeText: '🥋 11위',
     description: '전설의 닌자 고양이 럭키와 함께 4대 스포츠 경기장에서 두루마리를 획득하고 섬의 챔피언이 되어보세요!'
+  },
+  {
+    id: 'cricket',
+    title: '도촌 크리켓',
+    category: '스포츠',
+    imageSrc: getThumb('cricket.jpg'),
+    isPlayable: true,
+    badgeText: '🏏 NEW 12위',
+    description: '귀뚜라미 타자와 함께 달팽이 볼러의 마구를 쳐내고 통쾌한 6점 홈런을 날려보세요!'
   }
 ];
 
 export const COMING_SOON_GAMES = [
-  {
-    id: 'cricket',
-    title: '크리켓',
-    category: '스포츠',
-    imageSrc: getThumb('cricket.jpg'),
-    isPlayable: false
-  },
   {
     id: 'jerrylawson',
     title: 'Jerry Lawson',

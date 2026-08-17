@@ -3,11 +3,40 @@
 
 export const CHANGELOG_DATA = [
   {
+    version: 'v1.15.0',
+    date: '2026-08-17',
+    title: '신규 12호 원버튼 스포츠 [도촌 크리켓] 공식 출시 & 서든데스 타격 배틀 오픈',
+    badge: 'LATEST',
+    badgeColor: 'emerald',
+    items: [
+      {
+        tag: 'NEW GAME',
+        tagColor: 'amber',
+        text: '[신규 게임 도촌 크리켓(Cricket) 정식 출시] 귀뚜라미 타자가 되어 달팽이 볼러가 던지는 마구를 쳐내고 통쾌한 6점 홈런을 날리는 서든데스 스포츠 타격 아케이드 게임 오픈'
+      },
+      {
+        tag: 'ASSETS & ENGINE',
+        tagColor: 'emerald',
+        text: '[고화질 전용 에셋 및 3D 바운드 물리 엔진 구축] 에메랄드 잔디 구장 스타디움 배경, 귀뚜라미 타자 & 달팽이 투수 캐릭터 스프라이트, 크리켓 특유의 잔디 바운드 포물선 궤적 및 회전 스핀 물리 연출 탑재'
+      },
+      {
+        tag: '6 PITCH VARIATIONS',
+        tagColor: 'purple',
+        text: '[달팽이 볼러 6대 구종 시스템] 정통 직구, 바운드 아리랑볼, 감속 체인지업, 스네이크 슬라이더, 구글리 스핀, 불꽃 요커 등 스코어 비례 가속 및 다양한 구질 탑재'
+      },
+      {
+        tag: 'RULES & LEADERBOARD',
+        tagColor: 'teal',
+        text: '[크리켓 득점 룰 및 도촌초 실시간 명예의 전당 연동] 6점 홈런·4점 바운더리·1~2점 주루 점수 시스템 및 100점 초과 달성 시 실시간 랭킹 등록 지원'
+      }
+    ]
+  },
+  {
     version: 'v1.14.0',
     date: '2026-08-16',
     title: '신규 11호 대작 RPG 스포츠 [도촌 챔피언 아일랜드] 공식 출시 & 4대 경기장 완비',
-    badge: 'LATEST',
-    badgeColor: 'emerald',
+    badge: 'UPDATE',
+    badgeColor: 'blue',
     items: [
       {
         tag: 'NEW GAME',
