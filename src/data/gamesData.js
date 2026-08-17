@@ -152,6 +152,13 @@ export const PLAYABLE_GAMES = [
 
 export const COMING_SOON_GAMES = [
   {
+    id: 'skyjumper',
+    title: '도촌 스카이 점퍼',
+    category: '액션',
+    imageSrc: getThumb('skyjumper.jpg'),
+    isPlayable: false
+  },
+  {
     id: 'kidscoding',
     title: '도촌 코딩 토끼',
     category: '퍼즐',

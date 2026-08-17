@@ -3,11 +3,25 @@
 
 export const CHANGELOG_DATA = [
   {
+    version: 'v1.27.0',
+    date: '2026-08-18',
+    title: '신규 순차 개장 준비(Coming Soon) [도촌 스카이 점퍼 (두들 점프 모티브)] 등록 & 3D 썸네일 탑재',
+    badge: 'LATEST',
+    badgeColor: 'emerald',
+    items: [
+      {
+        tag: 'COMING SOON',
+        tagColor: 'amber',
+        text: '[도촌 스카이 점퍼 (Doodle Jump 모티브) 등록] 발판을 밟고 우주 끝까지 무한 점프 상승하는 국민 아케이드 게임 개장 준비 라인업 등록 및 나노바나나 고화질 3D 썸네일 탑재'
+      }
+    ]
+  },
+  {
     version: 'v1.26.0',
     date: '2026-08-18',
     title: '신규 순차 개장 준비(Coming Soon) 명작 구글 두들 라인업 7종 대거 등록 & 고화질 3D 썸네일 탑재',
-    badge: 'LATEST',
-    badgeColor: 'emerald',
+    badge: 'UPDATE',
+    badgeColor: 'blue',
     items: [
       {
         tag: 'COMING SOON',
