@@ -3,11 +3,55 @@
 
 export const CHANGELOG_DATA = [
   {
+    version: 'v1.26.0',
+    date: '2026-08-18',
+    title: '신규 순차 개장 준비(Coming Soon) 명작 구글 두들 라인업 7종 대거 등록 & 고화질 3D 썸네일 탑재',
+    badge: 'LATEST',
+    badgeColor: 'emerald',
+    items: [
+      {
+        tag: 'COMING SOON',
+        tagColor: 'amber',
+        text: '[도촌 코딩 토끼 (Kids Coding 모티브)] 블록 코딩으로 당근을 수확하는 어린이 코딩 50주년 기념 교육 퍼즐 개장 준비 라인업 등록 및 3D 썸네일 탑재'
+      },
+      {
+        tag: 'COMING SOON',
+        tagColor: 'blue',
+        text: '[도촌 버블티 카페 (Bubble Tea 모티브)] 귀여운 동물 손님들의 주문에 맞춰 펄과 밀크티를 정량 채우는 힐링 타이쿤 개장 준비 라인업 등록 및 3D 썸네일 탑재'
+      },
+      {
+        tag: 'COMING SOON',
+        tagColor: 'purple',
+        text: '[도촌 피자 마스터 (Pizza 모티브)] 토핑 조건에 맞게 피자를 등분하여 분수와 기하학을 배우는 수학 퍼즐 개장 준비 라인업 등록 및 3D 썸네일 탑재'
+      },
+      {
+        tag: 'COMING SOON',
+        tagColor: 'emerald',
+        text: '[도촌 꿀벌의 비행 (Earth Day Bee 모티브)] 꽃가루를 묻혀 꽃을 피우고 생태계를 가꾸는 힐링 비행 액션 개장 준비 라인업 등록 및 3D 썸네일 탑재'
+      },
+      {
+        tag: 'COMING SOON',
+        tagColor: 'amber',
+        text: '[도촌 미니 올림픽 (London 2012 Games 모티브)] 허들 달리기, 농구 3점슛, 축구 골키퍼 등 스릴 넘치는 미니 스포츠 아케이드 개장 준비 라인업 등록 및 3D 썸네일 탑재'
+      },
+      {
+        tag: 'COMING SOON',
+        tagColor: 'teal',
+        text: '[도촌 천산갑의 모험 (Pangolin Love 모티브)] 몸을 둥글게 말아 데굴데굴 구르고 점프하는 횡스크롤 플랫폼 액션 개장 준비 라인업 등록 및 3D 썸네일 탑재'
+      },
+      {
+        tag: 'COMING SOON',
+        tagColor: 'blue',
+        text: '[도촌 UFO 탈출작전 (Roswell Incident 모티브)] 불시착한 외계인을 도와 부품을 찾아 우주로 탈출하는 포인트 앤 클릭 어드벤처 개장 준비 라인업 등록 및 3D 썸네일 탑재'
+      }
+    ]
+  },
+  {
     version: 'v1.25.0',
     date: '2026-08-17',
     title: '도촌초 게임 이용 및 안전 수칙 반응형 팝업 모달 신설 (필수 실천 서약 & 오늘 하루 보지 않기)',
-    badge: 'LATEST',
-    badgeColor: 'emerald',
+    badge: 'UPDATE',
+    badgeColor: 'blue',
     items: [
       {
         tag: 'SAFETY RULES',

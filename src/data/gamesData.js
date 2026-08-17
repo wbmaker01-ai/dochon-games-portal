@@ -152,6 +152,55 @@ export const PLAYABLE_GAMES = [
 
 export const COMING_SOON_GAMES = [
   {
+    id: 'kidscoding',
+    title: '도촌 코딩 토끼',
+    category: '퍼즐',
+    imageSrc: getThumb('kidscoding.jpg'),
+    isPlayable: false
+  },
+  {
+    id: 'bubbletea',
+    title: '도촌 버블티 카페',
+    category: '액션',
+    imageSrc: getThumb('bubbletea.jpg'),
+    isPlayable: false
+  },
+  {
+    id: 'pizza',
+    title: '도촌 피자 마스터',
+    category: '퍼즐',
+    imageSrc: getThumb('pizza.jpg'),
+    isPlayable: false
+  },
+  {
+    id: 'earthbee',
+    title: '도촌 꿀벌의 비행',
+    category: '액션',
+    imageSrc: getThumb('earthbee.jpg'),
+    isPlayable: false
+  },
+  {
+    id: 'olympics',
+    title: '도촌 미니 올림픽',
+    category: '스포츠',
+    imageSrc: getThumb('olympics.jpg'),
+    isPlayable: false
+  },
+  {
+    id: 'pangolin',
+    title: '도촌 천산갑의 모험',
+    category: '어드벤처',
+    imageSrc: getThumb('pangolin.jpg'),
+    isPlayable: false
+  },
+  {
+    id: 'roswell',
+    title: '도촌 UFO 탈출작전',
+    category: '어드벤처',
+    imageSrc: getThumb('roswell.jpg'),
+    isPlayable: false
+  },
+  {
     id: 'petanque',
     title: '페탕크',
     category: '스포츠',
