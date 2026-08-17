@@ -2,7 +2,7 @@
 // Supports Cloud REST Database (Firebase / Supabase / Custom REST) & Hybrid Offline Sync
 
 // Public Cloud Realtime Database Endpoint for Dochon Elementary School
-const DB_API_URL = 'https://dochon-games-portal-default-rtdb.asia-southeast1.firebasedatabase.app/leaderboards';
+const DB_API_URL = 'https://dochon-games-portal-bbdbc-default-rtdb.asia-southeast1.firebasedatabase.app/leaderboards';
 
 /**
  * Deduplicate leaderboard array by player name, keeping ONLY the single highest score for each unique name.

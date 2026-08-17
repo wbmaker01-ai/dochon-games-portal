@@ -6,6 +6,7 @@ import { submitScoreToDB } from '../../../utils/leaderboardApi';
 import { haptics } from '../../../utils/haptics';
 import { Play, Pause, RotateCcw, Volume2, VolumeX, Trophy, ArrowUp, ArrowDown, ArrowLeft, ArrowRight, Sparkles } from 'lucide-react';
 import confetti from 'canvas-confetti';
+import './pacman.css';
 
 export default function PacManGame({ onScoreSubmitted }) {
   const canvasRef = useRef(null);
@@ -464,101 +465,101 @@ export default function PacManGame({ onScoreSubmitted }) {
   };
 
   return (
-    <div className="flex flex-col items-center justify-center w-full max-w-4xl mx-auto p-1.5 sm:p-3 select-none">
-      {/* 1. Header Bar */}
-      <div className="flex flex-col items-center w-full mb-2 gap-1.5 px-1">
+    <div className="pacman-game-wrap">
+      {/* 1. Header Bar with Dedicated CSS Styling */}
+      <div className="pacman-header-hud">
         {/* Title */}
-        <div className="flex items-center gap-2 sm:gap-3">
-          <span className="text-lg sm:text-2xl font-black bg-gradient-to-r from-amber-300 via-yellow-200 to-amber-400 bg-clip-text text-transparent flex items-center gap-1.5 sm:gap-2 drop-shadow">
-            🕹️ Dochon Pac-Man&nbsp;&nbsp;
-          </span>
-          <span className="text-[11px] sm:text-[12px] bg-amber-400/20 text-amber-300 border border-amber-400/50 px-2.5 sm:px-3 py-0.5 rounded-full font-black tracking-wide shadow-sm">
-            D-O-C-H-O-N 미로 맵
-          </span>
+        <div className="pacman-title-group">
+          <span className="pacman-title-text">🕹️ Dochon Pac-Man</span>
+          <span className="pacman-map-badge">D-O-C-H-O-N 미로 맵</span>
         </div>
 
-        {/* Row: 현재 점수 / 최고 점수 — one line */}
-        <div className="flex items-center gap-1.5 font-black text-xs flex-nowrap">
-          <div className="bg-slate-900/90 border border-amber-500/40 px-2 py-0.5 rounded-lg shadow-inner flex items-center gap-1 whitespace-nowrap">
-            <span className="text-slate-400 text-[10px]">현재 점수</span>
-            <span className="text-amber-400 font-mono text-sm">{score.toLocaleString()}점</span>
+        {/* Row 1: 현재 점수 100점 / 최고 점수 3,250점 (한 줄에 나란히) */}
+        <div className="pacman-score-row">
+          <div className="pacman-score-pill">
+            <span className="pacman-pill-label">현재 점수</span>
+            <span className="pacman-pill-val-amber">{score.toLocaleString()}점</span>
           </div>
-          <span className="text-slate-500 font-black select-none text-xs">/</span>
-          <div className="bg-slate-900/90 border border-teal-500/40 px-2 py-0.5 rounded-lg shadow-inner flex items-center gap-1 whitespace-nowrap">
-            <span className="text-slate-400 text-[10px]">최고 점수</span>
-            <span className="text-teal-300 font-mono text-sm">{highScore.toLocaleString()}점</span>
+          <span className="pacman-score-divider">/</span>
+          <div className="pacman-score-pill pill-teal">
+            <span className="pacman-pill-label">최고 점수</span>
+            <span className="pacman-pill-val-teal">{highScore.toLocaleString()}점</span>
           </div>
         </div>
 
-        {/* Row: 목숨 + 하트 — one line */}
-        <div className="flex items-center gap-1.5 font-black text-xs flex-nowrap">
-          <div className="bg-slate-900/90 border border-pink-500/40 px-2 py-0.5 rounded-lg shadow-inner flex items-center gap-1.5 whitespace-nowrap">
-            <span className="text-slate-400 text-[10px]">목숨</span>
-            <div className="flex items-center gap-0.5">
+        {/* Row 2: 목숨 💖 💖 💖 (한 줄에 나란히) */}
+        <div className="pacman-lives-row">
+          <div className="pacman-lives-pill">
+            <span className="pacman-pill-label">목숨</span>
+            <div className="pacman-hearts-list">
               {Array.from({ length: 3 }).map((_, i) => (
-                <span key={i} className={`text-sm transition-all duration-300 ${i < lives ? 'opacity-100 scale-110 drop-shadow-[0_0_8px_rgba(244,63,94,0.8)]' : 'opacity-20 scale-90 grayscale'}`}>💖</span>
+                <span
+                  key={i}
+                  className={i < lives ? 'pacman-heart-active' : 'pacman-heart-lost'}
+                >
+                  💖
+                </span>
               ))}
             </div>
           </div>
         </div>
-
       </div>
 
-      {/* 2. Reserved Fixed-Height Announcement Ribbon (100% Fixed Height, Zero Layout Shift) */}
-      <div className="w-full h-9 sm:h-11 flex items-center justify-center mb-1.5 sm:mb-2 shrink-0">
-        <div className={`transition-all duration-300 transform ${comboText ? 'opacity-100 scale-100 translate-y-0' : 'opacity-0 scale-95 -translate-y-1 pointer-events-none'}`}>
-          <div className="px-4 py-1.5 rounded-full bg-gradient-to-r from-amber-400 via-yellow-300 to-amber-400 text-slate-950 font-black text-xs sm:text-sm shadow-xl shadow-amber-500/30 border-2 border-yellow-200 flex items-center gap-2 tracking-tight">
+      {/* 2. Reserved Fixed-Height Announcement Ribbon */}
+      <div className="pacman-ribbon-container">
+        {comboText ? (
+          <div className="pacman-ribbon-badge">
             <Sparkles className="w-4 h-4 text-slate-950 animate-spin" />
-            <span>{comboText || '도촌 팩맨 파워업!'}</span>
+            <span>{comboText}</span>
             <Sparkles className="w-4 h-4 text-slate-950 animate-spin" />
           </div>
-        </div>
+        ) : null}
       </div>
 
       {/* 3. Main Canvas Container */}
-      <div className="relative border-4 border-amber-400/60 rounded-2xl overflow-hidden shadow-2xl bg-slate-950 w-full max-w-[792px] mx-auto">
+      <div className="pacman-canvas-container">
         <canvas
           ref={canvasRef}
           width={COLS * TILE_SIZE}
           height={ROWS * TILE_SIZE}
-          style={{ width: '100%', height: 'auto', display: 'block' }}
+          className="pacman-canvas"
         />
 
         {/* Overlay States */}
         {gameState === 'IDLE' && (
-          <div className="absolute inset-0 z-30 bg-black/85 backdrop-blur-md flex flex-col items-center justify-center gap-4 text-center p-6">
-            <h3 className="text-2xl md:text-4xl font-black bg-gradient-to-r from-yellow-300 via-amber-200 to-amber-400 bg-clip-text text-transparent drop-shadow">
+          <div className="pacman-overlay-screen">
+            <h3 className="pacman-overlay-title">
               도촌 팩맨 (DOCHON PAC-MAN)
             </h3>
-            <p className="text-slate-200 text-xs md:text-sm max-w-md leading-relaxed">
-              알파벳 <strong className="text-amber-400 font-black">D O C H O N</strong>으로 디자인된 도촌초등학교 팩맨 미로!<br />
+            <p className="pacman-overlay-desc">
+              알파벳 <strong>D O C H O N</strong>으로 디자인된 도촌초등학교 팩맨 미로!<br />
               키보드 방향키(W/A/S/D) 또는 아래 십자키로 조작하며<br />
-              <span className="text-pink-300 font-black underline decoration-pink-500">도촌 급식 햄버거(파워 구슬)</span>를 먹고 유령을 물리치세요!
+              <span className="highlight-pink">도촌 급식 햄버거(파워 구슬)</span>를 먹고 유령을 물리치세요!
             </p>
-            <button onClick={restartGame} className="btn-gold text-base md:text-lg px-8 py-3 animate-pulse shadow-2xl">
+            <button onClick={restartGame} className="btn-gold text-base px-8 py-3 animate-pulse shadow-2xl">
               <Play className="w-5 h-5 fill-current" /> 게임 시작하기
             </button>
           </div>
         )}
 
         {gameState === 'PAUSED' && (
-          <div className="absolute inset-0 z-30 bg-black/75 backdrop-blur-sm flex flex-col items-center justify-center gap-2 pointer-events-none">
-            <h3 className="text-3xl md:text-4xl font-black bg-gradient-to-r from-amber-300 via-yellow-200 to-amber-400 bg-clip-text text-transparent drop-shadow-[0_0_12px_rgba(251,191,36,0.6)]">
+          <div className="pacman-overlay-screen pointer-events-none">
+            <h3 className="pacman-overlay-title">
               ⏸️ 일시 정지
             </h3>
-            <p className="text-slate-300 text-xs font-bold bg-slate-900/80 border border-slate-700 px-4 py-1.5 rounded-full shadow-lg">
+            <p className="pacman-overlay-desc">
               하단의 [게임 재개] 버튼을 누르면 이어서 진행됩니다
             </p>
           </div>
         )}
 
         {(gameState === 'GAMEOVER' || gameState === 'VICTORY') && (
-          <div className="absolute inset-0 z-30 bg-black/90 backdrop-blur-md flex flex-col items-center justify-center p-4 sm:p-6 text-center gap-3 sm:gap-4">
-            <h3 className={`text-2xl sm:text-4xl font-black ${gameState === 'VICTORY' ? 'text-teal-400 drop-shadow-[0_0_15px_rgba(45,212,191,0.6)]' : 'text-red-400 drop-shadow-[0_0_15px_rgba(248,113,113,0.6)]'}`}>
+          <div className="pacman-overlay-screen">
+            <h3 className={`pacman-overlay-title ${gameState === 'VICTORY' ? 'title-victory' : 'title-gameover'}`}>
               {gameState === 'VICTORY' ? '🎉 전교 1위 등극! 축하합니다!' : '💀 유령에게 잡혔습니다!'}
             </h3>
-            <p className="text-sm sm:text-base font-bold text-slate-200">
-              최종 획득 점수: <span className="text-amber-400 text-xl sm:text-2xl font-mono font-black">{score.toLocaleString()}점</span>
+            <p className="pacman-final-score">
+              최종 획득 점수: <span className="pacman-final-score-val">{score.toLocaleString()}점</span>
             </p>
 
             {score > 100 ? (
@@ -585,13 +586,13 @@ export default function PacManGame({ onScoreSubmitted }) {
                   </button>
                 </form>
               ) : (
-                <p className="text-teal-300 font-black bg-teal-950/90 border-2 border-teal-500/60 px-5 py-2.5 rounded-xl text-xs sm:text-sm shadow-xl">
+                <p className="pacman-success-badge">
                   ✅ 도촌 명예의 전당에 성공적으로 등록되었습니다!
                 </p>
               )
             ) : (
-              <div className="bg-slate-900/80 border border-slate-700/80 px-4 py-3 rounded-2xl max-w-xs text-center">
-                <p className="text-xs text-amber-300/90 font-bold mb-1">
+              <div className="pacman-low-score-notice">
+                <p className="text-xs text-amber-300 font-bold mb-1">
                   💡 100점 초과 달성 시 랭킹에 등록할 수 있어요!
                 </p>
                 <p className="text-[11px] text-slate-400">
@@ -604,7 +605,7 @@ export default function PacManGame({ onScoreSubmitted }) {
       </div>
 
       {/* Cute Arcade Action Bar & Large 3-Row Touch D-Pad */}
-      <div className="flex flex-col items-center justify-center w-full mt-2 px-2">
+      <div className="pacman-bottom-controls">
 
         {/* 1. Cute Action Pill Buttons Row */}
         <div className="arcade-action-bar">

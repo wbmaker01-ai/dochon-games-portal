@@ -3,11 +3,35 @@
 
 export const CHANGELOG_DATA = [
   {
+    version: 'v1.24.0',
+    date: '2026-08-17',
+    title: '도촌 팩맨 상단 점수/목숨 HUD 한 줄 레이아웃 개편 및 전용 스타일 분리',
+    badge: 'LATEST',
+    badgeColor: 'emerald',
+    items: [
+      {
+        tag: 'SCORE HUD',
+        tagColor: 'amber',
+        text: '[점수 및 최고점수 라벨 개편] "현재 점수" 및 "최고 점수"로 명칭을 명확하게 수정하고, "현재 점수 100점 / 최고 점수 3,250점" 형태로 상단에 한 줄로 나란히 배치'
+      },
+      {
+        tag: 'LIVES HUD',
+        tagColor: 'teal',
+        text: '[목숨 및 하트 아이콘 한 줄 배치] "목숨 💖💖💖" 형태로 하트 아이콘을 텍스트와 함께 한 줄로 깔끔하게 정렬'
+      },
+      {
+        tag: 'DEDICATED STYLES',
+        tagColor: 'purple',
+        text: '[팩맨 전용 스타일 시트 분리] pacman.css 독립 파일로 분리하여 캔버스, 점수판, 목숨판, 랭킹 등록창, 조작키의 시각적 완성도 및 반응형 레이아웃 강화'
+      }
+    ]
+  },
+  {
     version: 'v1.23.0',
     date: '2026-08-17',
     title: '모바일 UX 3대 개선안 [터치 제스처 최적화 · 인게임 가로모드 알림 · 스마트폰 손맛 햅틱 진동]',
-    badge: 'LATEST',
-    badgeColor: 'emerald',
+    badge: 'UPDATE',
+    badgeColor: 'blue',
     items: [
       {
         tag: 'TOUCH ACTION',
