@@ -435,42 +435,32 @@ body {
   display: flex;
   flex-wrap: nowrap;
   align-items: center;
-  justify-content: flex-start;
-  gap: 6px;
+  justify-content: center;
+  gap: 5px;
   max-width: 100%;
   margin: 0 auto;
   overflow-x: auto;
   overflow-y: hidden;
-  padding-bottom: 4px;
-  scrollbar-width: thin;
-  scrollbar-color: rgba(251, 191, 36, 0.4) transparent;
+  padding-bottom: 2px;
+  scrollbar-width: none;
   -webkit-overflow-scrolling: touch;
-  scroll-snap-type: x proximity;
 }
 
 .portal-categories::-webkit-scrollbar {
-  height: 3px;
-}
-.portal-categories::-webkit-scrollbar-track {
-  background: transparent;
-}
-.portal-categories::-webkit-scrollbar-thumb {
-  background-color: rgba(251, 191, 36, 0.35);
-  border-radius: 9999px;
+  display: none;
 }
 
 .portal-categories .portal-category-chip {
-  scroll-snap-align: start;
   flex-shrink: 0;
 }
 
 .portal-category-chip {
   display: inline-flex;
   align-items: center;
-  gap: 5px;
-  padding: 5px 12px;
+  gap: 4px;
+  padding: 4px 9px;
   border-radius: 9999px;
-  font-size: 11px;
+  font-size: 10px;
   font-weight: 800;
   background-color: rgba(30, 41, 59, 0.8);
   color: #CBD5E1;
@@ -478,6 +468,7 @@ body {
   cursor: pointer;
   transition: all 0.2s ease;
   user-select: none;
+  white-space: nowrap;
 }
 
 .portal-category-chip:hover {
@@ -496,9 +487,9 @@ body {
 }
 
 .portal-category-counter {
-  font-size: 10px;
+  font-size: 9px;
   font-weight: 900;
-  padding: 1px 5px;
+  padding: 1px 4px;
   border-radius: 9999px;
   background-color: rgba(0, 0, 0, 0.3);
   color: #94A3B8;
