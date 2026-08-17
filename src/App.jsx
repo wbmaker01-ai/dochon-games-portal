@@ -20,15 +20,25 @@ import GameCard from './components/GameCard';
 import LeaderboardModal from './components/LeaderboardModal';
 import ChangelogModal from './components/ChangelogModal';
 import GuideModal from './components/GuideModal';
+import RulesNoticeModal from './components/RulesNoticeModal';
 import { PLAYABLE_GAMES, COMING_SOON_GAMES, CATEGORY_DEFINITIONS } from './data/gamesData';
 import { getLatestVersion } from './data/changelogData';
-import { getLeaderboardFromDB, syncLocalStorageToCloudDB } from './utils/leaderboardApi';
+import { getLeaderboardFromDB } from './utils/leaderboardApi';
 import { getRankedPlayableGames } from './utils/rankingAlgorithm';
 import { haptics } from './utils/haptics';
-import { Trophy, X, Lock, Gamepad2, Dices, Heart, Crown, History, HelpCircle, Smartphone, RotateCcw } from 'lucide-react';
+import { Trophy, X, Lock, Gamepad2, Dices, Heart, Crown, History, HelpCircle, Smartphone, RotateCcw, ShieldCheck } from 'lucide-react';
 
 export default function App() {
   const [activeGame, setActiveGame] = useState(null);
+  const [isRulesOpen, setIsRulesOpen] = useState(() => {
+    try {
+      const today = new Date().toISOString().split('T')[0];
+      const hideDate = localStorage.getItem('dochon_rules_hide_today');
+      return hideDate !== today;
+    } catch (e) {
+      return true;
+    }
+  });
   const [isLeaderboardOpen, setIsLeaderboardOpen] = useState(false);
   const [isChangelogOpen, setIsChangelogOpen] = useState(false);
   const [isGuideOpen, setIsGuideOpen] = useState(false);
@@ -242,6 +252,16 @@ export default function App() {
             >
               <HelpCircle className="w-3.5 h-3.5 text-cyan-400" />
               <span>이용안내</span>
+            </button>
+
+            {/* 🛡️ Portal Safety & Rules Notice Modal Button */}
+            <button
+              onClick={() => setIsRulesOpen(true)}
+              className="btn-rules shadow-md flex items-center gap-1.5"
+              title="도촌초 게임 이용 및 안전 수칙 확인하기"
+            >
+              <ShieldCheck className="w-3.5 h-3.5 text-amber-400" />
+              <span>이용수칙</span>
             </button>
           </div>
         </div>
@@ -538,6 +558,12 @@ export default function App() {
       <GuideModal
         isOpen={isGuideOpen}
         onClose={() => setIsGuideOpen(false)}
+      />
+
+      {/* 9. Pure HTML/CSS In-Page Overlay Modal for Portal Rules & Safety Notice */}
+      <RulesNoticeModal
+        isOpen={isRulesOpen}
+        onClose={() => setIsRulesOpen(false)}
       />
 
       {/* 9. Centered Footer */}

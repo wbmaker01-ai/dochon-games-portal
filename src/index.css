@@ -2125,6 +2125,38 @@ body {
   transform: scale(0.95) !important;
 }
 
+.btn-rules {
+  background: rgba(15, 23, 42, 0.95) !important;
+  color: #FEF08A !important;
+  border: 1.5px solid rgba(245, 158, 11, 0.6) !important;
+  padding: 8px 16px !important;
+  border-radius: 9999px !important;
+  font-size: 0.82rem !important;
+  font-weight: 900 !important;
+  cursor: pointer !important;
+  transition: all 0.2s ease !important;
+  display: inline-flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  gap: 6px !important;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.4) !important;
+  user-select: none !important;
+  backdrop-filter: blur(8px) !important;
+  white-space: nowrap !important;
+}
+
+.btn-rules:hover {
+  background: rgba(30, 41, 59, 0.95) !important;
+  color: #FBBF24 !important;
+  border-color: #FBBF24 !important;
+  transform: translateY(-2px) !important;
+  box-shadow: 0 6px 16px rgba(245, 158, 11, 0.35) !important;
+}
+
+.btn-rules:active {
+  transform: scale(0.95) !important;
+}
+
 .guide-modal-box {
   position: relative !important;
   width: 100% !important;
@@ -2476,6 +2508,232 @@ button, a, input, [role="button"], .dpad-btn, .btn-dino-jump, .btn-dino-duck, .m
 .pacman-score-form__submit:active {
   transform: translateY(1px) scale(0.97);
   box-shadow: 0 2px 8px rgba(251, 191, 36, 0.35);
+}
+
+/* ==========================================================================
+   🚨 Rules & Etiquette Notice Modal (도촌초 게임 이용 및 안전 수칙 팝업)
+   ========================================================================== */
+
+.rules-modal-box {
+  position: relative !important;
+  width: 100% !important;
+  max-width: 620px !important;
+  background: linear-gradient(150deg, #090D16 0%, #15162C 50%, #0F172A 100%) !important;
+  border: 2px solid rgba(251, 191, 36, 0.5) !important;
+  border-radius: 28px !important;
+  box-shadow: 0 25px 65px -15px rgba(0, 0, 0, 0.95), 0 0 40px rgba(245, 158, 11, 0.25) !important;
+  padding: 24px !important;
+  display: flex !important;
+  flex-direction: column !important;
+  max-height: 92vh !important;
+  animation: modalScaleIn 0.3s cubic-bezier(0.16, 1, 0.3, 1) !important;
+  color: #FFFFFF !important;
+  box-sizing: border-box !important;
+}
+
+.rules-modal-header {
+  display: flex !important;
+  align-items: center !important;
+  gap: 14px !important;
+  padding-bottom: 16px !important;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.1) !important;
+}
+
+.rules-header-icon-wrap {
+  width: 48px !important;
+  height: 48px !important;
+  border-radius: 16px !important;
+  background: linear-gradient(135deg, #FBBF24 0%, #F59E0B 100%) !important;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  box-shadow: 0 8px 20px rgba(245, 158, 11, 0.4) !important;
+  flex-shrink: 0 !important;
+}
+
+.rules-modal-body {
+  overflow-y: auto !important;
+  padding-right: 6px !important;
+  margin-top: 14px !important;
+  margin-bottom: 14px !important;
+  display: flex !important;
+  flex-direction: column !important;
+  gap: 10px !important;
+}
+
+.rules-modal-body::-webkit-scrollbar {
+  width: 6px !important;
+}
+.rules-modal-body::-webkit-scrollbar-track {
+  background: rgba(255, 255, 255, 0.05) !important;
+  border-radius: 9999px !important;
+}
+.rules-modal-body::-webkit-scrollbar-thumb {
+  background: rgba(251, 191, 36, 0.35) !important;
+  border-radius: 9999px !important;
+}
+
+.rules-intro-card {
+  background: rgba(245, 158, 11, 0.1) !important;
+  border: 1px dashed rgba(251, 191, 36, 0.4) !important;
+  border-radius: 14px !important;
+  padding: 10px 14px !important;
+  text-align: left !important;
+}
+
+.rules-item-card {
+  display: flex !important;
+  align-items: flex-start !important;
+  gap: 12px !important;
+  background: rgba(15, 23, 42, 0.7) !important;
+  border: 1px solid rgba(255, 255, 255, 0.08) !important;
+  border-radius: 16px !important;
+  padding: 12px 14px !important;
+  transition: all 0.2s ease !important;
+  text-align: left !important;
+}
+
+.rules-item-card:hover {
+  background: rgba(30, 41, 59, 0.8) !important;
+  border-color: rgba(255, 255, 255, 0.18) !important;
+}
+
+.rules-item-icon {
+  width: 36px !important;
+  height: 36px !important;
+  border-radius: 12px !important;
+  border: 1px solid !important;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  font-size: 18px !important;
+  flex-shrink: 0 !important;
+}
+
+.rules-item-content {
+  display: flex !important;
+  flex-direction: column !important;
+  gap: 3px !important;
+}
+
+.rules-item-title {
+  font-size: 13px !important;
+  font-weight: 900 !important;
+  margin: 0 !important;
+  letter-spacing: -0.01em !important;
+}
+
+.rules-item-desc {
+  font-size: 11.5px !important;
+  color: #CBD5E1 !important;
+  line-height: 1.45 !important;
+  margin: 0 !important;
+}
+
+.rules-agreement-section {
+  display: flex !important;
+  flex-direction: column !important;
+  gap: 8px !important;
+  background: rgba(15, 23, 42, 0.9) !important;
+  border: 1.5px solid rgba(251, 191, 36, 0.3) !important;
+  border-radius: 18px !important;
+  padding: 12px 16px !important;
+  margin-top: 2px !important;
+}
+
+.rules-check-label {
+  display: flex !important;
+  align-items: center !important;
+  gap: 10px !important;
+  cursor: pointer !important;
+  user-select: none !important;
+  padding: 6px 8px !important;
+  border-radius: 10px !important;
+  transition: all 0.2s ease !important;
+}
+
+.rules-check-label:hover {
+  background: rgba(251, 191, 36, 0.1) !important;
+}
+
+.rules-check-label.checked {
+  background: rgba(251, 191, 36, 0.15) !important;
+}
+
+.rules-checkbox {
+  width: 20px !important;
+  height: 20px !important;
+  accent-color: #F59E0B !important;
+  cursor: pointer !important;
+  flex-shrink: 0 !important;
+}
+
+.rules-check-text {
+  font-size: 12.5px !important;
+  letter-spacing: -0.01em !important;
+}
+
+.rules-check-label-sub {
+  display: flex !important;
+  align-items: center !important;
+  gap: 8px !important;
+  cursor: pointer !important;
+  user-select: none !important;
+  padding-left: 38px !important;
+}
+
+.rules-checkbox-sub {
+  width: 15px !important;
+  height: 15px !important;
+  accent-color: #94A3B8 !important;
+  cursor: pointer !important;
+  flex-shrink: 0 !important;
+}
+
+.rules-modal-footer {
+  margin-top: 14px !important;
+  display: flex !important;
+  justify-content: center !important;
+}
+
+.rules-confirm-btn {
+  width: 100% !important;
+  padding: 13px 20px !important;
+  border-radius: 16px !important;
+  font-size: 14px !important;
+  font-weight: 900 !important;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  gap: 8px !important;
+  cursor: pointer !important;
+  transition: all 0.2s ease !important;
+  border: none !important;
+}
+
+.rules-confirm-btn.active {
+  background: linear-gradient(135deg, #FBBF24 0%, #F59E0B 100%) !important;
+  color: #78350F !important;
+  box-shadow: 0 8px 25px rgba(245, 158, 11, 0.45) !important;
+  transform: translateY(-1px) !important;
+}
+
+.rules-confirm-btn.active:hover {
+  transform: translateY(-2px) !important;
+  box-shadow: 0 10px 30px rgba(245, 158, 11, 0.6) !important;
+  filter: brightness(1.05) !important;
+}
+
+.rules-confirm-btn.active:active {
+  transform: translateY(1px) scale(0.99) !important;
+}
+
+.rules-confirm-btn.disabled {
+  background: #1E293B !important;
+  color: #64748B !important;
+  border: 1px solid rgba(255, 255, 255, 0.08) !important;
+  cursor: not-allowed !important;
+  box-shadow: none !important;
 }
 
 

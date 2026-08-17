@@ -3,11 +3,35 @@
 
 export const CHANGELOG_DATA = [
   {
+    version: 'v1.25.0',
+    date: '2026-08-17',
+    title: '도촌초 게임 이용 및 안전 수칙 반응형 팝업 모달 신설 (필수 실천 서약 & 오늘 하루 보지 않기)',
+    badge: 'LATEST',
+    badgeColor: 'emerald',
+    items: [
+      {
+        tag: 'SAFETY RULES',
+        tagColor: 'amber',
+        text: '[도촌초 게임 이용 및 안전 수칙 팝업 신설] 학생들의 올바른 게임 이용 문화 조성을 위해 4대 핵심 수칙(선생님 허락 후 플레이, 바른 말 고운 말 사용, 친구와 사이좋게 경쟁, 스스로 정해진 시간 지키기) 안내 팝업 탑재'
+      },
+      {
+        tag: 'MANDATORY AGREEMENT',
+        tagColor: 'teal',
+        text: '[필수 실천 서약 체크박스 시스템] "위 내용을 모두 이해했으며, 성실히 실천하겠습니다" 필수 체크 시에만 게임 포털 입장 및 플레이가 가능하도록 안전 장치 적용'
+      },
+      {
+        tag: 'DAILY OPTION',
+        tagColor: 'blue',
+        text: '[오늘 하루 다시 보지 않기 & 툴바 상시 열람] "오늘 하루는 이 안내 팝업을 다시 보지 않겠습니다" 선택 옵션 제공 및 메인 상단 툴바 [🛡️ 이용수칙] 버튼을 통해 언제든 재확인 가능'
+      }
+    ]
+  },
+  {
     version: 'v1.24.0',
     date: '2026-08-17',
     title: '도촌 팩맨 상단 점수/목숨 HUD 한 줄 레이아웃 개편 및 전용 스타일 분리',
-    badge: 'LATEST',
-    badgeColor: 'emerald',
+    badge: 'UPDATE',
+    badgeColor: 'blue',
     items: [
       {
         tag: 'SCORE HUD',
