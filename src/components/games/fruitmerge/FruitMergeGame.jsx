@@ -63,6 +63,7 @@ export default function FruitMergeGame({ onScoreSubmitted }) {
   const aimXRef = useRef(CANVAS_WIDTH / 2);
   const lastDropTimeRef = useRef(0);
   const isGameOverRef = useRef(false);
+  const keysPressed = useRef({});
 
   // Update sound mute state
   useEffect(() => {
@@ -93,11 +94,11 @@ export default function FruitMergeGame({ onScoreSubmitted }) {
   }, []);
 
   // Trigger Box Shake Skill
-  const handleShake = () => {
+  const handleShake = useCallback(() => {
     if (shakeCount <= 0 || gameState !== 'playing') return;
     engineRef.current.shakeBox();
     setShakeCount(prev => prev - 1);
-  };
+  }, [shakeCount, gameState]);
 
   // Drop Fruit Execution
   const triggerDrop = useCallback(() => {
@@ -175,6 +176,58 @@ export default function FruitMergeGame({ onScoreSubmitted }) {
     setCanDrop(false);
   }, []);
 
+  // Keyboard Controls (Arrow Keys, A/D, Space, Down, Enter, Z)
+  useEffect(() => {
+    const handleKeyDown = (e) => {
+      // Ignore key events if user is typing their name in the Leaderboard form
+      if (e.target && (e.target.tagName === 'INPUT' || e.target.tagName === 'TEXTAREA')) {
+        return;
+      }
+
+      if (['ArrowLeft', 'ArrowRight', 'ArrowDown', 'Space', 'KeyA', 'KeyD', 'KeyS'].includes(e.code)) {
+        e.preventDefault();
+      }
+
+      keysPressed.current[e.code] = true;
+
+      // Snappy immediate step on single tap
+      const curRadius = FRUITS[currentLevel]?.radius || 17;
+      if (e.code === 'ArrowLeft' || e.code === 'KeyA') {
+        aimXRef.current = Math.max(BOX_LEFT + curRadius, aimXRef.current - 18);
+      }
+      if (e.code === 'ArrowRight' || e.code === 'KeyD') {
+        aimXRef.current = Math.min(BOX_RIGHT - curRadius, aimXRef.current + 18);
+      }
+
+      // Drop on Space, Down Arrow, or Enter
+      if ((e.code === 'Space' || e.code === 'ArrowDown' || e.code === 'Enter') && !e.repeat) {
+        if (gameState === 'playing') {
+          triggerDrop();
+        }
+      }
+
+      // Quick Shake on Z
+      if (e.code === 'KeyZ' && !e.repeat) {
+        handleShake();
+      }
+    };
+
+    const handleKeyUp = (e) => {
+      if (['ArrowLeft', 'ArrowRight', 'ArrowDown', 'Space', 'KeyA', 'KeyD', 'KeyS'].includes(e.code)) {
+        e.preventDefault();
+      }
+      keysPressed.current[e.code] = false;
+    };
+
+    window.addEventListener('keydown', handleKeyDown);
+    window.addEventListener('keyup', handleKeyUp);
+
+    return () => {
+      window.removeEventListener('keydown', handleKeyDown);
+      window.removeEventListener('keyup', handleKeyUp);
+    };
+  }, [gameState, triggerDrop, handleShake]);
+
   // Main 60FPS Game Loop
   useEffect(() => {
     const canvas = canvasRef.current;
@@ -185,6 +238,16 @@ export default function FruitMergeGame({ onScoreSubmitted }) {
 
     const gameLoop = () => {
       if (!isRunning) return;
+
+      // Keyboard Smooth Movement
+      if (keysPressed.current['ArrowLeft'] || keysPressed.current['KeyA']) {
+        const curRadius = FRUITS[currentLevel]?.radius || 17;
+        aimXRef.current = Math.max(BOX_LEFT + curRadius, aimXRef.current - 7.5);
+      }
+      if (keysPressed.current['ArrowRight'] || keysPressed.current['KeyD']) {
+        const curRadius = FRUITS[currentLevel]?.radius || 17;
+        aimXRef.current = Math.min(BOX_RIGHT - curRadius, aimXRef.current + 7.5);
+      }
 
       if (!isGameOverRef.current) {
         engineRef.current.update(
@@ -417,7 +480,14 @@ export default function FruitMergeGame({ onScoreSubmitted }) {
         )}
       </div>
 
-      {/* 4. Bottom Fruit Evolution Sequence Rail */}
+      {/* 4. Controls Quick Keyboard & Mouse Hint Bar */}
+      <div className="fruit-controls-hint">
+        <span className="fruit-hint-badge">⌨️ [← / →] 이동</span>
+        <span className="fruit-hint-badge">[스페이스바 / ↓] 과일 낙하</span>
+        <span className="fruit-hint-badge">[Z] 흔들기</span>
+      </div>
+
+      {/* 5. Bottom Fruit Evolution Sequence Rail */}
       <div className="fruit-evolution-rail">
         {FRUITS.map((fruit, idx) => (
           <React.Fragment key={fruit.level}>

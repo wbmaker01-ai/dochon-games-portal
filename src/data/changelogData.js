@@ -3,11 +3,30 @@
 
 export const CHANGELOG_DATA = [
   {
+    version: 'v1.20.3',
+    date: '2026-08-17',
+    title: '도촌 과일 합치기 키보드 전용 조작계(화살표·스페이스바·단축키) 전격 탑재',
+    badge: 'LATEST',
+    badgeColor: 'emerald',
+    items: [
+      {
+        tag: 'CONTROLS',
+        tagColor: 'amber',
+        text: '[PC 키보드 풀 컨트롤 시스템 지원] 마우스 없이도 좌우 방향키(← / →) 및 A / D 키로 과일 조준 위치를 부드럽게 이동하고, 스페이스바(Space) 또는 아래 방향키(↓) / Enter 키로 신속하게 과일을 낙하할 수 있는 정밀 키보드 조작계 구현'
+      },
+      {
+        tag: 'SHORTCUTS',
+        tagColor: 'blue',
+        text: '[비상 흔들기 단축키 & 가이드 바 추가] [Z] 키로 상자 흔들기 스킬 즉시 시동 지원 및 캔버스 하단에 직관적인 키보드 단축키 안내 힌트 바 적용'
+      }
+    ]
+  },
+  {
     version: 'v1.20.2',
     date: '2026-08-17',
     title: '포털 라인업 재정비 및 게임 목록 최적화',
-    badge: 'LATEST',
-    badgeColor: 'emerald',
+    badge: 'UPDATE',
+    badgeColor: 'blue',
     items: [
       {
         tag: 'PORTAL UPDATE',
