@@ -3,11 +3,50 @@
 
 export const CHANGELOG_DATA = [
   {
+    version: 'v1.21.0',
+    date: '2026-08-17',
+    title: '신규 17호 블록 격파 아케이드 [도촌 벽돌 격파왕] 공식 출시 & 전교 랭킹 오픈',
+    badge: 'LATEST',
+    badgeColor: 'emerald',
+    items: [
+      {
+        tag: 'NEW GAME',
+        tagColor: 'amber',
+        text: '[신규 17호 게임 도촌 벽돌 격파왕 정식 오픈] 패들을 조작하여 공을 튕겨내고 다채로운 블록을 격파하는 클래식 아케이드 블록 브레이커 정식 개장'
+      },
+      {
+        tag: '5 STAGES',
+        tagColor: 'blue',
+        text: '[5단계 유니크 스테이지 맵] 도촌 클래식 무지개, 도촌 사랑의 하트, 다이아몬드 요새, 우주 침공 인베이더, 대마왕 관문 등 개성 넘치는 스테이지 맵 구성'
+      },
+      {
+        tag: 'SPECIAL BRICKS',
+        tagColor: 'purple',
+        text: '[4종 특수 블록 시스템] 1HP 일반 블록, 2~3HP 강화 철갑 블록, 3x3 연쇄 폭탄 블록, 100점 대량 보너스 스타 블록 탑재'
+      },
+      {
+        tag: '7 POWER-UPS',
+        tagColor: 'amber',
+        text: '[7종 파워업 캡슐 아이템] 3구 멀티볼, 와이드 패들, 레이저 캐논 연사, 관통 파이어볼, 바닥 안전 방어막, 슬로우 모션, 라이프 보너스 지원'
+      },
+      {
+        tag: 'AUDIO SYNTH',
+        tagColor: 'emerald',
+        text: '[Web Audio API 사운드 신디사이저] 벽돌 격파 콤보에 따라 음계가 상승하는 멜로디 하모니, 레이저 발사음, 폭발음, 클리어 팡파레 탑재'
+      },
+      {
+        tag: 'LEADERBOARD',
+        tagColor: 'amber',
+        text: '[도촌초 실시간 명예의 전당 연동] 100점 초과 달성 시 전교 랭킹 등록 및 점수 등록 후 벽돌 격파왕 탭 자동 선택 지원'
+      }
+    ]
+  },
+  {
     version: 'v1.20.4',
     date: '2026-08-17',
     title: '도촌 과일 합치기 모바일/터치 전용 디자인 버튼 컨트롤러 탑재',
-    badge: 'LATEST',
-    badgeColor: 'emerald',
+    badge: 'UPDATE',
+    badgeColor: 'blue',
     items: [
       {
         tag: 'MOBILE CONTROLS',

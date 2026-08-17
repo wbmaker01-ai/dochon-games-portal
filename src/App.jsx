@@ -15,6 +15,7 @@ import PonyExpressGame from './components/games/ponyexpress/PonyExpressGame';
 import JerryLawsonGame from './components/games/jerrylawson/JerryLawsonGame';
 import MagicCatGame from './components/games/magic/MagicCatGame';
 import FruitMergeGame from './components/games/fruitmerge/FruitMergeGame';
+import BrickBreakerGame from './components/games/brickbreaker/BrickBreakerGame';
 import GameCard from './components/GameCard';
 import LeaderboardModal from './components/LeaderboardModal';
 import ChangelogModal from './components/ChangelogModal';
@@ -428,6 +429,7 @@ export default function App() {
                   {activeGame === 'gnome' && '🌿 도촌 정원 요정 (DOCHON GARDEN GNOMES)'}
                   {activeGame === 'colortile' && '🧩 도촌 컬러 타일 (DOCHON COLOR TILE)'}
                   {activeGame === 'popcorn' && '🍿 도촌 팝콘 (DOCHON POPCORN SURVIVAL)'}
+                  {activeGame === 'brickbreaker' && '🧱 도촌 벽돌 격파왕 (DOCHON BRICK BREAKER)'}
                 </span>
                 <span style={{
                   backgroundColor: 'rgba(251, 191, 36, 0.2)',
@@ -502,6 +504,9 @@ export default function App() {
               )}
               {activeGame === 'fruitmerge' && (
                 <FruitMergeGame onScoreSubmitted={() => openInPageLeaderboardModal('fruitmerge')} />
+              )}
+              {activeGame === 'brickbreaker' && (
+                <BrickBreakerGame onScoreSubmitted={() => openInPageLeaderboardModal('brickbreaker')} />
               )}
             </div>
           </div>

@@ -136,19 +136,21 @@ export const PLAYABLE_GAMES = [
     category: '퍼즐',
     imageSrc: getThumb('fruitmerge.jpg'),
     isPlayable: true,
-    badgeText: '🍉 NEW 16위',
+    badgeText: '🍉 16위',
     description: '떨어지는 과일을 합쳐 거대한 도촌 수박을 만드는 초인기 2D 물리 합성 퍼즐!'
-  }
-];
-
-export const COMING_SOON_GAMES = [
+  },
   {
     id: 'brickbreaker',
     title: '도촌 벽돌 격파왕',
     category: '액션',
     imageSrc: getThumb('brickbreaker.jpg'),
-    isPlayable: false
-  },
+    isPlayable: true,
+    badgeText: '🧱 NEW 17위',
+    description: '반사되는 공과 화려한 파워업 아이템으로 형형색색의 블록을 격파하는 클래식 아케이드!'
+  }
+];
+
+export const COMING_SOON_GAMES = [
   {
     id: 'petanque',
     title: '페탕크',

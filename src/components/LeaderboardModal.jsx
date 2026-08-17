@@ -285,6 +285,7 @@ export default function LeaderboardModal({ isOpen, onClose, activeTab = 'pacman'
             if (game.id === 'jerrylawson') iconEmoji = '🕹️';
             if (game.id === 'magic') iconEmoji = '🧙';
             if (game.id === 'fruitmerge') iconEmoji = '🍉';
+            if (game.id === 'brickbreaker') iconEmoji = '🧱';
 
             // Remove '도촌 ' prefix for compact and clean layout
             const shortTitle = game.title.replace(/^도촌\s*/, '');
@@ -307,6 +308,7 @@ export default function LeaderboardModal({ isOpen, onClose, activeTab = 'pacman'
               else if (game.id === 'jerrylawson') activeCustomStyle = { background: 'linear-gradient(135deg, #8B5CF6, #6D28D9)', color: '#FFFFFF' };
               else if (game.id === 'magic') activeCustomStyle = { background: 'linear-gradient(135deg, #9333EA, #4F46E5)', color: '#FFFFFF' };
               else if (game.id === 'fruitmerge') activeCustomStyle = { background: 'linear-gradient(135deg, #10B981, #EF4444)', color: '#FFFFFF' };
+              else if (game.id === 'brickbreaker') activeCustomStyle = { background: 'linear-gradient(135deg, #0284C7, #0369A1)', color: '#FFFFFF' };
             }
 
             return (

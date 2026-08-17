@@ -1,0 +1,630 @@
+/* Dochon Brick Breaker (도촌 벽돌 격파왕) Dedicated Modern Stylesheet */
+
+.bb-game-container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  width: 100%;
+  max-width: 580px;
+  margin: 0 auto;
+  padding: 8px 12px 20px;
+  box-sizing: border-box;
+  user-select: none;
+  font-family: -apple-system, BlinkMacSystemFont, "Pretendard", "Noto Sans KR", sans-serif;
+  color: #F8FAFC;
+}
+
+/* 1. Glassmorphism Top HUD Bar */
+.bb-hud-bar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  width: 100%;
+  max-width: 480px;
+  background: rgba(15, 23, 42, 0.75);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  border: 1px solid rgba(56, 189, 248, 0.25);
+  border-radius: 14px;
+  padding: 8px 14px;
+  margin-bottom: 8px;
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.4), inset 0 1px 0 rgba(255, 255, 255, 0.1);
+}
+
+.bb-hud-item {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 2px;
+}
+
+.bb-hud-label {
+  font-size: 10px;
+  font-weight: 700;
+  color: #94A3B8;
+  letter-spacing: 0.5px;
+  text-transform: uppercase;
+}
+
+.bb-hud-value {
+  font-size: 15px;
+  font-weight: 900;
+  color: #F8FAFC;
+  font-variant-numeric: tabular-nums;
+}
+
+.bb-score-value {
+  color: #FDE047;
+  text-shadow: 0 0 8px rgba(253, 224, 71, 0.5);
+}
+
+.bb-lives-container {
+  display: flex;
+  align-items: center;
+  gap: 3px;
+  font-size: 14px;
+}
+
+.bb-hud-actions {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.bb-hud-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 32px;
+  height: 32px;
+  border-radius: 8px;
+  background: rgba(30, 41, 59, 0.8);
+  border: 1px solid rgba(148, 163, 184, 0.2);
+  color: #CBD5E1;
+  cursor: pointer;
+  transition: all 0.15s ease;
+}
+
+.bb-hud-btn:hover {
+  background: rgba(51, 65, 85, 0.9);
+  color: #FFFFFF;
+  border-color: rgba(56, 189, 248, 0.5);
+  transform: translateY(-1px);
+}
+
+/* 2. Canvas Stage Wrapper */
+.bb-canvas-wrapper {
+  position: relative;
+  width: 100%;
+  max-width: 480px;
+  aspect-ratio: 480 / 640;
+  border-radius: 16px;
+  overflow: hidden;
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.6), 0 0 20px rgba(56, 189, 248, 0.15);
+  border: 2px solid rgba(56, 189, 248, 0.35);
+  background: #020617;
+  touch-action: none;
+}
+
+.bb-canvas {
+  width: 100%;
+  height: 100%;
+  display: block;
+}
+
+/* 3. In-Game Overlays (Start / Pause / Clear / Game Over) */
+.bb-overlay-screen {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: rgba(15, 23, 42, 0.85);
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 24px;
+  text-align: center;
+  box-sizing: border-box;
+  animation: bbFadeIn 0.25s ease-out;
+  z-index: 20;
+}
+
+@keyframes bbFadeIn {
+  from { opacity: 0; transform: scale(0.96); }
+  to { opacity: 1; transform: scale(1); }
+}
+
+.bb-overlay-icon {
+  font-size: 42px;
+  margin-bottom: 10px;
+  filter: drop-shadow(0 0 16px rgba(251, 191, 36, 0.6));
+}
+
+.bb-overlay-title {
+  font-size: 22px;
+  font-weight: 900;
+  color: #FFFFFF;
+  margin: 0 0 6px;
+  letter-spacing: -0.5px;
+}
+
+.bb-overlay-desc {
+  font-size: 13px;
+  color: #94A3B8;
+  margin: 0 0 18px;
+  line-height: 1.5;
+  max-width: 320px;
+}
+
+.bb-score-card {
+  background: rgba(30, 41, 59, 0.8);
+  border: 1px solid rgba(56, 189, 248, 0.3);
+  border-radius: 12px;
+  padding: 12px 20px;
+  margin-bottom: 18px;
+  width: 80%;
+  display: flex;
+  justify-content: space-around;
+}
+
+.bb-score-col {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.bb-score-col-label {
+  font-size: 11px;
+  color: #94A3B8;
+  font-weight: 700;
+}
+
+.bb-score-col-val {
+  font-size: 20px;
+  font-weight: 900;
+  color: #FDE047;
+}
+
+/* Primary Action Buttons */
+.bb-btn-primary {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  padding: 12px 28px;
+  background: linear-gradient(135deg, #0284C7, #0369A1);
+  color: #FFFFFF;
+  font-size: 15px;
+  font-weight: 900;
+  border-radius: 12px;
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  box-shadow: 0 4px 16px rgba(2, 132, 199, 0.5);
+  cursor: pointer;
+  transition: all 0.15s ease;
+}
+
+.bb-btn-primary:hover {
+  background: linear-gradient(135deg, #0369A1, #075985);
+  transform: translateY(-2px);
+  box-shadow: 0 6px 20px rgba(2, 132, 199, 0.7);
+}
+
+.bb-btn-secondary {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  padding: 8px 18px;
+  background: rgba(30, 41, 59, 0.8);
+  color: #CBD5E1;
+  font-size: 13px;
+  font-weight: 700;
+  border-radius: 10px;
+  border: 1px solid rgba(148, 163, 184, 0.3);
+  cursor: pointer;
+  margin-top: 10px;
+  transition: all 0.15s ease;
+}
+
+.bb-btn-secondary:hover {
+  background: rgba(51, 65, 85, 0.9);
+  color: #FFFFFF;
+}
+
+/* 4. Honor of School Leaderboard Submit Form in Overlay */
+.bb-submit-form {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 10px;
+  width: 100%;
+  max-width: 320px;
+  margin-bottom: 14px;
+}
+
+.bb-input-row {
+  display: flex;
+  width: 100%;
+  gap: 6px;
+}
+
+.bb-name-input {
+  flex: 1;
+  padding: 10px 14px;
+  background: rgba(15, 23, 42, 0.9);
+  border: 1.5px solid #F59E0B;
+  border-radius: 10px;
+  color: #FFFFFF;
+  font-size: 14px;
+  font-weight: 700;
+  outline: none;
+  text-align: center;
+  transition: border-color 0.2s;
+}
+
+.bb-name-input:focus {
+  border-color: #FDE047;
+  box-shadow: 0 0 10px rgba(253, 224, 71, 0.4);
+}
+
+.bb-name-input::placeholder {
+  color: #64748B;
+  font-weight: 500;
+}
+
+.bb-submit-btn {
+  padding: 10px 16px;
+  background: linear-gradient(135deg, #F59E0B, #D97706);
+  color: #000000;
+  font-size: 13px;
+  font-weight: 900;
+  border: none;
+  border-radius: 10px;
+  cursor: pointer;
+  white-space: nowrap;
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  transition: transform 0.15s;
+}
+
+.bb-submit-btn:hover {
+  transform: translateY(-1px);
+}
+
+.bb-submit-btn:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+/* 5. Mobile Touch Controls Bar */
+.bb-mobile-controls {
+  display: none;
+  width: 100%;
+  max-width: 480px;
+  justify-content: space-between;
+  align-items: center;
+  margin-top: 10px;
+  gap: 10px;
+}
+
+@media (max-width: 768px), (pointer: coarse) {
+  .bb-mobile-controls {
+    display: flex;
+  }
+}
+
+.bb-ctrl-dpad {
+  display: flex;
+  gap: 8px;
+}
+
+.bb-ctrl-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 58px;
+  height: 52px;
+  background: rgba(30, 41, 59, 0.85);
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+  border: 1.5px solid rgba(56, 189, 248, 0.4);
+  border-radius: 12px;
+  color: #38BDF8;
+  font-size: 20px;
+  cursor: pointer;
+  user-select: none;
+  touch-action: manipulation;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+  transition: transform 0.1s, background 0.1s;
+}
+
+.bb-ctrl-btn:active {
+  transform: scale(0.92);
+  background: rgba(56, 189, 248, 0.3);
+  color: #FFFFFF;
+}
+
+.bb-action-btn {
+  flex: 1;
+  max-width: 180px;
+  height: 52px;
+  background: linear-gradient(135deg, #0284C7, #0369A1);
+  border: 1.5px solid rgba(255, 255, 255, 0.2);
+  border-radius: 12px;
+  color: #FFFFFF;
+  font-size: 13px;
+  font-weight: 900;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  cursor: pointer;
+  user-select: none;
+  touch-action: manipulation;
+  box-shadow: 0 4px 16px rgba(2, 132, 199, 0.4);
+}
+
+.bb-action-btn:active {
+  transform: scale(0.94);
+  background: linear-gradient(135deg, #0369A1, #075985);
+}
+
+/* 6. How To Play Modal Styles */
+.bb-modal-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100vw;
+  height: 100vh;
+  background: rgba(2, 6, 23, 0.85);
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 10000;
+  padding: 16px;
+  box-sizing: border-box;
+}
+
+.bb-modal-content {
+  background: #0F172A;
+  border: 1.5px solid rgba(56, 189, 248, 0.35);
+  border-radius: 20px;
+  width: 100%;
+  max-width: 520px;
+  max-height: 85vh;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  box-shadow: 0 16px 48px rgba(0, 0, 0, 0.8), 0 0 32px rgba(56, 189, 248, 0.15);
+}
+
+.bb-modal-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 16px 20px;
+  border-bottom: 1px solid rgba(148, 163, 184, 0.15);
+  background: rgba(15, 23, 42, 0.95);
+}
+
+.bb-modal-title {
+  font-size: 16px;
+  font-weight: 900;
+  color: #F8FAFC;
+  margin: 0;
+}
+
+.bb-modal-subtitle {
+  font-size: 11px;
+  color: #94A3B8;
+  margin: 2px 0 0;
+}
+
+.bb-modal-close {
+  background: transparent;
+  border: none;
+  color: #94A3B8;
+  cursor: pointer;
+  padding: 4px;
+  border-radius: 6px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.bb-modal-close:hover {
+  color: #FFFFFF;
+  background: rgba(255, 255, 255, 0.1);
+}
+
+.bb-modal-body {
+  padding: 18px 20px;
+  overflow-y: auto;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.bb-guide-section {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.bb-section-title {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 13px;
+  font-weight: 800;
+  color: #E2E8F0;
+  margin: 0;
+}
+
+.bb-guide-box {
+  background: rgba(30, 41, 59, 0.6);
+  border: 1px solid rgba(148, 163, 184, 0.2);
+  border-radius: 10px;
+  padding: 10px 14px;
+  font-size: 12px;
+  color: #CBD5E1;
+  line-height: 1.5;
+}
+
+.bb-highlight-box {
+  background: rgba(245, 158, 11, 0.1);
+  border-color: rgba(245, 158, 11, 0.4);
+  color: #FEF3C7;
+}
+
+.bb-controls-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 10px;
+}
+
+@media (max-width: 480px) {
+  .bb-controls-grid {
+    grid-template-columns: 1fr;
+  }
+}
+
+.bb-control-card {
+  background: rgba(30, 41, 59, 0.5);
+  border: 1px solid rgba(148, 163, 184, 0.15);
+  border-radius: 10px;
+  padding: 10px;
+}
+
+.bb-control-badge {
+  display: inline-block;
+  font-size: 11px;
+  font-weight: 800;
+  color: #38BDF8;
+  margin-bottom: 6px;
+}
+
+.bb-control-card ul {
+  margin: 0;
+  padding-left: 16px;
+  font-size: 11px;
+  color: #94A3B8;
+  line-height: 1.6;
+}
+
+.bb-encyclopedia-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 8px;
+}
+
+.bb-enc-item {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  background: rgba(30, 41, 59, 0.4);
+  border: 1px solid rgba(148, 163, 184, 0.15);
+  border-radius: 8px;
+  padding: 6px 8px;
+}
+
+.bb-brick-preview {
+  width: 42px;
+  height: 20px;
+  border-radius: 4px;
+  border: 1.2px solid;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 10px;
+  font-weight: 800;
+  color: #FFFFFF;
+  flex-shrink: 0;
+}
+
+.bb-enc-info {
+  display: flex;
+  flex-direction: column;
+}
+
+.bb-enc-info strong {
+  font-size: 11px;
+  color: #F1F5F9;
+}
+
+.bb-enc-info span {
+  font-size: 10px;
+  color: #94A3B8;
+}
+
+.bb-items-list {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.bb-powerup-row {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  background: rgba(30, 41, 59, 0.4);
+  border: 1px solid rgba(148, 163, 184, 0.15);
+  border-radius: 8px;
+  padding: 6px 10px;
+}
+
+.bb-powerup-icon {
+  width: 28px;
+  height: 28px;
+  border-radius: 50%;
+  border: 1.5px solid;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 14px;
+  flex-shrink: 0;
+  background: rgba(15, 23, 42, 0.8);
+}
+
+.bb-powerup-text strong {
+  font-size: 11px;
+  color: #F8FAFC;
+  display: block;
+}
+
+.bb-powerup-text p {
+  margin: 0;
+  font-size: 10px;
+  color: #94A3B8;
+}
+
+.bb-modal-footer {
+  padding: 12px 20px;
+  border-top: 1px solid rgba(148, 163, 184, 0.15);
+  background: rgba(15, 23, 42, 0.95);
+  display: flex;
+  justify-content: flex-end;
+}
+
+.bb-btn-confirm {
+  padding: 10px 22px;
+  background: linear-gradient(135deg, #0284C7, #0369A1);
+  color: #FFFFFF;
+  font-size: 13px;
+  font-weight: 800;
+  border: none;
+  border-radius: 10px;
+  cursor: pointer;
+  transition: transform 0.1s;
+}
+
+.bb-btn-confirm:hover {
+  transform: translateY(-1px);
+}
