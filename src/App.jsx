@@ -59,12 +59,7 @@ export default function App() {
   const [leaderboardCounts, setLeaderboardCounts] = useState({});
 
   useEffect(() => {
-    // 1. One-time sync from localStorage to Firebase Cloud DB
-    syncLocalStorageToCloudDB().then(() => {
-      fetchTopScores();
-    });
-
-    // Fetch top scores and activity counts for playable games
+    // Fetch top scores and activity counts directly from Cloud DB
     async function fetchTopScores() {
       const topResults = {};
       const countResults = {};

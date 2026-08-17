@@ -228,45 +228,90 @@ export async function updateScoreInDB(gameKey, id, name, score) {
   const updatedName = String(name).trim();
   const updatedScore = Number(score) || 0;
 
-  // 1. Update localStorage fallback copy immediately
+  // 1. Update Cloud DB first
   try {
-    const stored = localStorage.getItem(`dochon_leaderboard_${gameKey}`);
-    let list = stored ? JSON.parse(stored) : getLocalLeaderboardFallback(gameKey);
-    const index = list.findIndex(item => String(item.id) === String(id));
-    if (index !== -1) {
-      list[index].name = updatedName;
-      list[index].score = updatedScore;
-      localStorage.setItem(`dochon_leaderboard_${gameKey}`, JSON.stringify(deduplicateLeaderboard(list)));
-    }
-  } catch (e) {}
-
-  // 2. Update Cloud DB
-  try {
-    const res = await fetch(`${DB_API_URL}/${gameKey}/${id}.json`, {
-      method: 'PATCH',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({
-        name: updatedName,
-        score: updatedScore
-      })
-    });
-
-    if (res.ok) {
-      console.log(`[Backend DB] Score ${id} successfully updated in Cloud Database.`);
-      return true;
+    // If id exists directly
+    if (id && !id.startsWith('local_')) {
+      const res = await fetch(`${DB_API_URL}/${gameKey}/${id}.json`, {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          name: updatedName,
+          score: updatedScore
+        })
+      });
+      if (res.ok) {
+        console.log(`[Backend DB] Score ${id} successfully updated in Cloud Database.`);
+      }
+    } else {
+      // Find key in Cloud DB by name/matching entry
+      const getRes = await fetch(`${DB_API_URL}/${gameKey}.json`);
+      if (getRes.ok) {
+        const data = await getRes.json();
+        if (data) {
+          const matchKey = Object.keys(data).find(k => k === id || data[k].name === name || data[k].name === updatedName);
+          if (matchKey) {
+            await fetch(`${DB_API_URL}/${gameKey}/${matchKey}.json`, {
+              method: 'PATCH',
+              headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify({
+                name: updatedName,
+                score: updatedScore
+              })
+            });
+          }
+        }
+      }
     }
   } catch (err) {
     console.error('[Backend DB] Failed to update score in Cloud Database:', err);
   }
 
-  return false;
+  // 2. Update localStorage fallback copy
+  try {
+    const stored = localStorage.getItem(`dochon_leaderboard_${gameKey}`);
+    let list = stored ? JSON.parse(stored) : getLocalLeaderboardFallback(gameKey);
+    const index = list.findIndex(item => String(item.id) === String(id) || item.name === name);
+    if (index !== -1) {
+      list[index].name = updatedName;
+      list[index].score = updatedScore;
+    } else {
+      list.push({ id: id || `edit_${Date.now()}`, name: updatedName, score: updatedScore, date: new Date().toISOString().split('T')[0] });
+    }
+    localStorage.setItem(`dochon_leaderboard_${gameKey}`, JSON.stringify(deduplicateLeaderboard(list)));
+  } catch (e) {}
+
+  return true;
 }
 
 /**
  * Delete a score record from the Cloud DB (Admin Feature)
  */
 export async function deleteScoreFromDB(gameKey, id) {
-  // 1. Update localStorage fallback copy immediately
+  // 1. Delete from Cloud DB first
+  try {
+    if (id && !id.startsWith('local_')) {
+      await fetch(`${DB_API_URL}/${gameKey}/${id}.json`, {
+        method: 'DELETE'
+      });
+      console.log(`[Backend DB] Score ${id} successfully deleted from Cloud Database.`);
+    }
+
+    // Also check if any other duplicate keys exist in Cloud DB for this ID
+    const getRes = await fetch(`${DB_API_URL}/${gameKey}.json`);
+    if (getRes.ok) {
+      const data = await getRes.json();
+      if (data && data[id]) {
+        await fetch(`${DB_API_URL}/${gameKey}/${id}.json`, {
+          method: 'DELETE'
+        });
+      }
+    }
+  } catch (err) {
+    console.error('[Backend DB] Failed to delete score from Cloud Database:', err);
+  }
+
+  // 2. Update localStorage fallback copy immediately
   try {
     const stored = localStorage.getItem(`dochon_leaderboard_${gameKey}`);
     let list = stored ? JSON.parse(stored) : getLocalLeaderboardFallback(gameKey);
@@ -274,21 +319,7 @@ export async function deleteScoreFromDB(gameKey, id) {
     localStorage.setItem(`dochon_leaderboard_${gameKey}`, JSON.stringify(deduplicateLeaderboard(list)));
   } catch (e) {}
 
-  // 2. Delete from Cloud DB
-  try {
-    const res = await fetch(`${DB_API_URL}/${gameKey}/${id}.json`, {
-      method: 'DELETE'
-    });
-
-    if (res.ok) {
-      console.log(`[Backend DB] Score ${id} successfully deleted from Cloud Database.`);
-      return true;
-    }
-  } catch (err) {
-    console.error('[Backend DB] Failed to delete score from Cloud Database:', err);
-  }
-
-  return false;
+  return true;
 }
 
 /**
