@@ -5,8 +5,9 @@ export const CANVAS_HEIGHT = 540;
 
 // Coordinate Reference Points on the Cricket Field Canvas
 export const BOWLER_POS = { x: 480, y: 150 };
-export const BATTER_POS = { x: 480, y: 405 };
-export const WICKET_POS = { x: 480, y: 452 };
+export const BATTER_POS = { x: 425, y: 405 }; // Batsman stands to the left (leg/off side) of the wicket
+export const WICKET_POS = { x: 480, y: 445 }; // Wickets stand at center target
+export const HIT_ZONE_POS = { x: 475, y: 420 }; // Contact point between bat & ball
 export const BOWLER_WICKET_POS = { x: 480, y: 135 };
 export const PITCH_BOUNCE_Y = 310;
 

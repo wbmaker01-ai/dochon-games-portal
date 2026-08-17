@@ -5,6 +5,7 @@ import {
   BOWLER_POS,
   BATTER_POS,
   WICKET_POS,
+  HIT_ZONE_POS,
   PITCH_BOUNCE_Y,
   PITCH_TYPES,
   HIT_RESULTS,
@@ -256,16 +257,16 @@ export default function CricketGame({ onScoreSubmitted }) {
       if (judgment.result.id === 'SIX') {
         cricketAudio.playBatHit(true);
         cricketAudio.playSixCelebration();
-        particleSystemRef.current.addConfetti(BATTER_POS.x, BATTER_POS.y - 40, 80);
-        particleSystemRef.current.addHitSparks(BATTER_POS.x, BATTER_POS.y - 20, 40, '#F59E0B');
+        particleSystemRef.current.addConfetti(HIT_ZONE_POS.x, HIT_ZONE_POS.y - 40, 80);
+        particleSystemRef.current.addHitSparks(HIT_ZONE_POS.x, HIT_ZONE_POS.y - 20, 40, '#F59E0B');
       } else if (judgment.result.id === 'FOUR') {
         cricketAudio.playBatHit(true);
         cricketAudio.playFourBoundary();
-        particleSystemRef.current.addHitSparks(BATTER_POS.x, BATTER_POS.y - 20, 30, '#10B981');
+        particleSystemRef.current.addHitSparks(HIT_ZONE_POS.x, HIT_ZONE_POS.y - 20, 30, '#10B981');
       } else {
         cricketAudio.playBatHit(false);
         cricketAudio.playFootstep();
-        particleSystemRef.current.addHitSparks(BATTER_POS.x, BATTER_POS.y - 10, 15, '#3B82F6');
+        particleSystemRef.current.addHitSparks(HIT_ZONE_POS.x, HIT_ZONE_POS.y - 10, 15, '#3B82F6');
       }
 
       // Show Announcement Popup
@@ -281,8 +282,8 @@ export default function CricketGame({ onScoreSubmitted }) {
       else power = 8;
 
       hitBallTrajectoryRef.current = {
-        x: BATTER_POS.x,
-        y: BATTER_POS.y - 10,
+        x: HIT_ZONE_POS.x,
+        y: HIT_ZONE_POS.y - 10,
         vx: Math.sin(angle) * power,
         vy: -Math.cos(angle) * power,
         scale: 1.0
@@ -411,8 +412,8 @@ export default function CricketGame({ onScoreSubmitted }) {
 
       // Popping Crease (Batter line)
       ctx.beginPath();
-      ctx.moveTo(BATTER_POS.x - 110, BATTER_POS.y + 20);
-      ctx.lineTo(BATTER_POS.x + 110, BATTER_POS.y + 20);
+      ctx.moveTo(WICKET_POS.x - 110, WICKET_POS.y - 25);
+      ctx.lineTo(WICKET_POS.x + 110, WICKET_POS.y - 25);
       ctx.stroke();
       ctx.restore();
 

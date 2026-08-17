@@ -167,8 +167,8 @@ export function calculateBallState(progress, pitchConfig) {
 
   const startX = BOWLER_POS.x;
   const startY = BOWLER_POS.y + 10;
-  const targetX = BATTER_POS.x;
-  const targetY = BATTER_POS.y + 15;
+  const targetX = WICKET_POS.x;
+  const targetY = WICKET_POS.y - 10;
 
   let x, y, shadowY, shadowAlpha, scale, isBouncingMoment = false;
 
