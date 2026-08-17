@@ -77,20 +77,20 @@ export default function MagicCatHowToPlayModal({ isOpen, onClose }) {
             <div className="p-3 rounded-xl bg-violet-950/60 border border-violet-500/40">
               <div className="flex items-center gap-1.5 text-violet-300 font-bold text-xs mb-1">
                 <Zap className="w-4 h-4 text-purple-400" />
-                <span>번개 (⚡) 광역 마법</span>
+                <span>번개 (⚡) 광역 마법 — [Z자 그리기]</span>
               </div>
               <p className="text-[11px] text-slate-300 leading-relaxed">
-                번개 기호를 그리면 화면 내에 번개 기호를 달고 있는 <strong>모든 유령을 동시에 타격</strong>하여 시원하게 정화합니다!
+                알파벳 <strong className="text-amber-300">‘Z’</strong> 또는 <strong className="text-amber-300">‘N’</strong> 자를 그리듯 지그재그로 빠르게 꺾어 그리면 화면 내 모든 번개 유령을 한 번에 정화합니다!
               </p>
             </div>
 
             <div className="p-3 rounded-xl bg-rose-950/60 border border-rose-500/40">
               <div className="flex items-center gap-1.5 text-rose-300 font-bold text-xs mb-1">
                 <Heart className="w-4 h-4 text-rose-400 fill-rose-400" />
-                <span>하트 (❤️) 생명력 회복</span>
+                <span>하트 (❤️) 생명력 회복 — [루프 그리기]</span>
               </div>
               <p className="text-[11px] text-slate-300 leading-relaxed">
-                하트 기호를 그리거나 연속 콤보를 달성하면 잃어버린 생명력(<strong>+1 HP</strong>)을 즉시 회복할 수 있습니다!
+                상단에서 시작해 <strong className="text-rose-300">하트 모양이나 둥근 원 루프(O)</strong>를 한 바퀴 부드럽게 그리면 잃어버린 생명력(<strong className="text-rose-300">+1 HP</strong>)을 즉시 회복합니다!
               </p>
             </div>
           </div>

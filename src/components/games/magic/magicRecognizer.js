@@ -4,11 +4,11 @@
 
 export class GestureRecognizer {
   static recognize(rawPoints) {
-    if (!rawPoints || rawPoints.length < 5) {
+    if (!rawPoints || rawPoints.length < 4) {
       return null;
     }
 
-    // Step 1: Filter out duplicate or extremely close points
+    // Step 1: Filter out duplicate or jittery points
     const points = [];
     for (let i = 0; i < rawPoints.length; i++) {
       const p = rawPoints[i];
@@ -23,7 +23,7 @@ export class GestureRecognizer {
       }
     }
 
-    if (points.length < 5) return null;
+    if (points.length < 4) return null;
 
     // Step 2: Calculate total path length
     let totalLength = 0;
@@ -31,8 +31,8 @@ export class GestureRecognizer {
       totalLength += Math.hypot(points[i].x - points[i - 1].x, points[i].y - points[i - 1].y);
     }
 
-    // Must have drawn at least a meaningful distance (e.g. 24px)
-    if (totalLength < 24) return null;
+    // Minimum meaningful stroke length
+    if (totalLength < 18) return null;
 
     // Step 3: Bounding box & key extrema points
     let minX = Infinity, maxX = -Infinity;
@@ -63,7 +63,7 @@ export class GestureRecognizer {
       const dx = points[i].x - points[i - 2].x;
       const dy = points[i].y - points[i - 2].y;
 
-      if (Math.abs(dx) > 6) {
+      if (Math.abs(dx) > 4) {
         const signX = Math.sign(dx);
         if (lastSignX !== 0 && signX !== lastSignX) {
           xDirectionChanges++;
@@ -71,7 +71,7 @@ export class GestureRecognizer {
         lastSignX = signX;
       }
 
-      if (Math.abs(dy) > 6) {
+      if (Math.abs(dy) > 4) {
         const signY = Math.sign(dy);
         if (lastSignY !== 0 && signY !== lastSignY) {
           yDirectionChanges++;
@@ -81,10 +81,17 @@ export class GestureRecognizer {
     }
 
     // ==============================================
-    // ⚡ 1. LIGHTNING (번개): Multiple direction reversals (Zigzag / Z-stroke)
+    // ⚡ 1. LIGHTNING (번개): Z-stroke / Zigzag / N-stroke
     // ==============================================
-    if (xDirectionChanges >= 2 || (xDirectionChanges >= 1 && yDirectionChanges >= 2)) {
-      if (boxH > 25 && boxW > 20) {
+    // Z-shape: Right -> Down-Left -> Right (xDirectionChanges >= 1 and y goes down)
+    // or N-shape: Up -> Down-Right -> Up
+    // or any stroke with 2 or more inflection points in X or Y
+    const isZShape = (xDirectionChanges >= 1 && yDirectionChanges >= 1 && boxH > 18 && boxW > 18);
+    const isZigzag = (xDirectionChanges >= 2 || yDirectionChanges >= 2);
+
+    if (isZShape || isZigzag) {
+      // Ensure it's not a closed loop (heart)
+      if (startEndDist > Math.min(boxW, boxH) * 0.4) {
         return 'LIGHTNING';
       }
     }
@@ -92,25 +99,33 @@ export class GestureRecognizer {
     // ==============================================
     // ❤️ 2. HEART (하트): Loop or double-arch stroke
     // ==============================================
-    // Heart features: start and end are close or meet at bottom tip, or has 2 distinct top humps and 1 bottom tip
-    const isClosedOrNearlyClosed = (startEndDist < boxW * 0.45 && startEndDist < boxH * 0.45 && totalLength > 80);
-    if (isClosedOrNearlyClosed && yDirectionChanges >= 2 && boxW > 30 && boxH > 30) {
+    // Highly forgiving for mouse:
+    // 1) Closed or semi-closed loop (start & end within 70% of box size) with both X and Y turns
+    // 2) Top dip with bottom tip (classic heart)
+    const isNearlyClosedLoop = (startEndDist < Math.max(boxW, boxH) * 0.7 && totalLength > 45 && boxW > 20 && boxH > 20);
+    const hasLoopCurve = (xDirectionChanges >= 1 && yDirectionChanges >= 1);
+
+    if (isNearlyClosedLoop && hasLoopCurve) {
       return 'HEART';
+    }
+
+    // Classic Heart with 2 top bumps
+    if (minYIdx > 0 && minYIdx < points.length - 1 && maxYIdx > 0 && maxYIdx < points.length - 1) {
+      if (boxW > 25 && boxH > 25 && startEndDist < boxW * 0.65) {
+        return 'HEART';
+      }
     }
 
     // ==============================================
     // ∧ 3. UP_V (산 모양 / Caret): Goes UP then DOWN
     // ==============================================
-    // The highest point (minY) is in the middle 20%~80% of the stroke
-    // Start and End are both significantly lower (greater Y) than the peak
     const peakRelativePos = minYIdx / points.length;
-    const isUpVPeakInMiddle = peakRelativePos >= 0.15 && peakRelativePos <= 0.85;
-    const startBelowPeak = startP.y - minY > boxH * 0.4;
-    const endBelowPeak = endP.y - minY > boxH * 0.4;
+    const isUpVPeakInMiddle = peakRelativePos >= 0.12 && peakRelativePos <= 0.88;
+    const startBelowPeak = startP.y - minY > boxH * 0.35;
+    const endBelowPeak = endP.y - minY > boxH * 0.35;
 
-    if (isUpVPeakInMiddle && startBelowPeak && endBelowPeak && boxH >= 20 && boxW >= 15) {
-      // Ensure it's not a closed loop or vertical line
-      if (boxW > boxH * 0.35 && xDirectionChanges <= 1) {
+    if (isUpVPeakInMiddle && startBelowPeak && endBelowPeak && boxH >= 16 && boxW >= 14) {
+      if (boxW > boxH * 0.3 && xDirectionChanges <= 1) {
         return 'UP_V';
       }
     }
@@ -118,15 +133,13 @@ export class GestureRecognizer {
     // ==============================================
     // ∨ 4. DOWN_V (골 모양 / V-shape): Goes DOWN then UP
     // ==============================================
-    // The lowest point (maxY) is in the middle 20%~80% of the stroke
-    // Start and End are both significantly higher (smaller Y) than the valley
     const valleyRelativePos = maxYIdx / points.length;
-    const isDownVInMiddle = valleyRelativePos >= 0.15 && valleyRelativePos <= 0.85;
-    const startAboveValley = maxY - startP.y > boxH * 0.4;
-    const endAboveValley = maxY - endP.y > boxH * 0.4;
+    const isDownVInMiddle = valleyRelativePos >= 0.12 && valleyRelativePos <= 0.88;
+    const startAboveValley = maxY - startP.y > boxH * 0.35;
+    const endAboveValley = maxY - endP.y > boxH * 0.35;
 
-    if (isDownVInMiddle && startAboveValley && endAboveValley && boxH >= 20 && boxW >= 15) {
-      if (boxW > boxH * 0.35 && xDirectionChanges <= 1) {
+    if (isDownVInMiddle && startAboveValley && endAboveValley && boxH >= 16 && boxW >= 14) {
+      if (boxW > boxH * 0.3 && xDirectionChanges <= 1) {
         return 'DOWN_V';
       }
     }
@@ -134,30 +147,30 @@ export class GestureRecognizer {
     // ==============================================
     // — 5. HORIZONTAL (가로선): Wide aspect ratio, low Y change
     // ==============================================
-    if (boxW > boxH * 1.5 && boxW >= 30 && xDirectionChanges === 0) {
+    if (boxW > boxH * 1.4 && boxW >= 24 && xDirectionChanges === 0) {
       return 'HORIZONTAL';
     }
 
     // ==============================================
     // │ 6. VERTICAL (세로선): Tall aspect ratio, low X change
     // ==============================================
-    if (boxH > boxW * 1.5 && boxH >= 30 && yDirectionChanges === 0) {
+    if (boxH > boxW * 1.4 && boxH >= 24 && yDirectionChanges === 0) {
       return 'VERTICAL';
     }
 
     // Fallback classification based on dominant aspect ratio & end-to-end vector
-    if (boxW > boxH * 2.0 && boxW >= 30) {
+    if (boxW > boxH * 1.8 && boxW >= 25) {
       return 'HORIZONTAL';
     }
-    if (boxH > boxW * 2.0 && boxH >= 30) {
+    if (boxH > boxW * 1.8 && boxH >= 25) {
       return 'VERTICAL';
     }
 
-    // Caret / V fallback if peak is strong
-    if (startBelowPeak && endBelowPeak && boxH >= 25 && boxW >= 20) {
+    // Caret / V fallback
+    if (startBelowPeak && endBelowPeak && boxH >= 20 && boxW >= 15) {
       return 'UP_V';
     }
-    if (startAboveValley && endAboveValley && boxH >= 25 && boxW >= 20) {
+    if (startAboveValley && endAboveValley && boxH >= 20 && boxW >= 15) {
       return 'DOWN_V';
     }
 
