@@ -3,11 +3,30 @@
 
 export const CHANGELOG_DATA = [
   {
+    version: 'v1.15.1',
+    date: '2026-08-17',
+    title: '크리켓 게임 멈춤 버그 완전 해결 & 위켓 피격 아웃 알림 연출 대폭 강화',
+    badge: 'LATEST',
+    badgeColor: 'emerald',
+    items: [
+      {
+        tag: 'BUG FIX',
+        tagColor: 'rose',
+        text: '[게임 멈춤(프리즈) 현상 완전 해결] 비동기 타이머 의존성을 전면 제거하고 60FPS 순수 타임스탬프 기반 상태 머신으로 전환하여 다회차 플레이 및 연속 타격 시 100% 무중단 안정성 확보'
+      },
+      {
+        tag: 'UI & UX',
+        tagColor: 'amber',
+        text: '[위켓 피격 아웃 및 게임 오버 안내 대폭 강화] 위켓이 쓰러졌을 때 즉각적인 아웃 판정(BOWLED OUT) 태그, 명확한 아웃 원인 설명 박스, 최종 득점·최고 기록 요약 카드 및 100점 랭킹 달성 팁 제공'
+      }
+    ]
+  },
+  {
     version: 'v1.15.0',
     date: '2026-08-17',
     title: '신규 12호 원버튼 스포츠 [도촌 크리켓] 공식 출시 & 서든데스 타격 배틀 오픈',
-    badge: 'LATEST',
-    badgeColor: 'emerald',
+    badge: 'UPDATE',
+    badgeColor: 'blue',
     items: [
       {
         tag: 'NEW GAME',

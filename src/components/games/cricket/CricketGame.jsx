@@ -46,7 +46,6 @@ export default function CricketGame({ onScoreSubmitted }) {
   const animFrameRef = useRef(null);
   const particleSystemRef = useRef(new ParticleSystem());
   const wicketEntityRef = useRef(new WicketEntity(WICKET_POS.x, WICKET_POS.y));
-  const timeoutsRef = useRef([]);
 
   // Asset Refs
   const assetsLoadedRef = useRef(false);
@@ -57,9 +56,13 @@ export default function CricketGame({ onScoreSubmitted }) {
   const sixBadgeImgRef = useRef(null);
 
   // =========================================================================
-  // Game State Machine (Ref-based for 60fps stutter-free loop)
+  // Pure 60FPS Timestamp-Driven Game State Machine (Zero setTimeout Dependency)
   // =========================================================================
   const gameStateRef = useRef('IDLE'); // 'IDLE' | 'BOWLER_WINDUP' | 'PITCHING' | 'HIT_ANIMATION' | 'WICKET_OUT_ANIMATION' | 'GAME_OVER'
+  const stateStartTimeRef = useRef(performance.now());
+  const idleDurationRef = useRef(800); // ms to wait before windup
+  const hitDurationRef = useRef(1800); // ms to show hit flight & celebration
+
   const scoreRef = useRef(0);
   const highScoreRef = useRef(0);
   const currentPitchConfigRef = useRef(PITCH_TYPES.FASTBALL);
@@ -72,11 +75,9 @@ export default function CricketGame({ onScoreSubmitted }) {
   const hasSwungRef = useRef(false);
   const swingStartTimeRef = useRef(0);
   const lastBounceTriggeredRef = useRef(false);
-  const lastStateChangeTimeRef = useRef(performance.now());
 
   // Hit & Flight Animation Refs
   const hitResultRef = useRef(null);
-  const hitAnimStartTimeRef = useRef(0);
   const hitBallTrajectoryRef = useRef({ x: 0, y: 0, vx: 0, vy: 0, scale: 1 });
 
   // React State for UI HUD
@@ -94,21 +95,6 @@ export default function CricketGame({ onScoreSubmitted }) {
   const [playerName, setPlayerName] = useState('');
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [submittedSuccess, setSubmittedSuccess] = useState(false);
-
-  // Helper: Managed Timeout tracking to avoid race conditions & memory leaks
-  const safeTimeout = useCallback((fn, ms) => {
-    const id = setTimeout(() => {
-      timeoutsRef.current = timeoutsRef.current.filter((t) => t !== id);
-      fn();
-    }, ms);
-    timeoutsRef.current.push(id);
-    return id;
-  }, []);
-
-  const clearAllTimeouts = useCallback(() => {
-    timeoutsRef.current.forEach((id) => clearTimeout(id));
-    timeoutsRef.current = [];
-  }, []);
 
   // Load High Score from LocalStorage
   useEffect(() => {
@@ -130,56 +116,70 @@ export default function CricketGame({ onScoreSubmitted }) {
   }, [isMuted]);
 
   // =========================================================================
-  // Delivery & State Progression Logic
+  // Load & Process Images (Runs once on mount)
   // =========================================================================
-  const scheduleNextDelivery = useCallback(
-    (delayMs = 800) => {
-      if (gameStateRef.current === 'GAME_OVER') return;
+  useEffect(() => {
+    let isMounted = true;
 
-      safeTimeout(() => {
-        if (gameStateRef.current === 'GAME_OVER') return;
+    const loadImages = async () => {
+      const bgImg = new Image();
+      bgImg.src = getAsset('bg_stadium.jpg');
 
-        // 1. Pick next pitch type
-        const pitch = selectNextPitch(scoreRef.current);
-        currentPitchConfigRef.current = pitch;
-        setCurrentPitchInfo(pitch);
+      const bReadyRaw = new Image();
+      bReadyRaw.src = getAsset('batter_ready.jpg');
 
-        // 2. Calculate dynamic speed
-        const { actualDuration, speedLevel } = calculatePitchSpeed(
-          scoreRef.current,
-          pitch
-        );
-        pitchTotalDurationRef.current = Math.max(720, actualDuration);
-        currentSpeedLevelRef.current = speedLevel;
-        setSpeedTier(speedLevel);
+      const bSwingRaw = new Image();
+      bSwingRaw.src = getAsset('batter_swing.jpg');
 
-        // 3. Bowler windup phase
-        gameStateRef.current = 'BOWLER_WINDUP';
-        lastStateChangeTimeRef.current = performance.now();
-        cricketAudio.playWhoosh();
+      const bowlerRaw = new Image();
+      bowlerRaw.src = getAsset('bowler_throw.jpg');
 
-        safeTimeout(() => {
-          if (gameStateRef.current === 'GAME_OVER') return;
+      const sixBadgeRaw = new Image();
+      sixBadgeRaw.src = getAsset('six_badge.jpg');
 
-          const now = performance.now();
-          pitchStartTimeRef.current = now;
-          expectedContactTimeRef.current =
-            now + pitchTotalDurationRef.current;
-          hasSwungRef.current = false;
-          lastBounceTriggeredRef.current = false;
-          gameStateRef.current = 'PITCHING';
-          lastStateChangeTimeRef.current = now;
-        }, 400);
-      }, delayMs);
-    },
-    [safeTimeout]
-  );
+      const waitImg = (img) =>
+        new Promise((resolve) => {
+          if (img.complete && img.naturalWidth > 0) resolve(img);
+          else {
+            img.onload = () => resolve(img);
+            img.onerror = () => resolve(img);
+          }
+        });
+
+      await Promise.all([
+        waitImg(bgImg),
+        waitImg(bReadyRaw),
+        waitImg(bSwingRaw),
+        waitImg(bowlerRaw),
+        waitImg(sixBadgeRaw)
+      ]);
+
+      if (!isMounted) return;
+
+      bgImgRef.current = bgImg;
+      batterReadySpriteRef.current = createTransparentSprite(bReadyRaw, 225);
+      batterSwingSpriteRef.current = createTransparentSprite(bSwingRaw, 225);
+      bowlerSpriteRef.current = createTransparentSprite(bowlerRaw, 225);
+      sixBadgeImgRef.current = createTransparentSprite(sixBadgeRaw, 225);
+      assetsLoadedRef.current = true;
+
+      // Start initial delivery in render loop
+      stateStartTimeRef.current = performance.now();
+      idleDurationRef.current = 600;
+      gameStateRef.current = 'IDLE';
+    };
+
+    loadImages();
+
+    return () => {
+      isMounted = false;
+    };
+  }, []);
 
   // =========================================================================
-  // Game Restart
+  // Game Restart (100% Synchronous, Zero Lingering Timers)
   // =========================================================================
   const restartGame = useCallback(() => {
-    clearAllTimeouts();
     scoreRef.current = 0;
     setScore(0);
     setIsGameOver(false);
@@ -189,10 +189,11 @@ export default function CricketGame({ onScoreSubmitted }) {
     setSubmittedSuccess(false);
     wicketEntityRef.current.reset();
     particleSystemRef.current.clear();
+
+    stateStartTimeRef.current = performance.now();
+    idleDurationRef.current = 400;
     gameStateRef.current = 'IDLE';
-    lastStateChangeTimeRef.current = performance.now();
-    scheduleNextDelivery(400);
-  }, [clearAllTimeouts, scheduleNextDelivery]);
+  }, []);
 
   // =========================================================================
   // Swing Bat Action
@@ -221,9 +222,9 @@ export default function CricketGame({ onScoreSubmitted }) {
     if (judgment.result) {
       // HIT SUCCESS! (SIX, FOUR, 2 RUNS, 1 RUN)
       hitResultRef.current = judgment.result;
-      hitAnimStartTimeRef.current = now;
+      hitDurationRef.current = judgment.result.animationDuration;
+      stateStartTimeRef.current = now;
       gameStateRef.current = 'HIT_ANIMATION';
-      lastStateChangeTimeRef.current = now;
 
       // Update Score
       const newScore = scoreRef.current + judgment.result.points;
@@ -275,10 +276,6 @@ export default function CricketGame({ onScoreSubmitted }) {
 
       // Show Announcement Popup
       setActiveHitAnnouncement(judgment.result);
-      safeTimeout(
-        () => setActiveHitAnnouncement(null),
-        judgment.result.animationDuration - 300
-      );
 
       // Initialize Hit Ball Trajectory
       const angle = -Math.PI * 0.5 + (Math.random() - 0.5) * 0.6;
@@ -295,115 +292,11 @@ export default function CricketGame({ onScoreSubmitted }) {
         vy: -Math.cos(angle) * power,
         scale: 1.0
       };
-
-      // Schedule next delivery after hit animation
-      safeTimeout(() => {
-        if (gameStateRef.current !== 'GAME_OVER') {
-          gameStateRef.current = 'IDLE';
-          lastStateChangeTimeRef.current = performance.now();
-          scheduleNextDelivery(500);
-        }
-      }, judgment.result.animationDuration);
     } else {
       // Swung too early or late -> Whiff whoosh
       cricketAudio.playWhoosh();
     }
-  }, [scheduleNextDelivery, restartGame, safeTimeout]);
-
-  // =========================================================================
-  // Trigger Wicket Shatter & Game Over
-  // =========================================================================
-  const triggerWicketOut = useCallback(() => {
-    if (
-      gameStateRef.current === 'GAME_OVER' ||
-      gameStateRef.current === 'WICKET_OUT_ANIMATION'
-    )
-      return;
-
-    clearAllTimeouts();
-    gameStateRef.current = 'WICKET_OUT_ANIMATION';
-    lastStateChangeTimeRef.current = performance.now();
-    wicketEntityRef.current.shatter();
-    particleSystemRef.current.addWicketSplinters(
-      WICKET_POS.x,
-      WICKET_POS.y - 15
-    );
-    cricketAudio.playWicketCrash();
-
-    setActiveHitAnnouncement(HIT_RESULTS.WICKET_OUT);
-
-    safeTimeout(() => {
-      cricketAudio.playGameOver();
-      gameStateRef.current = 'GAME_OVER';
-      lastStateChangeTimeRef.current = performance.now();
-      setFinalScore(scoreRef.current);
-      setIsGameOver(true);
-      setActiveHitAnnouncement(null);
-    }, 1600);
-  }, [clearAllTimeouts, safeTimeout]);
-
-  // =========================================================================
-  // Load & Process Images
-  // =========================================================================
-  useEffect(() => {
-    let isMounted = true;
-
-    const loadImages = async () => {
-      const bgImg = new Image();
-      bgImg.src = getAsset('bg_stadium.jpg');
-
-      const bReadyRaw = new Image();
-      bReadyRaw.src = getAsset('batter_ready.jpg');
-
-      const bSwingRaw = new Image();
-      bSwingRaw.src = getAsset('batter_swing.jpg');
-
-      const bowlerRaw = new Image();
-      bowlerRaw.src = getAsset('bowler_throw.jpg');
-
-      const sixBadgeRaw = new Image();
-      sixBadgeRaw.src = getAsset('six_badge.jpg');
-
-      const waitImg = (img) =>
-        new Promise((resolve) => {
-          if (img.complete && img.naturalWidth > 0) resolve(img);
-          else {
-            img.onload = () => resolve(img);
-            img.onerror = () => resolve(img);
-          }
-        });
-
-      await Promise.all([
-        waitImg(bgImg),
-        waitImg(bReadyRaw),
-        waitImg(bSwingRaw),
-        waitImg(bowlerRaw),
-        waitImg(sixBadgeRaw)
-      ]);
-
-      if (!isMounted) return;
-
-      bgImgRef.current = bgImg;
-      batterReadySpriteRef.current = createTransparentSprite(bReadyRaw, 225);
-      batterSwingSpriteRef.current = createTransparentSprite(bSwingRaw, 225);
-      bowlerSpriteRef.current = createTransparentSprite(bowlerRaw, 225);
-      sixBadgeImgRef.current = createTransparentSprite(sixBadgeRaw, 225);
-      assetsLoadedRef.current = true;
-
-      // Start initial delivery after assets load
-      scheduleNextDelivery(800);
-    };
-
-    loadImages();
-
-    return () => {
-      isMounted = false;
-      clearAllTimeouts();
-      if (animFrameRef.current) {
-        cancelAnimationFrame(animFrameRef.current);
-      }
-    };
-  }, [clearAllTimeouts, scheduleNextDelivery]);
+  }, [restartGame]);
 
   // =========================================================================
   // Leaderboard Score Submission Handler
@@ -447,7 +340,7 @@ export default function CricketGame({ onScoreSubmitted }) {
   }, [handleSwing]);
 
   // =========================================================================
-  // 60FPS Main Canvas Render & Physics Loop
+  // 60FPS Pure Timestamp-Driven Main Canvas Render & Physics Loop
   // =========================================================================
   useEffect(() => {
     const canvas = canvasRef.current;
@@ -456,17 +349,102 @@ export default function CricketGame({ onScoreSubmitted }) {
 
     const render = () => {
       const now = performance.now();
+      const stateElapsed = now - stateStartTimeRef.current;
 
-      // Watchdog: If stuck in IDLE for > 2000ms while not game over, auto recover!
-      if (
-        gameStateRef.current === 'IDLE' &&
-        now - lastStateChangeTimeRef.current > 2000
-      ) {
-        lastStateChangeTimeRef.current = now;
-        scheduleNextDelivery(200);
+      // =====================================================================
+      // State Machine Frame Transitions (Frame-Perfect, 100% Stutter/Freeze Free)
+      // =====================================================================
+      if (assetsLoadedRef.current) {
+        // 1. IDLE State -> Advance to BOWLER_WINDUP
+        if (gameStateRef.current === 'IDLE') {
+          if (stateElapsed >= idleDurationRef.current) {
+            // Select next pitch & speed
+            const pitch = selectNextPitch(scoreRef.current);
+            currentPitchConfigRef.current = pitch;
+            setCurrentPitchInfo(pitch);
+
+            const { actualDuration, speedLevel } = calculatePitchSpeed(
+              scoreRef.current,
+              pitch
+            );
+            pitchTotalDurationRef.current = Math.max(720, actualDuration);
+            currentSpeedLevelRef.current = speedLevel;
+            setSpeedTier(speedLevel);
+
+            // Transition to BOWLER_WINDUP
+            stateStartTimeRef.current = now;
+            gameStateRef.current = 'BOWLER_WINDUP';
+            cricketAudio.playWhoosh();
+          }
+        }
+
+        // 2. BOWLER_WINDUP State -> Advance to PITCHING
+        else if (gameStateRef.current === 'BOWLER_WINDUP') {
+          if (stateElapsed >= 400) {
+            pitchStartTimeRef.current = now;
+            expectedContactTimeRef.current = now + pitchTotalDurationRef.current;
+            hasSwungRef.current = false;
+            lastBounceTriggeredRef.current = false;
+
+            stateStartTimeRef.current = now;
+            gameStateRef.current = 'PITCHING';
+          }
+        }
+
+        // 3. PITCHING State -> Missed/Overflown -> Advance to WICKET_OUT_ANIMATION
+        else if (gameStateRef.current === 'PITCHING') {
+          const pitchElapsed = now - pitchStartTimeRef.current;
+          const progress = pitchElapsed / pitchTotalDurationRef.current;
+
+          if (progress >= 1.02) {
+            // Missed! Ball hits wicket -> Bowled Out!
+            wicketEntityRef.current.shatter();
+            particleSystemRef.current.addWicketSplinters(
+              WICKET_POS.x,
+              WICKET_POS.y - 15
+            );
+            cricketAudio.playWicketCrash();
+            setActiveHitAnnouncement(HIT_RESULTS.WICKET_OUT);
+
+            stateStartTimeRef.current = now;
+            gameStateRef.current = 'WICKET_OUT_ANIMATION';
+          }
+        }
+
+        // 4. HIT_ANIMATION State -> Advance back to IDLE for Next Pitch
+        else if (gameStateRef.current === 'HIT_ANIMATION') {
+          // Hide announcement badge near end of animation
+          if (stateElapsed >= hitDurationRef.current - 300) {
+            setActiveHitAnnouncement(null);
+          }
+
+          if (stateElapsed >= hitDurationRef.current) {
+            setActiveHitAnnouncement(null);
+            idleDurationRef.current = 500;
+            stateStartTimeRef.current = now;
+            gameStateRef.current = 'IDLE';
+          }
+        }
+
+        // 5. WICKET_OUT_ANIMATION State -> Advance to GAME_OVER Modal
+        else if (gameStateRef.current === 'WICKET_OUT_ANIMATION') {
+          if (stateElapsed >= 1600) {
+            cricketAudio.playGameOver();
+            setFinalScore(scoreRef.current);
+            setIsGameOver(true);
+            setActiveHitAnnouncement(null);
+
+            stateStartTimeRef.current = now;
+            gameStateRef.current = 'GAME_OVER';
+          }
+        }
       }
 
-      // 1. Draw Background Stadium
+      // =====================================================================
+      // Canvas Drawing & Visual Rendering
+      // =====================================================================
+
+      // 1. Background Stadium
       if (bgImgRef.current && bgImgRef.current.complete) {
         ctx.drawImage(bgImgRef.current, 0, 0, CANVAS_WIDTH, CANVAS_HEIGHT);
       } else {
@@ -498,7 +476,8 @@ export default function CricketGame({ onScoreSubmitted }) {
       // 4. Draw Bowler (Snail)
       if (bowlerSpriteRef.current) {
         const bob = Math.sin(now * 0.005) * 2;
-        const windupOffset = gameStateRef.current === 'BOWLER_WINDUP' ? -6 : 0;
+        const windupOffset =
+          gameStateRef.current === 'BOWLER_WINDUP' ? -8 : 0;
         ctx.drawImage(
           bowlerSpriteRef.current,
           BOWLER_POS.x - 45,
@@ -533,8 +512,8 @@ export default function CricketGame({ onScoreSubmitted }) {
 
       // 7. Ball Physics & Rendering in 'PITCHING' state
       if (gameStateRef.current === 'PITCHING') {
-        const elapsed = now - pitchStartTimeRef.current;
-        const progress = elapsed / pitchTotalDurationRef.current;
+        const pitchElapsed = now - pitchStartTimeRef.current;
+        const progress = pitchElapsed / pitchTotalDurationRef.current;
 
         const ball = calculateBallState(progress, currentPitchConfigRef.current);
 
@@ -595,11 +574,6 @@ export default function CricketGame({ onScoreSubmitted }) {
           ctx.stroke();
         }
         ctx.restore();
-
-        // Check if ball reached batsman without a hit (Wicket Out Check)
-        if (progress >= 1.05) {
-          triggerWicketOut();
-        }
       }
 
       // 8. Hit Ball Flight Animation in 'HIT_ANIMATION' state
@@ -632,7 +606,7 @@ export default function CricketGame({ onScoreSubmitted }) {
         cancelAnimationFrame(animFrameRef.current);
       }
     };
-  }, [triggerWicketOut, scheduleNextDelivery]);
+  }, []);
 
   return (
     <div className="cricket-game-wrapper">
@@ -745,24 +719,48 @@ export default function CricketGame({ onScoreSubmitted }) {
             onClick={(e) => e.stopPropagation()}
           >
             <div className="cricket-gameover-card">
+              <div className="cricket-gameover-tag">
+                <span>🔴 아웃 판정: BOWLED OUT</span>
+              </div>
               <div className="cricket-gameover-icon">🏏</div>
-              <h2 className="cricket-gameover-title">GAME OVER</h2>
-              <p className="cricket-gameover-subtitle">
-                위켓이 쓰러졌습니다! 통쾌한 타격에 재도전해보세요.
-              </p>
+              <h2 className="cricket-gameover-title">경기 종료 (GAME OVER)</h2>
 
+              {/* Clear Reason Alert Box */}
+              <div className="cricket-gameover-alertbox">
+                <div className="cricket-gameover-alert-main">
+                  공이 위켓(나무 기둥)을 맞춰 아웃되었습니다!
+                </div>
+                <div className="cricket-gameover-alert-sub">
+                  크리켓은 단 한 번의 위켓 피격으로도 즉시 경기가 끝나는 서든데스 룰입니다.
+                </div>
+              </div>
+
+              {/* Score Summary Box */}
               <div className="cricket-gameover-scorebox">
                 <div className="cricket-gameover-score-row">
                   <span>최종 득점 (RUNS)</span>
                   <span className="cricket-score-num">{finalScore}점</span>
                 </div>
                 <div className="cricket-gameover-score-row">
-                  <span>최고 기록</span>
+                  <span>최고 기록 (BEST)</span>
                   <span style={{ fontWeight: '700', color: '#38BDF8' }}>
                     {highScore}점
                   </span>
                 </div>
+                <div className="cricket-gameover-score-row">
+                  <span>달성 난이도</span>
+                  <span style={{ fontWeight: '700', color: speedTier.color }}>
+                    {speedTier.badge} ({speedTier.name})
+                  </span>
+                </div>
               </div>
+
+              {/* Tip box for scores <= 100 */}
+              {finalScore <= 100 && (
+                <div className="cricket-gameover-tip">
+                  💡 <strong>100점을 초과 달성</strong>하면 도촌초 실시간 명예의 전당 랭킹에 이름을 남길 수 있습니다!
+                </div>
+              )}
 
               {/* Hall of Fame Score Submission (Strict 100+ points rule compliance) */}
               {finalScore > 100 && (
@@ -817,7 +815,7 @@ export default function CricketGame({ onScoreSubmitted }) {
               {/* Restart Button */}
               <button className="cricket-restart-btn" onClick={restartGame}>
                 <RotateCcw style={{ width: '16px', height: '16px' }} />
-                <span>다시 도전하기 (Spacebar)</span>
+                <span>다시 도전하기 (Spacebar / Enter / 클릭)</span>
               </button>
             </div>
           </div>
