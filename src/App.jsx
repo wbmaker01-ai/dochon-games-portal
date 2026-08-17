@@ -25,7 +25,7 @@ import { getLatestVersion } from './data/changelogData';
 import { getLeaderboardFromDB } from './utils/leaderboardApi';
 import { getRankedPlayableGames } from './utils/rankingAlgorithm';
 import { haptics } from './utils/haptics';
-import { Trophy, X, Lock, Gamepad2, Dices, Sparkles, Heart, Crown, Flame, History, HelpCircle, Smartphone, RotateCcw } from 'lucide-react';
+import { Trophy, X, Lock, Gamepad2, Dices, Heart, Crown, History, HelpCircle, Smartphone, RotateCcw } from 'lucide-react';
 
 export default function App() {
   const [activeGame, setActiveGame] = useState(null);
@@ -251,18 +251,6 @@ export default function App() {
       <section className="portal-hero-section">
         <div className="portal-hero-banner">
           <div className="portal-hero-content">
-            <div className="portal-hero-badge">
-              <Flame className="w-3.5 h-3.5 text-amber-400 animate-pulse" />
-              <span>오늘의 도촌 명예의 전당 1위 챔피언</span>
-              <Sparkles className="w-3.5 h-3.5 text-amber-400" />
-            </div>
-
-            <h2 className="portal-hero-title flex items-center justify-center gap-1.5">
-              <span>현재</span>
-              <span className="text-amber-300 font-black">{featuredGame.title}</span>
-              <span>최고 랭커는?</span>
-            </h2>
-
             <div className="portal-hero-champion-box">
               <div className="portal-hero-crown">
                 <Crown className="w-5 h-5 text-amber-400 fill-amber-400" />
