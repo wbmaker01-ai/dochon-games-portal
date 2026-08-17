@@ -25,7 +25,7 @@ import { getLatestVersion } from './data/changelogData';
 import { getLeaderboardFromDB } from './utils/leaderboardApi';
 import { getRankedPlayableGames } from './utils/rankingAlgorithm';
 import { haptics } from './utils/haptics';
-import { Trophy, X, Search, Lock, Gamepad2, Dices, Sparkles, Heart, Crown, Flame, History, HelpCircle, Smartphone, RotateCcw } from 'lucide-react';
+import { Trophy, X, Lock, Gamepad2, Dices, Sparkles, Heart, Crown, Flame, History, HelpCircle, Smartphone, RotateCcw } from 'lucide-react';
 
 export default function App() {
   const [activeGame, setActiveGame] = useState(null);
@@ -35,7 +35,6 @@ export default function App() {
   const [isGameOrientationDismissed, setIsGameOrientationDismissed] = useState(false);
   const [leaderboardTab, setLeaderboardTab] = useState('pacman');
   const [filterCategory, setFilterCategory] = useState('ALL');
-  const [searchQuery, setSearchQuery] = useState('');
   const [favorites, setFavorites] = useState(() => {
     try {
       const saved = localStorage.getItem('dochon_favorites');
@@ -134,17 +133,13 @@ export default function App() {
   const allGames = [...rankedPlayableGames, ...COMING_SOON_GAMES];
 
   const filterGame = (game) => {
-    let matchesCategory = true;
     if (filterCategory === 'FAVORITES') {
-      matchesCategory = favorites.includes(game.id);
-    } else if (filterCategory !== 'ALL') {
-      matchesCategory = game.category === filterCategory;
+      return favorites.includes(game.id);
     }
-
-    const matchesSearch = game.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      (game.category && game.category.toLowerCase().includes(searchQuery.toLowerCase()));
-
-    return matchesCategory && matchesSearch;
+    if (filterCategory !== 'ALL') {
+      return game.category === filterCategory;
+    }
+    return true;
   };
 
   const filteredPlayable = rankedPlayableGames.filter(filterGame);
@@ -206,28 +201,9 @@ export default function App() {
           </p>
         </div>
 
-        {/* Search Bar, Random Game Button, School Leaderboard Button & Update History Button */}
+        {/* Quick Action Button Toolbar: Random Game, School Leaderboard, Update History & Guide */}
         <div className="portal-search-row">
-          <div className="portal-search-input">
-            <Search className="w-4 h-4 text-amber-400/80 mr-2 shrink-0" />
-            <input
-              type="text"
-              placeholder="플레이할 게임을 검색하세요..."
-              value={searchQuery}
-              onChange={(e) => setSearchQuery(e.target.value)}
-            />
-            {searchQuery && (
-              <button
-                type="button"
-                onClick={() => setSearchQuery('')}
-                className="text-xs text-slate-400 hover:text-white px-1"
-              >
-                ✕
-              </button>
-            )}
-          </div>
-
-          <div className="flex items-center gap-2 flex-wrap justify-center">
+          <div className="flex items-center gap-2.5 flex-wrap justify-center">
             {/* 🎲 Lucky Random Pick Button */}
             <button
               onClick={handleRandomPlay}
@@ -262,19 +238,11 @@ export default function App() {
             <button
               onClick={() => setIsGuideOpen(true)}
               className="btn-guide shadow-md flex items-center gap-1.5"
-              title="게임 포털 이용안내 및 모바일 권장사항 확인하기"
+              title="도촌 게임 포털 이용안내 확인하기"
             >
               <HelpCircle className="w-3.5 h-3.5 text-cyan-400" />
               <span>이용안내</span>
             </button>
-          </div>
-        </div>
-
-        {/* 📱 Responsive Mobile / Tablet Landscape Notice Banner */}
-        <div className="portal-mobile-orientation-banner">
-          <div className="flex items-center justify-center gap-1.5 flex-wrap">
-            <Smartphone className="w-4 h-4 text-amber-400 animate-pulse shrink-0" />
-            <span><strong>이용 팁:</strong> 핸드폰이나 태블릿으로 이용 시 화면을 가로(가로모드)로 돌려 이용해주세요!</span>
           </div>
         </div>
       </header>

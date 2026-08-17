@@ -23,10 +23,17 @@ export default function SolitaireHowToPlayModal({ isOpen, onClose }) {
 
         {/* Content Body */}
         <div className="solitaire-help-body">
-          {/* 📱 Mobile Landscape Tip */}
-          <div className="bg-amber-950/40 border border-amber-500/40 rounded-xl p-3 flex items-center gap-2.5 text-xs text-amber-200">
-            <span className="text-base shrink-0">📱</span>
-            <span><strong>모바일 이용 팁:</strong> 핸드폰이나 태블릿으로 이용 시 화면을 가로(가로모드)로 돌려 이용해주세요!</span>
+          {/* 📱 Mobile Landscape Notice */}
+          <div className="solitaire-landscape-banner">
+            <div className="solitaire-landscape-icon">
+              <span>📱</span>
+            </div>
+            <div className="solitaire-landscape-text">
+              <strong>안내:</strong> 핸드폰이나 태블릿으로 이용 시 가로모드를 이용해주세요.
+              <span className="solitaire-landscape-sub">
+                (7개 바닥 카드 열을 훨씬 넓고 쾌적하게 플레이할 수 있습니다!)
+              </span>
+            </div>
           </div>
 
           {/* Main Goal Banner */}

@@ -675,6 +675,44 @@
   padding: 12px 16px;
 }
 
+.solitaire-landscape-banner {
+  background: linear-gradient(135deg, rgba(245, 158, 11, 0.18) 0%, rgba(180, 83, 9, 0.28) 100%);
+  border: 1.5px solid rgba(251, 191, 36, 0.6);
+  border-radius: 14px;
+  padding: 12px 16px;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  box-shadow: 0 4px 16px rgba(245, 158, 11, 0.15);
+}
+
+.solitaire-landscape-icon {
+  font-size: 24px;
+  flex-shrink: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.solitaire-landscape-text {
+  font-size: 13px;
+  color: #FEF3C7;
+  line-height: 1.5;
+}
+
+.solitaire-landscape-text strong {
+  color: #FDE047;
+  font-weight: 900;
+}
+
+.solitaire-landscape-sub {
+  font-size: 11px;
+  color: #FCD34D;
+  opacity: 0.9;
+  display: inline-block;
+  margin-left: 4px;
+}
+
 .solitaire-rules-grid {
   display: grid;
   grid-template-columns: repeat(2, 1fr);
