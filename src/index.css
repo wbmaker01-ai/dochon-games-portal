@@ -2346,5 +2346,140 @@ button, a, input, [role="button"], .dpad-btn, .btn-dino-jump, .btn-dino-duck, .m
 
 
 
+/* ============================================================ */
+/* PACMAN SCORE REGISTRATION FORM — PREMIUM DESIGN              */
+/* ============================================================ */
+
+.pacman-score-form {
+  display: flex;
+  flex-direction: column;
+  align-items: stretch;
+  gap: 14px;
+  width: 100%;
+  max-width: 320px;
+  background: linear-gradient(160deg, rgba(15, 23, 42, 0.98) 0%, rgba(20, 30, 56, 0.95) 100%);
+  border: 1.5px solid rgba(251, 191, 36, 0.45);
+  border-radius: 22px;
+  padding: 20px 22px 18px;
+  box-shadow:
+    0 0 0 1px rgba(251, 191, 36, 0.12),
+    0 8px 32px rgba(0, 0, 0, 0.55),
+    0 0 40px rgba(251, 191, 36, 0.08) inset;
+  backdrop-filter: blur(12px);
+  position: relative;
+  overflow: hidden;
+}
+
+/* subtle shimmer bar at top */
+.pacman-score-form::before {
+  content: '';
+  position: absolute;
+  top: 0; left: 0; right: 0;
+  height: 2px;
+  background: linear-gradient(90deg, transparent 0%, #FBBF24 40%, #F59E0B 60%, transparent 100%);
+  border-radius: 22px 22px 0 0;
+  opacity: 0.7;
+}
+
+.pacman-score-form__header {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  font-size: 11px;
+  font-weight: 900;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: #FDE68A;
+}
+
+/* Input wrapper — positions the icon inside */
+.pacman-score-form__input-wrap {
+  position: relative;
+  display: flex;
+  align-items: center;
+}
+
+.pacman-score-form__input-icon {
+  position: absolute;
+  left: 12px;
+  font-size: 15px;
+  pointer-events: none;
+  line-height: 1;
+  z-index: 2;
+}
+
+.pacman-score-form__input {
+  width: 100%;
+  padding: 11px 14px 11px 38px;
+  background: rgba(2, 6, 23, 0.7);
+  border: 1.5px solid rgba(148, 163, 184, 0.25);
+  border-radius: 14px;
+  color: #F8FAFC;
+  font-size: 14px;
+  font-weight: 700;
+  letter-spacing: 0.03em;
+  text-align: center;
+  outline: none;
+  transition: border-color 0.2s ease, box-shadow 0.2s ease, background 0.2s ease;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.4) inset;
+  caret-color: #FBBF24;
+}
+
+.pacman-score-form__input::placeholder {
+  color: rgba(148, 163, 184, 0.55);
+  font-weight: 500;
+  font-size: 13px;
+}
+
+.pacman-score-form__input:focus {
+  border-color: rgba(251, 191, 36, 0.8);
+  background: rgba(2, 6, 23, 0.9);
+  box-shadow:
+    0 0 0 3px rgba(251, 191, 36, 0.18),
+    0 2px 8px rgba(0, 0, 0, 0.4) inset;
+}
+
+.pacman-score-form__input:hover:not(:focus) {
+  border-color: rgba(148, 163, 184, 0.45);
+}
+
+/* Submit button */
+.pacman-score-form__submit {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 7px;
+  padding: 11px 18px;
+  border-radius: 14px;
+  border: none;
+  cursor: pointer;
+  font-size: 13px;
+  font-weight: 900;
+  letter-spacing: 0.04em;
+  color: #1C1917;
+  background: linear-gradient(135deg, #FBBF24 0%, #F59E0B 50%, #D97706 100%);
+  box-shadow:
+    0 4px 16px rgba(251, 191, 36, 0.4),
+    0 1px 0 rgba(255, 255, 255, 0.25) inset;
+  transition: transform 0.15s ease, box-shadow 0.15s ease, filter 0.15s ease;
+}
+
+.pacman-score-form__submit:hover {
+  transform: translateY(-1px);
+  box-shadow:
+    0 6px 22px rgba(251, 191, 36, 0.55),
+    0 1px 0 rgba(255, 255, 255, 0.25) inset;
+  filter: brightness(1.08);
+}
+
+.pacman-score-form__submit:active {
+  transform: translateY(1px) scale(0.97);
+  box-shadow: 0 2px 8px rgba(251, 191, 36, 0.35);
+}
+
+
+
+
 
 

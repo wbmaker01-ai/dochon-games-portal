@@ -558,21 +558,25 @@ export default function PacManGame({ onScoreSubmitted }) {
 
             {score > 100 ? (
               !submitted ? (
-                <form onSubmit={handleScoreSubmit} className="flex flex-col gap-2.5 w-full max-w-xs bg-slate-900/95 p-4 rounded-2xl border-2 border-amber-500/60 shadow-2xl">
-                  <label className="text-xs text-amber-300 font-black flex items-center justify-center gap-1">
-                    <Sparkles className="w-4 h-4 text-amber-400" /> 도촌 명예의 전당 점수 등록
-                  </label>
-                  <input
-                    type="text"
-                    placeholder="예: 홍길동"
-                    value={studentName}
-                    onChange={(e) => setStudentName(e.target.value)}
-                    className="px-4 py-2 bg-slate-800 border-2 border-slate-600 rounded-xl text-white text-xs font-bold focus:outline-none focus:border-amber-400 text-center"
-                    maxLength={16}
-                    required
-                  />
-                  <button type="submit" className="btn-gold text-xs font-black justify-center py-2.5 shadow-lg">
-                    <Trophy className="w-4 h-4 text-slate-950" /> 랭킹 등록하기
+                <form onSubmit={handleScoreSubmit} className="pacman-score-form">
+                  <div className="pacman-score-form__header">
+                    <Sparkles className="w-4 h-4 text-amber-400 drop-shadow-[0_0_6px_rgba(251,191,36,0.8)]" />
+                    <span>도촌 명예의 전당 점수 등록</span>
+                  </div>
+                  <div className="pacman-score-form__input-wrap">
+                    <span className="pacman-score-form__input-icon">✏️</span>
+                    <input
+                      type="text"
+                      placeholder="예: 홍길동"
+                      value={studentName}
+                      onChange={(e) => setStudentName(e.target.value)}
+                      className="pacman-score-form__input"
+                      maxLength={16}
+                      required
+                    />
+                  </div>
+                  <button type="submit" className="pacman-score-form__submit">
+                    <Trophy className="w-4 h-4" /> 랭킹 등록하기
                   </button>
                 </form>
               ) : (
