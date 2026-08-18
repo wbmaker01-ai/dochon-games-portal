@@ -38,7 +38,8 @@
   gap: 8px;
 }
 
-.kc-stage-chip {
+.kc-stage-chip,
+.kc-stage-select {
   background: linear-gradient(135deg, #3B82F6 0%, #1D4ED8 100%);
   color: #FFFFFF;
   padding: 4px 10px;
@@ -47,6 +48,19 @@
   font-weight: 800;
   letter-spacing: 0.5px;
   box-shadow: 0 2px 8px rgba(59, 130, 246, 0.4);
+  border: 1px solid rgba(255, 255, 255, 0.25);
+  cursor: pointer;
+  outline: none;
+}
+
+.kc-stage-select:hover {
+  filter: brightness(1.15);
+}
+
+.kc-stage-select option {
+  background: #0F172A;
+  color: #FFFFFF;
+  font-size: 0.8rem;
 }
 
 .kc-stage-title-text {
@@ -614,9 +628,86 @@
   font-size: 0.72rem;
   color: #DDD6FE;
   text-align: center;
-  padding: 6px;
-  border: 1px dashed rgba(255, 255, 255, 0.3);
+  padding: 8px 6px;
+  border: 1.5px dashed rgba(253, 224, 71, 0.6);
   border-radius: 6px;
+  background: rgba(253, 224, 71, 0.05);
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.kc-loop-empty-slot:hover {
+  background: rgba(253, 224, 71, 0.15);
+  border-color: #FDE047;
+  color: #FFFFFF;
+}
+
+/* Loop Sub-Block Adders Row */
+.kc-loop-adders-row {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  margin-top: 6px;
+  margin-left: 12px;
+  flex-wrap: wrap;
+}
+
+.kc-loop-adder-guide {
+  font-size: 0.7rem;
+  font-weight: 800;
+  color: #FEF08A;
+  letter-spacing: -0.2px;
+}
+
+.kc-loop-sub-adder {
+  border: 1px solid rgba(255, 255, 255, 0.3);
+  color: #FFFFFF;
+  padding: 3px 8px;
+  border-radius: 6px;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  font-weight: 800;
+  font-size: 0.72rem;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
+  transition: all 0.15s ease;
+}
+
+.kc-loop-sub-adder:hover {
+  transform: translateY(-1px);
+  filter: brightness(1.15);
+}
+
+/* Pulse Highlight Effect when Loop is empty or needs user action */
+.kc-loop-sub-adder.pulse-attention {
+  animation: kc-loop-pulse 1.4s ease-in-out infinite;
+  border: 2px solid #FDE047;
+}
+
+@keyframes kc-loop-pulse {
+  0%, 100% {
+    box-shadow: 0 0 4px 1px rgba(253, 224, 71, 0.5), 0 2px 4px rgba(0, 0, 0, 0.3);
+    border-color: #FDE047;
+  }
+  50% {
+    box-shadow: 0 0 16px 5px rgba(253, 224, 71, 0.95), 0 3px 8px rgba(253, 224, 71, 0.6);
+    border-color: #FFFFFF;
+  }
+}
+
+.kc-adder-plus {
+  font-weight: 900;
+  font-size: 0.8rem;
+  color: #FEF08A;
+}
+
+.kc-adder-symbol {
+  font-size: 0.85rem;
+}
+
+.kc-adder-name {
+  font-size: 0.7rem;
 }
 
 /* 4.3 CONTROLS TOOLBAR (Play, Step, Reset) */

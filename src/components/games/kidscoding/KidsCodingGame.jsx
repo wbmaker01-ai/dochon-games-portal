@@ -447,25 +447,37 @@ export default function KidsCodingGame({ onScoreSubmitted }) {
             {block.children && block.children.length > 0 ? (
               block.children.map(child => renderBlockItem(child, block.id))
             ) : (
-              <div className="kc-loop-empty-slot">
-                반복할 블록을 아래 팔레트에서 추가하세요 ⬇️
+              <div
+                className="kc-loop-empty-slot"
+                onClick={() => {
+                  const firstAllowed = currentStage.allowedBlocks.find(t => t !== BLOCK_TYPE.LOOP);
+                  if (firstAllowed) handleAddBlock(firstAllowed, block.id);
+                }}
+                title="클릭하여 블록 추가"
+              >
+                <span>➕ 아래 버튼을 눌러 반복할 블록을 쏙 넣어주세요! ⬇️</span>
               </div>
             )}
           </div>
 
-          {/* Quick Sub-Block Adders */}
-          <div style={{ display: 'flex', gap: '4px', marginTop: '4px', flexWrap: 'wrap' }}>
+          {/* Quick Sub-Block Adders with gi-pulse highlight */}
+          <div className="kc-loop-adders-row">
+            <span className="kc-loop-adder-guide">
+              {(!block.children || block.children.length === 0) ? '👇 반복할 동작 추가:' : '동작 추가:'}
+            </span>
             {currentStage.allowedBlocks
               .filter(t => t !== BLOCK_TYPE.LOOP)
               .map(t => (
                 <button
                   key={t}
                   onClick={() => handleAddBlock(t, block.id)}
-                  className="kc-loop-btn-small"
-                  style={{ width: 'auto', padding: '2px 6px', fontSize: '0.7rem' }}
-                  title={`루프 안에 ${BLOCK_INFO[t].name} 추가`}
+                  className={`kc-loop-sub-adder ${(!block.children || block.children.length === 0) ? 'pulse-attention' : ''}`}
+                  style={{ backgroundColor: BLOCK_INFO[t].color }}
+                  title={`반복 블록 안에 ${BLOCK_INFO[t].name} 넣기`}
                 >
-                  + {BLOCK_INFO[t].symbol}
+                  <span className="kc-adder-plus">+</span>
+                  <span className="kc-adder-symbol">{BLOCK_INFO[t].symbol}</span>
+                  <span className="kc-adder-name">{BLOCK_INFO[t].name}</span>
                 </button>
               ))}
           </div>
@@ -505,7 +517,18 @@ export default function KidsCodingGame({ onScoreSubmitted }) {
       {/* 1. TOP HEADER & HUD TOOLBAR */}
       <div className="kc-top-bar">
         <div className="kc-stage-badge">
-          <span className="kc-stage-chip">STAGE {currentStage.id} / {STAGES.length}</span>
+          <select
+            value={stageIndex}
+            onChange={(e) => setStageIndex(Number(e.target.value))}
+            className="kc-stage-select"
+            title="스테이지 직접 이동"
+          >
+            {STAGES.map((s, idx) => (
+              <option key={s.id} value={idx}>
+                STAGE {s.id} / {STAGES.length}
+              </option>
+            ))}
+          </select>
           <span className="kc-stage-title-text">{currentStage.title}</span>
         </div>
 
