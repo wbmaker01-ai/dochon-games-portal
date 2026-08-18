@@ -570,40 +570,177 @@ export default function KidsCodingGame({ onScoreSubmitted }) {
               </div>
             ))}
 
-            {/* Animated Rabbit Entity */}
+            {/* Directional Beacon & Shadow under Rabbit */}
             <div
-              className={`kc-rabbit-entity ${rabbitJumping ? 'kc-rabbit-jumping' : ''} ${simState.isFailed ? 'kc-rabbit-fail' : ''}`}
+              className="kc-rabbit-beacon"
               style={{
-                left: `${12 + simState.rabbit.x * 52 + 2}px`,
-                top: `${12 + simState.rabbit.y * 52 + 2}px`
+                left: `${12 + simState.rabbit.x * 52}px`,
+                top: `${12 + simState.rabbit.y * 52}px`
               }}
             >
               <div
-                className="kc-rabbit-inner"
+                className="kc-beacon-arrow"
                 style={{
                   transform: `rotate(${DIRECTION_DELTA[simState.rabbit.dir].angle}deg)`
                 }}
               >
-                <svg viewBox="0 0 50 50" width="44" height="44">
-                  {/* Rabbit Ears */}
-                  <ellipse cx="18" cy="10" rx="4" ry="10" fill="#FFFFFF" stroke="#E2E8F0" strokeWidth="1.5" />
-                  <ellipse cx="18" cy="10" rx="2" ry="7" fill="#FDA4AF" />
-                  <ellipse cx="32" cy="10" rx="4" ry="10" fill="#FFFFFF" stroke="#E2E8F0" strokeWidth="1.5" />
-                  <ellipse cx="32" cy="10" rx="2" ry="7" fill="#FDA4AF" />
-                  {/* Body & Head */}
-                  <circle cx="25" cy="30" r="16" fill="#FFFFFF" stroke="#CBD5E1" strokeWidth="2" />
-                  {/* Cheeks */}
-                  <circle cx="16" cy="32" r="3" fill="#FECDD3" opacity="0.8" />
-                  <circle cx="34" cy="32" r="3" fill="#FECDD3" opacity="0.8" />
-                  {/* Eyes */}
-                  <circle cx="19" cy="26" r="2.5" fill="#1E293B" />
-                  <circle cx="18.2" cy="25.2" r="0.8" fill="#FFFFFF" />
-                  <circle cx="31" cy="26" r="2.5" fill="#1E293B" />
-                  <circle cx="30.2" cy="25.2" r="0.8" fill="#FFFFFF" />
-                  {/* Cute Nose & Mouth */}
-                  <polygon points="25,29 23,31 27,31" fill="#F43F5E" />
-                  <path d="M23 32 Q25 34 27 32" stroke="#64748B" strokeWidth="1.2" fill="none" strokeLinecap="round" />
+                <svg viewBox="0 0 48 48" width="48" height="48">
+                  <ellipse cx="24" cy="24" rx="20" ry="20" fill="rgba(0, 0, 0, 0.25)" />
+                  <path
+                    d="M24 6 L32 18 L27 18 L27 28 L21 28 L21 18 L16 18 Z"
+                    fill="#FBBF24"
+                    stroke="#D97706"
+                    strokeWidth="1.2"
+                    filter="drop-shadow(0 0 4px rgba(251, 191, 36, 0.8))"
+                  />
                 </svg>
+              </div>
+            </div>
+
+            {/* Animated Full-Body Rabbit Entity (전신 3D 캐릭터) */}
+            <div
+              className={`kc-rabbit-entity ${rabbitJumping ? 'kc-rabbit-jumping' : ''} ${simState.isFailed ? 'kc-rabbit-fail' : ''}`}
+              style={{
+                left: `${12 + simState.rabbit.x * 52}px`,
+                top: `${12 + simState.rabbit.y * 52 - 10}px`
+              }}
+            >
+              <div className="kc-rabbit-inner">
+                {/* 1. RIGHT FACING FULL BODY (동쪽/우측) */}
+                {simState.rabbit.dir === DIRECTION.RIGHT && (
+                  <svg viewBox="0 0 54 60" width="48" height="54">
+                    {/* Shadow */}
+                    <ellipse cx="26" cy="52" rx="16" ry="5" fill="rgba(0,0,0,0.2)" />
+                    {/* Fluffy Tail on Left */}
+                    <circle cx="10" cy="38" r="6.5" fill="#FFFFFF" stroke="#CBD5E1" strokeWidth="1.5" />
+                    {/* Back Foot */}
+                    <ellipse cx="20" cy="50" rx="6" ry="3.5" fill="#E2E8F0" stroke="#94A3B8" strokeWidth="1.2" />
+                    {/* Chubby Body */}
+                    <ellipse cx="26" cy="36" rx="14" ry="12" fill="#FFFFFF" stroke="#CBD5E1" strokeWidth="1.8" />
+                    {/* Blue Coding Vest */}
+                    <path d="M18 30 Q26 28 34 32 Q32 44 22 44 Q16 42 18 30 Z" fill="#3B82F6" stroke="#2563EB" strokeWidth="1.2" />
+                    {/* Front Foot */}
+                    <ellipse cx="32" cy="51" rx="6.5" ry="4" fill="#FFFFFF" stroke="#CBD5E1" strokeWidth="1.5" />
+                    {/* Left/Back Ear */}
+                    <ellipse cx="22" cy="11" rx="4.2" ry="10" transform="rotate(-15 22 11)" fill="#FFFFFF" stroke="#CBD5E1" strokeWidth="1.5" />
+                    <ellipse cx="22" cy="11" rx="2.2" ry="7" transform="rotate(-15 22 11)" fill="#FDA4AF" />
+                    {/* Head */}
+                    <circle cx="32" cy="22" r="13" fill="#FFFFFF" stroke="#CBD5E1" strokeWidth="1.8" />
+                    {/* Right/Front Ear */}
+                    <ellipse cx="28" cy="9" rx="4.5" ry="11" transform="rotate(-5 28 9)" fill="#FFFFFF" stroke="#CBD5E1" strokeWidth="1.5" />
+                    <ellipse cx="28" cy="9" rx="2.4" ry="8" transform="rotate(-5 28 9)" fill="#FDA4AF" />
+                    {/* Cheeks */}
+                    <circle cx="32" cy="26" r="3.2" fill="#FECDD3" opacity="0.8" />
+                    {/* Big Eye Facing Right */}
+                    <circle cx="37" cy="20" r="3.2" fill="#1E293B" />
+                    <circle cx="38" cy="19" r="1.2" fill="#FFFFFF" />
+                    <circle cx="36" cy="22" r="0.6" fill="#60A5FA" />
+                    {/* Cute Nose & Mouth Facing Right */}
+                    <polygon points="44,23 41,25 41,21" fill="#F43F5E" />
+                    <path d="M40 26 Q43 27 42 29" stroke="#64748B" strokeWidth="1.2" fill="none" strokeLinecap="round" />
+                    {/* Front Paw Reaching Right */}
+                    <ellipse cx="37" cy="36" rx="5" ry="3.5" transform="rotate(20 37 36)" fill="#FFFFFF" stroke="#CBD5E1" strokeWidth="1.5" />
+                  </svg>
+                )}
+
+                {/* 2. LEFT FACING FULL BODY (서쪽/좌측) */}
+                {simState.rabbit.dir === DIRECTION.LEFT && (
+                  <svg viewBox="0 0 54 60" width="48" height="54" style={{ transform: 'scaleX(-1)' }}>
+                    {/* Shadow */}
+                    <ellipse cx="26" cy="52" rx="16" ry="5" fill="rgba(0,0,0,0.2)" />
+                    {/* Fluffy Tail on Left (Mirrored to Right) */}
+                    <circle cx="10" cy="38" r="6.5" fill="#FFFFFF" stroke="#CBD5E1" strokeWidth="1.5" />
+                    {/* Back Foot */}
+                    <ellipse cx="20" cy="50" rx="6" ry="3.5" fill="#E2E8F0" stroke="#94A3B8" strokeWidth="1.2" />
+                    {/* Chubby Body */}
+                    <ellipse cx="26" cy="36" rx="14" ry="12" fill="#FFFFFF" stroke="#CBD5E1" strokeWidth="1.8" />
+                    {/* Blue Coding Vest */}
+                    <path d="M18 30 Q26 28 34 32 Q32 44 22 44 Q16 42 18 30 Z" fill="#3B82F6" stroke="#2563EB" strokeWidth="1.2" />
+                    {/* Front Foot */}
+                    <ellipse cx="32" cy="51" rx="6.5" ry="4" fill="#FFFFFF" stroke="#CBD5E1" strokeWidth="1.5" />
+                    {/* Left/Back Ear */}
+                    <ellipse cx="22" cy="11" rx="4.2" ry="10" transform="rotate(-15 22 11)" fill="#FFFFFF" stroke="#CBD5E1" strokeWidth="1.5" />
+                    <ellipse cx="22" cy="11" rx="2.2" ry="7" transform="rotate(-15 22 11)" fill="#FDA4AF" />
+                    {/* Head */}
+                    <circle cx="32" cy="22" r="13" fill="#FFFFFF" stroke="#CBD5E1" strokeWidth="1.8" />
+                    {/* Right/Front Ear */}
+                    <ellipse cx="28" cy="9" rx="4.5" ry="11" transform="rotate(-5 28 9)" fill="#FFFFFF" stroke="#CBD5E1" strokeWidth="1.5" />
+                    <ellipse cx="28" cy="9" rx="2.4" ry="8" transform="rotate(-5 28 9)" fill="#FDA4AF" />
+                    {/* Cheeks */}
+                    <circle cx="32" cy="26" r="3.2" fill="#FECDD3" opacity="0.8" />
+                    {/* Big Eye Facing Right (Mirrored to Left) */}
+                    <circle cx="37" cy="20" r="3.2" fill="#1E293B" />
+                    <circle cx="38" cy="19" r="1.2" fill="#FFFFFF" />
+                    <circle cx="36" cy="22" r="0.6" fill="#60A5FA" />
+                    {/* Cute Nose & Mouth */}
+                    <polygon points="44,23 41,25 41,21" fill="#F43F5E" />
+                    <path d="M40 26 Q43 27 42 29" stroke="#64748B" strokeWidth="1.2" fill="none" strokeLinecap="round" />
+                    {/* Front Paw */}
+                    <ellipse cx="37" cy="36" rx="5" ry="3.5" transform="rotate(20 37 36)" fill="#FFFFFF" stroke="#CBD5E1" strokeWidth="1.5" />
+                  </svg>
+                )}
+
+                {/* 3. DOWN FACING FULL BODY (남쪽/하단/정면) */}
+                {simState.rabbit.dir === DIRECTION.DOWN && (
+                  <svg viewBox="0 0 54 60" width="48" height="54">
+                    {/* Shadow */}
+                    <ellipse cx="27" cy="52" rx="16" ry="5" fill="rgba(0,0,0,0.2)" />
+                    {/* Left Ear */}
+                    <ellipse cx="18" cy="10" rx="4.5" ry="11" transform="rotate(-8 18 10)" fill="#FFFFFF" stroke="#CBD5E1" strokeWidth="1.5" />
+                    <ellipse cx="18" cy="10" rx="2.4" ry="8" transform="rotate(-8 18 10)" fill="#FDA4AF" />
+                    {/* Right Ear */}
+                    <ellipse cx="36" cy="10" rx="4.5" ry="11" transform="rotate(8 36 10)" fill="#FFFFFF" stroke="#CBD5E1" strokeWidth="1.5" />
+                    <ellipse cx="36" cy="10" rx="2.4" ry="8" transform="rotate(8 36 10)" fill="#FDA4AF" />
+                    {/* Chubby Body */}
+                    <ellipse cx="27" cy="36" rx="15" ry="12" fill="#FFFFFF" stroke="#CBD5E1" strokeWidth="1.8" />
+                    {/* Blue Coding Vest Front */}
+                    <path d="M17 28 Q27 26 37 28 Q36 43 27 44 Q18 43 17 28 Z" fill="#3B82F6" stroke="#2563EB" strokeWidth="1.2" />
+                    <rect x="25" y="30" width="4" height="12" fill="#FBBF24" rx="1.5" />
+                    {/* Feet */}
+                    <ellipse cx="19" cy="51" rx="5.5" ry="3.5" fill="#FFFFFF" stroke="#CBD5E1" strokeWidth="1.5" />
+                    <ellipse cx="35" cy="51" rx="5.5" ry="3.5" fill="#FFFFFF" stroke="#CBD5E1" strokeWidth="1.5" />
+                    {/* Head */}
+                    <circle cx="27" cy="21" r="13" fill="#FFFFFF" stroke="#CBD5E1" strokeWidth="1.8" />
+                    {/* Cheeks */}
+                    <circle cx="17" cy="25" r="3" fill="#FECDD3" opacity="0.8" />
+                    <circle cx="37" cy="25" r="3" fill="#FECDD3" opacity="0.8" />
+                    {/* Eyes */}
+                    <circle cx="21" cy="20" r="2.8" fill="#1E293B" />
+                    <circle cx="20.2" cy="19.2" r="1.0" fill="#FFFFFF" />
+                    <circle cx="33" cy="20" r="2.8" fill="#1E293B" />
+                    <circle cx="32.2" cy="19.2" r="1.0" fill="#FFFFFF" />
+                    {/* Nose & Mouth */}
+                    <polygon points="27,23 25,25 29,25" fill="#F43F5E" />
+                    <path d="M25 26 Q27 28 29 26" stroke="#64748B" strokeWidth="1.2" fill="none" strokeLinecap="round" />
+                    {/* Front Paws */}
+                    <circle cx="22" cy="36" r="3.2" fill="#FFFFFF" stroke="#CBD5E1" strokeWidth="1.2" />
+                    <circle cx="32" cy="36" r="3.2" fill="#FFFFFF" stroke="#CBD5E1" strokeWidth="1.2" />
+                  </svg>
+                )}
+
+                {/* 4. UP FACING FULL BODY (북쪽/상단/뒷모습) */}
+                {simState.rabbit.dir === DIRECTION.UP && (
+                  <svg viewBox="0 0 54 60" width="48" height="54">
+                    {/* Shadow */}
+                    <ellipse cx="27" cy="52" rx="16" ry="5" fill="rgba(0,0,0,0.2)" />
+                    {/* Left Ear */}
+                    <ellipse cx="18" cy="8" rx="4.5" ry="11" transform="rotate(-6 18 8)" fill="#FFFFFF" stroke="#CBD5E1" strokeWidth="1.5" />
+                    {/* Right Ear */}
+                    <ellipse cx="36" cy="8" rx="4.5" ry="11" transform="rotate(6 36 8)" fill="#FFFFFF" stroke="#CBD5E1" strokeWidth="1.5" />
+                    {/* Feet Stepping Forward */}
+                    <ellipse cx="17" cy="48" rx="5" ry="4" fill="#FFFFFF" stroke="#CBD5E1" strokeWidth="1.5" />
+                    <ellipse cx="37" cy="48" rx="5" ry="4" fill="#FFFFFF" stroke="#CBD5E1" strokeWidth="1.5" />
+                    {/* Chubby Body Back */}
+                    <ellipse cx="27" cy="34" rx="15" ry="12" fill="#FFFFFF" stroke="#CBD5E1" strokeWidth="1.8" />
+                    {/* Blue Coding Vest Back with Hood/Logo */}
+                    <path d="M16 26 Q27 24 38 26 Q37 41 27 42 Q17 41 16 26 Z" fill="#3B82F6" stroke="#2563EB" strokeWidth="1.2" />
+                    <circle cx="27" cy="32" r="4" fill="#FBBF24" />
+                    {/* Big Fluffy White Tail in Center Back */}
+                    <circle cx="27" cy="39" r="6.5" fill="#FFFFFF" stroke="#CBD5E1" strokeWidth="1.8" />
+                    {/* Back of Head */}
+                    <circle cx="27" cy="19" r="13" fill="#FFFFFF" stroke="#CBD5E1" strokeWidth="1.8" />
+                  </svg>
+                )}
               </div>
             </div>
           </div>
