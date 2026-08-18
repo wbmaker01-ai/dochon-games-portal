@@ -28,9 +28,9 @@ export class SkyJumperPhysics {
     // Player State
     this.player = {
       x: CANVAS_WIDTH / 2 - PLAYER_CONFIG.WIDTH / 2,
-      y: CANVAS_HEIGHT - 160,
+      y: CANVAS_HEIGHT - 100 - PLAYER_CONFIG.HEIGHT,
       vx: 0,
-      vy: PLAYER_CONFIG.NORMAL_JUMP_VY,
+      vy: 0,
       width: PLAYER_CONFIG.WIDTH,
       height: PLAYER_CONFIG.HEIGHT,
       facing: 'right',
@@ -71,6 +71,14 @@ export class SkyJumperPhysics {
 
     // Generate Initial World
     this.initWorld();
+  }
+
+  // Launch the initial jump when countdown reaches GO!
+  launchInitialJump() {
+    this.player.vy = PLAYER_CONFIG.NORMAL_JUMP_VY;
+    this.player.squash = 0.65;
+    skyJumperAudio.playJump();
+    this.spawnJumpParticles(this.player.x + this.player.width / 2, CANVAS_HEIGHT - 100);
   }
 
   initClouds() {
@@ -240,13 +248,17 @@ export class SkyJumperPhysics {
 
     // 2. Horizontal Movement (Keyboard & Touch Pointer)
     let moveDir = 0;
-    if (this.keys.left) moveDir -= 1;
-    if (this.keys.right) moveDir += 1;
+    const isKeyboardActive = this.keys.left || this.keys.right;
 
-    if (this.pointerTargetX !== null) {
+    if (isKeyboardActive) {
+      // Keyboard input has absolute priority
+      if (this.keys.left) moveDir -= 1;
+      if (this.keys.right) moveDir += 1;
+      this.pointerTargetX = null; // Clear pointer target so it doesn't fight keyboard
+    } else if (this.pointerTargetX !== null) {
       const pCenterX = p.x + p.width / 2;
       const dx = this.pointerTargetX - pCenterX;
-      if (Math.abs(dx) > 10) {
+      if (Math.abs(dx) > 12) {
         moveDir = dx > 0 ? 1 : -1;
       }
     }

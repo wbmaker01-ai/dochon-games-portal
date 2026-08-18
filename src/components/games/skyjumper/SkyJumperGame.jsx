@@ -24,7 +24,8 @@ import './skyjumper.css';
 
 export default function SkyJumperGame({ onScoreSubmitted }) {
   // Game States
-  const [gameState, setGameState] = useState('READY'); // 'READY' | 'PLAYING' | 'PAUSED' | 'GAME_OVER'
+  const [gameState, setGameState] = useState('READY'); // 'READY' | 'COUNTDOWN' | 'PLAYING' | 'PAUSED' | 'GAME_OVER'
+  const [countdownNumber, setCountdownNumber] = useState(3);
   const [score, setScore] = useState(0);
   const [bestScore, setBestScore] = useState(() => {
     try {
@@ -49,6 +50,12 @@ export default function SkyJumperGame({ onScoreSubmitted }) {
   const reqIdRef = useRef(null);
   const lastTimeRef = useRef(0);
   const dpadIntervalRef = useRef(null);
+  const countdownTimersRef = useRef([]);
+
+  const clearCountdownTimers = () => {
+    countdownTimersRef.current.forEach(id => clearTimeout(id));
+    countdownTimersRef.current = [];
+  };
 
   // Initialize Physics Engine
   useEffect(() => {
@@ -83,6 +90,7 @@ export default function SkyJumperGame({ onScoreSubmitted }) {
 
     return () => {
       if (reqIdRef.current) cancelAnimationFrame(reqIdRef.current);
+      clearCountdownTimers();
       skyJumperAudio.stopRocketSound();
       skyJumperAudio.stopPropellerSound();
     };
@@ -124,7 +132,7 @@ export default function SkyJumperGame({ onScoreSubmitted }) {
   // Keyboard Event Handlers
   useEffect(() => {
     const handleKeyDown = (e) => {
-      if (['ArrowLeft', 'ArrowRight', 'ArrowUp', 'ArrowDown', ' '].includes(e.key)) {
+      if (['ArrowLeft', 'ArrowRight', 'ArrowUp', 'ArrowDown', ' ', 'Enter'].includes(e.key)) {
         e.preventDefault();
       }
 
@@ -133,13 +141,15 @@ export default function SkyJumperGame({ onScoreSubmitted }) {
 
       if (e.key === 'ArrowLeft' || e.key === 'a' || e.key === 'A') {
         engine.keys.left = true;
+        engine.pointerTargetX = null; // Clear mouse pointer lock
       }
       if (e.key === 'ArrowRight' || e.key === 'd' || e.key === 'D') {
         engine.keys.right = true;
+        engine.pointerTargetX = null; // Clear mouse pointer lock
       }
-      if (e.key === ' ' || e.key === 'ArrowUp' || e.key === 'w' || e.key === 'W') {
-        if (gameState === 'READY') {
-          startGame();
+      if (e.key === ' ' || e.key === 'ArrowUp' || e.key === 'w' || e.key === 'W' || e.key === 'Enter') {
+        if (gameState === 'READY' || gameState === 'GAME_OVER') {
+          startCountdown();
         } else if (gameState === 'PLAYING') {
           engine.shoot();
         }
@@ -167,29 +177,50 @@ export default function SkyJumperGame({ onScoreSubmitted }) {
     };
   }, [gameState]);
 
-  // Start Game
-  const startGame = () => {
+  // Start 3, 2, 1 Countdown Game Flow
+  const startCountdown = () => {
     haptics.medium();
     skyJumperAudio.init();
-    if (engineRef.current) {
-      engineRef.current.reset();
-    }
-    setScore(0);
-    setHasSubmitted(false);
-    setGameState('PLAYING');
-  };
-
-  // Reset / Restart Game
-  const resetGame = () => {
-    haptics.medium();
     skyJumperAudio.stopRocketSound();
     skyJumperAudio.stopPropellerSound();
+    clearCountdownTimers();
+
     if (engineRef.current) {
       engineRef.current.reset();
+      engineRef.current.pointerTargetX = null;
+      engineRef.current.keys.left = false;
+      engineRef.current.keys.right = false;
     }
+
     setScore(0);
     setHasSubmitted(false);
-    setGameState('PLAYING');
+    setCountdownNumber(3);
+    setGameState('COUNTDOWN');
+    skyJumperAudio.playCountdownBeep(false);
+
+    // Countdown Step 2: 2
+    const t1 = setTimeout(() => {
+      setCountdownNumber(2);
+      skyJumperAudio.playCountdownBeep(false);
+    }, 800);
+
+    // Countdown Step 3: 1
+    const t2 = setTimeout(() => {
+      setCountdownNumber(1);
+      skyJumperAudio.playCountdownBeep(false);
+    }, 1600);
+
+    // Countdown Step 4: GO! Launch Initial Jump
+    const t3 = setTimeout(() => {
+      setCountdownNumber('GO!');
+      skyJumperAudio.playCountdownBeep(true);
+      setGameState('PLAYING');
+      if (engineRef.current) {
+        engineRef.current.launchInitialJump();
+      }
+    }, 2400);
+
+    countdownTimersRef.current = [t1, t2, t3];
   };
 
   // Toggle Pause
@@ -218,6 +249,9 @@ export default function SkyJumperGame({ onScoreSubmitted }) {
   // Pointer Movement over Canvas
   const handlePointerMove = (e) => {
     if (gameState !== 'PLAYING' || !canvasRef.current || !engineRef.current) return;
+    // When keyboard is used, do not overwrite with stationary mouse
+    if (engineRef.current.keys.left || engineRef.current.keys.right) return;
+
     const rect = canvasRef.current.getBoundingClientRect();
     const scaleX = CANVAS_WIDTH / rect.width;
     const clientX = e.clientX || (e.touches && e.touches[0] ? e.touches[0].clientX : 0);
@@ -235,6 +269,7 @@ export default function SkyJumperGame({ onScoreSubmitted }) {
   const startHoldMove = (dir) => {
     if (!engineRef.current || gameState !== 'PLAYING') return;
     haptics.light();
+    engineRef.current.pointerTargetX = null; // Clear pointer target
 
     if (dir === 'left') {
       engineRef.current.keys.left = true;
@@ -310,7 +345,7 @@ export default function SkyJumperGame({ onScoreSubmitted }) {
             <HelpCircle style={{ width: '18px', height: '18px' }} />
           </button>
 
-          <button onClick={resetGame} className="sj-icon-btn" title="다시 시작">
+          <button onClick={startCountdown} className="sj-icon-btn" title="다시 시작">
             <RotateCcw style={{ width: '18px', height: '18px' }} />
           </button>
         </div>
@@ -330,6 +365,20 @@ export default function SkyJumperGame({ onScoreSubmitted }) {
           className="sj-canvas"
         />
 
+        {/* 3, 2, 1, GO! Countdown Overlay */}
+        {gameState === 'COUNTDOWN' && (
+          <div className="sj-countdown-overlay">
+            <div className="sj-countdown-circle">
+              <div key={countdownNumber} className="sj-countdown-number">
+                {countdownNumber}
+              </div>
+            </div>
+            <div className="sj-countdown-hint">
+              {countdownNumber === 'GO!' ? '🚀 출발!! 점프 시작!' : '⬅️ ➡️ 방향키나 마우스로 발판을 밟으세요!'}
+            </div>
+          </div>
+        )}
+
         {/* Ready / Start Overlay */}
         {gameState === 'READY' && (
           <div className="sj-overlay-screen">
@@ -340,7 +389,7 @@ export default function SkyJumperGame({ onScoreSubmitted }) {
               스프링과 제트팩을 타고 최고 고도를 경신하세요.
             </p>
 
-            <button onClick={startGame} className="sj-btn-primary" style={{ marginBottom: '14px' }}>
+            <button onClick={startCountdown} className="sj-btn-primary" style={{ marginBottom: '14px' }}>
               <Play style={{ width: '18px', height: '18px' }} />
               점프 시작하기
             </button>
@@ -431,7 +480,7 @@ export default function SkyJumperGame({ onScoreSubmitted }) {
               </div>
             )}
 
-            <button onClick={resetGame} className="sj-btn-primary">
+            <button onClick={startCountdown} className="sj-btn-primary">
               <RotateCcw style={{ width: '18px', height: '18px' }} />
               다시 도전하기
             </button>

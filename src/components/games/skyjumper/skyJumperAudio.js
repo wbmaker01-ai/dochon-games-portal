@@ -39,6 +39,55 @@ class SkyJumperAudio {
     }
   }
 
+  // 0. Countdown Beep (3, 2, 1 -> GO!)
+  playCountdownBeep(isGo = false) {
+    if (this.isMuted) return;
+    this.init();
+    if (!this.ctx) return;
+
+    try {
+      const t = this.ctx.currentTime;
+      if (isGo) {
+        // High upbeat energetic chime for GO!
+        const notes = [523.25, 659.25, 783.99, 1046.5]; // C5, E5, G5, C6
+        notes.forEach((freq, idx) => {
+          const osc = this.ctx.createOscillator();
+          const gain = this.ctx.createGain();
+          const startT = t + idx * 0.035;
+
+          osc.type = 'triangle';
+          osc.frequency.setValueAtTime(freq, startT);
+
+          gain.gain.setValueAtTime(0.18, startT);
+          gain.gain.exponentialRampToValueAtTime(0.001, startT + 0.22);
+
+          osc.connect(gain);
+          gain.connect(this.ctx.destination);
+
+          osc.start(startT);
+          osc.stop(startT + 0.24);
+        });
+      } else {
+        // Crisp high-tech beep for 3, 2, 1
+        const osc = this.ctx.createOscillator();
+        const gain = this.ctx.createGain();
+
+        osc.type = 'sine';
+        osc.frequency.setValueAtTime(480, t);
+        osc.frequency.linearRampToValueAtTime(580, t + 0.08);
+
+        gain.gain.setValueAtTime(0.22, t);
+        gain.gain.exponentialRampToValueAtTime(0.001, t + 0.12);
+
+        osc.connect(gain);
+        gain.connect(this.ctx.destination);
+
+        osc.start(t);
+        osc.stop(t + 0.14);
+      }
+    } catch (e) {}
+  }
+
   // 1. Normal Jump Sound
   playJump() {
     if (this.isMuted) return;

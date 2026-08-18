@@ -107,6 +107,66 @@
 }
 
 /* 3. Overlay Screens */
+.sj-countdown-overlay {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  background: rgba(15, 23, 42, 0.45);
+  backdrop-filter: blur(4px);
+  -webkit-backdrop-filter: blur(4px);
+  z-index: 30;
+  pointer-events: none;
+  animation: sjFadeIn 0.2s ease-out;
+}
+
+.sj-countdown-circle {
+  width: 130px;
+  height: 130px;
+  border-radius: 50%;
+  background: radial-gradient(circle, rgba(14, 165, 233, 0.3) 0%, rgba(99, 102, 241, 0.15) 70%, transparent 100%);
+  border: 3px solid rgba(56, 189, 248, 0.85);
+  box-shadow: 0 0 35px rgba(56, 189, 248, 0.6), inset 0 0 20px rgba(56, 189, 248, 0.35);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-bottom: 18px;
+  animation: sjPulseRing 0.8s infinite ease-out;
+}
+
+@keyframes sjPulseRing {
+  0% { transform: scale(0.95); box-shadow: 0 0 20px rgba(56, 189, 248, 0.4); }
+  50% { transform: scale(1.06); box-shadow: 0 0 45px rgba(56, 189, 248, 0.85); }
+  100% { transform: scale(0.95); box-shadow: 0 0 20px rgba(56, 189, 248, 0.4); }
+}
+
+.sj-countdown-number {
+  font-size: 58px;
+  font-weight: 900;
+  color: #FDE047;
+  text-shadow: 0 0 24px rgba(253, 224, 71, 0.9), 0 4px 12px rgba(0, 0, 0, 0.8);
+  animation: sjPopNum 0.75s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+}
+
+@keyframes sjPopNum {
+  0% { transform: scale(0.35); opacity: 0; }
+  50% { transform: scale(1.22); opacity: 1; }
+  100% { transform: scale(1.0); opacity: 1; }
+}
+
+.sj-countdown-hint {
+  font-size: 13px;
+  font-weight: 800;
+  color: #FFFFFF;
+  background: rgba(15, 23, 42, 0.85);
+  border: 1px solid rgba(255, 255, 255, 0.18);
+  padding: 8px 18px;
+  border-radius: 9999px;
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.4);
+}
+
 .sj-overlay-screen {
   position: absolute;
   inset: 0;

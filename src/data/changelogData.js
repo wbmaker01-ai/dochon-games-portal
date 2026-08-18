@@ -3,11 +3,30 @@
 
 export const CHANGELOG_DATA = [
   {
+    version: 'v1.30.0',
+    date: '2026-08-19',
+    title: '[도촌 스카이 점퍼] 3·2·1 카운트다운 시스템 도입 및 키보드 조작감(마우스 간섭 방지) 개선',
+    badge: 'LATEST',
+    badgeColor: 'emerald',
+    items: [
+      {
+        tag: 'GAMEPLAY',
+        tagColor: 'emerald',
+        text: '[3·2·1 카운트다운 & 초기 점프 동기화] 게임 시작 및 재도전 시 화면 중앙 펄스 링과 함께 3, 2, 1, GO! 카운트다운 및 사운드 효과음 출력 후 첫 점프를 시작하도록 개선하여 플레이 준비 시간 제공'
+      },
+      {
+        tag: 'CONTROLS',
+        tagColor: 'blue',
+        text: '[키보드 조작 우선권 및 마우스 고착 현상 완벽 해결] 마우스 커서가 캔버스 중앙에 위치할 때 키보드 좌/우 방향키 입력이 방해받던 문제를 해결하고 키보드 입력 시 마우스 포인터 타깃을 즉시 초기화하도록 조작감 최적화'
+      }
+    ]
+  },
+  {
     version: 'v1.29.0',
     date: '2026-08-19',
     title: '제19탄 신규 게임 [도촌 코딩 토끼 (Kids Coding 모티브)] 정식 개장 & 알고리즘 퍼즐 탑재',
-    badge: 'LATEST',
-    badgeColor: 'emerald',
+    badge: 'UPDATE',
+    badgeColor: 'blue',
     items: [
       {
         tag: 'NEW GAME',
