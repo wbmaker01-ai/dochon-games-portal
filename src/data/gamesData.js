@@ -145,19 +145,21 @@ export const PLAYABLE_GAMES = [
     category: '액션',
     imageSrc: getThumb('brickbreaker.jpg'),
     isPlayable: true,
-    badgeText: '🧱 NEW 17위',
+    badgeText: '🧱 17위',
     description: '반사되는 공과 화려한 파워업 아이템으로 형형색색의 블록을 격파하는 클래식 아케이드!'
-  }
-];
-
-export const COMING_SOON_GAMES = [
+  },
   {
     id: 'skyjumper',
     title: '도촌 스카이 점퍼',
     category: '액션',
     imageSrc: getThumb('skyjumper.jpg'),
-    isPlayable: false
-  },
+    isPlayable: true,
+    badgeText: '🚀 NEW 18위',
+    description: '발판을 딛고 하늘과 우주 끝까지 무한 점프하는 국민 점프 아케이드!'
+  }
+];
+
+export const COMING_SOON_GAMES = [
   {
     id: 'kidscoding',
     title: '도촌 코딩 토끼',

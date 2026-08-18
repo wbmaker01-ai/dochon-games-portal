@@ -1,0 +1,521 @@
+/* Dochon Sky Jumper - Stylesheet */
+
+.sj-game-container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+  max-width: 520px;
+  margin: 0 auto;
+  padding: 12px;
+  user-select: none;
+  -webkit-user-select: none;
+  touch-action: manipulation;
+  font-family: -apple-system, BlinkMacSystemFont, 'Pretendard', 'Segoe UI', Roboto, Helvetica, sans-serif;
+}
+
+/* 1. Glassmorphism Top HUD Bar */
+.sj-hud-bar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  width: 100%;
+  max-width: 480px;
+  padding: 10px 16px;
+  margin-bottom: 12px;
+  background: rgba(15, 23, 42, 0.75);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  border-radius: 16px;
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.35);
+  color: #FFFFFF;
+}
+
+.sj-hud-stat {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.sj-hud-label {
+  font-size: 11px;
+  font-weight: 700;
+  color: #94A3B8;
+  letter-spacing: 0.5px;
+  text-transform: uppercase;
+}
+
+.sj-hud-value {
+  font-size: 19px;
+  font-weight: 900;
+  color: #38BDF8;
+  font-variant-numeric: tabular-nums;
+  line-height: 1.1;
+  text-shadow: 0 0 10px rgba(56, 189, 248, 0.4);
+}
+
+.sj-hud-actions {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.sj-icon-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 36px;
+  height: 36px;
+  background: rgba(255, 255, 255, 0.08);
+  border: 1px solid rgba(255, 255, 255, 0.15);
+  border-radius: 10px;
+  color: #E2E8F0;
+  cursor: pointer;
+  transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.sj-icon-btn:hover {
+  background: rgba(255, 255, 255, 0.18);
+  color: #FFFFFF;
+  transform: translateY(-2px);
+}
+
+.sj-icon-btn:active {
+  transform: translateY(0);
+}
+
+/* 2. Canvas Stage Wrapper */
+.sj-canvas-wrapper {
+  position: relative;
+  width: 100%;
+  max-width: 480px;
+  aspect-ratio: 480 / 720;
+  border-radius: 20px;
+  overflow: hidden;
+  box-shadow: 0 16px 40px rgba(0, 0, 0, 0.5), 0 0 0 1px rgba(255, 255, 255, 0.1);
+  background: #030712;
+}
+
+.sj-canvas {
+  width: 100%;
+  height: 100%;
+  display: block;
+  image-rendering: auto;
+  cursor: pointer;
+}
+
+/* 3. Overlay Screens */
+.sj-overlay-screen {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 24px;
+  background: rgba(15, 23, 42, 0.88);
+  backdrop-filter: blur(14px);
+  -webkit-backdrop-filter: blur(14px);
+  color: #FFFFFF;
+  text-align: center;
+  z-index: 20;
+  animation: sjFadeIn 0.25s ease-out;
+}
+
+@keyframes sjFadeIn {
+  from { opacity: 0; transform: scale(0.96); }
+  to { opacity: 1; transform: scale(1); }
+}
+
+.sj-overlay-icon {
+  font-size: 52px;
+  margin-bottom: 10px;
+  animation: sjBounce 2s infinite ease-in-out;
+}
+
+@keyframes sjBounce {
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(-8px); }
+}
+
+.sj-overlay-title {
+  font-size: 26px;
+  font-weight: 900;
+  margin: 0 0 6px 0;
+  letter-spacing: -0.5px;
+  background: linear-gradient(135deg, #38BDF8, #818CF8);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+}
+
+.sj-overlay-desc {
+  font-size: 13px;
+  color: #CBD5E1;
+  max-width: 320px;
+  line-height: 1.5;
+  margin: 0 0 18px 0;
+}
+
+.sj-score-card {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 12px;
+  width: 100%;
+  max-width: 320px;
+  background: rgba(30, 41, 59, 0.8);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 14px;
+  padding: 14px;
+  margin-bottom: 18px;
+}
+
+.sj-score-col {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.sj-score-col-label {
+  font-size: 11px;
+  font-weight: 700;
+  color: #94A3B8;
+}
+
+.sj-score-col-val {
+  font-size: 20px;
+  font-weight: 900;
+  color: #FDE047;
+  font-variant-numeric: tabular-nums;
+}
+
+/* Submit Form */
+.sj-submit-form {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  width: 100%;
+  max-width: 320px;
+  margin-bottom: 16px;
+  background: rgba(245, 158, 11, 0.1);
+  border: 1px dashed rgba(245, 158, 11, 0.4);
+  padding: 12px;
+  border-radius: 12px;
+}
+
+.sj-input-row {
+  display: flex;
+  gap: 6px;
+}
+
+.sj-name-input {
+  flex: 1;
+  padding: 10px 12px;
+  background: rgba(15, 23, 42, 0.8);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  border-radius: 8px;
+  color: #FFFFFF;
+  font-size: 13px;
+  font-weight: 700;
+  outline: none;
+  transition: all 0.2s;
+}
+
+.sj-name-input:focus {
+  border-color: #38BDF8;
+  box-shadow: 0 0 0 2px rgba(56, 189, 248, 0.3);
+}
+
+.sj-submit-btn {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 0 14px;
+  background: linear-gradient(135deg, #F59E0B, #D97706);
+  border: none;
+  border-radius: 8px;
+  color: #FFFFFF;
+  font-size: 12px;
+  font-weight: 800;
+  cursor: pointer;
+  white-space: nowrap;
+  transition: all 0.2s;
+}
+
+.sj-submit-btn:hover:not(:disabled) {
+  transform: translateY(-1px);
+  filter: brightness(1.1);
+}
+
+.sj-submit-btn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+/* Primary Action Buttons */
+.sj-btn-primary {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  padding: 12px 28px;
+  background: linear-gradient(135deg, #0EA5E9, #6366F1);
+  border: none;
+  border-radius: 12px;
+  color: #FFFFFF;
+  font-size: 15px;
+  font-weight: 800;
+  cursor: pointer;
+  box-shadow: 0 6px 20px rgba(14, 165, 233, 0.4);
+  transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.sj-btn-primary:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 10px 24px rgba(14, 165, 233, 0.5);
+  filter: brightness(1.08);
+}
+
+.sj-btn-primary:active {
+  transform: translateY(0);
+}
+
+/* 4. Mobile Touch Controls */
+.sj-mobile-controls {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  width: 100%;
+  max-width: 480px;
+  margin-top: 12px;
+  gap: 12px;
+}
+
+.sj-ctrl-dpad {
+  display: flex;
+  gap: 8px;
+}
+
+.sj-ctrl-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 60px;
+  height: 52px;
+  background: rgba(30, 41, 59, 0.85);
+  border: 1px solid rgba(255, 255, 255, 0.15);
+  border-radius: 14px;
+  color: #FFFFFF;
+  cursor: pointer;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+  transition: all 0.15s;
+}
+
+.sj-ctrl-btn:active {
+  background: rgba(56, 189, 248, 0.3);
+  transform: scale(0.95);
+  border-color: #38BDF8;
+}
+
+.sj-action-btn {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  height: 52px;
+  background: linear-gradient(135deg, #E11D48, #BE123C);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  border-radius: 14px;
+  color: #FFFFFF;
+  font-size: 14px;
+  font-weight: 800;
+  cursor: pointer;
+  box-shadow: 0 4px 16px rgba(225, 29, 72, 0.35);
+  transition: all 0.15s;
+}
+
+.sj-action-btn:active {
+  transform: scale(0.96);
+  filter: brightness(1.2);
+}
+
+/* 5. How To Play Modal Styles */
+.sj-modal-backdrop {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.75);
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 16px;
+  z-index: 100;
+  animation: sjFadeIn 0.2s ease-out;
+}
+
+.sj-modal-card {
+  width: 100%;
+  max-width: 500px;
+  max-height: 88vh;
+  display: flex;
+  flex-direction: column;
+  background: #0F172A;
+  border: 1px solid rgba(255, 255, 255, 0.15);
+  border-radius: 20px;
+  box-shadow: 0 24px 48px rgba(0, 0, 0, 0.6);
+  overflow: hidden;
+  color: #FFFFFF;
+}
+
+.sj-modal-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 18px 20px;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+  background: rgba(30, 41, 59, 0.5);
+}
+
+.sj-modal-title-group {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.sj-modal-icon {
+  width: 22px;
+  height: 22px;
+  color: #38BDF8;
+}
+
+.sj-modal-title {
+  font-size: 17px;
+  font-weight: 800;
+  margin: 0;
+}
+
+.sj-modal-close-btn {
+  background: transparent;
+  border: none;
+  color: #94A3B8;
+  cursor: pointer;
+  padding: 4px;
+  border-radius: 6px;
+  transition: all 0.15s;
+}
+
+.sj-modal-close-btn:hover {
+  color: #FFFFFF;
+  background: rgba(255, 255, 255, 0.1);
+}
+
+.sj-modal-body {
+  padding: 18px 20px;
+  overflow-y: auto;
+  display: flex;
+  flex-direction: column;
+  gap: 18px;
+}
+
+.sj-guide-section {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.sj-guide-heading {
+  font-size: 14px;
+  font-weight: 800;
+  color: #38BDF8;
+  margin: 0;
+}
+
+.sj-guide-desc {
+  font-size: 12px;
+  color: #CBD5E1;
+  line-height: 1.5;
+  margin: 0;
+}
+
+.sj-controls-grid {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.sj-ctrl-item {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 8px 12px;
+  background: rgba(30, 41, 59, 0.6);
+  border-radius: 8px;
+  font-size: 12px;
+}
+
+.sj-ctrl-key {
+  font-weight: 800;
+  color: #FDE047;
+}
+
+.sj-ctrl-desc {
+  color: #CBD5E1;
+}
+
+.sj-items-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 8px;
+}
+
+.sj-item-card {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 8px 10px;
+  background: rgba(30, 41, 59, 0.6);
+  border: 1px solid rgba(255, 255, 255, 0.06);
+  border-radius: 10px;
+}
+
+.sj-item-badge {
+  padding: 3px 6px;
+  border-radius: 6px;
+  font-size: 10px;
+  font-weight: 800;
+  color: #FFFFFF;
+  white-space: nowrap;
+}
+
+.sj-item-icon {
+  font-size: 20px;
+}
+
+.sj-item-name {
+  font-size: 11px;
+  font-weight: 800;
+  color: #F1F5F9;
+}
+
+.sj-item-desc {
+  font-size: 10px;
+  color: #94A3B8;
+  line-height: 1.3;
+}
+
+.sj-altitude-list {
+  margin: 0;
+  padding-left: 18px;
+  font-size: 12px;
+  color: #CBD5E1;
+  line-height: 1.6;
+}
+
+.sj-modal-footer {
+  padding: 14px 20px;
+  border-top: 1px solid rgba(255, 255, 255, 0.1);
+  background: rgba(30, 41, 59, 0.5);
+}

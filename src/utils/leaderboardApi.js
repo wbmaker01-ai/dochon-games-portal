@@ -443,6 +443,13 @@ function getLocalLeaderboardFallback(gameKey) {
       { id: 'bb3', name: '이레이저 (5B)', score: 4850, date: '2026-08-16' },
       { id: 'bb4', name: '박콤보 (4C)', score: 3400, date: '2026-08-16' },
       { id: 'bb5', name: '최볼 (3A)', score: 2150, date: '2026-08-15' }
+    ],
+    skyjumper: [
+      { id: 'sj1', name: '김홍년선생님', score: 18450, date: '2026-08-19' },
+      { id: 'sj2', name: '김점퍼 (6A)', score: 14200, date: '2026-08-19' },
+      { id: 'sj3', name: '이로켓 (5B)', score: 11500, date: '2026-08-18' },
+      { id: 'sj4', name: '박스프링 (4C)', score: 8300, date: '2026-08-18' },
+      { id: 'sj5', name: '최우주 (3A)', score: 5400, date: '2026-08-17' }
     ]
   };
 

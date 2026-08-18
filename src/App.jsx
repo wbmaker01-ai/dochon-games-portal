@@ -16,6 +16,7 @@ import JerryLawsonGame from './components/games/jerrylawson/JerryLawsonGame';
 import MagicCatGame from './components/games/magic/MagicCatGame';
 import FruitMergeGame from './components/games/fruitmerge/FruitMergeGame';
 import BrickBreakerGame from './components/games/brickbreaker/BrickBreakerGame';
+import SkyJumperGame from './components/games/skyjumper/SkyJumperGame';
 import GameCard from './components/GameCard';
 import LeaderboardModal from './components/LeaderboardModal';
 import ChangelogModal from './components/ChangelogModal';
@@ -428,7 +429,6 @@ export default function App() {
                   {activeGame === 'gnome' && '🌿 도촌 정원 요정 (DOCHON GARDEN GNOMES)'}
                   {activeGame === 'colortile' && '🧩 도촌 컬러 타일 (DOCHON COLOR TILE)'}
                   {activeGame === 'popcorn' && '🍿 도촌 팝콘 (DOCHON POPCORN SURVIVAL)'}
-                  {activeGame === 'brickbreaker' && '🧱 도촌 벽돌 격파왕 (DOCHON BRICK BREAKER)'}
                   {activeGame === 'tictactoe' && '🍩 도촌 도넛 틱택토 (DONUT TIC-TAC-TOE)'}
                   {activeGame === 'champion' && '🏆 도촌 챔피언 아일랜드 (CHAMPION ISLAND)'}
                   {activeGame === 'cricket' && '🏏 도촌 크리켓 (DOCHON CRICKET)'}
@@ -436,6 +436,8 @@ export default function App() {
                   {activeGame === 'jerrylawson' && '🕹️ 도촌 제리 로슨 (JERRY LAWSON)'}
                   {activeGame === 'magic' && '🧙 도촌 마법 고양이 (MAGIC CAT ACADEMY)'}
                   {activeGame === 'fruitmerge' && '🍉 도촌 과일 합치기 (DOCHON FRUIT MERGE)'}
+                  {activeGame === 'brickbreaker' && '🧱 도촌 벽돌 격파왕 (DOCHON BRICK BREAKER)'}
+                  {activeGame === 'skyjumper' && '🚀 도촌 스카이 점퍼 (DOCHON SKY JUMPER)'}
                 </span>
                 <span style={{
                   backgroundColor: 'rgba(251, 191, 36, 0.2)',
@@ -536,6 +538,9 @@ export default function App() {
               )}
               {activeGame === 'brickbreaker' && (
                 <BrickBreakerGame onScoreSubmitted={() => openInPageLeaderboardModal('brickbreaker')} />
+              )}
+              {activeGame === 'skyjumper' && (
+                <SkyJumperGame onScoreSubmitted={() => openInPageLeaderboardModal('skyjumper')} />
               )}
             </div>
           </div>

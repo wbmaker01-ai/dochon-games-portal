@@ -3,11 +3,35 @@
 
 export const CHANGELOG_DATA = [
   {
+    version: 'v1.28.0',
+    date: '2026-08-19',
+    title: '제18탄 신규 게임 [도촌 스카이 점퍼 (두들 점프 모티브)] 정식 개장 & 명예의 전당 연동',
+    badge: 'LATEST',
+    badgeColor: 'emerald',
+    items: [
+      {
+        tag: 'NEW GAME',
+        tagColor: 'emerald',
+        text: '[도촌 스카이 점퍼 정식 개장] 수직 무한 점프 물리 엔진, 6종 특수 발판(이동/부서짐/유령/1회용/수직), 5종 파워업 아이템(스프링/트램펄린/프로펠러/로켓/보호막) 및 공중 몬스터 슈팅 격파 시스템 탑재'
+      },
+      {
+        tag: 'VISUAL & AUDIO',
+        tagColor: 'blue',
+        text: '[고도별 4단계 동적 배경 & Web Audio 신시사이저] 맑은 하늘(0~2000m)부터 황혼 노을, 밤하늘, 심우주 은하수(10000m+)까지 고도에 따른 실시간 테마 전환 및 경쾌한 자체 사운드 효과음 구현'
+      },
+      {
+        tag: 'LEADERBOARD',
+        tagColor: 'purple',
+        text: '[도촌초 실시간 명예의 전당 연동] 최고 달성 고도 점수(100m 초과) 클라우드 랭킹 등록 및 점수 제출 시 스카이 점퍼 랭킹 탭 자동 동기화'
+      }
+    ]
+  },
+  {
     version: 'v1.27.0',
     date: '2026-08-18',
     title: '신규 순차 개장 준비(Coming Soon) [도촌 스카이 점퍼 (두들 점프 모티브)] 등록 & 3D 썸네일 탑재',
-    badge: 'LATEST',
-    badgeColor: 'emerald',
+    badge: 'UPDATE',
+    badgeColor: 'blue',
     items: [
       {
         tag: 'COMING SOON',
