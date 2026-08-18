@@ -3,11 +3,40 @@
 
 export const CHANGELOG_DATA = [
   {
+    version: 'v1.29.0',
+    date: '2026-08-19',
+    title: '제19탄 신규 게임 [도촌 코딩 토끼 (Kids Coding 모티브)] 정식 개장 & 알고리즘 퍼즐 탑재',
+    badge: 'LATEST',
+    badgeColor: 'emerald',
+    items: [
+      {
+        tag: 'NEW GAME',
+        tagColor: 'emerald',
+        text: '[도촌 코딩 토끼 정식 개장] 구글 어린이 코딩 50주년 기념작을 모티브로 한 8단계 점진적 알고리즘 교육 퍼즐 정식 오픈 (전진, 좌/우 회전, 반복 루프 블록 시스템 탑재)'
+      },
+      {
+        tag: 'OPTIMIZATION',
+        tagColor: 'amber',
+        text: '[최적화 챌린지 & 3-Star 평가 시스템] 최소 블록 수로 해결하는 알고리즘 최적화 달성 시 별 3개(⭐️⭐️⭐️) 및 대량의 보너스 점수 부여'
+      },
+      {
+        tag: 'AUDIO & UI',
+        tagColor: 'blue',
+        text: '[Web Audio 효과음 & 반응형 블록 코딩 UI] 깡총깡총 점프음, 당근 수확 차임벨, 스크래치 스타일 직관적 블록 조립 UI 및 단계별 디버깅(1단계 실행) 지원'
+      },
+      {
+        tag: 'LEADERBOARD',
+        tagColor: 'purple',
+        text: '[실시간 명예의 전당 랭킹 연동] 100점 초과 달성 시 실시간 도촌초등학교 랭킹 등록 지원 및 제출 후 코딩 토끼 리더보드 탭 자동 선택'
+      }
+    ]
+  },
+  {
     version: 'v1.28.0',
     date: '2026-08-19',
     title: '제18탄 신규 게임 [도촌 스카이 점퍼 (두들 점프 모티브)] 정식 개장 & 명예의 전당 연동',
-    badge: 'LATEST',
-    badgeColor: 'emerald',
+    badge: 'UPDATE',
+    badgeColor: 'blue',
     items: [
       {
         tag: 'NEW GAME',

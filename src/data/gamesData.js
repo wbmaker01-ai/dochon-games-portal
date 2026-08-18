@@ -154,19 +154,21 @@ export const PLAYABLE_GAMES = [
     category: '액션',
     imageSrc: getThumb('skyjumper.jpg'),
     isPlayable: true,
-    badgeText: '🚀 NEW 18위',
+    badgeText: '🚀 18위',
     description: '발판을 딛고 하늘과 우주 끝까지 무한 점프하는 국민 점프 아케이드!'
-  }
-];
-
-export const COMING_SOON_GAMES = [
+  },
   {
     id: 'kidscoding',
     title: '도촌 코딩 토끼',
     category: '퍼즐',
     imageSrc: getThumb('kidscoding.jpg'),
-    isPlayable: false
-  },
+    isPlayable: true,
+    badgeText: '🥕 NEW 19위',
+    description: '블록 코딩으로 토끼를 움직여 모든 당근을 수확하는 어린이 컴퓨팅 사고력 퍼즐!'
+  }
+];
+
+export const COMING_SOON_GAMES = [
   {
     id: 'bubbletea',
     title: '도촌 버블티 카페',

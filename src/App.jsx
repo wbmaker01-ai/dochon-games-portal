@@ -17,6 +17,7 @@ import MagicCatGame from './components/games/magic/MagicCatGame';
 import FruitMergeGame from './components/games/fruitmerge/FruitMergeGame';
 import BrickBreakerGame from './components/games/brickbreaker/BrickBreakerGame';
 import SkyJumperGame from './components/games/skyjumper/SkyJumperGame';
+import KidsCodingGame from './components/games/kidscoding/KidsCodingGame';
 import GameCard from './components/GameCard';
 import LeaderboardModal from './components/LeaderboardModal';
 import ChangelogModal from './components/ChangelogModal';
@@ -438,6 +439,7 @@ export default function App() {
                   {activeGame === 'fruitmerge' && '🍉 도촌 과일 합치기 (DOCHON FRUIT MERGE)'}
                   {activeGame === 'brickbreaker' && '🧱 도촌 벽돌 격파왕 (DOCHON BRICK BREAKER)'}
                   {activeGame === 'skyjumper' && '🚀 도촌 스카이 점퍼 (DOCHON SKY JUMPER)'}
+                  {activeGame === 'kidscoding' && '🐰 도촌 코딩 토끼 (DOCHON KIDS CODING)'}
                 </span>
                 <span style={{
                   backgroundColor: 'rgba(251, 191, 36, 0.2)',
@@ -541,6 +543,9 @@ export default function App() {
               )}
               {activeGame === 'skyjumper' && (
                 <SkyJumperGame onScoreSubmitted={() => openInPageLeaderboardModal('skyjumper')} />
+              )}
+              {activeGame === 'kidscoding' && (
+                <KidsCodingGame onScoreSubmitted={() => openInPageLeaderboardModal('kidscoding')} />
               )}
             </div>
           </div>
