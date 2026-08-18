@@ -328,6 +328,98 @@
   75% { transform: rotate(-10deg); }
 }
 
+/* Rabbit Victory Celebration Hop */
+.kc-rabbit-celebrating {
+  animation: kc-rabbit-dance 0.42s ease-in-out infinite alternate;
+}
+
+@keyframes kc-rabbit-dance {
+  0% { transform: scale(1) translateY(0) rotate(-6deg); }
+  50% { transform: scale(1.15, 0.88) translateY(-18px) rotate(6deg); }
+  100% { transform: scale(1) translateY(0) rotate(-6deg); }
+}
+
+/* Active Code Tracing Pill */
+.kc-running-pill {
+  background: #FEF08A;
+  color: #854D0E;
+  font-size: 0.65rem;
+  font-weight: 900;
+  padding: 2px 6px;
+  border-radius: 9999px;
+  margin-left: 6px;
+  box-shadow: 0 0 10px rgba(254, 240, 138, 0.9);
+  display: inline-flex;
+  align-items: center;
+  gap: 2px;
+}
+
+/* Speed Control Button */
+.kc-speed-btn {
+  background: rgba(59, 130, 246, 0.2);
+  border: 1px solid rgba(59, 130, 246, 0.4);
+  color: #93C5FD;
+  padding: 6px 10px;
+  border-radius: 8px;
+  font-size: 0.76rem;
+  font-weight: 800;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  transition: all 0.15s ease;
+}
+
+.kc-speed-btn:hover {
+  background: rgba(59, 130, 246, 0.4);
+  color: #FFFFFF;
+  transform: translateY(-1px);
+}
+
+/* Minimized Code Inspection Top Banner */
+.kc-minimized-banner {
+  position: absolute;
+  top: 12px;
+  left: 50%;
+  transform: translateX(-50%);
+  background: rgba(15, 23, 42, 0.95);
+  border: 2px solid #34D399;
+  border-radius: 9999px;
+  padding: 6px 16px;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  z-index: 40;
+  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.5);
+  animation: kc-pop-in 0.3s ease;
+  max-width: 90%;
+}
+
+.kc-minimized-content {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+.kc-restore-btn {
+  background: linear-gradient(135deg, #10B981, #059669);
+  color: #FFFFFF;
+  border: none;
+  padding: 4px 12px;
+  border-radius: 9999px;
+  font-size: 0.74rem;
+  font-weight: 800;
+  cursor: pointer;
+  transition: all 0.15s ease;
+  white-space: nowrap;
+}
+
+.kc-restore-btn:hover {
+  filter: brightness(1.1);
+  transform: scale(1.05);
+}
+
 /* 4. CODING WORKSPACE PANEL (RIGHT OR BOTTOM) */
 .kc-code-panel {
   flex: 1.2;

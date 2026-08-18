@@ -32,7 +32,8 @@ import {
   ChevronRight,
   Zap,
   CheckCircle2,
-  AlertCircle
+  AlertCircle,
+  Eye
 } from 'lucide-react';
 import './kidscoding.css';
 
@@ -58,6 +59,9 @@ export default function KidsCodingGame({ onScoreSubmitted }) {
   // Coding Workspace State
   const [blocks, setBlocks] = useState([]);
   const [gameState, setGameState] = useState('EDITING'); // 'EDITING' | 'RUNNING' | 'PAUSED' | 'STAGE_CLEAR' | 'ALL_CLEAR' | 'FAILED'
+  const [playbackSpeed, setPlaybackSpeed] = useState(1.0); // 0.5 | 1.0 | 2.0
+  const [isRabbitCelebrating, setIsRabbitCelebrating] = useState(false);
+  const [isModalMinimized, setIsModalMinimized] = useState(false);
 
   // Live Simulation State
   const [simState, setSimState] = useState(() => createInitialSimulationState(currentStage));
@@ -83,6 +87,8 @@ export default function KidsCodingGame({ onScoreSubmitted }) {
     stopExecution();
     setBlocks([]);
     setGameState('EDITING');
+    setIsRabbitCelebrating(false);
+    setIsModalMinimized(false);
     setSimState(createInitialSimulationState(currentStage));
     setInstructions([]);
     setInstructionPointer(0);
@@ -179,20 +185,40 @@ export default function KidsCodingGame({ onScoreSubmitted }) {
   const handleResetSimulation = () => {
     stopExecution();
     setGameState('EDITING');
+    setIsRabbitCelebrating(false);
+    setIsModalMinimized(false);
     setSimState(createInitialSimulationState(currentStage));
     setInstructionPointer(0);
     setRabbitJumping(false);
   };
 
-  // Execution Step Processor
+  const handleToggleSpeed = () => {
+    haptics.light();
+    setPlaybackSpeed(prev => {
+      if (prev === 0.5) return 1.0;
+      if (prev === 1.0) return 2.0;
+      return 0.5;
+    });
+  };
+
+  // Execution Step Processor (자연스러운 뜀박질 템포 및 승리 세레머니 딜레이 보장)
   const processNextStep = useCallback((currState, currInstructions, ptr) => {
+    const stepDuration = Math.round(650 / playbackSpeed);
+    const hopDuration = Math.round(300 / playbackSpeed);
+
     if (ptr >= currInstructions.length) {
       // Execution reached end of script
       const finalState = executeStep(currState, null, currentStage);
       setSimState(finalState);
 
       if (finalState.isClear) {
-        handleStageClear(finalState);
+        // 1.8초간 승리 세레머니 및 코드 검토 시간 제공 후 팝업 오픈
+        setIsRabbitCelebrating(true);
+        kidsCodingAudio.playStageClear();
+        runTimerRef.current = setTimeout(() => {
+          handleStageClear(finalState);
+          setIsRabbitCelebrating(false);
+        }, 1800);
       } else {
         kidsCodingAudio.playError();
         setGameState('FAILED');
@@ -206,7 +232,7 @@ export default function KidsCodingGame({ onScoreSubmitted }) {
     // Sound & Motion Effects
     if (instr.action === BLOCK_TYPE.FORWARD) {
       setRabbitJumping(true);
-      setTimeout(() => setRabbitJumping(false), 240);
+      setTimeout(() => setRabbitJumping(false), hopDuration);
       kidsCodingAudio.playHop();
     } else if (instr.action === BLOCK_TYPE.TURN_LEFT || instr.action === BLOCK_TYPE.TURN_RIGHT) {
       kidsCodingAudio.playTurn();
@@ -229,15 +255,21 @@ export default function KidsCodingGame({ onScoreSubmitted }) {
     }
 
     if (nextState.isClear) {
-      handleStageClear(nextState);
+      // 1.8초간 승리 세레머니 댄스 후 클리어 팝업 오픈
+      setIsRabbitCelebrating(true);
+      kidsCodingAudio.playStageClear();
+      runTimerRef.current = setTimeout(() => {
+        handleStageClear(nextState);
+        setIsRabbitCelebrating(false);
+      }, 1800);
       return;
     }
 
     // Queue next step if still running
     runTimerRef.current = setTimeout(() => {
       processNextStep(nextState, currInstructions, ptr + 1);
-    }, 320);
-  }, [currentStage, stageIndex]);
+    }, stepDuration);
+  }, [currentStage, stageIndex, playbackSpeed]);
 
   // Stage Clear Logic & Score Calculation
   const handleStageClear = (finalState) => {
@@ -451,6 +483,11 @@ export default function KidsCodingGame({ onScoreSubmitted }) {
         <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
           <span>{info.symbol}</span>
           <span>{info.name}</span>
+          {isRunning && (
+            <span className="kc-running-pill animate-pulse">
+              ▶️ 실행 중
+            </span>
+          )}
         </div>
         <button
           onClick={() => handleRemoveBlock(block.id)}
@@ -599,7 +636,7 @@ export default function KidsCodingGame({ onScoreSubmitted }) {
 
             {/* Animated Full-Body Rabbit Entity (전신 3D 캐릭터) */}
             <div
-              className={`kc-rabbit-entity ${rabbitJumping ? 'kc-rabbit-jumping' : ''} ${simState.isFailed ? 'kc-rabbit-fail' : ''}`}
+              className={`kc-rabbit-entity ${rabbitJumping ? 'kc-rabbit-jumping' : ''} ${isRabbitCelebrating ? 'kc-rabbit-celebrating' : ''} ${simState.isFailed ? 'kc-rabbit-fail' : ''}`}
               style={{
                 left: `${12 + simState.rabbit.x * 52}px`,
                 top: `${12 + simState.rabbit.y * 52 - 10}px`
@@ -788,7 +825,7 @@ export default function KidsCodingGame({ onScoreSubmitted }) {
 
           {/* CONTROLS TOOLBAR */}
           <div className="kc-controls-bar">
-            <div style={{ display: 'flex', gap: '8px' }}>
+            <div style={{ display: 'flex', gap: '8px', alignItems: 'center' }}>
               <button
                 onClick={handleTogglePlay}
                 disabled={blocks.length === 0}
@@ -816,6 +853,15 @@ export default function KidsCodingGame({ onScoreSubmitted }) {
                 <SkipForward size={14} />
                 <span>1단계</span>
               </button>
+
+              {/* Speed Controller: 0.5x, 1.0x, 2.0x */}
+              <button
+                onClick={handleToggleSpeed}
+                className="kc-speed-btn"
+                title="실행 속도 조절 (🐢 0.5x 천천히 / 🐰 1.0x 보통 / ⚡ 2.0x 빠르게)"
+              >
+                <span>{playbackSpeed === 0.5 ? '🐢 0.5x' : playbackSpeed === 1.0 ? '🐰 1.0x' : '⚡ 2.0x'}</span>
+              </button>
             </div>
 
             <div style={{ display: 'flex', gap: '8px' }}>
@@ -841,8 +887,29 @@ export default function KidsCodingGame({ onScoreSubmitted }) {
         </div>
       </div>
 
+      {/* Minimized Inspection Top Banner */}
+      {isModalMinimized && (gameState === 'STAGE_CLEAR' || gameState === 'ALL_CLEAR') && (
+        <div className="kc-minimized-banner">
+          <div className="kc-minimized-content">
+            <span style={{ fontSize: '1.2rem' }}>🎉</span>
+            <span style={{ fontWeight: 800, fontSize: '0.85rem', color: '#FBBF24' }}>
+              {gameState === 'ALL_CLEAR' ? '도촌 코딩 마스터 등극!' : '스테이지 클리어! 토끼의 수확 성공'}
+            </span>
+            <span style={{ fontSize: '0.75rem', color: '#CBD5E1' }}>
+              (사용한 블록: {totalBlocksUsed}개 / 점수: {score}점)
+            </span>
+          </div>
+          <button
+            onClick={() => setIsModalMinimized(false)}
+            className="kc-restore-btn"
+          >
+            <span>결과 팝업 다시 보기 🔼</span>
+          </button>
+        </div>
+      )}
+
       {/* 3. STAGE CLEAR OVERLAY MODAL */}
-      {gameState === 'STAGE_CLEAR' && (
+      {gameState === 'STAGE_CLEAR' && !isModalMinimized && (
         <div className="kc-overlay-modal">
           <div className="kc-modal-card">
             <div style={{ fontSize: '2.5rem', marginBottom: '8px' }}>🎉</div>
@@ -879,17 +946,27 @@ export default function KidsCodingGame({ onScoreSubmitted }) {
               )}
             </div>
 
-            <div style={{ display: 'flex', gap: '10px', justifyContent: 'center' }}>
+            <div style={{ display: 'flex', gap: '8px', justifyContent: 'center', flexWrap: 'wrap' }}>
+              <button
+                onClick={() => setIsModalMinimized(true)}
+                className="kc-secondary-btn"
+                title="팝업을 내리고 내가 짠 코드와 맵을 살펴봅니다"
+                style={{ padding: '8px 12px' }}
+              >
+                <Eye size={14} />
+                <span>내 코드/맵 보기</span>
+              </button>
               <button
                 onClick={handleResetSimulation}
                 className="kc-secondary-btn"
-                style={{ padding: '8px 16px' }}
+                style={{ padding: '8px 12px' }}
               >
                 다시 도전 🔄
               </button>
               <button
                 onClick={handleNextStage}
                 className="kc-play-btn"
+                style={{ padding: '8px 14px' }}
               >
                 <span>다음 스테이지</span>
                 <ChevronRight size={16} />
@@ -900,7 +977,7 @@ export default function KidsCodingGame({ onScoreSubmitted }) {
       )}
 
       {/* 4. ALL STAGES MASTERED / VICTORY OVERLAY */}
-      {gameState === 'ALL_CLEAR' && (
+      {gameState === 'ALL_CLEAR' && !isModalMinimized && (
         <div className="kc-overlay-modal">
           <div className="kc-modal-card">
             <div style={{ fontSize: '3rem', marginBottom: '8px' }}>🏆</div>
@@ -922,6 +999,18 @@ export default function KidsCodingGame({ onScoreSubmitted }) {
               <div style={{ fontSize: '1.8rem', fontWeight: 900, color: '#FBBF24' }}>
                 {score}점
               </div>
+            </div>
+
+            {/* Inspect code button in victory screen */}
+            <div style={{ marginBottom: '12px' }}>
+              <button
+                onClick={() => setIsModalMinimized(true)}
+                className="kc-secondary-btn"
+                style={{ margin: '0 auto', padding: '6px 14px' }}
+              >
+                <Eye size={14} />
+                <span>내 최종 코드 & 맵 둘러보기</span>
+              </button>
             </div>
 
             {/* Hall of Fame Submission Form (GEMINI.md Rule: score > 100) */}
