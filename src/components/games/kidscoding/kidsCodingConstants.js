@@ -45,7 +45,7 @@ export const BLOCK_INFO = {
   [BLOCK_TYPE.TURN_LEFT]: {
     id: BLOCK_TYPE.TURN_LEFT,
     name: '왼쪽으로 돌기',
-    symbol: '↩️',
+    symbol: '↪️',
     color: '#10B981',       // Emerald Green
     hoverColor: '#059669',
     iconColor: '#6EE7B7',
@@ -54,7 +54,7 @@ export const BLOCK_INFO = {
   [BLOCK_TYPE.TURN_RIGHT]: {
     id: BLOCK_TYPE.TURN_RIGHT,
     name: '오른쪽으로 돌기',
-    symbol: '↪️',
+    symbol: '↩️',
     color: '#F59E0B',       // Amber
     hoverColor: '#D97706',
     iconColor: '#FDE68A',
