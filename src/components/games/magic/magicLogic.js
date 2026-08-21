@@ -38,6 +38,7 @@ export class MagicGameLogic {
       isCasting: false,
       castTimer: 0,
       invulnerableTimer: 0,
+      hurtAnimTimer: 0,
       blinkTimer: 0,
       isBlinking: false
     };
@@ -56,6 +57,7 @@ export class MagicGameLogic {
     this.particles = [];
     this.floatingTexts = [];
     this.screenFlash = 0;
+    this.hurtFlash = 0;
     this.screenShake = 0;
 
     // Boss state (Stage 5)
@@ -136,6 +138,7 @@ export class MagicGameLogic {
 
     // Player timers
     if (this.player.invulnerableTimer > 0) this.player.invulnerableTimer--;
+    if (this.player.hurtAnimTimer > 0) this.player.hurtAnimTimer--;
     if (this.player.castTimer > 0) {
       this.player.castTimer--;
       if (this.player.castTimer === 0) {
@@ -156,6 +159,7 @@ export class MagicGameLogic {
 
     // Screen effects decay
     if (this.screenFlash > 0) this.screenFlash -= 0.05;
+    if (this.hurtFlash > 0) this.hurtFlash -= 0.035;
     if (this.screenShake > 0) this.screenShake *= 0.85;
     if (this.screenShake < 0.2) this.screenShake = 0;
 
@@ -294,11 +298,18 @@ export class MagicGameLogic {
       g.currentY = g.y + perpY * Math.sin(g.wobbleTimer) * 8;
 
       // Check collision with player
-      if (dist < 48) {
-        this.onPlayerHit();
-        // Remove the attacking ghost with puff
-        this.createPurifiedBurst(g.x, g.y, '#EF4444');
-        this.ghosts.splice(i, 1);
+      if (dist < 46) {
+        const hitTaken = this.onPlayerHit();
+        if (hitTaken) {
+          // Attacking ghost explodes upon dealing damage
+          this.createPurifiedBurst(g.x, g.y, '#EF4444');
+          this.ghosts.splice(i, 1);
+        } else {
+          // Player is in temporary immune flash: bounce ghost back slightly
+          const pushAngle = Math.atan2(g.y - this.player.y, g.x - this.player.x);
+          g.x = this.player.x + Math.cos(pushAngle) * 55;
+          g.y = this.player.y + Math.sin(pushAngle) * 55;
+        }
       }
     }
   }
@@ -373,13 +384,13 @@ export class MagicGameLogic {
         }
       });
 
-      if (heartHit || (this.player.hp < this.player.maxHp && this.combo >= 4)) {
+      if (heartHit) {
         if (this.player.hp < this.player.maxHp) {
           this.player.hp = Math.min(this.player.maxHp, this.player.hp + 1);
-          this.addFloatingText(this.player.x, this.player.y - 60, '+1 HP ❤️ 회복!', '#F43F5E');
+          this.addFloatingText(this.player.x, this.player.y - 70, '+1 HP ❤️ 회복!', '#10B981');
           magicAudio.playHeartHeal();
-          matched = true;
         }
+        matched = true;
       }
     }
 
@@ -500,19 +511,34 @@ export class MagicGameLogic {
   }
 
   onPlayerHit() {
-    if (this.player.invulnerableTimer > 0) return;
-    this.player.hp--;
-    this.player.invulnerableTimer = 45;
+    if (this.player.invulnerableTimer > 0) return false;
+    this.player.hp = Math.max(0, this.player.hp - 1);
+    this.player.invulnerableTimer = 35;
+    this.player.hurtAnimTimer = 30;
     this.combo = 0;
-    this.screenFlash = 0.7;
+    this.screenFlash = 0.5;
+    this.hurtFlash = 0.85;
     this.screenShake = 14;
     magicAudio.playPlayerHurt();
+
+    // Floating damage text directly above Momo
+    this.addFloatingText(this.player.x, this.player.y - 75, '-1 HP 💔 피격!', '#EF4444');
+
+    // Red spark particles around Momo
+    for (let i = 0; i < 16; i++) {
+      this.createSparkleParticle(
+        this.player.x + (Math.random() - 0.5) * 36,
+        this.player.y + (Math.random() - 0.5) * 30,
+        '#EF4444'
+      );
+    }
 
     if (this.player.hp <= 0) {
       this.player.hp = 0;
       this.gameState = 'GAME_OVER';
       magicAudio.playGameOver();
     }
+    return true;
   }
 
   addScore(points, x, y, label = '') {
@@ -627,7 +653,19 @@ export class MagicGameLogic {
     // 8. Draw Floating Score Texts
     this.renderFloatingTexts(ctx);
 
-    // 9. Draw Screen Flash Overlay
+    // 9. Draw Red Damage Hurt Vignette
+    if (this.hurtFlash > 0) {
+      const hurtGrad = ctx.createRadialGradient(
+        CANVAS_WIDTH / 2, CANVAS_HEIGHT / 2, CANVAS_HEIGHT * 0.25,
+        CANVAS_WIDTH / 2, CANVAS_HEIGHT / 2, CANVAS_WIDTH * 0.7
+      );
+      hurtGrad.addColorStop(0, 'rgba(239, 68, 68, 0)');
+      hurtGrad.addColorStop(1, `rgba(239, 68, 68, ${Math.min(0.6, this.hurtFlash)})`);
+      ctx.fillStyle = hurtGrad;
+      ctx.fillRect(0, 0, CANVAS_WIDTH, CANVAS_HEIGHT);
+    }
+
+    // 10. Draw Screen Flash Overlay
     if (this.screenFlash > 0) {
       ctx.fillStyle = `rgba(255, 255, 255, ${Math.min(1, this.screenFlash)})`;
       ctx.fillRect(0, 0, CANVAS_WIDTH, CANVAS_HEIGHT);
@@ -668,7 +706,34 @@ export class MagicGameLogic {
 
     // Hurt invulnerability flash
     if (p.invulnerableTimer > 0 && Math.floor(p.invulnerableTimer / 4) % 2 === 0) {
-      ctx.globalAlpha = 0.4;
+      ctx.globalAlpha = 0.45;
+    }
+
+    // Floating Mini HP Hearts directly above Momo's Hat (Always visible for clear HP awareness)
+    const heartSpacing = 16;
+    const startX = -((p.maxHp - 1) * heartSpacing) / 2;
+    const heartY = -72;
+
+    for (let i = 0; i < p.maxHp; i++) {
+      const hx = startX + i * heartSpacing;
+      ctx.save();
+      ctx.translate(hx, heartY);
+      if (i < p.hp) {
+        // Active Red Glowing Heart
+        ctx.fillStyle = '#F43F5E';
+        ctx.shadowColor = 'rgba(244, 63, 94, 0.8)';
+        ctx.shadowBlur = 6;
+      } else {
+        // Depleted Dark Heart
+        ctx.fillStyle = 'rgba(71, 85, 105, 0.55)';
+        ctx.shadowBlur = 0;
+      }
+      ctx.beginPath();
+      ctx.moveTo(0, 3);
+      ctx.bezierCurveTo(-4.5, -2, -7.5, 2.5, 0, 8);
+      ctx.bezierCurveTo(7.5, 2.5, 4.5, -2, 0, 3);
+      ctx.fill();
+      ctx.restore();
     }
 
     // Soft Ground Shadow
@@ -678,13 +743,13 @@ export class MagicGameLogic {
     ctx.fill();
 
     // Momo Body (Black Cat)
-    ctx.fillStyle = '#18181B';
+    ctx.fillStyle = p.hurtAnimTimer > 0 ? '#450A0A' : '#18181B';
     ctx.beginPath();
     ctx.ellipse(0, 0, 24, 20, 0, 0, Math.PI * 2);
     ctx.fill();
 
     // Cat Ears
-    ctx.fillStyle = '#18181B';
+    ctx.fillStyle = p.hurtAnimTimer > 0 ? '#450A0A' : '#18181B';
     // Left Ear
     ctx.beginPath();
     ctx.moveTo(-18, -12);
@@ -700,7 +765,7 @@ export class MagicGameLogic {
     ctx.fill();
 
     // Right Ear
-    ctx.fillStyle = '#18181B';
+    ctx.fillStyle = p.hurtAnimTimer > 0 ? '#450A0A' : '#18181B';
     ctx.beginPath();
     ctx.moveTo(6, -18);
     ctx.lineTo(24, -30);
@@ -729,8 +794,31 @@ export class MagicGameLogic {
     ctx.arc(0, 14, 5, 0, Math.PI * 2);
     ctx.fill();
 
-    // Big Yellow Eyes
-    if (!p.isBlinking) {
+    // Cat Eyes: Normal / Blinking / Hurt (> <)
+    if (p.hurtAnimTimer > 0) {
+      // Hurt > < Eyes in fiery amber
+      ctx.strokeStyle = '#FDE047';
+      ctx.lineWidth = 3;
+      ctx.lineCap = 'round';
+      // Left eye >
+      ctx.beginPath();
+      ctx.moveTo(-12, -8);
+      ctx.lineTo(-6, -4);
+      ctx.lineTo(-12, 0);
+      ctx.stroke();
+      // Right eye <
+      ctx.beginPath();
+      ctx.moveTo(12, -8);
+      ctx.lineTo(6, -4);
+      ctx.lineTo(12, 0);
+      ctx.stroke();
+
+      // Sweat drop
+      ctx.fillStyle = '#38BDF8';
+      ctx.beginPath();
+      ctx.arc(18, -12, 3, 0, Math.PI * 2);
+      ctx.fill();
+    } else if (!p.isBlinking) {
       ctx.fillStyle = '#FDE047';
       // Left Eye
       ctx.beginPath();

@@ -202,15 +202,11 @@ export default function MagicCatGame({ onScoreSubmitted }) {
           </div>
 
           {/* Player HP Hearts */}
-          <div className="magic-hearts-container">
+          <div className="magic-hearts-container" title={`남은 생명력: ${playerHp}/${PLAYER_MAX_HP}`}>
             {Array.from({ length: PLAYER_MAX_HP }).map((_, i) => (
               <Heart
                 key={i}
-                className={`w-4 h-4 transition-all duration-300 ${
-                  i < playerHp
-                    ? 'text-rose-500 fill-rose-500 scale-100 drop-shadow-[0_0_6px_rgba(244,63,94,0.7)]'
-                    : 'text-slate-600 fill-slate-800/80 scale-90 opacity-40'
-                }`}
+                className={`magic-heart-icon ${i < playerHp ? 'magic-heart-active' : 'magic-heart-lost'}`}
               />
             ))}
           </div>

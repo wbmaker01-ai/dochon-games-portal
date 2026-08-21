@@ -3,11 +3,30 @@
 
 export const CHANGELOG_DATA = [
   {
+    version: 'v1.30.1',
+    date: '2026-08-21',
+    title: '[도촌 매직 캣 아카데미] 유령 충돌 시 하트 감소 판정 정상화 및 피격 시각 피드백 강화',
+    badge: 'LATEST',
+    badgeColor: 'emerald',
+    items: [
+      {
+        tag: 'BUG FIX',
+        tagColor: 'rose',
+        text: '[유령 충돌 및 하트 감소 판정 버그 수정] 무적 시간 중 다중 유령 충돌 시 유령이 대미지 없이 소멸하던 현상 및 제스처 오인식에 의한 무분별한 힐링 문제를 수정하여 정확한 하트 감소 보장'
+      },
+      {
+        tag: 'VISUAL FX',
+        tagColor: 'amber',
+        text: '[인게임 체력 표시 및 피격 연출 대폭 강화] 주인공 고양이 모모 머리 위에 5개 미니 하트 실시간 UI 배치, 피격 시 -1 HP 💔 플로팅 대미지 텍스트, 아파하는 표정 연출 및 화면 붉은빛 비네트 이펙트 탑재'
+      }
+    ]
+  },
+  {
     version: 'v1.30.0',
     date: '2026-08-19',
     title: '[도촌 스카이 점퍼] 3·2·1 카운트다운 시스템 도입 및 키보드 조작감(마우스 간섭 방지) 개선',
-    badge: 'LATEST',
-    badgeColor: 'emerald',
+    badge: 'UPDATE',
+    badgeColor: 'blue',
     items: [
       {
         tag: 'GAMEPLAY',
