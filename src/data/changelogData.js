@@ -3,11 +3,45 @@
 
 export const CHANGELOG_DATA = [
   {
+    version: 'v1.34.0',
+    date: '2026-08-21',
+    title: '제22탄 신규 게임 [도촌 꿀벌의 비행 (Earth Day Bee 모티브)] 정식 개장 & 힐링 비행 액션 오픈',
+    badge: 'LATEST',
+    badgeColor: 'emerald',
+    items: [
+      {
+        tag: 'NEW GAME',
+        tagColor: 'emerald',
+        text: '[도촌 꿀벌의 비행 정식 개장] 2020년 지구의 날(Earth Day 50주년) 구글 두들을 모티브로 한 꽃가루 수분 & 도촌초 생태계 가꾸기 힐링 비행 액션 정식 오픈'
+      },
+      {
+        tag: 'FLIGHT PHYSICS',
+        tagColor: 'amber',
+        text: '[2D Canvas 꿀벌 비행 & 수분 물리 엔진] 부드러운 날갯짓과 회전 스티어링 물리, 시차 스크롤 잔디밭 & 구름 배경, 5종 꽃(데이지·튤립·해바라기·라벤더·무지개꽃) 개화(Bloom) 및 꽃가루 파티클 연출'
+      },
+      {
+        tag: 'AUDIO SYNTH',
+        tagColor: 'blue',
+        text: '[Web Audio API 자연 힐링 사운드 신디사이저] 꿀벌 비행 허밍음, 꽃가루 획득 챠임, 꽃 개화 벨소리, 콤보 상승 아르페지오 및 레벨업 팡파르 100% 자체 합성 구현'
+      },
+      {
+        tag: 'ECOFACTS & COMBO',
+        tagColor: 'teal',
+        text: '[도촌 생태계 레벨 & 환경 꿀벌 상식] 단계별 화단 번성 시스템, 연속 개화 콤보(최대 x5) 및 생태계 보호 교육 팩트 토스트 제공'
+      },
+      {
+        tag: 'LEADERBOARD',
+        tagColor: 'purple',
+        text: '[도촌초 실시간 명예의 전당 연동] 100점 초과 달성 시 실시간 전교 랭킹 점수 등록 지원 및 점수 등록 후 꿀벌의 비행 리더보드 탭 자동 동기화'
+      }
+    ]
+  },
+  {
     version: 'v1.33.0',
     date: '2026-08-21',
     title: '제21탄 신규 게임 [도촌 피자 마스터 (Celebrating Pizza 모티브)] 정식 개장 & 수학 분수 퍼즐 오픈',
-    badge: 'LATEST',
-    badgeColor: 'emerald',
+    badge: 'UPDATE',
+    badgeColor: 'blue',
     items: [
       {
         tag: 'NEW GAME',

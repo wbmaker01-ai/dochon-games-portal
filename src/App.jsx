@@ -20,6 +20,7 @@ import SkyJumperGame from './components/games/skyjumper/SkyJumperGame';
 import KidsCodingGame from './components/games/kidscoding/KidsCodingGame';
 import BubbleTeaGame from './components/games/bubbletea/BubbleTeaGame';
 import PizzaGame from './components/games/pizza/PizzaGame';
+import EarthBeeGame from './components/games/earthbee/EarthBeeGame';
 import GameCard from './components/GameCard';
 import LeaderboardModal from './components/LeaderboardModal';
 import ChangelogModal from './components/ChangelogModal';
@@ -460,6 +461,7 @@ export default function App() {
                   {activeGame === 'kidscoding' && '🐰 도촌 코딩 토끼 (DOCHON KIDS CODING)'}
                   {activeGame === 'bubbletea' && '🧋 도촌 버블티 카페 (DOCHON BUBBLE TEA CAFE)'}
                   {activeGame === 'pizza' && '🍕 도촌 피자 마스터 (DOCHON PIZZA MASTER)'}
+                  {activeGame === 'earthbee' && '🐝 도촌 꿀벌의 비행 (DOCHON EARTH BEE)'}
                 </span>
                 <span style={{
                   backgroundColor: 'rgba(251, 191, 36, 0.2)',
@@ -572,6 +574,9 @@ export default function App() {
               )}
               {activeGame === 'pizza' && (
                 <PizzaGame onScoreSubmitted={() => openInPageLeaderboardModal('pizza')} />
+              )}
+              {activeGame === 'earthbee' && (
+                <EarthBeeGame onScoreSubmitted={() => openInPageLeaderboardModal('earthbee')} />
               )}
             </div>
           </div>
