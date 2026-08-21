@@ -190,19 +190,21 @@ export const PLAYABLE_GAMES = [
     category: '액션',
     imageSrc: getThumb('earthbee.jpg'),
     isPlayable: true,
-    badgeText: '🐝 NEW 22위',
+    badgeText: '🐝 22위',
     description: '꽃가루를 묻혀 꽃을 피우고 도촌초 생태계를 가꾸는 구글 두들 모티브 힐링 비행 액션!'
-  }
-];
-
-export const COMING_SOON_GAMES = [
+  },
   {
     id: 'olympics',
     title: '도촌 미니 올림픽',
     category: '스포츠',
     imageSrc: getThumb('olympics.jpg'),
-    isPlayable: false
-  },
+    isPlayable: true,
+    badgeText: '🏅 NEW 23위',
+    description: '100m 허들 달리기 · 3점슛 챌린지 · 급류 카누 슬라럼 3대 릴레이 스포츠 챔피언십!'
+  }
+];
+
+export const COMING_SOON_GAMES = [
   {
     id: 'pangolin',
     title: '도촌 천산갑의 모험',

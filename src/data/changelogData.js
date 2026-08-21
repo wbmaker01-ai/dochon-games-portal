@@ -3,11 +3,45 @@
 
 export const CHANGELOG_DATA = [
   {
+    version: 'v1.35.0',
+    date: '2026-08-21',
+    title: '제23탄 신규 게임 [도촌 미니 올림픽 (3대 릴레이 스포츠 챔피언십)] 정식 개장',
+    badge: 'LATEST',
+    badgeColor: 'emerald',
+    items: [
+      {
+        tag: 'NEW GAME',
+        tagColor: 'emerald',
+        text: '[도촌 미니 올림픽 정식 개장] Google 올림픽 기념 인터랙티브 스포츠 아케이드를 모티브로 한 3대 종목(100m 허들 달리기, 3점 슛 챌린지, 급류 카누 슬라럼) 릴레이 챔피언십 정식 오픈'
+      },
+      {
+        tag: 'PURE CODE ENGINE',
+        tagColor: 'amber',
+        text: '[100% 순수 코드 2D Canvas 그래픽 엔진] 외부 이미지 파일 없이 올림픽 몬도 트랙, 원목 농구 코트, 급류 물결 및 선수 캐릭터 애니메이션(달리기·슈팅·패들링) 벡터 렌더링 구현'
+      },
+      {
+        tag: 'AUDIO SYNTH',
+        tagColor: 'blue',
+        text: '[Web Audio API 스포츠 효과음 신디사이저] 출발 총성, 심판 휘슬, 발소리, 허들 점프 및 클리어 벨, 농구 림 스위시, 카누 물살, 관중 환호성, 시상식 팡파레 자체 합성'
+      },
+      {
+        tag: 'TEAM & MULTI-EVENT',
+        tagColor: 'teal',
+        text: '[4개 참가팀 선택 & 3종목 종합 채점 시스템] 도촌 불꽃·푸른·에메랄드·번개팀 유니폼 선택, 종목별 기록 합산 올림픽 종합 점수 및 금/은/동 메달 수여식 지원'
+      },
+      {
+        tag: 'LEADERBOARD',
+        tagColor: 'purple',
+        text: '[도촌초 실시간 명예의 전당 연동] 100점 초과 달성 시 실시간 전교 랭킹 점수 등록 지원 및 점수 등록 후 미니 올림픽 리더보드 탭 자동 동기화'
+      }
+    ]
+  },
+  {
     version: 'v1.34.0',
     date: '2026-08-21',
     title: '제22탄 신규 게임 [도촌 꿀벌의 비행 (Earth Day Bee 모티브)] 정식 개장 & 힐링 비행 액션 오픈',
-    badge: 'LATEST',
-    badgeColor: 'emerald',
+    badge: 'UPDATE',
+    badgeColor: 'blue',
     items: [
       {
         tag: 'NEW GAME',

@@ -1,0 +1,263 @@
+/* Olympics Game Stylesheet for Dochon Mini Olympics */
+
+.olympics-container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: space-between;
+  width: 100%;
+  max-width: 720px;
+  margin: 0 auto;
+  min-height: 520px;
+  background: radial-gradient(circle at 50% 20%, #1E1B4B, #0F172A 80%);
+  border-radius: 20px;
+  overflow: hidden;
+  box-shadow: 0 16px 40px rgba(0, 0, 0, 0.6);
+  user-select: none;
+  font-family: inherit;
+  position: relative;
+}
+
+/* Header */
+.olympics-header {
+  width: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 10px 16px;
+  background: rgba(15, 23, 42, 0.85);
+  border-bottom: 1px solid rgba(245, 158, 11, 0.3);
+  backdrop-filter: blur(8px);
+  z-index: 10;
+}
+
+.olympics-btn-icon {
+  width: 32px;
+  height: 32px;
+  border-radius: 10px;
+  background: rgba(30, 41, 59, 0.8);
+  border: 1px solid rgba(255, 255, 255, 0.15);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.olympics-btn-icon:hover {
+  background: rgba(51, 65, 85, 0.9);
+  transform: scale(1.05);
+}
+
+/* Viewport & Canvas */
+.olympics-viewport {
+  position: relative;
+  width: 100%;
+  aspect-ratio: 16 / 10;
+  max-height: 420px;
+  background: #020617;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  overflow: hidden;
+}
+
+.olympics-canvas {
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+  display: block;
+}
+
+/* Overlays */
+.olympics-overlay-screen {
+  position: absolute;
+  inset: 0;
+  background: rgba(15, 23, 42, 0.78);
+  backdrop-filter: blur(6px);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 16px;
+  z-index: 20;
+}
+
+.olympics-countdown-overlay {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  pointer-events: none;
+  z-index: 15;
+}
+
+.olympics-countdown-text {
+  font-size: 3.5rem;
+  font-weight: 900;
+  color: #FDE047;
+  text-shadow: 0 4px 20px rgba(253, 224, 71, 0.8), 0 0 40px rgba(0,0,0,0.9);
+  letter-spacing: 2px;
+}
+
+.olympics-results-card {
+  width: 100%;
+  max-width: 380px;
+  background: #0F172A;
+  border: 2px solid #F59E0B;
+  border-radius: 24px;
+  padding: 20px;
+  text-align: center;
+  box-shadow: 0 20px 50px rgba(0, 0, 0, 0.8);
+}
+
+/* Buttons & Inputs */
+.olympics-btn-primary {
+  background: linear-gradient(135deg, #F59E0B, #D97706);
+  color: #FFFFFF;
+  border: none;
+  padding: 10px 16px;
+  border-radius: 12px;
+  font-weight: 900;
+  cursor: pointer;
+  box-shadow: 0 4px 14px rgba(217, 119, 6, 0.4);
+  transition: all 0.2s ease;
+}
+
+.olympics-btn-primary:hover {
+  filter: brightness(1.1);
+  transform: translateY(-1px);
+}
+
+.olympics-btn-primary:active {
+  transform: translateY(1px);
+}
+
+.olympics-btn-secondary {
+  background: #334155;
+  color: #E2E8F0;
+  border: 1px solid #475569;
+  padding: 8px 14px;
+  border-radius: 12px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.olympics-btn-secondary:hover {
+  background: #475569;
+}
+
+.olympics-name-input {
+  flex: 1;
+  background: #1E293B;
+  border: 1.5px solid #F59E0B;
+  border-radius: 12px;
+  padding: 8px 12px;
+  color: #FFFFFF;
+  font-size: 13px;
+  font-weight: 700;
+  outline: none;
+}
+
+.olympics-name-input::placeholder {
+  color: #94A3B8;
+}
+
+/* Controls Panel */
+.olympics-controls-panel {
+  width: 100%;
+  padding: 10px 16px;
+  background: rgba(15, 23, 42, 0.9);
+  border-top: 1px solid rgba(255, 255, 255, 0.1);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 10;
+}
+
+.olympics-control-btn {
+  border: none;
+  color: #FFFFFF;
+  padding: 12px 14px;
+  border-radius: 14px;
+  font-weight: 900;
+  font-size: 13px;
+  cursor: pointer;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+  transition: transform 0.1s ease;
+  touch-action: manipulation;
+}
+
+.olympics-control-btn:active {
+  transform: scale(0.95);
+}
+
+/* How to play Modal */
+.olympics-modal-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.82);
+  backdrop-filter: blur(8px);
+  z-index: 10000;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 16px;
+}
+
+.olympics-howto-modal {
+  width: 100%;
+  max-width: 480px;
+  background: #0F172A;
+  border: 2px solid #F59E0B;
+  border-radius: 24px;
+  padding: 20px;
+  box-shadow: 0 24px 60px rgba(0, 0, 0, 0.9);
+  display: flex;
+  flex-direction: column;
+  max-height: 90vh;
+  overflow-y: auto;
+}
+
+.olympics-modal-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+  padding-bottom: 10px;
+  margin-bottom: 12px;
+}
+
+.olympics-modal-close {
+  background: transparent;
+  border: none;
+  cursor: pointer;
+  padding: 4px;
+  border-radius: 8px;
+}
+
+.olympics-howto-intro {
+  background: rgba(245, 158, 11, 0.12);
+  border: 1px solid rgba(245, 158, 11, 0.3);
+  border-radius: 14px;
+  padding: 10px 14px;
+  margin-bottom: 10px;
+}
+
+.olympics-event-card {
+  border-width: 1.5px;
+  border-radius: 16px;
+  padding: 12px;
+}
+
+.olympics-key {
+  display: inline-block;
+  padding: 1px 6px;
+  background: #334155;
+  border: 1px solid #64748B;
+  border-radius: 6px;
+  color: #FDE047;
+  font-weight: 800;
+  font-size: 10px;
+  box-shadow: 0 2px 0 #1E293B;
+}
