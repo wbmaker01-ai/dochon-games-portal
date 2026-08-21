@@ -163,19 +163,21 @@ export const PLAYABLE_GAMES = [
     category: '퍼즐',
     imageSrc: getThumb('kidscoding.jpg'),
     isPlayable: true,
-    badgeText: '🥕 NEW 19위',
+    badgeText: '🥕 19위',
     description: '블록 코딩으로 토끼를 움직여 모든 당근을 수확하는 어린이 컴퓨팅 사고력 퍼즐!'
-  }
-];
-
-export const COMING_SOON_GAMES = [
+  },
   {
     id: 'bubbletea',
     title: '도촌 버블티 카페',
     category: '액션',
     imageSrc: getThumb('bubbletea.jpg'),
-    isPlayable: false
-  },
+    isPlayable: true,
+    badgeText: '🧋 NEW 20위',
+    description: '귀여운 동물 손님들의 주문에 맞춰 쫀득한 펄과 달콤한 밀크티를 정량 채우는 힐링 타이쿤!'
+  }
+];
+
+export const COMING_SOON_GAMES = [
   {
     id: 'pizza',
     title: '도촌 피자 마스터',

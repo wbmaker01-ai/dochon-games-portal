@@ -450,6 +450,20 @@ function getLocalLeaderboardFallback(gameKey) {
       { id: 'sj3', name: '이로켓 (5B)', score: 11500, date: '2026-08-18' },
       { id: 'sj4', name: '박스프링 (4C)', score: 8300, date: '2026-08-18' },
       { id: 'sj5', name: '최우주 (3A)', score: 5400, date: '2026-08-17' }
+    ],
+    kidscoding: [
+      { id: 'kc1', name: '김홍년선생님', score: 3200, date: '2026-08-20' },
+      { id: 'kc2', name: '김알고 (6A)', score: 2800, date: '2026-08-20' },
+      { id: 'kc3', name: '이루프 (5B)', score: 2400, date: '2026-08-19' },
+      { id: 'kc4', name: '박토끼 (4C)', score: 1900, date: '2026-08-19' },
+      { id: 'kc5', name: '최당근 (3A)', score: 1400, date: '2026-08-19' }
+    ],
+    bubbletea: [
+      { id: 'bt1', name: '김홍년선생님', score: 2850, date: '2026-08-21' },
+      { id: 'bt2', name: '김버블 (6A)', score: 2400, date: '2026-08-21' },
+      { id: 'bt3', name: '이타로 (5B)', score: 1950, date: '2026-08-21' },
+      { id: 'bt4', name: '박밀크 (4C)', score: 1500, date: '2026-08-21' },
+      { id: 'bt5', name: '최흑당 (3A)', score: 1100, date: '2026-08-21' }
     ]
   };
 

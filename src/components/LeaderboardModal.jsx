@@ -288,6 +288,7 @@ export default function LeaderboardModal({ isOpen, onClose, activeTab = 'pacman'
             if (game.id === 'brickbreaker') iconEmoji = '🧱';
             if (game.id === 'skyjumper') iconEmoji = '🚀';
             if (game.id === 'kidscoding') iconEmoji = '🥕';
+            if (game.id === 'bubbletea') iconEmoji = '🧋';
 
             // Remove '도촌 ' prefix for compact and clean layout
             const shortTitle = game.title.replace(/^도촌\s*/, '');
@@ -313,6 +314,7 @@ export default function LeaderboardModal({ isOpen, onClose, activeTab = 'pacman'
               else if (game.id === 'brickbreaker') activeCustomStyle = { background: 'linear-gradient(135deg, #0284C7, #0369A1)', color: '#FFFFFF' };
               else if (game.id === 'skyjumper') activeCustomStyle = { background: 'linear-gradient(135deg, #0EA5E9, #6366F1)', color: '#FFFFFF' };
               else if (game.id === 'kidscoding') activeCustomStyle = { background: 'linear-gradient(135deg, #10B981, #3B82F6)', color: '#FFFFFF' };
+              else if (game.id === 'bubbletea') activeCustomStyle = { background: 'linear-gradient(135deg, #F59E0B, #8B5CF6)', color: '#FFFFFF' };
             }
 
             return (

@@ -3,11 +3,64 @@
 
 export const CHANGELOG_DATA = [
   {
+    version: 'v1.32.0',
+    date: '2026-08-21',
+    title: '즐겨찾기 초기 진입 상태 전체 해제(Clean State) 기본값 적용 및 로컬 저장소 동기화',
+    badge: 'LATEST',
+    badgeColor: 'emerald',
+    items: [
+      {
+        tag: 'FAVORITES INIT',
+        tagColor: 'pink',
+        text: '[초기 접속 시 즐겨찾기 전체 해제] 신규 사용자 또는 첫 접속 시 임의의 추천 게임이 강제 등록되지 않고 모든 즐겨찾기가 깨끗하게 해제된 초기 상태로 시작하도록 기본값 개편'
+      },
+      {
+        tag: 'USER CHOICE PERSISTENCE',
+        tagColor: 'teal',
+        text: '[사용자 맞춤 즐겨찾기 영구 저장] 사용자가 게임 카드 상단의 하트(💖) 아이콘을 직접 눌러 등록/해제한 내역만 브라우저 로컬 저장소(localStorage)에 안전하게 기록 및 동기화'
+      },
+      {
+        tag: 'EMPTY STATE UX',
+        tagColor: 'amber',
+        text: '[즐겨찾기 필터 빈 상태 안내 화면 추가] 등록된 즐겨찾기가 0개일 때 즐겨찾기 탭 진입 시 친절한 하트 등록 방법 가이드 카드 표시'
+      }
+    ]
+  },
+  {
+    version: 'v1.31.0',
+    date: '2026-08-21',
+    title: '제20탄 신규 게임 [도촌 버블티 카페 (Bubble Tea 모티브)] 정식 개장 & 힐링 타이쿤 오픈',
+    badge: 'UPDATE',
+    badgeColor: 'blue',
+    items: [
+      {
+        tag: 'NEW GAME',
+        tagColor: 'emerald',
+        text: '[도촌 버블티 카페 정식 개장] 구글 두들 글로벌 명작 Celebrating Bubble Tea를 모티브로 한 3단계 정량 맞추기 타이밍 힐링 아케이드 정식 오픈 (펄 투입, 밀크티 붓기, 시럽 토핑 단계별 구현)'
+      },
+      {
+        tag: 'PHYSICS & VISUAL',
+        tagColor: 'amber',
+        text: '[2D Canvas 유체 표면 파동 & 쫀득 펄 물리] 컵 내 차오르는 액체의 실시간 표면 파동(Sine Wave) 연출, 펄 탄성 충돌 물리, 스트로우 꽂힘 및 6종 귀여운 동물 손님 힐링 애니메이션 탑재'
+      },
+      {
+        tag: 'AUDIO ENGINE',
+        tagColor: 'blue',
+        text: '[Web Audio API ASMR 사운드 신디사이저] 펄 떨어지는 퐁당퐁당 소리, 음료 차오르는 쪼르륵 주입음, 스트로우 뽁! 효과음, 별점 판정 차임벨 및 호로록 음미 사운드 100% 자체 합성 구현'
+      },
+      {
+        tag: 'LEADERBOARD',
+        tagColor: 'purple',
+        text: '[도촌초 실시간 명예의 전당 연동] 100점 초과 달성 시 실시간 전교 랭킹 점수 등록 지원 및 점수 등록 후 버블티 카페 리더보드 탭 자동 동기화'
+      }
+    ]
+  },
+  {
     version: 'v1.30.1',
     date: '2026-08-21',
     title: '[도촌 매직 캣 아카데미] 유령 충돌 시 하트 감소 판정 정상화 및 피격 시각 피드백 강화',
-    badge: 'LATEST',
-    badgeColor: 'emerald',
+    badge: 'UPDATE',
+    badgeColor: 'blue',
     items: [
       {
         tag: 'BUG FIX',

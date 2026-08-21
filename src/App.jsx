@@ -18,6 +18,7 @@ import FruitMergeGame from './components/games/fruitmerge/FruitMergeGame';
 import BrickBreakerGame from './components/games/brickbreaker/BrickBreakerGame';
 import SkyJumperGame from './components/games/skyjumper/SkyJumperGame';
 import KidsCodingGame from './components/games/kidscoding/KidsCodingGame';
+import BubbleTeaGame from './components/games/bubbletea/BubbleTeaGame';
 import GameCard from './components/GameCard';
 import LeaderboardModal from './components/LeaderboardModal';
 import ChangelogModal from './components/ChangelogModal';
@@ -51,9 +52,9 @@ export default function App() {
   const [favorites, setFavorites] = useState(() => {
     try {
       const saved = localStorage.getItem('dochon_favorites');
-      return saved ? JSON.parse(saved) : ['pacman', 'dino', 'snake', 'solitaire', 'minesweeper', 'baseball', 'colortile', 'popcorn', 'tictactoe', 'champion'];
+      return saved ? JSON.parse(saved) : [];
     } catch (e) {
-      return ['pacman', 'dino', 'snake', 'solitaire', 'minesweeper', 'baseball', 'colortile', 'popcorn', 'tictactoe', 'champion'];
+      return [];
     }
   });
 
@@ -411,6 +412,22 @@ export default function App() {
             </div>
           </section>
         )}
+
+        {/* EMPTY FAVORITES NOTICE */}
+        {filterCategory === 'FAVORITES' && favorites.length === 0 && (
+          <div className="flex flex-col items-center justify-center py-16 px-4 text-center my-6 bg-slate-900/60 border border-pink-500/20 rounded-3xl backdrop-blur-md shadow-xl">
+            <div className="w-16 h-16 rounded-full bg-pink-500/10 border-2 border-pink-500/30 flex items-center justify-center text-3xl mb-3 shadow-lg shadow-pink-500/10 animate-bounce">
+              💖
+            </div>
+            <h3 className="text-base sm:text-lg font-black text-pink-200 mb-1.5">
+              아직 즐겨찾기에 등록된 게임이 없어요!
+            </h3>
+            <p className="text-xs sm:text-sm text-slate-300 max-w-sm leading-relaxed">
+              원하는 게임 카드 우측 상단의 <strong className="text-pink-400">하트(💖)</strong>를 클릭하면<br />
+              나만의 즐겨찾기 목록에 등록되어 빠르게 찾아볼 수 있습니다.
+            </p>
+          </div>
+        )}
       </main>
 
       {/* 5. Responsive Overlay Popup Modal for Active Game */}
@@ -440,6 +457,7 @@ export default function App() {
                   {activeGame === 'brickbreaker' && '🧱 도촌 벽돌 격파왕 (DOCHON BRICK BREAKER)'}
                   {activeGame === 'skyjumper' && '🚀 도촌 스카이 점퍼 (DOCHON SKY JUMPER)'}
                   {activeGame === 'kidscoding' && '🐰 도촌 코딩 토끼 (DOCHON KIDS CODING)'}
+                  {activeGame === 'bubbletea' && '🧋 도촌 버블티 카페 (DOCHON BUBBLE TEA CAFE)'}
                 </span>
                 <span style={{
                   backgroundColor: 'rgba(251, 191, 36, 0.2)',
@@ -546,6 +564,9 @@ export default function App() {
               )}
               {activeGame === 'kidscoding' && (
                 <KidsCodingGame onScoreSubmitted={() => openInPageLeaderboardModal('kidscoding')} />
+              )}
+              {activeGame === 'bubbletea' && (
+                <BubbleTeaGame onScoreSubmitted={() => openInPageLeaderboardModal('bubbletea')} />
               )}
             </div>
           </div>
