@@ -1,0 +1,597 @@
+// Dochon Pizza Master - Main Game Controller Component
+import React, { useState, useEffect, useRef, useCallback } from 'react';
+import { PizzaEngine } from './pizzaEngine';
+import { pizzaAudio } from './pizzaAudio';
+import PizzaHowToPlayModal from './PizzaHowToPlayModal';
+import {
+  CANVAS_WIDTH,
+  CANVAS_HEIGHT,
+  STAGES,
+  generateEndlessStage,
+  TOPPING_INFO,
+  SCORE_BASE_SUCCESS,
+  SCORE_PER_PERFECT_STAR,
+  SCORE_COMBO_MULTIPLIER,
+  SCORE_TIME_BONUS_PER_SEC
+} from './pizzaConstants';
+import { submitScoreToDB } from '../../../utils/leaderboardApi';
+import { haptics } from '../../../utils/haptics';
+import {
+  Volume2,
+  VolumeX,
+  HelpCircle,
+  RotateCcw,
+  Trophy,
+  Star,
+  Scissors,
+  CheckCircle2,
+  AlertCircle,
+  Play,
+  Flame,
+  Clock,
+  Sparkles
+} from 'lucide-react';
+import './pizza.css';
+
+export default function PizzaGame({ onScoreSubmitted }) {
+  const canvasRef = useRef(null);
+  const engineRef = useRef(null);
+  const animFrameIdRef = useRef(null);
+
+  // Game States
+  const [isPlaying, setIsPlaying] = useState(false);
+  const [stageIndex, setStageIndex] = useState(0);
+  const [currentStage, setCurrentStage] = useState(STAGES[0]);
+  const [score, setScore] = useState(0);
+  const [combo, setCombo] = useState(0);
+  const [timeLeft, setTimeLeft] = useState(STAGES[0].timeLimit);
+  const [isGameOver, setIsGameOver] = useState(false);
+  const [highScore, setHighScore] = useState(() => {
+    try {
+      return Number(localStorage.getItem('dochon_pizza_highscore')) || 0;
+    } catch (e) {
+      return 0;
+    }
+  });
+
+  // Stage Result / Feedback state
+  const [stageResult, setStageResult] = useState(null); // { isSuccess, stars, message, uniformityScore }
+  const [cutsRemaining, setCutsRemaining] = useState(STAGES[0].maxCuts);
+
+  // Audio & How to play modal
+  const [isMuted, setIsMuted] = useState(false);
+  const [isHowToPlayOpen, setIsHowToPlayOpen] = useState(false);
+
+  // Hall of Fame Leaderboard Submission States
+  const [playerName, setPlayerName] = useState('');
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [isSubmitted, setIsSubmitted] = useState(false);
+  const [submitError, setSubmitError] = useState('');
+
+  // Real-time animation loop
+  const renderLoop = useCallback(() => {
+    if (engineRef.current && currentStage) {
+      engineRef.current.render(currentStage);
+    }
+    animFrameIdRef.current = requestAnimationFrame(renderLoop);
+  }, [currentStage]);
+
+  // Initialize Canvas & Engine
+  useEffect(() => {
+    if (canvasRef.current) {
+      const canvas = canvasRef.current;
+      canvas.width = CANVAS_WIDTH;
+      canvas.height = CANVAS_HEIGHT;
+      const engine = new PizzaEngine(canvas);
+      engineRef.current = engine;
+      renderLoop();
+    }
+    return () => {
+      if (animFrameIdRef.current) {
+        cancelAnimationFrame(animFrameIdRef.current);
+      }
+    };
+  }, [renderLoop]);
+
+  // Stage Setup function
+  const loadStage = useCallback((index) => {
+    let stage;
+    if (index < STAGES.length) {
+      stage = STAGES[index];
+    } else {
+      stage = generateEndlessStage(index + 1);
+    }
+
+    setCurrentStage(stage);
+    setTimeLeft(stage.timeLimit);
+    setCutsRemaining(stage.maxCuts);
+    setStageResult(null);
+
+    if (engineRef.current) {
+      engineRef.current.reset();
+    }
+    pizzaAudio.playOrderBell();
+  }, []);
+
+  // Start Game
+  const handleStartGame = () => {
+    haptics.medium();
+    setIsPlaying(true);
+    setIsGameOver(false);
+    setScore(0);
+    setCombo(0);
+    setStageIndex(0);
+    loadStage(0);
+    pizzaAudio.playClick();
+  };
+
+  // Timer Tick
+  useEffect(() => {
+    if (!isPlaying || isGameOver || stageResult) return;
+
+    const timer = setInterval(() => {
+      setTimeLeft(prev => {
+        if (prev <= 1) {
+          clearInterval(timer);
+          handleGameOver();
+          return 0;
+        }
+        return prev - 1;
+      });
+    }, 1000);
+
+    return () => clearInterval(timer);
+  }, [isPlaying, isGameOver, stageResult]);
+
+  // Game Over Handler
+  const handleGameOver = () => {
+    setIsGameOver(true);
+    pizzaAudio.playFail();
+    setHighScore(prev => {
+      const newHigh = Math.max(prev, score);
+      try {
+        localStorage.setItem('dochon_pizza_highscore', String(newHigh));
+      } catch (e) {}
+      return newHigh;
+    });
+  };
+
+  // Convert Pointer Coordinates to Canvas Resolution (640 x 560)
+  const getCanvasCoords = (e) => {
+    const canvas = canvasRef.current;
+    if (!canvas) return { x: 0, y: 0 };
+    const rect = canvas.getBoundingClientRect();
+    const scaleX = CANVAS_WIDTH / rect.width;
+    const scaleY = CANVAS_HEIGHT / rect.height;
+
+    const clientX = e.touches ? e.touches[0].clientX : e.clientX;
+    const clientY = e.touches ? e.touches[0].clientY : e.clientY;
+
+    return {
+      x: (clientX - rect.left) * scaleX,
+      y: (clientY - rect.top) * scaleY
+    };
+  };
+
+  // Pointer Down (Start dragging cut line)
+  const handlePointerDown = (e) => {
+    if (!isPlaying || isGameOver || stageResult || cutsRemaining <= 0) return;
+    const coords = getCanvasCoords(e);
+    const engine = engineRef.current;
+    if (engine) {
+      engine.isDragging = true;
+      engine.dragStart = coords;
+      engine.dragCurrent = coords;
+    }
+  };
+
+  // Pointer Move (Update dragging laser line)
+  const handlePointerMove = (e) => {
+    const engine = engineRef.current;
+    if (!engine || !engine.isDragging) return;
+    const coords = getCanvasCoords(e);
+    engine.dragCurrent = coords;
+  };
+
+  // Pointer Up (Finalize cut)
+  const handlePointerUp = (e) => {
+    const engine = engineRef.current;
+    if (!engine || !engine.isDragging) return;
+
+    const start = engine.dragStart;
+    const end = engine.dragCurrent;
+    engine.isDragging = false;
+    engine.dragStart = null;
+    engine.dragCurrent = null;
+
+    if (start && end) {
+      const isCutAdded = engine.addCut(start, end);
+      if (isCutAdded) {
+        pizzaAudio.playSlice();
+        haptics.light();
+        const nextCuts = cutsRemaining - 1;
+        setCutsRemaining(nextCuts);
+
+        // Auto validate if max cuts reached
+        if (nextCuts === 0) {
+          setTimeout(() => {
+            validatePizza();
+          }, 300);
+        }
+      }
+    }
+  };
+
+  // Reset current stage cut lines
+  const handleResetCuts = () => {
+    if (!isPlaying || isGameOver || stageResult) return;
+    haptics.light();
+    pizzaAudio.playClick();
+    if (engineRef.current) {
+      engineRef.current.reset();
+    }
+    setCutsRemaining(currentStage.maxCuts);
+  };
+
+  // Validate Pizza Cutting against Stage Requirements
+  const validatePizza = () => {
+    const engine = engineRef.current;
+    if (!engine || !currentStage) return;
+
+    const result = engine.validateStage(currentStage);
+    setStageResult(result);
+
+    if (result.isSuccess) {
+      pizzaAudio.playSuccess();
+      haptics.success();
+
+      // Trigger sparkle particles at center
+      engine.spawnSparkles(CANVAS_WIDTH / 2, CANVAS_HEIGHT / 2, 20);
+
+      // Score Calculation
+      const stars = result.stars;
+      const timeBonus = timeLeft * SCORE_TIME_BONUS_PER_SEC;
+      const comboBonus = combo * SCORE_COMBO_MULTIPLIER;
+      const stageScore = SCORE_BASE_SUCCESS + stars * SCORE_PER_PERFECT_STAR + timeBonus + comboBonus;
+
+      setScore(prev => prev + stageScore);
+      setCombo(prev => prev + 1);
+
+      // Play Star sounds with slight delay
+      for (let i = 0; i < stars; i++) {
+        setTimeout(() => {
+          pizzaAudio.playStar(i);
+        }, 150 * (i + 1));
+      }
+    } else {
+      pizzaAudio.playFail();
+      haptics.error();
+      setCombo(0); // Reset combo on fail
+    }
+  };
+
+  // Next Stage Button
+  const handleNextStage = () => {
+    haptics.medium();
+    pizzaAudio.playClick();
+    const nextIdx = stageIndex + 1;
+    setStageIndex(nextIdx);
+    loadStage(nextIdx);
+  };
+
+  // Retry Current Stage on Fail
+  const handleRetryStage = () => {
+    haptics.light();
+    pizzaAudio.playClick();
+    loadStage(stageIndex);
+  };
+
+  // Hall of Fame Leaderboard Submission
+  const handleScoreSubmit = async (e) => {
+    e.preventDefault();
+    if (!playerName.trim() || isSubmitting) return;
+
+    setIsSubmitting(true);
+    setSubmitError('');
+
+    try {
+      const res = await submitScoreToDB('pizza', playerName.trim(), score);
+      if (res && res.success) {
+        setIsSubmitted(true);
+        haptics.success();
+        if (onScoreSubmitted) {
+          onScoreSubmitted();
+        }
+      } else {
+        setSubmitError('등록 중 오류가 발생했습니다. 다시 시도해주세요.');
+      }
+    } catch (err) {
+      setSubmitError('네트워크 오류가 발생했습니다.');
+    } finally {
+      setIsSubmitting(false);
+    }
+  };
+
+  // Sound Toggle
+  const toggleMute = () => {
+    const nextMuted = !isMuted;
+    setIsMuted(nextMuted);
+    pizzaAudio.setMuted(nextMuted);
+  };
+
+  return (
+    <div className="pizza-game-container">
+      {/* 1. Top HUD Statistics */}
+      <div className="pizza-hud">
+        <div className="pizza-hud-stat">
+          <span className="pizza-hud-label">점수</span>
+          <span className="pizza-hud-value gold">{score.toLocaleString()}</span>
+        </div>
+
+        {combo > 1 && (
+          <div className="pizza-hud-stat">
+            <span className="pizza-hud-label">연속 성공</span>
+            <span className="pizza-hud-value combo flex items-center gap-1">
+              <Flame className="w-4 h-4 text-rose-500 fill-rose-500" />
+              {combo} COMBO!
+            </span>
+          </div>
+        )}
+
+        <div className="pizza-hud-stat">
+          <span className="pizza-hud-label">남은 시간</span>
+          <span className="pizza-hud-value flex items-center gap-1">
+            <Clock className="w-4 h-4 text-amber-400" />
+            {timeLeft}초
+          </span>
+        </div>
+
+        <div className="pizza-hud-stat">
+          <span className="pizza-hud-label">최고 기록</span>
+          <span className="pizza-hud-value">{highScore.toLocaleString()}</span>
+        </div>
+
+        <div className="flex items-center gap-2">
+          <button
+            onClick={toggleMute}
+            className="pizza-btn-icon"
+            title={isMuted ? '소리 켜기' : '소리 끄기'}
+          >
+            {isMuted ? <VolumeX className="w-4 h-4" /> : <Volume2 className="w-4 h-4" />}
+          </button>
+          <button
+            onClick={() => setIsHowToPlayOpen(true)}
+            className="pizza-btn-icon"
+            title="게임 방법"
+          >
+            <HelpCircle className="w-4 h-4" />
+          </button>
+        </div>
+      </div>
+
+      {/* 2. Customer Order Ticket Card */}
+      {isPlaying && !isGameOver && currentStage && (
+        <div className="pizza-order-card">
+          <div className="pizza-order-header">
+            <div className="pizza-customer-badge">
+              <span className="pizza-customer-avatar">{currentStage.customerAvatar}</span>
+              <span className="pizza-customer-name">{currentStage.customerName}의 주문</span>
+            </div>
+            <span className="pizza-fraction-badge">{currentStage.fractionText}</span>
+          </div>
+
+          <p className="pizza-order-speech">"{currentStage.customerSpeech}"</p>
+
+          <div className="pizza-reqs-row">
+            {currentStage.requirements.map((req, i) => (
+              <div key={i} className="pizza-req-pill">
+                <span>{TOPPING_INFO[req.type]?.emoji}</span>
+                <span>{req.description}</span>
+              </div>
+            ))}
+          </div>
+        </div>
+      )}
+
+      {/* 3. Timer Progress Bar */}
+      {isPlaying && !isGameOver && (
+        <div className="pizza-timer-bar-wrap">
+          <div
+            className="pizza-timer-bar-fill"
+            style={{ width: `${(timeLeft / (currentStage?.timeLimit || 45)) * 100}%` }}
+          />
+        </div>
+      )}
+
+      {/* 4. Canvas Play Area */}
+      <div className="pizza-canvas-wrapper">
+        <canvas
+          ref={canvasRef}
+          className="pizza-canvas"
+          onMouseDown={handlePointerDown}
+          onMouseMove={handlePointerMove}
+          onMouseUp={handlePointerUp}
+          onTouchStart={handlePointerDown}
+          onTouchMove={handlePointerMove}
+          onTouchEnd={handlePointerUp}
+        />
+
+        {/* Cuts indicator badge */}
+        {isPlaying && !isGameOver && !stageResult && (
+          <div className="pizza-cuts-hud">
+            <Scissors className="w-3.5 h-3.5 text-amber-400" />
+            <span>남은 컷: {cutsRemaining}회</span>
+            <div className="flex items-center gap-1 ml-1.5">
+              {Array.from({ length: currentStage.maxCuts }).map((_, idx) => (
+                <div
+                  key={idx}
+                  className={`pizza-cut-dot ${idx < cutsRemaining ? 'active' : ''}`}
+                />
+              ))}
+            </div>
+          </div>
+        )}
+
+        {/* Stage Result / Clear Overlay */}
+        {stageResult && (
+          <div className="pizza-stage-result-overlay">
+            <div className={`text-4xl mb-2 ${stageResult.isSuccess ? 'animate-bounce' : ''}`}>
+              {stageResult.isSuccess ? '🍕' : '😢'}
+            </div>
+
+            <h3 className={`text-xl font-black mb-1 ${stageResult.isSuccess ? 'text-amber-400' : 'text-rose-400'}`}>
+              {stageResult.isSuccess ? '주문 완수 성공!' : '주문 실패!'}
+            </h3>
+
+            <p className="text-sm text-slate-300 max-w-sm mb-3">
+              {stageResult.message}
+            </p>
+
+            {/* Stars row */}
+            {stageResult.isSuccess && (
+              <div className="pizza-stars-row">
+                {[1, 2, 3].map(s => (
+                  <Star
+                    key={s}
+                    className={`pizza-star-icon ${s <= stageResult.stars ? 'filled' : ''}`}
+                  />
+                ))}
+              </div>
+            )}
+
+            <div className="text-xs text-slate-400 mb-5">
+              분할 정확도: <strong className="text-amber-300 font-bold">{stageResult.uniformityScore}%</strong>
+            </div>
+
+            <div className="flex items-center gap-3">
+              {stageResult.isSuccess ? (
+                <button onClick={handleNextStage} className="pizza-btn pizza-btn-serve">
+                  <Sparkles className="w-4 h-4" />
+                  <span>다음 주문 받기</span>
+                </button>
+              ) : (
+                <button onClick={handleRetryStage} className="pizza-btn pizza-btn-serve">
+                  <RotateCcw className="w-4 h-4" />
+                  <span>다시 자르기</span>
+                </button>
+              )}
+            </div>
+          </div>
+        )}
+
+        {/* Start Game Splash Overlay */}
+        {!isPlaying && !isGameOver && (
+          <div className="pizza-stage-result-overlay">
+            <div className="text-5xl mb-3 animate-pulse">🍕</div>
+            <h2 className="text-2xl font-black text-amber-400 mb-2">도촌 피자 마스터</h2>
+            <p className="text-xs sm:text-sm text-slate-300 max-w-xs mb-6 leading-relaxed">
+              피자를 자르고 분수를 마스터하라!<br />
+              손님의 주문 조건에 맞게 정확하게 등분해보세요.
+            </p>
+            <button
+              onClick={handleStartGame}
+              className="pizza-btn pizza-btn-serve py-3 px-8 text-base shadow-xl"
+            >
+              <Play className="w-5 h-5 fill-slate-950" />
+              <span>주방 오픈 & 게임 시작</span>
+            </button>
+          </div>
+        )}
+      </div>
+
+      {/* 5. Bottom Action Bar */}
+      {isPlaying && !isGameOver && !stageResult && (
+        <div className="pizza-action-bar">
+          <button onClick={handleResetCuts} className="pizza-btn pizza-btn-reset">
+            <RotateCcw className="w-4 h-4" />
+            <span>컷팅 초기화</span>
+          </button>
+
+          <button
+            onClick={validatePizza}
+            disabled={engineRef.current?.cuts.length === 0}
+            className="pizza-btn pizza-btn-serve"
+          >
+            <CheckCircle2 className="w-4 h-4" />
+            <span>피자 서빙하기 ({currentStage.targetSlices}등분 확인)</span>
+          </button>
+        </div>
+      )}
+
+      {/* 6. Game Over & Hall of Fame Modal */}
+      {isGameOver && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/80 backdrop-blur-md animate-fade-in">
+          <div className="pizza-gameover-card">
+            <div className="text-5xl mb-2">🏆</div>
+            <h2 className="text-2xl font-black text-amber-400 mb-1">영업 마감!</h2>
+            <p className="text-xs text-slate-400 mb-4">오늘의 피자 주방이 마감되었습니다.</p>
+
+            <div className="bg-slate-800/80 border border-slate-700 rounded-2xl p-4 mb-5">
+              <div className="text-xs text-slate-400 mb-1">최종 달성 점수</div>
+              <div className="text-3xl font-black text-amber-400">{score.toLocaleString()}점</div>
+            </div>
+
+            {/* Hall of Fame Submission Form (Strictly > 100 points rule) */}
+            {score > 100 ? (
+              <div className="bg-slate-800/60 border border-amber-500/30 rounded-2xl p-4 mb-5 text-left">
+                <div className="flex items-center gap-2 mb-2">
+                  <Trophy className="w-4 h-4 text-amber-400" />
+                  <h3 className="text-sm font-bold text-amber-300">명예의 전당 점수 등록</h3>
+                </div>
+
+                {isSubmitted ? (
+                  <div className="flex items-center gap-2 text-emerald-400 text-sm font-bold py-2">
+                    <CheckCircle2 className="w-4 h-4" />
+                    <span>명예의 전당에 랭킹이 성공적으로 등록되었습니다!</span>
+                  </div>
+                ) : (
+                  <form onSubmit={handleScoreSubmit} className="space-y-3">
+                    <div>
+                      <input
+                        type="text"
+                        value={playerName}
+                        onChange={(e) => setPlayerName(e.target.value)}
+                        placeholder="예: 홍길동"
+                        maxLength={10}
+                        required
+                        className="w-full px-3.5 py-2 bg-slate-900 border border-slate-700 rounded-xl text-white text-sm focus:outline-none focus:border-amber-400"
+                      />
+                    </div>
+                    {submitError && (
+                      <p className="text-xs text-rose-400">{submitError}</p>
+                    )}
+                    <button
+                      type="submit"
+                      disabled={isSubmitting || !playerName.trim()}
+                      className="w-full py-2.5 bg-gradient-to-r from-amber-500 to-orange-500 hover:from-amber-400 hover:to-orange-400 text-slate-950 font-black rounded-xl text-sm transition-all disabled:opacity-50"
+                    >
+                      {isSubmitting ? '등록 중...' : '명예의 전당에 기록하기'}
+                    </button>
+                  </form>
+                )}
+              </div>
+            ) : (
+              <p className="text-xs text-slate-500 mb-5">
+                (100점 초과 달성 시 명예의 전당에 등록할 수 있습니다)
+              </p>
+            )}
+
+            <button
+              onClick={handleStartGame}
+              className="w-full py-3 bg-gradient-to-r from-amber-500 to-orange-500 text-slate-950 font-black rounded-xl shadow-lg transition-transform active:scale-95 text-sm flex items-center justify-center gap-2"
+            >
+              <RotateCcw className="w-4 h-4" />
+              <span>다시 도전하기</span>
+            </button>
+          </div>
+        </div>
+      )}
+
+      {/* 7. How To Play Modal */}
+      <PizzaHowToPlayModal
+        isOpen={isHowToPlayOpen}
+        onClose={() => setIsHowToPlayOpen(false)}
+      />
+    </div>
+  );
+}

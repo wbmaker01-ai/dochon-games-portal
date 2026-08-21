@@ -19,6 +19,7 @@ import BrickBreakerGame from './components/games/brickbreaker/BrickBreakerGame';
 import SkyJumperGame from './components/games/skyjumper/SkyJumperGame';
 import KidsCodingGame from './components/games/kidscoding/KidsCodingGame';
 import BubbleTeaGame from './components/games/bubbletea/BubbleTeaGame';
+import PizzaGame from './components/games/pizza/PizzaGame';
 import GameCard from './components/GameCard';
 import LeaderboardModal from './components/LeaderboardModal';
 import ChangelogModal from './components/ChangelogModal';
@@ -458,6 +459,7 @@ export default function App() {
                   {activeGame === 'skyjumper' && '🚀 도촌 스카이 점퍼 (DOCHON SKY JUMPER)'}
                   {activeGame === 'kidscoding' && '🐰 도촌 코딩 토끼 (DOCHON KIDS CODING)'}
                   {activeGame === 'bubbletea' && '🧋 도촌 버블티 카페 (DOCHON BUBBLE TEA CAFE)'}
+                  {activeGame === 'pizza' && '🍕 도촌 피자 마스터 (DOCHON PIZZA MASTER)'}
                 </span>
                 <span style={{
                   backgroundColor: 'rgba(251, 191, 36, 0.2)',
@@ -567,6 +569,9 @@ export default function App() {
               )}
               {activeGame === 'bubbletea' && (
                 <BubbleTeaGame onScoreSubmitted={() => openInPageLeaderboardModal('bubbletea')} />
+              )}
+              {activeGame === 'pizza' && (
+                <PizzaGame onScoreSubmitted={() => openInPageLeaderboardModal('pizza')} />
               )}
             </div>
           </div>

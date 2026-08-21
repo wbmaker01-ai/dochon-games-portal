@@ -3,11 +3,45 @@
 
 export const CHANGELOG_DATA = [
   {
+    version: 'v1.33.0',
+    date: '2026-08-21',
+    title: '제21탄 신규 게임 [도촌 피자 마스터 (Celebrating Pizza 모티브)] 정식 개장 & 수학 분수 퍼즐 오픈',
+    badge: 'LATEST',
+    badgeColor: 'emerald',
+    items: [
+      {
+        tag: 'NEW GAME',
+        tagColor: 'emerald',
+        text: '[도촌 피자 마스터 정식 개장] 구글 두들 명작 Celebrating Pizza를 모티브로 한 토핑 분배 & 기하학 분수 커팅 퍼즐 정식 오픈 (1/2, 1/4, 1/3, 1/6, 1/8 등분 단계별 미션 및 무한 셰프 챌린지 모드)'
+      },
+      {
+        tag: 'GEOMETRIC ENGINE',
+        tagColor: 'amber',
+        text: '[2D Canvas 기하학 슬라이스 & 면적 판정] 마우스/터치 드래그 직선 컷팅 알고리즘, 실시간 다각형 분할 및 조각별 면적 균등도·토핑 분배 정밀 검증 시스템 구축'
+      },
+      {
+        tag: 'PROCEDURAL ART',
+        tagColor: 'rose',
+        text: '[노릇노릇 절차적 피자 그래픽] 원목 도마, 모차렐라 치즈 그라데이션, 페퍼로니·올리브·양송이·파프리카·바질·방울토마토 6종 고화질 벡터 토핑 및 치즈 파티클 연출'
+      },
+      {
+        tag: 'AUDIO SYNTH',
+        tagColor: 'blue',
+        text: '[Web Audio API 사운드 신디사이저] 피자 컷터 슬라이스 삭-삭 마찰음, 주문 벨소리, 완성 팡파르, 3단 별점 차임 및 무의존성 오디오 엔진 자체 제작'
+      },
+      {
+        tag: 'LEADERBOARD',
+        tagColor: 'purple',
+        text: '[도촌초 실시간 명예의 전당 연동] 100점 초과 달성 시 실시간 전교 랭킹 점수 등록 지원 및 점수 등록 후 피자 마스터 리더보드 탭 자동 동기화'
+      }
+    ]
+  },
+  {
     version: 'v1.32.0',
     date: '2026-08-21',
     title: '즐겨찾기 초기 진입 상태 전체 해제(Clean State) 기본값 적용 및 로컬 저장소 동기화',
-    badge: 'LATEST',
-    badgeColor: 'emerald',
+    badge: 'UPDATE',
+    badgeColor: 'blue',
     items: [
       {
         tag: 'FAVORITES INIT',

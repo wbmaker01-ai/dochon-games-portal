@@ -172,26 +172,30 @@ export const PLAYABLE_GAMES = [
     category: '액션',
     imageSrc: getThumb('bubbletea.jpg'),
     isPlayable: true,
-    badgeText: '🧋 NEW 20위',
+    badgeText: '🧋 20위',
     description: '귀여운 동물 손님들의 주문에 맞춰 쫀득한 펄과 달콤한 밀크티를 정량 채우는 힐링 타이쿤!'
-  }
-];
-
-export const COMING_SOON_GAMES = [
+  },
   {
     id: 'pizza',
     title: '도촌 피자 마스터',
     category: '퍼즐',
     imageSrc: getThumb('pizza.jpg'),
-    isPlayable: false
+    isPlayable: true,
+    badgeText: '🍕 21위',
+    description: '손님의 주문에 맞게 피자를 정교하게 등분하여 분수와 기하학을 마스터하는 맛있는 수학 퍼즐!'
   },
   {
     id: 'earthbee',
     title: '도촌 꿀벌의 비행',
     category: '액션',
     imageSrc: getThumb('earthbee.jpg'),
-    isPlayable: false
-  },
+    isPlayable: true,
+    badgeText: '🐝 NEW 22위',
+    description: '꽃가루를 묻혀 꽃을 피우고 도촌초 생태계를 가꾸는 구글 두들 모티브 힐링 비행 액션!'
+  }
+];
+
+export const COMING_SOON_GAMES = [
   {
     id: 'olympics',
     title: '도촌 미니 올림픽',
