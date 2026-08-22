@@ -818,22 +818,22 @@ export default function OlympicsGame({ onScoreSubmitted }) {
               </div>
 
               {/* Score Breakdown Table */}
-              <div className="bg-slate-950/80 rounded-2xl p-3.5 mb-3 text-xs space-y-2 border border-slate-800 text-left">
-                <div className="flex justify-between text-slate-300 font-semibold">
+              <div className="olympics-score-table">
+                <div className="olympics-score-row">
                   <span>🏃 100m 허들 달리기</span>
-                  <strong className="text-amber-400 text-sm">{scores.hurdles.toLocaleString()} 점</strong>
+                  <strong className="text-amber-400 font-black">{scores.hurdles.toLocaleString()} 점</strong>
                 </div>
-                <div className="flex justify-between text-slate-300 font-semibold">
+                <div className="olympics-score-row">
                   <span>🏀 3점 슛 챌린지</span>
-                  <strong className="text-orange-400 text-sm">{scores.basketball.toLocaleString()} 점</strong>
+                  <strong className="text-orange-400 font-black">{scores.basketball.toLocaleString()} 점</strong>
                 </div>
-                <div className="flex justify-between text-slate-300 font-semibold">
+                <div className="olympics-score-row">
                   <span>🛶 급류 카누 슬라럼</span>
-                  <strong className="text-cyan-400 text-sm">{scores.canoe.toLocaleString()} 점</strong>
+                  <strong className="text-cyan-400 font-black">{scores.canoe.toLocaleString()} 점</strong>
                 </div>
-                <div className="border-t border-slate-700 pt-2 flex justify-between text-white font-black text-base">
-                  <span>🥇 올림픽 종합 점수</span>
-                  <strong className="text-amber-300 text-lg">{scores.total.toLocaleString()} 점</strong>
+                <div className="olympics-score-total-row">
+                  <span className="text-yellow-300">🥇 올림픽 종합 점수</span>
+                  <strong className="text-yellow-300 font-black text-lg">{scores.total.toLocaleString()} 점</strong>
                 </div>
               </div>
 
@@ -875,12 +875,13 @@ export default function OlympicsGame({ onScoreSubmitted }) {
                 </p>
               )}
 
-              {/* Retry Button */}
+              {/* Retry Button with High-Contrast Tactile Design */}
               <button
                 onClick={() => startEvent(GAME_EVENTS.HURDLES)}
-                className="mt-3 text-xs text-slate-300 hover:text-white font-bold flex items-center justify-center gap-1.5 w-full py-2"
+                className="olympics-btn-retry"
               >
-                <RotateCcw className="w-4 h-4" /> 다시 도전하기
+                <RotateCcw className="w-4 h-4 text-amber-400" />
+                <span>다시 도전하기 🔄</span>
               </button>
             </div>
           </div>

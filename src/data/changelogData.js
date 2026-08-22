@@ -3,11 +3,30 @@
 
 export const CHANGELOG_DATA = [
   {
+    version: 'v1.36.7',
+    date: '2026-08-22',
+    title: '[도촌 미니 올림픽] 종합 시상식 결과창 레이아웃 정돈 및 "다시 도전하기" 전용 디자인 버튼 적용',
+    badge: 'LATEST',
+    badgeColor: 'emerald',
+    items: [
+      {
+        tag: 'UI & BUTTON DESIGN',
+        tagColor: 'amber',
+        text: '[시상식 "다시 도전하기" 디자인 버튼 적용] 기본 브라우저 스타일로 노출되던 문제를 전면 개편하여, 고대비 다크 글래스모피즘 및 골드 하이라이트 호버 인터랙션을 갖춘 세련된 전용 액션 버튼(.olympics-btn-retry)으로 업그레이드'
+      },
+      {
+        tag: 'SCORE TABLE POLISH',
+        tagColor: 'blue',
+        text: '[종합 점수 결과 테이블 타이포그래피 정돈] 3개 종목별 획득 점수 및 최종 종합 점수의 행간과 명도 대비를 깔끔하게 정돈하여 시상식 화면의 시인성을 극대화'
+      }
+    ]
+  },
+  {
     version: 'v1.36.6',
     date: '2026-08-22',
     title: '[도촌 피자 마스터] 10단계 정규 코스 완주 엔딩 시스템 & 플레이 타임 2~3분 밸런싱 적용',
-    badge: 'LATEST',
-    badgeColor: 'emerald',
+    badge: 'UPDATE',
+    badgeColor: 'blue',
     items: [
       {
         tag: 'GAMEPLAY & ENDING',

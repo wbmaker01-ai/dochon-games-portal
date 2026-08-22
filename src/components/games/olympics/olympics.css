@@ -463,3 +463,69 @@
   color: #94A3B8;
   font-weight: 600;
 }
+
+/* Custom Retry Button (High-Contrast & Tactile Design) */
+.olympics-btn-retry {
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  gap: 8px !important;
+  width: 100% !important;
+  padding: 12px 18px !important;
+  margin-top: 10px !important;
+  background: linear-gradient(135deg, #1E293B, #0F172A) !important;
+  color: #F8FAFC !important;
+  border: 1.5px solid #475569 !important;
+  border-radius: 14px !important;
+  font-size: 13.5px !important;
+  font-weight: 800 !important;
+  cursor: pointer !important;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.5), inset 0 1px 0 rgba(255, 255, 255, 0.1) !important;
+  transition: all 0.2s ease !important;
+  user-select: none !important;
+}
+
+.olympics-btn-retry:hover {
+  background: linear-gradient(135deg, #334155, #1E293B) !important;
+  border-color: #F59E0B !important;
+  color: #FDE047 !important;
+  transform: translateY(-1px) !important;
+  box-shadow: 0 6px 16px rgba(245, 158, 11, 0.25) !important;
+}
+
+.olympics-btn-retry:active {
+  transform: translateY(1px) scale(0.98) !important;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.4) !important;
+}
+
+/* Score Breakdown Table Styles */
+.olympics-score-table {
+  background: rgba(15, 23, 42, 0.95) !important;
+  border: 1.5px solid rgba(255, 255, 255, 0.12) !important;
+  border-radius: 18px !important;
+  padding: 14px 18px !important;
+  margin-bottom: 14px !important;
+  box-shadow: inset 0 2px 8px rgba(0, 0, 0, 0.6) !important;
+}
+
+.olympics-score-row {
+  display: flex !important;
+  align-items: center !important;
+  justify-content: space-between !important;
+  padding: 5px 0 !important;
+  font-size: 13px !important;
+  font-weight: 700 !important;
+  color: #E2E8F0 !important;
+}
+
+.olympics-score-total-row {
+  display: flex !important;
+  align-items: center !important;
+  justify-content: space-between !important;
+  padding-top: 8px !important;
+  margin-top: 6px !important;
+  border-top: 1.5px solid rgba(255, 255, 255, 0.2) !important;
+  font-size: 15px !important;
+  font-weight: 900 !important;
+  color: #FFFFFF !important;
+}
