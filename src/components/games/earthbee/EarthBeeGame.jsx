@@ -373,11 +373,16 @@ export default function EarthBeeGame({ onScoreSubmitted }) {
 
         {/* Pollen Gauge */}
         <div className="earthbee-pollen-container">
-          <span className="earthbee-stat-label">꽃가루 (POLLEN)</span>
+          <div className="flex items-center gap-1.5">
+            <span className="earthbee-stat-label">꽃가루 (POLLEN)</span>
+            <span className={`text-[11px] font-black ${pollenPct < 25 ? 'text-rose-400 animate-pulse' : 'text-amber-300'}`}>
+              {pollenPct}%
+            </span>
+          </div>
           <div className="earthbee-pollen-bar-bg">
             <div
-              className="earthbee-pollen-bar-fill"
-              style={{ width: `${Math.min(100, pollenPct)}%` }}
+              className={`earthbee-pollen-bar-fill ${pollenPct < 25 ? 'low' : ''}`}
+              style={{ width: `${Math.max(0, Math.min(100, pollenPct))}%` }}
             />
           </div>
         </div>

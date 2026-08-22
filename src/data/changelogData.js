@@ -3,11 +3,30 @@
 
 export const CHANGELOG_DATA = [
   {
+    version: 'v1.36.4',
+    date: '2026-08-22',
+    title: '[도촌 꿀벌의 비행] 꽃가루 게이지 소비·채취 루프 정상화 및 황금빛 개화 이펙트 강화',
+    badge: 'LATEST',
+    badgeColor: 'emerald',
+    items: [
+      {
+        tag: 'POLLEN ECONOMY',
+        tagColor: 'amber',
+        text: '[꽃가루 게이지 소모/재채취 메커니즘 정상화] 꽃봉오리를 피울 때 꽃가루가 정상적으로 차감(개화당 -25%)되고, 갓 피어난 꽃에서 즉시 꽃가루가 무한 회수되던 결함을 수정하여 정원의 황금빛 꽃을 직접 찾아 꽃가루를 충전하는 본래의 탐색 루프 복원'
+      },
+      {
+        tag: 'VISUAL EFFECTS',
+        tagColor: 'teal',
+        text: '[꽃가루 보유 꽃 시각화] 꽃가루 채취가 가능한 만개 꽃 주변에 빛나는 황금빛 오라 링과 6개의 회전 파티클을 추가하고, 상단 HUD에 실시간 꽃가루 퍼센트(%) 및 부족 시 붉은색 경고 표시 탑재'
+      }
+    ]
+  },
+  {
     version: 'v1.36.3',
     date: '2026-08-22',
     title: '[도촌 미니 올림픽] 카누 슬라럼 코스 대폭 확장 (2,400m 롱코스) & 체크포인트 세로 간격 2.2배 확대',
-    badge: 'LATEST',
-    badgeColor: 'emerald',
+    badge: 'UPDATE',
+    badgeColor: 'blue',
     items: [
       {
         tag: 'CANOE EXTENDED MAP',

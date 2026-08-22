@@ -92,8 +92,9 @@ export class EarthBeeEngine {
     this.bee.targetY = this.bee.y;
     this.bee.vx = 0;
     this.bee.vy = 0;
-    this.bee.pollenCount = 20; // Start with a little starter pollen
+    this.bee.pollenCount = 40; // Starts with starter pollen for ~1-2 blooms
     this.bee.carryingType = FLOWER_TYPES.DAISY;
+    this.noPollenCooldown = 0;
 
     // Generate Clouds
     for (let i = 0; i < 8; i++) {
@@ -139,7 +140,7 @@ export class EarthBeeEngine {
     const activeLevelConfig = ECO_LEVELS.find(l => l.level === this.ecoLevel) || ECO_LEVELS[0];
     const availableTypeKeys = activeLevelConfig.flowerTypes;
 
-    const count = 45;
+    const count = 48;
     for (let i = 0; i < count; i++) {
       const typeKey = availableTypeKeys[Math.floor(Math.random() * availableTypeKeys.length)];
       const fType = FLOWER_TYPES[typeKey];
@@ -147,8 +148,9 @@ export class EarthBeeEngine {
       const x = 100 + Math.random() * (this.gardenWidth - 200);
       const y = 100 + Math.random() * (this.gardenHeight - 200);
 
-      // Half start as bloomed (for pollen harvest) and half as buds (waiting for pollination)
-      const isBloomed = i % 2 === 0;
+      // Distribute: 1/3 have harvestable golden pollen, 1/3 bloomed without pollen, 1/3 buds
+      const isBloomed = i % 3 !== 0; // 66% bloomed, 33% buds
+      const hasPollen = i % 3 === 1; // Only 33% of flowers have harvestable pollen at start
 
       this.flowers.push({
         id: `flower_${Date.now()}_${i}_${Math.random()}`,
@@ -158,7 +160,8 @@ export class EarthBeeEngine {
         state: isBloomed ? 'BLOOMED' : 'BUD',
         bloomScale: isBloomed ? 1 : 0.35,
         targetScale: isBloomed ? 1 : 0.35,
-        pollenAvailable: isBloomed,
+        pollenAvailable: hasPollen,
+        pollenCooldown: hasPollen ? 0 : 8 + Math.random() * 10,
         bloomProgress: isBloomed ? 1 : 0,
         swayPhase: Math.random() * Math.PI * 2,
         pulsingAura: false
@@ -349,6 +352,14 @@ export class EarthBeeEngine {
 
       if (flower.state === 'BLOOMED') {
         bloomedCount++;
+        // Pollen regeneration cooldown for bloomed flowers
+        if (!flower.pollenAvailable) {
+          flower.pollenCooldown = Math.max(0, (flower.pollenCooldown || 0) - dt);
+          if (flower.pollenCooldown <= 0) {
+            flower.pollenAvailable = true;
+            this.spawnPollenBurst(flower.x, flower.y, '#FDE047', 6);
+          }
+        }
       }
 
       // Check distance with Bee
@@ -357,35 +368,30 @@ export class EarthBeeEngine {
       // A. Harvest Pollen from Bloomed Flowers
       if (flower.state === 'BLOOMED' && flower.pollenAvailable && fDist < BEE_CONFIG.POLLEN_COLLECT_RADIUS) {
         if (this.bee.pollenCount < this.bee.maxPollen) {
-          const addAmount = flower.type.pollenReward;
+          const addAmount = 40; // Collect +40% pollen per flower
           this.bee.pollenCount = Math.min(this.bee.maxPollen, this.bee.pollenCount + addAmount);
           this.bee.carryingType = flower.type;
           flower.pollenAvailable = false;
+          flower.pollenCooldown = 14; // 14 seconds cooldown before refilling
 
           // Spawn sparkling harvest particles
           this.spawnPollenBurst(flower.x, flower.y, flower.type.petalColor, 12);
-          this.addFloatingText(flower.x, flower.y - 20, `+꽃가루 ✨`, '#FDE047');
+          this.addFloatingText(flower.x, flower.y - 20, `+꽃가루 ✨ (${this.bee.pollenCount}%)`, '#FDE047');
 
           if (this.onPollenCollectCallback) {
-            this.onPollenCollectCallback(flower.type);
+            this.onPollenCollectCallback(flower.type, this.bee.pollenCount);
           }
-
-          // Flower regrows pollen after 8 seconds
-          setTimeout(() => {
-            if (flower.state === 'BLOOMED') {
-              flower.pollenAvailable = true;
-            }
-          }, 8000);
         }
       }
 
-      // B. Pollinate & Bloom Buds
+      // B. Pollinate & Bloom Buds (Consumes 25% Pollen)
       if (flower.state === 'BUD' && fDist < BEE_CONFIG.POLLEN_DELIVER_RADIUS) {
-        if (this.bee.pollenCount >= 15) {
-          this.bee.pollenCount = Math.max(0, this.bee.pollenCount - 15);
+        if (this.bee.pollenCount >= 25) {
+          this.bee.pollenCount = Math.max(0, this.bee.pollenCount - 25);
           flower.state = 'BLOOMED';
           flower.targetScale = 1.0;
-          flower.pollenAvailable = true;
+          flower.pollenAvailable = false; // CRITICAL: Freshly bloomed flowers do NOT yield pollen immediately!
+          flower.pollenCooldown = 18; // 18s cooldown
           this.totalBlooms++;
 
           // Combo Calculation
@@ -424,14 +430,32 @@ export class EarthBeeEngine {
               timeBonus,
               combo: this.combo,
               totalBlooms: this.totalBlooms,
-              ecoLevel: this.ecoLevel
+              ecoLevel: this.ecoLevel,
+              pollenCount: this.bee.pollenCount
             });
+          }
+        } else {
+          // Pollen Insufficient Warning
+          if (!flower.warnedTimer || this.time - flower.warnedTimer > 1.8) {
+            flower.warnedTimer = this.time;
+            this.addFloatingText(flower.x, flower.y - 20, `꽃가루 부족! 🍯 (황금 꽃을 찾으세요)`, '#F87171');
           }
         }
       }
     });
 
-    // Ensure garden always has at least 15 unbloomed buds to pollinate
+    // Ensure garden always has at least 5 active pollen flowers
+    const activePollenCount = this.flowers.filter(f => f.state === 'BLOOMED' && f.pollenAvailable).length;
+    if (activePollenCount < 5) {
+      const candidate = this.flowers.find(f => f.state === 'BLOOMED' && !f.pollenAvailable);
+      if (candidate) {
+        candidate.pollenAvailable = true;
+        candidate.pollenCooldown = 0;
+        this.spawnPollenBurst(candidate.x, candidate.y, '#FDE047', 6);
+      }
+    }
+
+    // Ensure garden always has at least 12 unbloomed buds to pollinate
     const budCount = this.flowers.filter(f => f.state === 'BUD').length;
     if (budCount < 12) {
       this.spawnMoreBuds(10);
@@ -443,12 +467,13 @@ export class EarthBeeEngine {
       if (other.state === 'BUD') {
         const d = Math.hypot(other.x - x, other.y - y);
         if (d < 160 && Math.random() < 0.4) {
-          // Chain pollination for close flowers!
+          // Chain pollination for close flowers
           setTimeout(() => {
             if (other.state === 'BUD') {
               other.state = 'BLOOMED';
               other.targetScale = 1.0;
-              other.pollenAvailable = true;
+              other.pollenAvailable = false; // Does not give pollen
+              other.pollenCooldown = 16;
               this.totalBlooms++;
               this.spawnPollenBurst(other.x, other.y, other.type.petalColor, 8);
               this.addFloatingText(other.x, other.y - 20, `연쇄 개화! 🌸`, '#EC4899');
@@ -479,6 +504,7 @@ export class EarthBeeEngine {
         bloomScale: 0.3,
         targetScale: 0.3,
         pollenAvailable: false,
+        pollenCooldown: 0,
         bloomProgress: 0,
         swayPhase: Math.random() * Math.PI * 2,
         pulsingAura: false
@@ -707,10 +733,10 @@ export class EarthBeeEngine {
         ctx.arc(0, -3, 7, 0, Math.PI * 2);
         ctx.fill();
 
-        // Pulsing Pollen Indicator Halo if Bee has pollen
-        if (this.bee.pollenCount >= 15) {
+        // Pulsing Pollen Indicator Halo if Bee has pollen (>= 25)
+        if (this.bee.pollenCount >= 25) {
           const haloPulse = 14 + Math.sin(this.time * 6) * 3;
-          ctx.strokeStyle = 'rgba(253, 224, 71, 0.7)';
+          ctx.strokeStyle = 'rgba(74, 222, 128, 0.85)';
           ctx.lineWidth = 2;
           ctx.beginPath();
           ctx.arc(0, 0, haloPulse, 0, Math.PI * 2);
@@ -744,17 +770,26 @@ export class EarthBeeEngine {
         ctx.arc(0, 0, flower.type.id === 'sunflower' ? 12 : 9, 0, Math.PI * 2);
         ctx.fill();
 
-        // Pollen Dust indicator if harvestable
+        // Distinct Glowing Golden Ring & Orbiting Pollen Dust if harvestable
         if (flower.pollenAvailable) {
-          ctx.fillStyle = '#FDE047';
-          for (let d = 0; d < 5; d++) {
-            const dAngle = (d / 5) * Math.PI * 2 + this.time * 2;
-            const dx = Math.cos(dAngle) * 4;
-            const dy = Math.sin(dAngle) * 4;
+          ctx.save();
+          const auraRadius = (flower.type.id === 'sunflower' ? 24 : 19) + Math.sin(this.time * 6 + flower.swayPhase) * 3;
+          ctx.strokeStyle = 'rgba(253, 224, 71, 0.9)';
+          ctx.lineWidth = 2.5;
+          ctx.beginPath();
+          ctx.arc(0, 0, auraRadius, 0, Math.PI * 2);
+          ctx.stroke();
+
+          ctx.fillStyle = '#FEF08A';
+          for (let d = 0; d < 6; d++) {
+            const dAngle = (d / 6) * Math.PI * 2 + this.time * 3.5;
+            const dx = Math.cos(dAngle) * auraRadius;
+            const dy = Math.sin(dAngle) * auraRadius;
             ctx.beginPath();
-            ctx.arc(dx, dy, 2, 0, Math.PI * 2);
+            ctx.arc(dx, dy, 2.5, 0, Math.PI * 2);
             ctx.fill();
           }
+          ctx.restore();
         }
       }
 

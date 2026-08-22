@@ -76,6 +76,11 @@
   box-shadow: 0 0 8px rgba(253, 224, 71, 0.8);
 }
 
+.earthbee-pollen-bar-fill.low {
+  background: linear-gradient(90deg, #F43F5E, #FB923C);
+  box-shadow: 0 0 8px rgba(244, 63, 94, 0.8);
+}
+
 /* Header Action Buttons */
 .earthbee-btn-icon {
   display: flex;
