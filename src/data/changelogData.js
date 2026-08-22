@@ -3,11 +3,35 @@
 
 export const CHANGELOG_DATA = [
   {
+    version: 'v1.35.3',
+    date: '2026-08-22',
+    title: '[도촌 미니 올림픽] 컨트롤 버튼 가독성 전면 개편 & 경기장 고화질 벡터 그래픽 및 HUD 업그레이드',
+    badge: 'LATEST',
+    badgeColor: 'emerald',
+    items: [
+      {
+        tag: 'UI & READABILITY',
+        tagColor: 'amber',
+        text: '[가상 컨트롤 버튼 시인성 대폭 개선] 흰색 바탕과 흰색 글씨로 인해 발생하던 텍스트 미노출 현상을 해결하고, 고대비 그라데이션 버튼 및 선명한 키 뱃지([← / A], [Space / ↑], [→ / D])를 적용하여 조작 키와 명칭이 즉각 보이도록 개선'
+      },
+      {
+        tag: 'CANVAS GRAPHICS',
+        tagColor: 'blue',
+        text: '[경기장 전광판 & 캐릭터 벡터 그래픽 고도화] 100m 허들 전광판 폰트 시인성 강화, 거리 표시(m) 다크 뱃지 추가, 관중석 및 선수 캐릭터 스케일업(1.3배) 및 고화질 외곽선 적용'
+      },
+      {
+        tag: 'LIVE HUD',
+        tagColor: 'emerald',
+        text: '[상단 실시간 올림픽 HUD 탑재] 종목별 실시간 진행도(거리/공 개수) 및 실시간 획득 점수 인디케이터를 상단 바에 글래스모피즘으로 배치'
+      }
+    ]
+  },
+  {
     version: 'v1.35.2',
     date: '2026-08-22',
     title: '[도촌 꿀벌의 비행] 키보드 방향키(↑ ↓ ← → / WASD) 직접 조향 물리 엔진 개편 및 터치 D-Pad 추가',
-    badge: 'LATEST',
-    badgeColor: 'emerald',
+    badge: 'UPDATE',
+    badgeColor: 'blue',
     items: [
       {
         tag: 'KEYBOARD CONTROL',

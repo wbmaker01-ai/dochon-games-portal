@@ -23,10 +23,11 @@ import {
   Award,
   Flame,
   Zap,
-  ArrowRight,
   Send,
   Sparkles,
-  ChevronRight
+  ChevronRight,
+  Flag,
+  Target
 } from 'lucide-react';
 import './olympics.css';
 
@@ -51,8 +52,8 @@ export default function OlympicsGame({ onScoreSubmitted }) {
   const [isSubmitted, setIsSubmitted] = useState(false);
 
   // In-Game Live HUD Stats
-  const [eventTimeLeft, setEventTimeLeft] = useState(0);
   const [liveEventScore, setLiveEventScore] = useState(0);
+  const [liveProgressText, setLiveProgressText] = useState('');
   const [countdown, setCountdown] = useState(null); // 3, 2, 1, GO!
 
   // Canvas Reference & Render Engine
@@ -141,6 +142,7 @@ export default function OlympicsGame({ onScoreSubmitted }) {
     s.time = 0;
 
     if (eventKey === GAME_EVENTS.HURDLES) {
+      setLiveProgressText('0m / 100m');
       s.hurdles.distance = 0;
       s.hurdles.speed = 0;
       s.hurdles.playerY = 0;
@@ -158,6 +160,7 @@ export default function OlympicsGame({ onScoreSubmitted }) {
         isFallen: false
       }));
     } else if (eventKey === GAME_EVENTS.BASKETBALL) {
+      setLiveProgressText('공 1 / 8');
       s.basketball.ballIndex = 1;
       s.basketball.gaugePos = 50;
       s.basketball.gaugeDir = 1;
@@ -167,6 +170,7 @@ export default function OlympicsGame({ onScoreSubmitted }) {
       s.basketball.elapsedTime = 0;
       s.basketball.ball = { x: 0, y: 0, vx: 0, vy: 0, rot: 0, isActive: false };
     } else if (eventKey === GAME_EVENTS.CANOE) {
+      setLiveProgressText('0m / 800m');
       s.canoe.playerX = 300;
       s.canoe.playerAngle = 0;
       s.canoe.targetAngle = 0;
@@ -232,7 +236,6 @@ export default function OlympicsGame({ onScoreSubmitted }) {
     const s = gameStateRef.current;
     if (!s.isRunning || currentEvent !== GAME_EVENTS.HURDLES || s.hurdles.isStumbled) return;
 
-    // Alternate feet gives maximum acceleration
     if (s.lastFootLeft !== isLeft) {
       s.hurdles.speed = Math.min(s.hurdles.speed + HURDLES_CONFIG.BASE_ACCEL * 1.5, HURDLES_CONFIG.MAX_SPEED);
       s.lastFootLeft = isLeft;
@@ -292,10 +295,10 @@ export default function OlympicsGame({ onScoreSubmitted }) {
 
     // Launch Ball Projectile
     const canvas = canvasRef.current;
-    const startX = (canvas?.width || 600) * 0.26;
+    const startX = (canvas?.width || 640) * 0.26;
     const startY = (canvas?.height || 400) * 0.62;
-    const hoopX = (canvas?.width || 600) * 0.78;
-    const hoopY = (canvas?.height || 400) * 0.32;
+    const hoopX = (canvas?.width || 640) * 0.8;
+    const hoopY = (canvas?.height || 400) * 0.3;
 
     s.basketball.ball = {
       x: startX,
@@ -362,7 +365,6 @@ export default function OlympicsGame({ onScoreSubmitted }) {
   const gameLoop = useCallback(() => {
     const canvas = canvasRef.current;
     if (!canvas) return;
-    const ctx = canvas.getContext('2d');
     const engine = engineRef.current;
     if (!engine) return;
 
@@ -380,6 +382,7 @@ export default function OlympicsGame({ onScoreSubmitted }) {
         // Apply Speed & Friction
         s.hurdles.speed *= HURDLES_CONFIG.FRICTION;
         s.hurdles.distance += s.hurdles.speed * 0.04;
+        setLiveProgressText(`${Math.min(100, Math.floor(s.hurdles.distance))}m / 100m`);
 
         // Stumble Recovery
         if (s.hurdles.isStumbled) {
@@ -482,7 +485,6 @@ export default function OlympicsGame({ onScoreSubmitted }) {
           s.basketball.ball.y = (1 - p) * (1 - p) * startY + 2 * (1 - p) * p * midY + p * p * targetY;
 
           if (p >= 1) {
-            // Ball Reached Basket
             s.basketball.ball.isActive = false;
             s.basketball.isShooting = false;
 
@@ -496,9 +498,9 @@ export default function OlympicsGame({ onScoreSubmitted }) {
 
             s.basketball.ballIndex += 1;
             s.basketball.shotsLeft -= 1;
+            setLiveProgressText(`공 ${Math.min(8, s.basketball.ballIndex)} / 8`);
 
             if (s.basketball.shotsLeft <= 0) {
-              // Basketball finished
               setLiveEventScore(currentLive => {
                 finishCurrentEvent(GAME_EVENTS.BASKETBALL, currentLive);
                 return currentLive;
@@ -527,11 +529,11 @@ export default function OlympicsGame({ onScoreSubmitted }) {
       if (s.isRunning) {
         s.canoe.elapsedTime += 0.016;
 
-        // River Downward Scrolling
         const riverSpeed = CANOE_CONFIG.RIVER_SPEED;
         s.canoe.riverScroll += riverSpeed * 2;
         s.canoe.distanceTraveled += riverSpeed;
         s.canoe.paddlePhase += 0.08;
+        setLiveProgressText(`${Math.min(800, Math.floor(s.canoe.distanceTraveled))}m / 800m`);
 
         // Smooth Canoe Rotation Angle
         s.canoe.playerAngle += (s.canoe.targetAngle - s.canoe.playerAngle) * 0.15;
@@ -562,7 +564,7 @@ export default function OlympicsGame({ onScoreSubmitted }) {
           if (dist < (obs.radius || 20) + 14) {
             olympicsAudio.playCollision();
             haptics.heavy();
-            s.canoe.distanceTraveled -= 8; // Bump back
+            s.canoe.distanceTraveled -= 8;
           }
         });
 
@@ -646,31 +648,49 @@ export default function OlympicsGame({ onScoreSubmitted }) {
 
   return (
     <div className="olympics-container">
-      {/* 1. Header Toolbar */}
+      {/* 1. Header with Title & Live HUD Stats */}
       <div className="olympics-header">
-        <div className="flex items-center gap-2">
-          <span className="text-xl">🏅</span>
+        <div className="olympics-title-box">
+          <span style={{ fontSize: '24px' }}>🏅</span>
           <div>
-            <h2 className="text-sm font-black text-white leading-tight">
+            <h2 className="olympics-title-main">
               도촌 미니 올림픽
             </h2>
-            <span className="text-[10px] text-amber-300 font-bold">
-              {currentEvent !== GAME_EVENTS.INTRO && currentEvent !== GAME_EVENTS.RESULTS
-                ? EVENT_DETAILS[currentEvent]?.name
-                : '3대 릴레이 스포츠 챔피언십'}
-            </span>
+            <div className="flex items-center gap-1.5 mt-0.5">
+              {currentEvent !== GAME_EVENTS.INTRO && currentEvent !== GAME_EVENTS.RESULTS ? (
+                <span className="olympics-event-badge">
+                  {EVENT_DETAILS[currentEvent]?.icon} {EVENT_DETAILS[currentEvent]?.name}
+                </span>
+              ) : (
+                <span className="text-[11px] font-bold text-amber-300">
+                  3대 릴레이 스포츠 챔피언십
+                </span>
+              )}
+            </div>
           </div>
         </div>
 
-        <div className="flex items-center gap-2">
-          {/* Sound Toggle */}
-          <button onClick={toggleSound} className="olympics-btn-icon" title="배경음/효과음 토글">
-            {isMuted ? <VolumeX className="w-4 h-4 text-rose-400" /> : <Volume2 className="w-4 h-4 text-emerald-400" />}
-          </button>
+        {/* Live HUD Stats during Gameplay */}
+        {currentEvent !== GAME_EVENTS.INTRO && currentEvent !== GAME_EVENTS.RESULTS && (
+          <div className="olympics-hud-stats">
+            <div className="olympics-stat-pill">
+              <span className="olympics-stat-label">진행도</span>
+              <strong className="olympics-stat-value text-white">{liveProgressText}</strong>
+            </div>
+            <div className="olympics-stat-pill">
+              <span className="olympics-stat-label">종목 점수</span>
+              <strong className="olympics-stat-value">{liveEventScore.toLocaleString()}점</strong>
+            </div>
+          </div>
+        )}
 
-          {/* How to Play Guide */}
-          <button onClick={() => setIsHowToPlayOpen(true)} className="olympics-btn-icon" title="게임 방법">
-            <HelpCircle className="w-4 h-4 text-amber-400" />
+        {/* Header Action Buttons */}
+        <div className="flex items-center gap-2">
+          <button onClick={toggleSound} className="olympics-btn-icon" title="사운드 켜기/끄기">
+            {isMuted ? <VolumeX className="w-5 h-5 text-rose-400" /> : <Volume2 className="w-5 h-5 text-emerald-400" />}
+          </button>
+          <button onClick={() => setIsHowToPlayOpen(true)} className="olympics-btn-icon" title="게임 조작 안내">
+            <HelpCircle className="w-5 h-5 text-amber-400" />
           </button>
         </div>
       </div>
@@ -696,20 +716,20 @@ export default function OlympicsGame({ onScoreSubmitted }) {
         {/* INTRO SCREEN OVERLAY */}
         {currentEvent === GAME_EVENTS.INTRO && (
           <div className="olympics-overlay-screen">
-            <div className="text-center max-w-md p-6 bg-slate-900/90 rounded-3xl border-2 border-amber-500/50 backdrop-blur-md shadow-2xl">
+            <div className="olympics-intro-card">
               <div className="text-4xl mb-2 animate-bounce">🏃 🏀 🛶</div>
               <h1 className="text-2xl font-black text-amber-400 mb-1 tracking-tight">
                 DOCHON MINI OLYMPICS
               </h1>
-              <p className="text-xs text-slate-300 mb-4 font-medium">
+              <p className="text-xs text-slate-300 mb-4 font-medium leading-relaxed">
                 100m 허들 달리기 · 3점슛 챌린지 · 급류 카누 슬라럼<br />
-                도촌초등학교 3대 릴레이 스포츠 챔피언에 도전하세요!
+                <strong className="text-white">도촌초등학교 3대 릴레이 스포츠 챔피언</strong>에 도전하세요!
               </p>
 
               {/* Team Selection */}
               <div className="mb-5">
-                <span className="text-[11px] font-bold text-slate-400 block mb-2">
-                  참가 팀 유니폼 선택
+                <span className="text-[12px] font-bold text-slate-300 block mb-2">
+                  👕 참가 팀 유니폼 선택
                 </span>
                 <div className="flex justify-center gap-2">
                   {ATHLETE_PALETTES.map(team => (
@@ -719,10 +739,10 @@ export default function OlympicsGame({ onScoreSubmitted }) {
                         setSelectedTeam(team);
                         haptics.light();
                       }}
-                      className={`px-3 py-1.5 rounded-xl text-xs font-black border transition-all ${
+                      className={`px-3.5 py-2 rounded-xl text-xs font-black border transition-all ${
                         selectedTeam.id === team.id
-                          ? 'border-white scale-105 shadow-lg'
-                          : 'border-transparent opacity-70 hover:opacity-100'
+                          ? 'border-white scale-105 shadow-xl ring-2 ring-amber-400'
+                          : 'border-transparent opacity-75 hover:opacity-100'
                       }`}
                       style={{ backgroundColor: team.primary, color: '#FFFFFF' }}
                     >
@@ -733,7 +753,7 @@ export default function OlympicsGame({ onScoreSubmitted }) {
               </div>
 
               {/* Action Buttons */}
-              <div className="flex gap-2.5">
+              <div className="flex gap-3">
                 <button
                   onClick={() => startEvent(GAME_EVENTS.HURDLES)}
                   className="olympics-btn-primary flex-1 py-3 text-sm font-black flex items-center justify-center gap-2"
@@ -756,39 +776,39 @@ export default function OlympicsGame({ onScoreSubmitted }) {
         {currentEvent === GAME_EVENTS.RESULTS && (
           <div className="olympics-overlay-screen">
             <div className="olympics-results-card">
-              <div className="text-3xl mb-1 animate-bounce">🏆</div>
+              <div className="text-4xl mb-1 animate-bounce">🏆</div>
               <h2 className="text-xl font-black text-white mb-0.5">
                 도촌 미니 올림픽 <span className="text-amber-400">종합 시상식</span>
               </h2>
-              <p className="text-[11px] text-slate-300 font-bold mb-3">
+              <p className="text-xs text-slate-300 font-bold mb-3">
                 {selectedTeam.name}의 모든 경기가 완료되었습니다!
               </p>
 
               {/* Medal Badge */}
               <div
-                className="py-2 px-4 rounded-2xl mb-3 font-black text-sm border shadow-lg inline-block"
-                style={{ borderColor: medalInfo.color, color: medalInfo.color, backgroundColor: 'rgba(0,0,0,0.4)' }}
+                className="py-2.5 px-5 rounded-2xl mb-3 font-black text-base border shadow-xl inline-block"
+                style={{ borderColor: medalInfo.color, color: medalInfo.color, backgroundColor: 'rgba(0,0,0,0.6)' }}
               >
                 {medalInfo.label}
               </div>
 
               {/* Score Breakdown Table */}
-              <div className="bg-slate-950/70 rounded-2xl p-3 mb-3 text-xs space-y-1.5 border border-slate-800">
-                <div className="flex justify-between text-slate-300">
+              <div className="bg-slate-950/80 rounded-2xl p-3.5 mb-3 text-xs space-y-2 border border-slate-800 text-left">
+                <div className="flex justify-between text-slate-300 font-semibold">
                   <span>🏃 100m 허들 달리기</span>
-                  <strong className="text-amber-400">{scores.hurdles.toLocaleString()} 점</strong>
+                  <strong className="text-amber-400 text-sm">{scores.hurdles.toLocaleString()} 점</strong>
                 </div>
-                <div className="flex justify-between text-slate-300">
+                <div className="flex justify-between text-slate-300 font-semibold">
                   <span>🏀 3점 슛 챌린지</span>
-                  <strong className="text-orange-400">{scores.basketball.toLocaleString()} 점</strong>
+                  <strong className="text-orange-400 text-sm">{scores.basketball.toLocaleString()} 점</strong>
                 </div>
-                <div className="flex justify-between text-slate-300">
+                <div className="flex justify-between text-slate-300 font-semibold">
                   <span>🛶 급류 카누 슬라럼</span>
-                  <strong className="text-cyan-400">{scores.canoe.toLocaleString()} 점</strong>
+                  <strong className="text-cyan-400 text-sm">{scores.canoe.toLocaleString()} 점</strong>
                 </div>
-                <div className="border-t border-slate-700 pt-1.5 flex justify-between text-white font-black text-sm">
+                <div className="border-t border-slate-700 pt-2 flex justify-between text-white font-black text-base">
                   <span>🥇 올림픽 종합 점수</span>
-                  <strong className="text-amber-300">{scores.total.toLocaleString()} 점</strong>
+                  <strong className="text-amber-300 text-lg">{scores.total.toLocaleString()} 점</strong>
                 </div>
               </div>
 
@@ -811,21 +831,21 @@ export default function OlympicsGame({ onScoreSubmitted }) {
                         <button
                           type="submit"
                           disabled={isSubmitting}
-                          className="olympics-btn-primary px-4 text-xs font-black shrink-0 flex items-center gap-1"
+                          className="olympics-btn-primary px-5 text-sm font-black shrink-0 flex items-center gap-1.5"
                         >
-                          <Send className="w-3.5 h-3.5" />
+                          <Send className="w-4 h-4" />
                           <span>{isSubmitting ? '등록중...' : '랭킹 등록'}</span>
                         </button>
                       </div>
                     </form>
                   ) : (
-                    <div className="p-2 rounded-xl bg-emerald-950/50 border border-emerald-500/40 text-emerald-300 text-xs font-bold">
-                      ✅ 명예의 전당 랭킹 등록 완료!
+                    <div className="p-2.5 rounded-xl bg-emerald-950/60 border border-emerald-500/50 text-emerald-300 text-xs font-bold">
+                      ✅ 도촌초 명예의 전당 랭킹 등록 완료!
                     </div>
                   )}
                 </div>
               ) : (
-                <p className="text-[11px] text-slate-400 font-medium">
+                <p className="text-xs text-slate-400 font-medium">
                   100점 초과 달성 시 명예의 전당 랭킹에 기록할 수 있습니다.
                 </p>
               )}
@@ -833,65 +853,71 @@ export default function OlympicsGame({ onScoreSubmitted }) {
               {/* Retry Button */}
               <button
                 onClick={() => startEvent(GAME_EVENTS.HURDLES)}
-                className="mt-3 text-xs text-slate-300 hover:text-white font-bold flex items-center justify-center gap-1 w-full py-1.5"
+                className="mt-3 text-xs text-slate-300 hover:text-white font-bold flex items-center justify-center gap-1.5 w-full py-2"
               >
-                <RotateCcw className="w-3.5 h-3.5" /> 다시 도전하기
+                <RotateCcw className="w-4 h-4" /> 다시 도전하기
               </button>
             </div>
           </div>
         )}
       </div>
 
-      {/* 3. Mobile / In-Game On-Screen Touch Controls */}
+      {/* 3. High-Visibility On-Screen Controls Panel */}
       {currentEvent !== GAME_EVENTS.INTRO && currentEvent !== GAME_EVENTS.RESULTS && (
         <div className="olympics-controls-panel">
           {currentEvent === GAME_EVENTS.HURDLES && (
-            <div className="flex items-center justify-center gap-3 w-full max-w-sm">
+            <div className="flex items-center justify-center gap-3 w-full max-w-md">
               <button
                 onPointerDown={(e) => { e.preventDefault(); handleHurdleStep(true); }}
-                className="olympics-control-btn flex-1 bg-amber-600 active:bg-amber-700"
+                className="olympics-control-btn btn-hurdle-step flex-1"
               >
-                🦶 왼발 (←)
+                <span className="olympics-btn-key-badge">← / A</span>
+                <span>왼발 달리기</span>
               </button>
               <button
                 onPointerDown={(e) => { e.preventDefault(); handleHurdleJump(); }}
-                className="olympics-control-btn flex-1 bg-emerald-600 active:bg-emerald-700 text-base"
+                className="olympics-control-btn btn-hurdle-jump flex-1"
               >
-                ⬆️ 점프 (Space)
+                <span className="olympics-btn-key-badge">Space / ↑</span>
+                <span>⬆️ 허들 점프!</span>
               </button>
               <button
                 onPointerDown={(e) => { e.preventDefault(); handleHurdleStep(false); }}
-                className="olympics-control-btn flex-1 bg-amber-600 active:bg-amber-700"
+                className="olympics-control-btn btn-hurdle-step flex-1"
               >
-                오른발 (→) 🦶
+                <span className="olympics-btn-key-badge">→ / D</span>
+                <span>오른발 달리기</span>
               </button>
             </div>
           )}
 
           {currentEvent === GAME_EVENTS.BASKETBALL && (
-            <div className="flex items-center justify-center w-full max-w-xs">
+            <div className="flex items-center justify-center w-full max-w-sm">
               <button
                 onPointerDown={(e) => { e.preventDefault(); handleBasketballShoot(); }}
-                className="olympics-control-btn w-full bg-orange-600 active:bg-orange-700 text-sm font-black py-3.5"
+                className="olympics-control-btn btn-shoot-action w-full"
               >
-                🏀 슛 발사! (Space / 터치)
+                <span className="olympics-btn-key-badge">SPACE / 터치</span>
+                <span className="text-base font-black">🏀 3점 슛 발사!</span>
               </button>
             </div>
           )}
 
           {currentEvent === GAME_EVENTS.CANOE && (
-            <div className="flex items-center justify-center gap-4 w-full max-w-xs">
+            <div className="flex items-center justify-center gap-4 w-full max-w-sm">
               <button
                 onPointerDown={(e) => { e.preventDefault(); handleCanoeSteer(-1); }}
-                className="olympics-control-btn flex-1 bg-cyan-600 active:bg-cyan-700 text-sm font-black"
+                className="olympics-control-btn btn-canoe-steer flex-1"
               >
-                ◀ 좌현 회전 (←)
+                <span className="olympics-btn-key-badge">← / A</span>
+                <span>◀ 좌현 회전</span>
               </button>
               <button
                 onPointerDown={(e) => { e.preventDefault(); handleCanoeSteer(1); }}
-                className="olympics-control-btn flex-1 bg-cyan-600 active:bg-cyan-700 text-sm font-black"
+                className="olympics-control-btn btn-canoe-steer flex-1"
               >
-                우현 회전 (→) ▶
+                <span className="olympics-btn-key-badge">→ / D</span>
+                <span>우현 회전 ▶</span>
               </button>
             </div>
           )}
