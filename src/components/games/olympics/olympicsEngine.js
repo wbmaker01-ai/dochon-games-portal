@@ -648,7 +648,7 @@ export class OlympicsRenderEngine {
   }
 
   // -------------------------------------------------------------
-  // 3. CANOE SLALOM RENDERER (Crisp & Dynamic)
+  // 3. CANOE SLALOM RENDERER (Forward Whitewater Physics)
   // -------------------------------------------------------------
   renderCanoe({
     width,
@@ -664,15 +664,17 @@ export class OlympicsRenderEngine {
     distanceTraveled
   }) {
     const ctx = this.ctx;
+    const playerScreenY = height * 0.72; // Player fixed at Y = 288px
+    const pixelsPerMeter = 1.6;
 
     // A. Forest Riverbank Sides
     ctx.fillStyle = '#064E3B';
     ctx.fillRect(0, 0, width, height);
 
-    // Bank Trees
+    // Bank Trees scrolling down
     ctx.fillStyle = '#047857';
     for (let y = -40; y < height + 40; y += 45) {
-      const treeY = (y + riverScroll * 0.5) % (height + 80) - 40;
+      const treeY = (y + riverScroll * 0.8) % (height + 80) - 40;
       ctx.beginPath();
       ctx.arc(24, treeY, 20, 0, Math.PI * 2);
       ctx.fill();
@@ -693,21 +695,23 @@ export class OlympicsRenderEngine {
     ctx.fillStyle = riverGrad;
     ctx.fillRect(riverX, 0, riverWidth, height);
 
-    // Whitewater Waves & Foam
-    ctx.strokeStyle = 'rgba(255, 255, 255, 0.5)';
+    // Whitewater Waves & Foam flowing from Top to Bottom
+    ctx.strokeStyle = 'rgba(255, 255, 255, 0.45)';
     ctx.lineWidth = 3;
-    for (let i = 0; i < 7; i++) {
-      const streamX = riverX + 35 + i * (riverWidth / 7);
-      const streamOffset = (riverScroll * 2.5 + i * 85) % height;
+    for (let i = 0; i < 8; i++) {
+      const streamX = riverX + 30 + i * (riverWidth / 8);
+      const streamOffset = (riverScroll * 3 + i * 85) % height;
       ctx.beginPath();
       ctx.moveTo(streamX, streamOffset);
       ctx.lineTo(streamX + Math.sin(streamOffset * 0.05) * 14, streamOffset + 38);
       ctx.stroke();
     }
 
-    // C. Obstacles (Boulders & Logs)
+    // C. River Obstacles (Coming from Top towards Player)
     obstacles.forEach(obs => {
-      const screenY = obs.y - distanceTraveled;
+      const distAhead = obs.targetDist - distanceTraveled;
+      const screenY = playerScreenY - distAhead * pixelsPerMeter;
+
       if (screenY >= -50 && screenY <= height + 50) {
         ctx.save();
         ctx.translate(obs.x, screenY);
@@ -740,9 +744,11 @@ export class OlympicsRenderEngine {
       }
     });
 
-    // D. Slalom Gates (Green / White High-Visibility Poles)
+    // D. Slalom Gates (Gate 1 to Gate 10 coming from Top towards Player)
     gates.forEach(gate => {
-      const screenY = gate.y - distanceTraveled;
+      const distAhead = gate.targetDist - distanceTraveled;
+      const screenY = playerScreenY - distAhead * pixelsPerMeter;
+
       if (screenY >= -60 && screenY <= height + 60) {
         ctx.save();
         ctx.translate(gate.x, screenY);
@@ -766,25 +772,24 @@ export class OlympicsRenderEngine {
 
         // Gate Badge
         ctx.fillStyle = gate.isPassed ? '#10B981' : '#0F172A';
-        ctx.strokeStyle = '#FFFFFF';
-        ctx.lineWidth = 1.5;
+        ctx.strokeStyle = gate.isPassed ? '#6EE7B7' : '#FBBF24';
+        ctx.lineWidth = 2;
         ctx.beginPath();
-        ctx.roundRect(-30, -10, 60, 20, 10);
+        ctx.roundRect(-34, -12, 68, 24, 12);
         ctx.fill();
         ctx.stroke();
 
         ctx.fillStyle = '#FFFFFF';
-        ctx.font = '900 11px system-ui, sans-serif';
+        ctx.font = '900 12px system-ui, sans-serif';
         ctx.textAlign = 'center';
         ctx.textBaseline = 'middle';
-        ctx.fillText(`GATE ${gate.num}`, 0, 0);
+        ctx.fillText(gate.isPassed ? '✓ PASS' : `GATE ${gate.num}`, 0, 0);
 
         ctx.restore();
       }
     });
 
     // E. Canoe & Paddler
-    const playerScreenY = height * 0.72;
     this.drawCanoeKayak({
       ctx,
       x: playerX,

@@ -3,11 +3,49 @@
 
 export const CHANGELOG_DATA = [
   {
+    version: 'v1.36.2',
+    date: '2026-08-22',
+    title: '[도촌 미니 올림픽] 카누 슬라럼 물살 정방향 물리 개편 & 플레이 타임 밸런싱(1,200m/10발) & 수평 1줄 조작계 적용',
+    badge: 'LATEST',
+    badgeColor: 'emerald',
+    items: [
+      {
+        tag: 'CANOE FORWARD FLOW',
+        tagColor: 'blue',
+        text: '[카누 슬라럼 정방향 물살 & 게이트 물리 개편] 카누 전진 시 게이트(GATE 1~10)와 장애물이 화면 위쪽에서 자연스럽게 다가와 아래로 흐르도록 상대 거리 벡터 수식을 정방향으로 전면 개편'
+      },
+      {
+        tag: 'GAMEPLAY BALANCE',
+        tagColor: 'emerald',
+        text: '[종목별 플레이 타임 & 몰입도 강화] 너무 빠르게 끝나던 문제를 해결하여 카누 코스를 1,200m(10개 게이트)로 확장하고 슛 기회를 10발로 확대, 허들 가속 커브를 실감나는 12~16초 완주로 최적화'
+      },
+      {
+        tag: 'GAMEPAD 1-ROW',
+        tagColor: 'amber',
+        text: '[카누 모드 수평 1줄 게임패드 적용] 좌측에 [◀ 좌회전 + 우회전 ▶] 버튼을 1줄 수평으로 나란히 배치하고, 우측에 [⚡ 패들 가속] 액션 버튼을 배치하여 완벽한 양손 모바일 조작 완성'
+      }
+    ]
+  },
+  {
+    version: 'v1.36.1',
+    date: '2026-08-22',
+    title: '[도촌 미니 올림픽] 가상 게임패드 수평 1줄 듀얼 클러스터(왼쪽: 달리기 / 오른쪽: 점프) 레이아웃 개편',
+    badge: 'UPDATE',
+    badgeColor: 'blue',
+    items: [
+      {
+        tag: 'GAMEPAD LAYOUT',
+        tagColor: 'amber',
+        text: '[수평 1줄 게임패드 분리 배치] 기존 세로 3줄 정렬을 전면 개편하여, 1줄 수평(Horizontal 1-Row)으로 왼쪽에 [왼발 달리기 + 오른발 달리기], 오른쪽에 [⬆️ 허들 점프!]를 양손 분리 배치하여 최적의 모바일 터치 조작감 제공'
+      }
+    ]
+  },
+  {
     version: 'v1.36.0',
     date: '2026-08-22',
     title: '[포털 & 피자 마스터] 전체 UI 가독성 전면 개편 & 고대비 타이포그래피 및 대형 액션 버튼 적용',
-    badge: 'LATEST',
-    badgeColor: 'emerald',
+    badge: 'UPDATE',
+    badgeColor: 'blue',
     items: [
       {
         tag: 'UI & CONTRAST',

@@ -59,13 +59,13 @@ export default function OlympicsHowToPlayModal({ isOpen, onClose }) {
               <div className="flex items-center gap-2 mb-1.5">
                 <span className="text-2xl">🏀</span>
                 <h4 className="text-sm font-black text-orange-400">
-                  2종목: 3점 슛 챌린지
+                  2종목: 3점 슛 챌린지 (총 10발)
                 </h4>
               </div>
               <ul className="text-xs text-slate-200 space-y-1.5 pl-4 list-disc font-medium">
                 <li><strong className="text-white">슛 던지기</strong>: 타이밍 바가 초록색 <strong className="text-emerald-400">PERFECT ZONE</strong>에 도달했을 때 <kbd className="olympics-key">Space</kbd> 키 입력!</li>
                 <li><strong className="text-white">연속 콤보</strong>: 연속 클린 득점 시 점수가 폭등하는 불꽃 콤보 활성화!</li>
-                <li><strong className="text-amber-300">핵심 팁</strong>: 마지막 8번째 공은 <span className="text-cyan-400 font-black">200점 보너스 머니볼</span>입니다.</li>
+                <li><strong className="text-amber-300">핵심 팁</strong>: 마지막 10번째 공은 <span className="text-cyan-400 font-black">200점 보너스 머니볼</span>입니다.</li>
               </ul>
             </div>
 
@@ -74,12 +74,13 @@ export default function OlympicsHowToPlayModal({ isOpen, onClose }) {
               <div className="flex items-center gap-2 mb-1.5">
                 <span className="text-2xl">🛶</span>
                 <h4 className="text-sm font-black text-cyan-400">
-                  3종목: 급류 카누 슬라럼
+                  3종목: 급류 카누 슬라럼 (1,200m)
                 </h4>
               </div>
               <ul className="text-xs text-slate-200 space-y-1.5 pl-4 list-disc font-medium">
-                <li><strong className="text-white">방향 조종</strong>: 좌우 방향키(<kbd className="olympics-key">←</kbd> <kbd className="olympics-key">→</kbd>)로 물살을 타며 방향 조절.</li>
-                <li><strong className="text-white">게이트 통과</strong>: 녹색 슬라럼 게이트 사이를 정확히 통과하면 연속 보너스 점수!</li>
+                <li><strong className="text-white">방향 조종</strong>: 좌측 버튼 또는 방향키(<kbd className="olympics-key">←</kbd> <kbd className="olympics-key">→</kbd>)로 물살을 타며 방향 조절.</li>
+                <li><strong className="text-white">패들 가속</strong>: 우측 가속 버튼 또는 <kbd className="olympics-key">Space</kbd> / <kbd className="olympics-key">↑</kbd> 키로 급류를 빠르게 돌파!</li>
+                <li><strong className="text-white">게이트 통과</strong>: 위에서 내려오는 녹색 슬라럼 게이트를 정확히 통과하면 연속 보너스 점수!</li>
                 <li><strong className="text-amber-300">핵심 팁</strong>: 바위와 통나무에 부딪히면 감속 및 충돌 감점이 적용됩니다.</li>
               </ul>
             </div>

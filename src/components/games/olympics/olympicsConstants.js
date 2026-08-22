@@ -38,43 +38,43 @@ export const EVENT_DETAILS = {
   }
 };
 
-// Hurdles Configuration
+// Hurdles Configuration (Balanced for 12~16s realistic sprint)
 export const HURDLES_CONFIG = {
   TRACK_LENGTH_METERS: 100,
-  HURDLE_POSITIONS: [20, 35, 50, 65, 80], // in meters
-  BASE_ACCEL: 0.22,
-  MAX_SPEED: 7.8,
-  FRICTION: 0.985,
-  JUMP_POWER: 8.8,
-  GRAVITY: 0.38,
-  TIME_LIMIT_SECONDS: 25,
+  HURDLE_POSITIONS: [18, 32, 46, 60, 74, 88], // 6 hurdles
+  BASE_ACCEL: 0.16,
+  MAX_SPEED: 5.6,
+  FRICTION: 0.99,
+  JUMP_POWER: 8.5,
+  GRAVITY: 0.40,
+  TIME_LIMIT_SECONDS: 30,
   BASE_SCORE: 600,
-  PERFECT_JUMP_BONUS: 80,
-  GOOD_JUMP_BONUS: 40,
-  HIT_PENALTY_TIME: 1.2
+  PERFECT_JUMP_BONUS: 70,
+  GOOD_JUMP_BONUS: 35,
+  HIT_PENALTY_TIME: 1.0
 };
 
-// Basketball Configuration
+// Basketball Configuration (10 shots shootout)
 export const BASKETBALL_CONFIG = {
-  TOTAL_BALLS: 8,
-  TIME_LIMIT: 25,
+  TOTAL_BALLS: 10,
+  TIME_LIMIT: 35,
   REGULAR_SHOT_SCORE: 100,
   MONEY_BALL_SCORE: 200,
-  PERFECT_ZONE_WIDTH: 24, // in percent
-  GOOD_ZONE_WIDTH: 48,
-  GAUGE_SPEED: 2.3
+  PERFECT_ZONE_WIDTH: 22, // in percent
+  GOOD_ZONE_WIDTH: 44,
+  GAUGE_SPEED: 2.0
 };
 
-// Canoe Slalom Configuration
+// Canoe Slalom Configuration (Balanced for 20~28s exciting whitewater course)
 export const CANOE_CONFIG = {
-  COURSE_LENGTH: 800,
-  RIVER_SPEED: 3.6,
-  STEER_SPEED: 4.8,
+  COURSE_LENGTH: 1200,
+  RIVER_SPEED: 2.2,
+  BOOST_SPEED: 3.8,
+  STEER_SPEED: 5.2,
   TOTAL_GATES: 10,
-  GATE_PASS_SCORE: 80,
+  GATE_PASS_SCORE: 90,
   PERFECT_LINE_BONUS: 40,
-  ROCK_COLLISION_PENALTY: 50,
-  SPEED_BOOST: 1.5
+  ROCK_COLLISION_PENALTY: 40
 };
 
 // Medal cutoffs based on Total Combined Score

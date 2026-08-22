@@ -102,24 +102,27 @@ export default function OlympicsGame({ onScoreSubmitted }) {
       paddlePhase: 0,
       riverScroll: 0,
       distanceTraveled: 0,
+      currentSpeed: CANOE_CONFIG.RIVER_SPEED,
       gatesPassed: 0,
       gates: Array.from({ length: CANOE_CONFIG.TOTAL_GATES }, (_, i) => ({
         id: i,
         num: i + 1,
-        x: 140 + Math.sin(i * 1.4) * 120,
-        y: 120 + i * 70,
-        width: 80,
+        targetDist: 100 + i * 100, // 100m, 200m, ..., 1000m
+        x: 320 + Math.sin(i * 1.5) * 125,
+        width: 90,
         isPassed: false
       })),
       obstacles: [
-        { id: 1, type: 'rock', x: 220, y: 160, radius: 18 },
-        { id: 2, type: 'log', x: 380, y: 240 },
-        { id: 3, type: 'rock', x: 180, y: 310, radius: 20 },
-        { id: 4, type: 'rock', x: 340, y: 390, radius: 19 },
-        { id: 5, type: 'log', x: 240, y: 470 },
-        { id: 6, type: 'rock', x: 390, y: 550, radius: 22 },
-        { id: 7, type: 'rock', x: 160, y: 630, radius: 17 },
-        { id: 8, type: 'log', x: 310, y: 700 }
+        { id: 1, type: 'rock', targetDist: 150, x: 230, radius: 18 },
+        { id: 2, type: 'log', targetDist: 250, x: 390 },
+        { id: 3, type: 'rock', targetDist: 350, x: 190, radius: 20 },
+        { id: 4, type: 'rock', targetDist: 450, x: 360, radius: 19 },
+        { id: 5, type: 'log', targetDist: 550, x: 260 },
+        { id: 6, type: 'rock', targetDist: 650, x: 410, radius: 22 },
+        { id: 7, type: 'rock', targetDist: 750, x: 180, radius: 18 },
+        { id: 8, type: 'log', targetDist: 850, x: 330 },
+        { id: 9, type: 'rock', targetDist: 950, x: 220, radius: 20 },
+        { id: 10, type: 'log', targetDist: 1080, x: 380 }
       ],
       elapsedTime: 0
     }
@@ -160,7 +163,7 @@ export default function OlympicsGame({ onScoreSubmitted }) {
         isFallen: false
       }));
     } else if (eventKey === GAME_EVENTS.BASKETBALL) {
-      setLiveProgressText('공 1 / 8');
+      setLiveProgressText('공 1 / 10');
       s.basketball.ballIndex = 1;
       s.basketball.gaugePos = 50;
       s.basketball.gaugeDir = 1;
@@ -170,13 +173,14 @@ export default function OlympicsGame({ onScoreSubmitted }) {
       s.basketball.elapsedTime = 0;
       s.basketball.ball = { x: 0, y: 0, vx: 0, vy: 0, rot: 0, isActive: false };
     } else if (eventKey === GAME_EVENTS.CANOE) {
-      setLiveProgressText('0m / 800m');
-      s.canoe.playerX = 300;
+      setLiveProgressText('0m / 1,200m');
+      s.canoe.playerX = 320;
       s.canoe.playerAngle = 0;
       s.canoe.targetAngle = 0;
       s.canoe.paddlePhase = 0;
       s.canoe.riverScroll = 0;
       s.canoe.distanceTraveled = 0;
+      s.canoe.currentSpeed = CANOE_CONFIG.RIVER_SPEED;
       s.canoe.gatesPassed = 0;
       s.canoe.elapsedTime = 0;
       s.canoe.gates.forEach(g => { g.isPassed = false; });
@@ -325,6 +329,16 @@ export default function OlympicsGame({ onScoreSubmitted }) {
     haptics.light();
   };
 
+  const handleCanoeBoost = () => {
+    const s = gameStateRef.current;
+    if (!s.isRunning || currentEvent !== GAME_EVENTS.CANOE) return;
+
+    s.canoe.currentSpeed = CANOE_CONFIG.BOOST_SPEED;
+    s.canoe.paddlePhase += 1.4;
+    olympicsAudio.playPaddle();
+    haptics.medium();
+  };
+
   // Keyboard Event Listeners
   useEffect(() => {
     const handleKeyDown = (e) => {
@@ -351,6 +365,9 @@ export default function OlympicsGame({ onScoreSubmitted }) {
         } else if (e.key === 'ArrowRight' || e.key === 'd' || e.key === 'D') {
           e.preventDefault();
           handleCanoeSteer(1);
+        } else if (e.key === ' ' || e.key === 'ArrowUp' || e.key === 'w' || e.key === 'W') {
+          e.preventDefault();
+          handleCanoeBoost();
         }
       }
     };
@@ -498,7 +515,7 @@ export default function OlympicsGame({ onScoreSubmitted }) {
 
             s.basketball.ballIndex += 1;
             s.basketball.shotsLeft -= 1;
-            setLiveProgressText(`공 ${Math.min(8, s.basketball.ballIndex)} / 8`);
+            setLiveProgressText(`공 ${Math.min(BASKETBALL_CONFIG.TOTAL_BALLS, s.basketball.ballIndex)} / ${BASKETBALL_CONFIG.TOTAL_BALLS}`);
 
             if (s.basketball.shotsLeft <= 0) {
               setLiveEventScore(currentLive => {
@@ -524,30 +541,37 @@ export default function OlympicsGame({ onScoreSubmitted }) {
       });
     }
 
-    // 3. Canoe Slalom Event Logic
+    // 3. Canoe Slalom Event Logic (Forward Whitewater Physics)
     else if (currentEvent === GAME_EVENTS.CANOE) {
       if (s.isRunning) {
         s.canoe.elapsedTime += 0.016;
 
-        const riverSpeed = CANOE_CONFIG.RIVER_SPEED;
-        s.canoe.riverScroll += riverSpeed * 2;
-        s.canoe.distanceTraveled += riverSpeed;
-        s.canoe.paddlePhase += 0.08;
-        setLiveProgressText(`${Math.min(800, Math.floor(s.canoe.distanceTraveled))}m / 800m`);
+        // Smooth speed deceleration to normal
+        s.canoe.currentSpeed += (CANOE_CONFIG.RIVER_SPEED - s.canoe.currentSpeed) * 0.04;
+        const currentSpeed = s.canoe.currentSpeed;
+
+        s.canoe.riverScroll += currentSpeed * 2.5;
+        s.canoe.distanceTraveled += currentSpeed;
+        s.canoe.paddlePhase += currentSpeed * 0.04;
+        setLiveProgressText(`${Math.min(CANOE_CONFIG.COURSE_LENGTH, Math.floor(s.canoe.distanceTraveled))}m / ${CANOE_CONFIG.COURSE_LENGTH}m`);
 
         // Smooth Canoe Rotation Angle
-        s.canoe.playerAngle += (s.canoe.targetAngle - s.canoe.playerAngle) * 0.15;
+        s.canoe.playerAngle += (s.canoe.targetAngle - s.canoe.playerAngle) * 0.18;
         s.canoe.targetAngle *= 0.88;
 
         // Boundary Clamp
         const bankW = Math.min(width * 0.12, 60);
-        s.canoe.playerX = Math.max(bankW + 20, Math.min(width - bankW - 20, s.canoe.playerX));
+        s.canoe.playerX = Math.max(bankW + 24, Math.min(width - bankW - 24, s.canoe.playerX));
 
-        // Slalom Gates Passing Check
+        // Slalom Gates Passing Check (Forward)
         const playerScreenY = height * 0.72;
+        const pixelsPerMeter = 1.6;
+
         s.canoe.gates.forEach(gate => {
-          const gateScreenY = gate.y - s.canoe.distanceTraveled;
-          if (!gate.isPassed && Math.abs(gateScreenY - playerScreenY) < 18) {
+          const distAhead = gate.targetDist - s.canoe.distanceTraveled;
+          const gateScreenY = playerScreenY - distAhead * pixelsPerMeter;
+
+          if (!gate.isPassed && Math.abs(gateScreenY - playerScreenY) < 22) {
             if (Math.abs(s.canoe.playerX - gate.x) < gate.width * 0.5) {
               gate.isPassed = true;
               s.canoe.gatesPassed += 1;
@@ -557,21 +581,22 @@ export default function OlympicsGame({ onScoreSubmitted }) {
           }
         });
 
-        // Obstacles Collision Check
+        // Obstacles Collision Check (Forward)
         s.canoe.obstacles.forEach(obs => {
-          const obsScreenY = obs.y - s.canoe.distanceTraveled;
+          const distAhead = obs.targetDist - s.canoe.distanceTraveled;
+          const obsScreenY = playerScreenY - distAhead * pixelsPerMeter;
           const dist = Math.hypot(s.canoe.playerX - obs.x, playerScreenY - obsScreenY);
           if (dist < (obs.radius || 20) + 14) {
             olympicsAudio.playCollision();
             haptics.heavy();
-            s.canoe.distanceTraveled -= 8;
+            s.canoe.distanceTraveled = Math.max(0, s.canoe.distanceTraveled - 6);
           }
         });
 
         // Course Finished
         if (s.canoe.distanceTraveled >= CANOE_CONFIG.COURSE_LENGTH) {
           const gatesScore = s.canoe.gatesPassed * CANOE_CONFIG.GATE_PASS_SCORE;
-          const timeBonus = Math.max(0, Math.round(400 - s.canoe.elapsedTime * 8));
+          const timeBonus = Math.max(0, Math.round(500 - s.canoe.elapsedTime * 10));
           const totalCanoeScore = gatesScore + timeBonus;
           setLiveEventScore(totalCanoeScore);
           finishCurrentEvent(GAME_EVENTS.CANOE, totalCanoeScore);
@@ -862,40 +887,48 @@ export default function OlympicsGame({ onScoreSubmitted }) {
         )}
       </div>
 
-      {/* 3. High-Visibility On-Screen Controls Panel */}
+      {/* 3. High-Visibility On-Screen Controls Panel (1-Row Horizontal Gamepad Layout) */}
       {currentEvent !== GAME_EVENTS.INTRO && currentEvent !== GAME_EVENTS.RESULTS && (
         <div className="olympics-controls-panel">
           {currentEvent === GAME_EVENTS.HURDLES && (
-            <div className="flex items-center justify-center gap-3 w-full max-w-md">
-              <button
-                onPointerDown={(e) => { e.preventDefault(); handleHurdleStep(true); }}
-                className="olympics-control-btn btn-hurdle-step flex-1"
-              >
-                <span className="olympics-btn-key-badge">← / A</span>
-                <span>왼발 달리기</span>
-              </button>
-              <button
-                onPointerDown={(e) => { e.preventDefault(); handleHurdleJump(); }}
-                className="olympics-control-btn btn-hurdle-jump flex-1"
-              >
-                <span className="olympics-btn-key-badge">Space / ↑</span>
-                <span>⬆️ 허들 점프!</span>
-              </button>
-              <button
-                onPointerDown={(e) => { e.preventDefault(); handleHurdleStep(false); }}
-                className="olympics-control-btn btn-hurdle-step flex-1"
-              >
-                <span className="olympics-btn-key-badge">→ / D</span>
-                <span>오른발 달리기</span>
-              </button>
+            <div className="olympics-gamepad-row">
+              {/* Left Cluster: Left Foot & Right Foot Runner Buttons */}
+              <div className="olympics-gamepad-left-cluster">
+                <button
+                  onPointerDown={(e) => { e.preventDefault(); handleHurdleStep(true); }}
+                  className="olympics-control-btn btn-hurdle-step"
+                >
+                  <span className="olympics-btn-key-badge">← / A</span>
+                  <span>왼발 달리기</span>
+                </button>
+                <button
+                  onPointerDown={(e) => { e.preventDefault(); handleHurdleStep(false); }}
+                  className="olympics-control-btn btn-hurdle-step"
+                >
+                  <span className="olympics-btn-key-badge">→ / D</span>
+                  <span>오른발 달리기</span>
+                </button>
+              </div>
+
+              {/* Right Cluster: Jump Button */}
+              <div className="olympics-gamepad-right-cluster">
+                <button
+                  onPointerDown={(e) => { e.preventDefault(); handleHurdleJump(); }}
+                  className="olympics-control-btn btn-hurdle-jump"
+                >
+                  <span className="olympics-btn-key-badge">Space / ↑</span>
+                  <span>⬆️ 허들 점프!</span>
+                </button>
+              </div>
             </div>
           )}
 
           {currentEvent === GAME_EVENTS.BASKETBALL && (
-            <div className="flex items-center justify-center w-full max-w-sm">
+            <div className="olympics-gamepad-row" style={{ justifyContent: 'center' }}>
               <button
                 onPointerDown={(e) => { e.preventDefault(); handleBasketballShoot(); }}
-                className="olympics-control-btn btn-shoot-action w-full"
+                className="olympics-control-btn btn-shoot-action"
+                style={{ maxWidth: '420px', width: '100%' }}
               >
                 <span className="olympics-btn-key-badge">SPACE / 터치</span>
                 <span className="text-base font-black">🏀 3점 슛 발사!</span>
@@ -904,21 +937,35 @@ export default function OlympicsGame({ onScoreSubmitted }) {
           )}
 
           {currentEvent === GAME_EVENTS.CANOE && (
-            <div className="flex items-center justify-center gap-4 w-full max-w-sm">
-              <button
-                onPointerDown={(e) => { e.preventDefault(); handleCanoeSteer(-1); }}
-                className="olympics-control-btn btn-canoe-steer flex-1"
-              >
-                <span className="olympics-btn-key-badge">← / A</span>
-                <span>◀ 좌현 회전</span>
-              </button>
-              <button
-                onPointerDown={(e) => { e.preventDefault(); handleCanoeSteer(1); }}
-                className="olympics-control-btn btn-canoe-steer flex-1"
-              >
-                <span className="olympics-btn-key-badge">→ / D</span>
-                <span>우현 회전 ▶</span>
-              </button>
+            <div className="olympics-gamepad-row">
+              {/* Left Cluster: Steer Left & Right Buttons Horizontal */}
+              <div className="olympics-gamepad-left-cluster">
+                <button
+                  onPointerDown={(e) => { e.preventDefault(); handleCanoeSteer(-1); }}
+                  className="olympics-control-btn btn-canoe-steer"
+                >
+                  <span className="olympics-btn-key-badge">← / A</span>
+                  <span>◀ 좌회전</span>
+                </button>
+                <button
+                  onPointerDown={(e) => { e.preventDefault(); handleCanoeSteer(1); }}
+                  className="olympics-control-btn btn-canoe-steer"
+                >
+                  <span className="olympics-btn-key-badge">→ / D</span>
+                  <span>우회전 ▶</span>
+                </button>
+              </div>
+
+              {/* Right Cluster: Paddle Boost Button */}
+              <div className="olympics-gamepad-right-cluster">
+                <button
+                  onPointerDown={(e) => { e.preventDefault(); handleCanoeBoost(); }}
+                  className="olympics-control-btn btn-hurdle-jump"
+                >
+                  <span className="olympics-btn-key-badge">Space / ↑</span>
+                  <span>⚡ 패들 가속!</span>
+                </button>
+              </div>
             </div>
           )}
         </div>
