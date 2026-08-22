@@ -3,11 +3,45 @@
 
 export const CHANGELOG_DATA = [
   {
+    version: 'v1.38.0',
+    date: '2026-08-22',
+    title: '[도촌 UFO 탈출작전] 25번째 공식 신작 정식 개장! 구글 두들 로즈웰 모티브 포인트 앤 클릭 어드벤처 탑재',
+    badge: 'LATEST',
+    badgeColor: 'emerald',
+    items: [
+      {
+        tag: 'NEW GAME',
+        tagColor: 'emerald',
+        text: '[25번째 공식 신작 게임 개장] 2013년 구글 두들 명작 "로즈웰 66주년 인터랙티브 기념작"을 모티브로 한 포인트 앤 클릭 어드벤처 퍼즐 "도촌 UFO 탈출작전" 정식 런칭'
+      },
+      {
+        tag: 'ADVENTURE ENGINE',
+        tagColor: 'amber',
+        text: '[독립 전용 엔진 구축] src/components/games/roswell/ 독립 폴더 구조 분리, 4대 탐험 씬(불시착지, 들판, 헛간, 농가) 및 인벤토리 아이템 상호작용 체인 구현'
+      },
+      {
+        tag: 'RETRO VISUALS',
+        tagColor: 'purple',
+        text: '[흑백 무성영화 레트로 그래픽] Canvas 2D 절차적 렌더링을 통한 빈티지 필름 비네팅, 스캔라인 노이즈 및 외계 SF 라이팅 효과'
+      },
+      {
+        tag: 'PROCEDURAL SFX',
+        tagColor: 'blue',
+        text: '[Web Audio API 실시간 합성음] 삐리리 외계인 텔레파시 음, 상호작용 피드백, 부품 발견 아르페지오 및 UFO 우주 발사 추진음 탑재'
+      },
+      {
+        tag: 'LEADERBOARD',
+        tagColor: 'teal',
+        text: '[도촌초 명예의 전당 연동] 3대 부품 회수 및 탈출 성공 시 시간 비례 고득점 보너스 산출 및 점수 등록 후 UFO 랭킹 탭 자동 동기화'
+      }
+    ]
+  },
+  {
     version: 'v1.37.0',
     date: '2026-08-22',
     title: '[도촌 천산갑의 모험] 24번째 신작 정식 개장! 구글 두들 모티브 횡스크롤 플랫폼 액션 독립 컴포넌트 탑재',
-    badge: 'LATEST',
-    badgeColor: 'emerald',
+    badge: 'UPDATE',
+    badgeColor: 'blue',
     items: [
       {
         tag: 'NEW GAME',

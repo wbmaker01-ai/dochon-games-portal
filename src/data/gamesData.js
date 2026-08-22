@@ -208,19 +208,21 @@ export const PLAYABLE_GAMES = [
     category: '어드벤처',
     imageSrc: getThumb('pangolin.jpg'),
     isPlayable: true,
-    badgeText: '🦔 NEW 24위',
+    badgeText: '🦔 24위',
     description: '몸을 둥글게 말아 데굴데굴 질주하고 점프하는 구글 두들 모티브 4대 테마 횡스크롤 플랫폼 액션!'
-  }
-];
-
-export const COMING_SOON_GAMES = [
+  },
   {
     id: 'roswell',
     title: '도촌 UFO 탈출작전',
     category: '어드벤처',
     imageSrc: getThumb('roswell.jpg'),
-    isPlayable: false
-  },
+    isPlayable: true,
+    badgeText: '🛸 NEW 25위',
+    description: '불시착한 외계인을 도와 흩어진 3대 부품을 찾아 UFO를 수리하고 탈출하는 포인트 앤 클릭 어드벤처!'
+  }
+];
+
+export const COMING_SOON_GAMES = [
   {
     id: 'petanque',
     title: '페탕크',
