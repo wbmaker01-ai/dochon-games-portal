@@ -161,7 +161,7 @@ export default function RoswellGame({ onScoreSubmitted }) {
     switch (sceneKey) {
       case SCENES.CRASH_SITE: return '불시착 지점 🛸';
       case SCENES.FARMLAND: return '도촌 농장 들판 🌾';
-      case SCENES.BARN: return '오래된 헛간 헛간 🏚️';
+      case SCENES.BARN: return '오래된 헛간 🏚️';
       case SCENES.FARMHOUSE: return '농부의 오두막 🏡';
       default: return '도촌 마을';
     }
@@ -187,17 +187,17 @@ export default function RoswellGame({ onScoreSubmitted }) {
         <div className="roswell-stat-group">
           <button
             onClick={() => setIsHowToPlayOpen(true)}
-            className="p-1.5 rounded-xl bg-slate-800/80 hover:bg-slate-700 text-slate-300 hover:text-white transition-colors border border-slate-700"
-            title="게임 방법"
+            className="roswell-icon-btn"
+            title="게임 방법 및 힌트 가이드"
           >
-            <HelpCircle className="w-4 h-4" />
+            <HelpCircle className="w-5 h-5" />
           </button>
           <button
             onClick={toggleSound}
-            className="p-1.5 rounded-xl bg-slate-800/80 hover:bg-slate-700 text-slate-300 hover:text-white transition-colors border border-slate-700"
+            className="roswell-icon-btn"
             title={isMuted ? '음소거 해제' : '음소거'}
           >
-            {isMuted ? <VolumeX className="w-4 h-4 text-red-400" /> : <Volume2 className="w-4 h-4 text-emerald-400" />}
+            {isMuted ? <VolumeX className="w-5 h-5 text-red-400" /> : <Volume2 className="w-5 h-5 text-emerald-400" />}
           </button>
         </div>
       </div>

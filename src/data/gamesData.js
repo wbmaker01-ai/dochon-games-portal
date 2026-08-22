@@ -217,19 +217,21 @@ export const PLAYABLE_GAMES = [
     category: '어드벤처',
     imageSrc: getThumb('roswell.jpg'),
     isPlayable: true,
-    badgeText: '🛸 NEW 25위',
+    badgeText: '🛸 25위',
     description: '불시착한 외계인을 도와 흩어진 3대 부품을 찾아 UFO를 수리하고 탈출하는 포인트 앤 클릭 어드벤처!'
+  },
+  {
+    id: 'petanque',
+    title: '도촌 페탕크 마스터',
+    category: '스포츠',
+    imageSrc: getThumb('petanque.jpg'),
+    isPlayable: true,
+    badgeText: '🎯 NEW 26위',
+    description: '노란 표적구(뷔슈)에 쇠구슬을 가깝게 붙이고 상대 공을 쳐내는 프랑스 전통 구기 스포츠 2.5D 물리 챌린지!'
   }
 ];
 
 export const COMING_SOON_GAMES = [
-  {
-    id: 'petanque',
-    title: '페탕크',
-    category: '스포츠',
-    imageSrc: getThumb('petanque.jpg'),
-    isPlayable: false
-  },
   {
     id: 'halfmoon',
     title: '반달',

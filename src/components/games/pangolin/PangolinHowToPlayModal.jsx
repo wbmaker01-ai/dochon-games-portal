@@ -49,12 +49,12 @@ export default function PangolinHowToPlayModal({ isOpen, onClose }) {
             <div className="pangolin-guide-card">
               <h4 className="text-xs font-black text-sky-300 flex items-center gap-1.5 mb-2">
                 <Zap className="w-3.5 h-3.5" />
-                모바일 터치 조작
+                태블릿 / 모바일 게임패드 조작
               </h4>
               <ul className="text-[11px] text-slate-300 space-y-1.5">
-                <li><strong className="text-sky-400">좌/우 온스크린 버튼</strong>: 부드러운 방향 이동</li>
-                <li><strong className="text-amber-400">⚡ 롤링 버튼</strong>: 즉시 몸을 말아 초고속 질주</li>
-                <li><strong className="text-pink-400">🦘 점프 버튼</strong>: 2단 더블 점프 지원</li>
+                <li><strong className="text-sky-400">◀ 왼쪽 / 오른쪽 ▶</strong>: 아케이드 방향키 이동</li>
+                <li><strong className="text-amber-400">⚡ 롤링 버튼</strong>: 꾹 누르면 데굴데굴 초고속 질주</li>
+                <li><strong className="text-pink-400">🦘 점프 버튼</strong>: 터치 시 2단 연속 더블 점프</li>
               </ul>
             </div>
           </div>

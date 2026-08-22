@@ -22,7 +22,8 @@ export default function RoswellHowToPlayModal({ isOpen, onClose }) {
           </div>
           <button
             onClick={onClose}
-            className="p-1.5 rounded-xl bg-slate-800/80 hover:bg-slate-700 text-slate-400 hover:text-white transition-colors border border-slate-700"
+            className="roswell-icon-btn"
+            title="닫기"
           >
             <X className="w-5 h-5" />
           </button>

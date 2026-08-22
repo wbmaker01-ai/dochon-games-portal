@@ -3,11 +3,103 @@
 
 export const CHANGELOG_DATA = [
   {
+    version: 'v1.39.1',
+    date: '2026-08-22',
+    title: '[도촌 UFO 탈출작전] 3번째 씬 헛간 인터랙션 버그 수정 & 상단 액션 버튼 네온 디자인 개선',
+    badge: 'LATEST',
+    badgeColor: 'emerald',
+    items: [
+      {
+        tag: 'BUG FIX',
+        tagColor: 'rose',
+        text: '[3번째 헛간 씬 아이템 획득 정상화] 풍차 도르래/지붕 위 부품(🔮) 및 건초더미 뼈다귀(🦴) 클릭 판정 영역(Hitbox)을 대폭 확장하고, 밧줄 연결 시 부품 즉시 회수 및 친절한 대사 힌트 가이드 보강'
+      },
+      {
+        tag: 'UI/UX DESIGN',
+        tagColor: 'emerald',
+        text: '[전용 네온 디자인 버튼 탑재] 브라우저 기본 흰색 버튼 스타일을 제거하고 테마에 최적화된 다크 에메랄드 글래스모피즘 아이콘 버튼(.roswell-icon-btn)으로 전면 교체'
+      },
+      {
+        tag: 'VISUAL GLOW',
+        tagColor: 'purple',
+        text: '[인터랙티브 오브젝트 펄스 글로우] 당근, 밧줄, 에너지 코어, 유리 돔, 안테나 등 탐험 사물에 실시간 펄스 하이라이트 링을 적용하여 시각적 직관성 강화'
+      },
+      {
+        tag: 'TYPO FIX',
+        tagColor: 'blue',
+        text: '[상단 상태바 텍스트 보정] "오래된 헛간 헛간" 중복 표기 오타를 "오래된 헛간"으로 깔끔하게 교정'
+      }
+    ]
+  },
+  {
+    version: 'v1.39.0',
+    date: '2026-08-22',
+    title: '[도촌 페탕크 마스터] 26번째 공식 신작 정식 개장! 프랑스 전통 구기 스포츠 2.5D 물리 챌린지 탑재',
+    badge: 'UPDATE',
+    badgeColor: 'blue',
+    items: [
+      {
+        tag: 'NEW GAME',
+        tagColor: 'emerald',
+        text: '[26번째 공식 신작 게임 개장] 2022년 구글 두들 인터랙티브 기념작을 모티브로 한 프랑스 전통 구기 레저 스포츠 "도촌 페탕크 마스터" 정식 런칭'
+      },
+      {
+        tag: '2.5D PHYSICS',
+        tagColor: 'amber',
+        text: '[독립 전용 엔진 구축] src/components/games/petanque/ 독립 패키지 구축, 원근감 투영(Perspective) 렌더러, 포물선 비행 & 지면 롤링 마찰 및 금속 구슬 탄성 충돌 물리 시뮬레이션 탑재'
+      },
+      {
+        tag: '2 TACTICAL SHOTS',
+        tagColor: 'blue',
+        text: '[포앵테 vs 티레 2대 전술] 낮은 탄도로 부드럽게 굴려 표적구(뷔슈)에 바짝 붙이는 "포앵테"와 높은 포물선으로 상대 공을 직접 때려 날려버리는 "티레" 샷 전술 지원'
+      },
+      {
+        tag: 'LASER MEASURING',
+        tagColor: 'purple',
+        text: '[정밀 레이저 줄자 시스템] 엔드 종료 시 뷔슈 중심 실시간 거리(cm/mm) 측정 및 순위 판정 시각화'
+      },
+      {
+        tag: 'PROCEDURAL SFX',
+        tagColor: 'teal',
+        text: '[Web Audio API 실시간 합성음] 맑은 금속 쇠구슬 충돌음(Clank), 흙바닥 착지음, 거리 측정 휘슬 및 승리 팡파레 탑재'
+      },
+      {
+        tag: 'LEADERBOARD',
+        tagColor: 'rose',
+        text: '[도촌초 명예의 전당 연동] 3엔드 매치 후 정밀도/불스아이/승리 보너스 합산 점수 산출 및 점수 등록 후 페탕크 랭킹 탭 자동 동기화'
+      }
+    ]
+  },
+  {
+    version: 'v1.38.1',
+    date: '2026-08-22',
+    title: '[도촌 천산갑의 모험] 아케이드 툴바 디자인 전면 개편, 태블릿 게임패드 조작계 탑재 및 진행도 HUD 상단 재배치',
+    badge: 'UPDATE',
+    badgeColor: 'blue',
+    items: [
+      {
+        tag: 'UI DESIGN OVERHAUL',
+        tagColor: 'amber',
+        text: '[상단 툴바 프리미엄 디자인 개편] 브라우저 기본 흰색 버튼 스타일을 다크 슬레이트 글래스모피즘 아케이드 툴바 버튼으로 전면 교체 및 텍스트 겹침 현상 완벽 해결'
+      },
+      {
+        tag: 'GAMEPAD CONTROLS',
+        tagColor: 'teal',
+        text: '[태블릿/터치 전용 아케이드 게임패드 탑재] 768px 이상 태블릿 기기 및 PC에서도 자유롭게 사용할 수 있도록 큼직한 아케이드 D-Pad(◀/▶)와 액션 버튼(⚡롤링/🦘점프) 상시 지원'
+      },
+      {
+        tag: 'HUD REPOSITION',
+        tagColor: 'blue',
+        text: '[스테이지 완주율 진행도 바 상단 이동] 하단에서 달리는 천산갑 캐릭터를 가리던 완주 진행도 바를 상단 HUD 중앙으로 재배치하여 시야를 완벽히 확보'
+      }
+    ]
+  },
+  {
     version: 'v1.38.0',
     date: '2026-08-22',
     title: '[도촌 UFO 탈출작전] 25번째 공식 신작 정식 개장! 구글 두들 로즈웰 모티브 포인트 앤 클릭 어드벤처 탑재',
-    badge: 'LATEST',
-    badgeColor: 'emerald',
+    badge: 'UPDATE',
+    badgeColor: 'blue',
     items: [
       {
         tag: 'NEW GAME',

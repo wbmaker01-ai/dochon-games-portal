@@ -1,4 +1,4 @@
-/* Dochon Pangolin Adventure Responsive & Neo-Brutalism Stylesheet */
+/* Dochon Pangolin Adventure - Premium Arcade Glassmorphism & Neo-Brutalism Stylesheet */
 
 .pangolin-wrapper {
   position: relative;
@@ -8,20 +8,101 @@
   background: #020617;
   border-radius: 1.25rem;
   overflow: hidden;
-  box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.8), 0 0 0 1px rgba(251, 191, 36, 0.2);
+  box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.85), 0 0 0 1px rgba(251, 191, 36, 0.25);
   user-select: none;
   font-family: inherit;
+  display: flex;
+  flex-direction: column;
 }
 
-/* Canvas Container */
+/* 1. Top Custom Tool & Header Bar */
+.pangolin-top-bar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 8px 14px;
+  background: linear-gradient(180deg, rgba(15, 23, 42, 0.98), rgba(9, 13, 22, 0.98));
+  border-bottom: 1px solid rgba(251, 191, 36, 0.2);
+  gap: 8px;
+  flex-wrap: wrap;
+  z-index: 10;
+}
+
+.pangolin-top-title-group {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+.pangolin-top-title {
+  font-size: 0.92rem;
+  font-weight: 900;
+  color: #fbbf24;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  text-shadow: 0 2px 4px rgba(0, 0, 0, 0.6);
+}
+
+.pangolin-stage-badge {
+  background: rgba(245, 158, 11, 0.18);
+  color: #fde68a;
+  border: 1px solid rgba(245, 158, 11, 0.4);
+  padding: 3px 9px;
+  border-radius: 9999px;
+  font-size: 0.72rem;
+  font-weight: 800;
+  letter-spacing: -0.02em;
+}
+
+.pangolin-top-actions {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+/* Custom Tool Buttons (사운드 / 게임 방법) */
+.pangolin-tool-btn {
+  background: rgba(30, 41, 59, 0.9);
+  color: #e2e8f0;
+  border: 1px solid rgba(255, 255, 255, 0.18);
+  padding: 6px 12px;
+  border-radius: 10px;
+  font-size: 0.78rem;
+  font-weight: 800;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  cursor: pointer;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.4);
+  transition: all 0.15s ease;
+  outline: none;
+}
+
+.pangolin-tool-btn:hover {
+  background: rgba(51, 65, 85, 0.95);
+  color: #ffffff;
+  border-color: rgba(251, 191, 36, 0.5);
+  box-shadow: 0 0 10px rgba(251, 191, 36, 0.25);
+  transform: translateY(-1px);
+}
+
+.pangolin-tool-btn:active {
+  transform: translateY(1px);
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.6);
+}
+
+/* 2. Main Canvas Viewport */
 .pangolin-canvas-container {
   position: relative;
   width: 100%;
   aspect-ratio: 16 / 9;
-  background: #000;
+  background: #020617;
   display: flex;
   align-items: center;
   justify-content: center;
+  overflow: hidden;
 }
 
 .pangolin-canvas {
@@ -31,124 +112,193 @@
   object-fit: contain;
 }
 
-/* Top HUD Bar */
+/* 3. Top HUD Elements Overlay (좌측 점수, 중앙 진행도, 우측 시간) */
 .pangolin-hud {
   position: absolute;
-  top: 12px;
-  left: 12px;
-  right: 12px;
+  top: 10px;
+  left: 10px;
+  right: 10px;
   display: flex;
   justify-content: space-between;
   align-items: center;
   pointer-events: none;
   z-index: 20;
+  gap: 8px;
 }
 
 .pangolin-hud-chip {
-  background: rgba(15, 23, 42, 0.85);
-  backdrop-filter: blur(8px);
-  border: 1px solid rgba(255, 255, 255, 0.15);
-  padding: 6px 12px;
+  background: rgba(15, 23, 42, 0.88);
+  backdrop-filter: blur(10px);
+  border: 1px solid rgba(255, 255, 255, 0.18);
+  padding: 5px 12px;
   border-radius: 9999px;
   display: flex;
   align-items: center;
   gap: 6px;
-  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.4);
-  font-weight: 800;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.5);
+  font-weight: 900;
   font-size: 0.82rem;
   color: #f8fafc;
+  shrink: 0;
 }
 
-.pangolin-progress-container {
-  position: absolute;
-  bottom: 12px;
-  left: 50%;
-  transform: translateX(-50%);
-  width: 60%;
-  max-width: 400px;
-  background: rgba(15, 23, 42, 0.85);
-  backdrop-filter: blur(8px);
-  border: 1px solid rgba(255, 255, 255, 0.15);
-  padding: 6px 12px;
-  border-radius: 9999px;
+/* Central Top Progress Bar (캐릭터를 가리지 않도록 상단으로 이동) */
+.pangolin-progress-top {
   display: flex;
   flex-direction: column;
-  gap: 4px;
-  z-index: 20;
-  pointer-events: none;
+  align-items: center;
+  gap: 3px;
+  background: rgba(15, 23, 42, 0.88);
+  backdrop-filter: blur(10px);
+  border: 1px solid rgba(251, 191, 36, 0.3);
+  padding: 4px 14px;
+  border-radius: 9999px;
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.5);
+  min-width: 160px;
+  max-width: 280px;
+  flex: 1;
 }
 
-.pangolin-progress-bar-bg {
+.pangolin-progress-top-label {
+  font-size: 0.72rem;
+  font-weight: 900;
+  color: #fde68a;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
   width: 100%;
-  height: 8px;
+  gap: 6px;
+}
+
+.pangolin-progress-top-bg {
+  width: 100%;
+  height: 6px;
   background: rgba(255, 255, 255, 0.15);
   border-radius: 9999px;
   overflow: hidden;
 }
 
-.pangolin-progress-bar-fill {
+.pangolin-progress-top-fill {
   height: 100%;
   background: linear-gradient(90deg, #f59e0b, #ec4899, #38bdf8);
   border-radius: 9999px;
-  transition: width 0.1s linear;
+  transition: width 0.12s ease-out;
+  box-shadow: 0 0 6px rgba(236, 72, 153, 0.5);
 }
 
-/* On-Screen Mobile Controls */
-.pangolin-mobile-controls {
+/* 4. Universal Tablet & Mobile Gamepad Controller Bar */
+.pangolin-gamepad-bar {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  padding: 10px 16px;
-  background: #090d16;
-  border-top: 1px solid rgba(255, 255, 255, 0.1);
+  padding: 10px 18px;
+  background: linear-gradient(180deg, #090d16, #020617);
+  border-top: 2px solid rgba(255, 255, 255, 0.08);
+  gap: 12px;
   touch-action: manipulation;
+  z-index: 15;
 }
 
-@media (min-width: 768px) {
-  .pangolin-mobile-controls {
-    display: none;
-  }
-}
-
-.pangolin-ctrl-btn {
-  background: #1e293b;
-  border: 2px solid #334155;
-  color: #ffffff;
-  padding: 12px 18px;
-  border-radius: 14px;
-  font-size: 1.1rem;
-  font-weight: 900;
+.pangolin-pad-group {
   display: flex;
   align-items: center;
+  gap: 10px;
+}
+
+/* Gamepad Direction & Action Buttons */
+.pangolin-pad-btn {
+  background: linear-gradient(180deg, #1e293b, #0f172a);
+  border: 2px solid #334155;
+  color: #ffffff;
+  min-width: 58px;
+  height: 48px;
+  padding: 0 14px;
+  border-radius: 14px;
+  font-size: 0.95rem;
+  font-weight: 900;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
   justify-content: center;
-  box-shadow: 0 4px 0 #0f172a;
-  transition: all 0.05s ease;
+  gap: 2px;
+  box-shadow: 0 4px 0 #020617, 0 6px 12px rgba(0, 0, 0, 0.4);
+  cursor: pointer;
+  transition: all 0.06s ease;
   user-select: none;
   -webkit-user-select: none;
+  outline: none;
 }
 
-.pangolin-ctrl-btn:active {
+.pangolin-pad-btn:hover {
+  border-color: #64748b;
+  background: linear-gradient(180deg, #334155, #1e293b);
+}
+
+.pangolin-pad-btn:active,
+.pangolin-pad-btn.is-active {
   transform: translateY(3px);
-  box-shadow: 0 1px 0 #0f172a;
+  box-shadow: 0 1px 0 #020617;
+  background: #0f172a;
 }
 
-.pangolin-ctrl-btn.btn-jump {
-  background: linear-gradient(135deg, #ec4899, #db2777);
-  border-color: #f472b6;
-  box-shadow: 0 4px 0 #9d174d;
+.pangolin-pad-key-hint {
+  font-size: 0.58rem;
+  font-weight: 700;
+  color: #94a3b8;
+  letter-spacing: -0.02em;
 }
 
-.pangolin-ctrl-btn.btn-roll {
-  background: linear-gradient(135deg, #f59e0b, #d97706);
-  border-color: #fbbf24;
-  box-shadow: 0 4px 0 #92400e;
+/* Action: Roll Button */
+.pangolin-pad-btn.btn-roll {
+  background: linear-gradient(180deg, #f59e0b, #d97706);
+  border-color: #fcd34d;
+  color: #0f172a;
+  box-shadow: 0 4px 0 #92400e, 0 6px 12px rgba(245, 158, 11, 0.3);
 }
 
-/* Modals and Overlays */
+.pangolin-pad-btn.btn-roll:hover {
+  background: linear-gradient(180deg, #fbbf24, #f59e0b);
+}
+
+.pangolin-pad-btn.btn-roll:active,
+.pangolin-pad-btn.btn-roll.is-active {
+  transform: translateY(3px);
+  box-shadow: 0 1px 0 #92400e;
+  background: #b45309;
+}
+
+.pangolin-pad-btn.btn-roll .pangolin-pad-key-hint {
+  color: #78350f;
+}
+
+/* Action: Jump Button */
+.pangolin-pad-btn.btn-jump {
+  background: linear-gradient(180deg, #ec4899, #db2777);
+  border-color: #fbcfe8;
+  color: #ffffff;
+  box-shadow: 0 4px 0 #9d174d, 0 6px 12px rgba(236, 72, 153, 0.3);
+}
+
+.pangolin-pad-btn.btn-jump:hover {
+  background: linear-gradient(180deg, #f472b6, #ec4899);
+}
+
+.pangolin-pad-btn.btn-jump:active,
+.pangolin-pad-btn.btn-jump.is-active {
+  transform: translateY(3px);
+  box-shadow: 0 1px 0 #9d174d;
+  background: #be185d;
+}
+
+.pangolin-pad-btn.btn-jump .pangolin-pad-key-hint {
+  color: #fdf2f8;
+}
+
+/* 5. Modals and Result Overlays */
 .pangolin-overlay-center {
   position: absolute;
   inset: 0;
-  background: rgba(2, 6, 23, 0.85);
+  background: rgba(2, 6, 23, 0.88);
   backdrop-filter: blur(10px);
   display: flex;
   align-items: center;
@@ -161,20 +311,21 @@
   background: linear-gradient(180deg, #1e293b, #0f172a);
   border: 2px solid rgba(251, 191, 36, 0.4);
   border-radius: 1.5rem;
-  padding: 24px;
+  padding: 22px 24px;
   max-width: 460px;
   width: 100%;
   text-align: center;
-  box-shadow: 0 20px 40px rgba(0, 0, 0, 0.8);
+  box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.9), 0 0 20px rgba(251, 191, 36, 0.15);
   animation: pangolinPopIn 0.25s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+  word-break: keep-all;
 }
 
 @keyframes pangolinPopIn {
-  0% { transform: scale(0.9); opacity: 0; }
+  0% { transform: scale(0.92); opacity: 0; }
   100% { transform: scale(1); opacity: 1; }
 }
 
-/* Buttons */
+/* Modal Buttons */
 .pangolin-btn-start {
   background: linear-gradient(135deg, #f59e0b, #d97706);
   color: #0f172a;
@@ -186,6 +337,10 @@
   cursor: pointer;
   box-shadow: 0 4px 0 #92400e, 0 10px 20px rgba(245, 158, 11, 0.3);
   transition: all 0.1s ease;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
 }
 
 .pangolin-btn-start:hover {
@@ -202,18 +357,18 @@
   background: linear-gradient(135deg, #10b981, #059669);
   color: #ffffff;
   font-weight: 900;
-  font-size: 0.95rem;
+  font-size: 0.92rem;
   padding: 9px 18px;
   border-radius: 9999px;
-  border: none;
+  border: 1px solid rgba(52, 211, 153, 0.4);
   cursor: pointer;
-  box-shadow: 0 4px 0 #047857;
+  box-shadow: 0 4px 0 #047857, 0 6px 12px rgba(16, 185, 129, 0.3);
   transition: all 0.1s ease;
 }
 
 .pangolin-btn-submit:hover:not(:disabled) {
   transform: translateY(-2px);
-  box-shadow: 0 6px 0 #047857;
+  box-shadow: 0 6px 0 #047857, 0 8px 16px rgba(16, 185, 129, 0.4);
 }
 
 .pangolin-btn-submit:active:not(:disabled) {
@@ -226,31 +381,32 @@
   cursor: not-allowed;
 }
 
-/* Inputs */
+/* High Contrast Input Field */
 .pangolin-input-name {
   background: #090d16;
   border: 2px solid #334155;
   color: #f8fafc;
-  font-weight: 700;
+  font-weight: 800;
   font-size: 0.95rem;
-  padding: 8px 14px;
+  padding: 8px 16px;
   border-radius: 9999px;
   width: 100%;
   outline: none;
-  transition: border-color 0.2s ease;
+  transition: all 0.2s ease;
 }
 
 .pangolin-input-name:focus {
   border-color: #f59e0b;
-  box-shadow: 0 0 0 3px rgba(245, 158, 11, 0.2);
+  box-shadow: 0 0 0 3px rgba(245, 158, 11, 0.25);
+  background: #0f172a;
 }
 
-/* Guide Modal Backdrop */
+/* 6. Guide Modal Backdrop & Content */
 .pangolin-modal-backdrop {
   position: fixed;
   inset: 0;
-  background: rgba(0, 0, 0, 0.75);
-  backdrop-filter: blur(6px);
+  background: rgba(0, 0, 0, 0.8);
+  backdrop-filter: blur(8px);
   display: flex;
   align-items: center;
   justify-content: center;
@@ -260,16 +416,17 @@
 
 .pangolin-guide-modal {
   background: #0f172a;
-  border: 1px solid #334155;
+  border: 2px solid #334155;
   border-radius: 1.25rem;
   max-width: 540px;
   width: 100%;
   overflow: hidden;
-  box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.9);
+  box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.95);
+  animation: pangolinPopIn 0.2s ease-out;
 }
 
 .pangolin-guide-header {
-  padding: 14px 18px;
+  padding: 12px 18px;
   background: #1e293b;
   border-bottom: 1px solid #334155;
   display: flex;
@@ -278,10 +435,22 @@
 }
 
 .pangolin-guide-close-btn {
-  background: transparent;
-  border: none;
+  background: rgba(255, 255, 255, 0.08);
+  border: 1px solid rgba(255, 255, 255, 0.15);
+  border-radius: 8px;
+  color: #cbd5e1;
   cursor: pointer;
-  padding: 4px;
+  padding: 5px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.15s ease;
+}
+
+.pangolin-guide-close-btn:hover {
+  background: rgba(239, 68, 68, 0.2);
+  border-color: #ef4444;
+  color: #ffffff;
 }
 
 .pangolin-guide-body {

@@ -1,0 +1,400 @@
+/* Dochon Pétanque Master Stylesheet */
+
+.petanque-game-container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  width: 100%;
+  max-width: 860px;
+  margin: 0 auto;
+  padding: 8px 12px 20px;
+  box-sizing: border-box;
+  user-select: none;
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+}
+
+/* 1. Header Toolbar */
+.petanque-header-toolbar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  width: 100%;
+  background: linear-gradient(135deg, rgba(30, 41, 59, 0.95), rgba(15, 23, 42, 0.95));
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  border-radius: 14px;
+  padding: 8px 14px;
+  margin-bottom: 8px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.35);
+}
+
+.petanque-title-row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.petanque-icon-badge {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 32px;
+  height: 32px;
+  background: rgba(245, 158, 11, 0.15);
+  border: 1px solid rgba(245, 158, 11, 0.4);
+  border-radius: 8px;
+  font-size: 16px;
+}
+
+.petanque-title-main {
+  font-size: 15px;
+  font-weight: 800;
+  color: #f8fafc;
+}
+
+.petanque-title-sub {
+  font-size: 11px;
+  color: #94a3b8;
+}
+
+.petanque-header-actions {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.petanque-btn-icon {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 34px;
+  height: 34px;
+  border-radius: 8px;
+  background: rgba(51, 65, 85, 0.8);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  color: #cbd5e1;
+  cursor: pointer;
+  transition: all 0.15s ease;
+}
+
+.petanque-btn-icon:hover {
+  background: rgba(71, 85, 105, 1);
+  color: #ffffff;
+  transform: translateY(-1px);
+}
+
+/* 2. Scoreboard & End Indicator Banner */
+.petanque-scoreboard-banner {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  width: 100%;
+  background: rgba(15, 23, 42, 0.85);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 12px;
+  padding: 6px 14px;
+  margin-bottom: 8px;
+  gap: 12px;
+}
+
+.petanque-team-card {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.petanque-team-balls {
+  display: flex;
+  gap: 4px;
+}
+
+.petanque-ball-dot {
+  width: 12px;
+  height: 12px;
+  border-radius: 50%;
+  border: 1.5px solid rgba(255, 255, 255, 0.3);
+  transition: all 0.2s ease;
+}
+
+.petanque-ball-dot.ready-blue {
+  background: radial-gradient(circle at 35% 35%, #93c5fd, #2563eb);
+  box-shadow: 0 0 6px rgba(59, 130, 246, 0.6);
+}
+
+.petanque-ball-dot.ready-red {
+  background: radial-gradient(circle at 35% 35%, #fca5a5, #dc2626);
+  box-shadow: 0 0 6px rgba(239, 68, 68, 0.6);
+}
+
+.petanque-ball-dot.used {
+  background: #334155;
+  border-color: #475569;
+  opacity: 0.4;
+}
+
+.petanque-center-round-badge {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.petanque-round-pill {
+  padding: 2px 10px;
+  background: linear-gradient(90deg, #d97706, #f59e0b);
+  color: #0f172a;
+  border-radius: 999px;
+  font-size: 11px;
+  font-weight: 800;
+  letter-spacing: 0.5px;
+}
+
+.petanque-score-text {
+  font-size: 13px;
+  font-weight: 900;
+  color: #f1f5f9;
+  margin-top: 2px;
+}
+
+/* 3. Canvas Viewport Area */
+.petanque-canvas-wrapper {
+  position: relative;
+  width: 100%;
+  background: #020617;
+  border-radius: 16px;
+  overflow: hidden;
+  border: 2px solid rgba(255, 255, 255, 0.15);
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.5);
+  aspect-ratio: 800 / 560;
+}
+
+.petanque-canvas {
+  width: 100%;
+  height: 100%;
+  display: block;
+  object-fit: contain;
+}
+
+/* Canvas In-Game Notification Ribbon */
+.petanque-in-game-banner {
+  position: absolute;
+  top: 12px;
+  left: 50%;
+  transform: translateX(-50%);
+  background: rgba(15, 23, 42, 0.9);
+  backdrop-filter: blur(6px);
+  border: 1px solid rgba(251, 191, 36, 0.5);
+  border-radius: 999px;
+  padding: 5px 16px;
+  font-size: 12px;
+  font-weight: 800;
+  color: #fef08a;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.4);
+  pointer-events: none;
+  z-index: 10;
+  animation: pulse-slow 2s infinite ease-in-out;
+}
+
+/* Canvas Overlays (Intro, Results, End of End) */
+.petanque-overlay-modal {
+  position: absolute;
+  inset: 0;
+  background: rgba(15, 23, 42, 0.88);
+  backdrop-filter: blur(8px);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 16px;
+  z-index: 20;
+}
+
+.petanque-intro-card,
+.petanque-result-card {
+  background: linear-gradient(135deg, #1e293b, #0f172a);
+  border: 1.5px solid rgba(245, 158, 11, 0.4);
+  border-radius: 18px;
+  padding: 24px;
+  width: 100%;
+  max-width: 440px;
+  text-align: center;
+  box-shadow: 0 12px 32px rgba(0, 0, 0, 0.6);
+}
+
+/* 4. Controls Gamepad Panel */
+.petanque-controls-panel {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  width: 100%;
+  margin-top: 8px;
+  background: rgba(30, 41, 59, 0.95);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 14px;
+  padding: 10px 14px;
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.3);
+}
+
+.petanque-controls-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+
+/* Shot Type Toggle Pill */
+.petanque-shot-selector {
+  display: flex;
+  background: rgba(15, 23, 42, 0.8);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 10px;
+  padding: 3px;
+  gap: 4px;
+}
+
+.petanque-shot-btn {
+  padding: 5px 12px;
+  border-radius: 8px;
+  font-size: 11px;
+  font-weight: 700;
+  border: none;
+  cursor: pointer;
+  transition: all 0.15s ease;
+  color: #94a3b8;
+  background: transparent;
+}
+
+.petanque-shot-btn.active-pointer {
+  background: #2563eb;
+  color: #ffffff;
+  box-shadow: 0 2px 8px rgba(37, 99, 235, 0.5);
+}
+
+.petanque-shot-btn.active-tirer {
+  background: #dc2626;
+  color: #ffffff;
+  box-shadow: 0 2px 8px rgba(220, 38, 38, 0.5);
+}
+
+/* Angle & Power Slider Containers */
+.petanque-slider-group {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex: 1;
+  min-width: 140px;
+}
+
+.petanque-slider-label {
+  font-size: 11px;
+  font-weight: 700;
+  color: #cbd5e1;
+  white-space: nowrap;
+}
+
+.petanque-slider-range {
+  width: 100%;
+  height: 6px;
+  accent-color: #f59e0b;
+  cursor: pointer;
+}
+
+/* Big Throw Launch Button */
+.petanque-btn-launch {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  width: 100%;
+  padding: 10px;
+  background: linear-gradient(135deg, #f59e0b, #d97706);
+  border: none;
+  border-radius: 12px;
+  color: #0f172a;
+  font-size: 14px;
+  font-weight: 900;
+  cursor: pointer;
+  box-shadow: 0 4px 12px rgba(217, 119, 6, 0.4);
+  transition: all 0.15s ease;
+}
+
+.petanque-btn-launch:hover:not(:disabled) {
+  background: linear-gradient(135deg, #fbbf24, #f59e0b);
+  transform: translateY(-1px);
+  box-shadow: 0 6px 16px rgba(217, 119, 6, 0.6);
+}
+
+.petanque-btn-launch:active:not(:disabled) {
+  transform: translateY(1px);
+}
+
+.petanque-btn-launch:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+/* Modal Backdrop & Container */
+.petanque-modal-backdrop {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.75);
+  backdrop-filter: blur(6px);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 16px;
+  z-index: 100;
+}
+
+.petanque-modal-container {
+  background: #1e293b;
+  border: 1.5px solid rgba(255, 255, 255, 0.15);
+  border-radius: 16px;
+  width: 100%;
+  max-width: 520px;
+  max-height: 90vh;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  box-shadow: 0 16px 36px rgba(0, 0, 0, 0.7);
+}
+
+.petanque-modal-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 14px 18px;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+  background: rgba(15, 23, 42, 0.6);
+}
+
+.petanque-modal-body {
+  padding: 18px;
+  overflow-y: auto;
+}
+
+.petanque-modal-footer {
+  padding: 12px 18px;
+  border-top: 1px solid rgba(255, 255, 255, 0.1);
+  background: rgba(15, 23, 42, 0.6);
+}
+
+@keyframes pulse-slow {
+  0%, 100% { opacity: 1; transform: translateX(-50%) scale(1); }
+  50% { opacity: 0.85; transform: translateX(-50%) scale(0.98); }
+}
+
+@media (max-width: 640px) {
+  .petanque-game-container {
+    padding: 4px 6px 12px;
+  }
+  .petanque-scoreboard-banner {
+    padding: 4px 8px;
+  }
+  .petanque-controls-row {
+    flex-direction: column;
+    align-items: stretch;
+  }
+  .petanque-shot-selector {
+    width: 100%;
+    justify-content: center;
+  }
+}

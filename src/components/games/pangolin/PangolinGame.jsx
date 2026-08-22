@@ -5,7 +5,7 @@ import { pangolinAudio } from './pangolinAudio';
 import { submitScoreToDB } from '../../../utils/leaderboardApi';
 import { CANVAS_WIDTH, CANVAS_HEIGHT, STAGES } from './pangolinConstants';
 import PangolinHowToPlayModal from './PangolinHowToPlayModal';
-import { Play, RotateCcw, Volume2, VolumeX, HelpCircle, Trophy, Award, ArrowRight, Zap, Compass, ArrowUp } from 'lucide-react';
+import { Play, RotateCcw, Volume2, VolumeX, HelpCircle, Trophy, Award, ArrowRight, Zap, Compass, ArrowUp, ArrowLeft, ChevronRight } from 'lucide-react';
 import './pangolin.css';
 
 export default function PangolinGame({ onScoreSubmitted }) {
@@ -16,6 +16,7 @@ export default function PangolinGame({ onScoreSubmitted }) {
   // Key states
   const keysRef = useRef({});
   const mobileInputRef = useRef({ left: false, right: false, jump: false, roll: false });
+  const [padActive, setPadActive] = useState({ left: false, right: false, roll: false, jump: false });
 
   // Game Lifecycle State: 'START' | 'PLAYING' | 'STAGE_CLEAR' | 'VICTORY_ENDING' | 'GAMEOVER'
   const [gameState, setGameState] = useState('START');
@@ -206,35 +207,42 @@ export default function PangolinGame({ onScoreSubmitted }) {
 
   return (
     <div className="pangolin-wrapper">
-      {/* Top Controller Bar */}
-      <div className="flex items-center justify-between px-4 py-2 bg-slate-900/90 border-b border-slate-800">
-        <div className="flex items-center gap-2">
-          <span className="text-xl">🦔</span>
-          <span className="text-sm font-black text-amber-400">도촌 천산갑의 모험</span>
-          <span className="hidden sm:inline-block text-[10px] bg-amber-500/20 text-amber-300 px-2 py-0.5 rounded-full font-bold border border-amber-500/30">
+      {/* 1. Top Custom Glassmorphism Header Bar */}
+      <div className="pangolin-top-bar">
+        <div className="pangolin-top-title-group">
+          <span className="pangolin-top-title">
+            <span>🦔</span>
+            <span>도촌 천산갑의 모험</span>
+          </span>
+          <span className="pangolin-stage-badge">
             {hudData.stageName} ({hudData.stageIndex + 1}/4)
           </span>
         </div>
 
-        <div className="flex items-center gap-2">
+        <div className="pangolin-top-actions">
+          {/* Custom Styled Sound Toggle Button */}
           <button
             onClick={toggleSound}
-            className="p-1.5 rounded-lg bg-slate-800 text-slate-300 hover:text-white border border-slate-700 transition-colors"
-            title={isMuted ? '음소거 해제' : '음소거'}
+            className="pangolin-tool-btn"
+            title={isMuted ? '소리 켜기' : '소리 끄기'}
           >
-            {isMuted ? <VolumeX className="w-4 h-4 text-rose-400" /> : <Volume2 className="w-4 h-4 text-emerald-400" />}
+            {isMuted ? <VolumeX className="w-3.5 h-3.5 text-rose-400" /> : <Volume2 className="w-3.5 h-3.5 text-emerald-400" />}
+            <span>{isMuted ? '음소거' : '소리 켜짐'}</span>
           </button>
+
+          {/* Custom Styled How to Play Button */}
           <button
             onClick={() => setIsHowToPlayOpen(true)}
-            className="p-1.5 rounded-lg bg-slate-800 text-slate-300 hover:text-white border border-slate-700 transition-colors flex items-center gap-1 text-xs font-bold"
+            className="pangolin-tool-btn"
+            title="게임 가이드 및 조작 방법 확인"
           >
-            <HelpCircle className="w-4 h-4 text-sky-400" />
-            <span className="hidden sm:inline">게임 방법</span>
+            <HelpCircle className="w-3.5 h-3.5 text-sky-400" />
+            <span>게임 방법</span>
           </button>
         </div>
       </div>
 
-      {/* Main Canvas Viewport */}
+      {/* 2. Main Canvas Viewport */}
       <div className="pangolin-canvas-container">
         <canvas
           ref={canvasRef}
@@ -243,50 +251,50 @@ export default function PangolinGame({ onScoreSubmitted }) {
           className="pangolin-canvas"
         />
 
-        {/* In-Game HUD Elements */}
+        {/* 3. In-Game HUD Elements: Score (Left), Progress (Top Center), Time (Right) */}
         {gameState === 'PLAYING' && (
-          <>
-            <div className="pangolin-hud">
-              {/* Score & Combo */}
-              <div className="flex items-center gap-2">
-                <div className="pangolin-hud-chip text-amber-300 border-amber-500/30">
-                  <Trophy className="w-4 h-4 text-amber-400" />
-                  <span>{hudData.score.toLocaleString()} 점</span>
+          <div className="pangolin-hud">
+            {/* Left: Score & Combo */}
+            <div className="flex items-center gap-1.5 shrink-0">
+              <div className="pangolin-hud-chip text-amber-300 border-amber-500/30">
+                <Trophy className="w-3.5 h-3.5 text-amber-400" />
+                <span>{hudData.score.toLocaleString()} 점</span>
+              </div>
+              {hudData.combo > 1 && (
+                <div className="pangolin-hud-chip text-pink-300 border-pink-500/40 animate-pulse">
+                  <span>🔥 COMBO x{hudData.combo}</span>
                 </div>
-                {hudData.combo > 1 && (
-                  <div className="pangolin-hud-chip text-pink-300 border-pink-500/40 animate-pulse">
-                    <span>🔥 COMBO x{hudData.combo}</span>
-                  </div>
-                )}
-              </div>
-
-              {/* Time Left */}
-              <div className={`pangolin-hud-chip ${hudData.timeLeft <= 10 ? 'text-rose-400 border-rose-500/50 animate-bounce' : 'text-sky-300'}`}>
-                <span>⏱️ {hudData.timeLeft}초</span>
-              </div>
+              )}
             </div>
 
-            {/* Distance Progress Bar */}
-            <div className="pangolin-progress-container">
-              <div className="flex justify-between items-center text-[10px] font-black text-slate-300">
-                <span>{hudData.country}</span>
+            {/* Top Center: Relocated Distance Progress Bar (캐릭터를 가리지 않도록 상단 배치) */}
+            <div className="pangolin-progress-top">
+              <div className="pangolin-progress-top-label">
+                <span>{hudData.itemEmoji} {hudData.country}</span>
                 <span>{hudData.distanceProgress}% 완주</span>
               </div>
-              <div className="pangolin-progress-bar-bg">
+              <div className="pangolin-progress-top-bg">
                 <div
-                  className="pangolin-progress-bar-fill"
+                  className="pangolin-progress-top-fill"
                   style={{ width: `${hudData.distanceProgress}%` }}
                 />
               </div>
             </div>
-          </>
+
+            {/* Right: Time Left */}
+            <div className="shrink-0">
+              <div className={`pangolin-hud-chip ${hudData.timeLeft <= 10 ? 'text-rose-400 border-rose-500/50 animate-bounce' : 'text-sky-300'}`}>
+                <span>⏱️ {hudData.timeLeft}초</span>
+              </div>
+            </div>
+          </div>
         )}
 
-        {/* 1. START OVERLAY */}
+        {/* START OVERLAY */}
         {gameState === 'START' && (
           <div className="pangolin-overlay-center">
             <div className="pangolin-result-box">
-              <div className="w-16 h-16 rounded-full bg-amber-500/20 border-2 border-amber-400 flex items-center justify-center text-4xl mx-auto mb-3 animate-bounce">
+              <div className="w-16 h-16 rounded-full bg-amber-500/20 border-2 border-amber-400 flex items-center justify-center text-4xl mx-auto mb-3 animate-bounce shadow-lg shadow-amber-500/20">
                 🦔
               </div>
               <h2 className="text-xl font-black text-amber-300 mb-1">
@@ -297,16 +305,16 @@ export default function PangolinGame({ onScoreSubmitted }) {
                 몸을 공처럼 둥글게 말아 데굴데굴 구르고 점프하며 완주선에 도달하세요!
               </p>
 
-              <div className="bg-slate-900/80 p-3 rounded-xl border border-slate-700 text-left text-xs text-slate-300 space-y-1.5 mb-5">
+              <div className="bg-slate-900/80 p-3 rounded-xl border border-slate-700 text-left text-xs text-slate-300 space-y-1.5 mb-5 shadow-inner">
                 <div className="font-bold text-amber-400 flex items-center gap-1">
-                  <Compass className="w-3.5 h-3.5" /> 간단 조작키 안내
+                  <Compass className="w-3.5 h-3.5" /> 간편 조작 가이드
                 </div>
-                <div>• <strong className="text-white">좌/우 방향키 (또는 A, D)</strong>: 이동 및 달리기</div>
-                <div>• <strong className="text-white">Shift / Z 키</strong>: 데굴데굴 고속 롤링 모드!</div>
-                <div>• <strong className="text-white">스페이스바 (또는 W, ⬆️)</strong>: 점프 & 2단 더블 점프</div>
+                <div>• <strong className="text-white">좌/우 방향키 (또는 A, D / ◀ ▶)</strong>: 걷기 및 달리기</div>
+                <div>• <strong className="text-white">Shift / Z 키 (또는 ⚡ 롤링)</strong>: 데굴데굴 고속 롤링 모드!</div>
+                <div>• <strong className="text-white">스페이스바 (또는 ⬆️ 점프)</strong>: 점프 & 2단 더블 점프</div>
               </div>
 
-              <button onClick={startGame} className="pangolin-btn-start w-full py-3 flex items-center justify-center gap-2">
+              <button onClick={startGame} className="pangolin-btn-start w-full py-3">
                 <Play className="w-5 h-5 fill-slate-950" />
                 <span>모험 시작하기!</span>
               </button>
@@ -314,7 +322,7 @@ export default function PangolinGame({ onScoreSubmitted }) {
           </div>
         )}
 
-        {/* 2. STAGE CLEAR OVERLAY */}
+        {/* STAGE CLEAR OVERLAY */}
         {gameState === 'STAGE_CLEAR' && (
           <div className="pangolin-overlay-center">
             <div className="pangolin-result-box border-emerald-500/40">
@@ -330,7 +338,7 @@ export default function PangolinGame({ onScoreSubmitted }) {
                 현재 누적 점수: <span className="text-lg text-white">{hudData.score.toLocaleString()}</span> 점
               </div>
 
-              <button onClick={handleNextStage} className="pangolin-btn-start w-full py-2.5 flex items-center justify-center gap-2">
+              <button onClick={handleNextStage} className="pangolin-btn-start w-full py-2.5">
                 <span>다음 스테이지로 이동 ({hudData.stageIndex + 2}/4)</span>
                 <ArrowRight className="w-4 h-4" />
               </button>
@@ -338,7 +346,7 @@ export default function PangolinGame({ onScoreSubmitted }) {
           </div>
         )}
 
-        {/* 3. VICTORY GRAND ENDING OVERLAY */}
+        {/* VICTORY GRAND ENDING OVERLAY */}
         {gameState === 'VICTORY_ENDING' && (
           <div className="pangolin-overlay-center">
             <div className="pangolin-result-box border-pink-500/50">
@@ -351,9 +359,9 @@ export default function PangolinGame({ onScoreSubmitted }) {
                 <strong className="text-amber-400 font-extrabold">+5,000점 완주 보너스 획득! 🏆</strong>
               </p>
 
-              <div className="bg-slate-900/90 p-4 rounded-xl border border-pink-500/30 my-3">
+              <div className="bg-slate-900/90 p-3 rounded-xl border border-pink-500/30 my-3">
                 <div className="text-xs text-slate-400">최종 획득 점수</div>
-                <div className="text-3xl font-black text-amber-300 my-1">
+                <div className="text-3xl font-black text-amber-300 my-0.5">
                   {hudData.score.toLocaleString()} <span className="text-sm font-bold text-slate-300">점</span>
                 </div>
               </div>
@@ -398,7 +406,7 @@ export default function PangolinGame({ onScoreSubmitted }) {
               )}
 
               <div className="mt-4 flex gap-2">
-                <button onClick={startGame} className="pangolin-btn-start flex-1 py-2.5 flex items-center justify-center gap-1.5">
+                <button onClick={startGame} className="pangolin-btn-start flex-1 py-2.5">
                   <RotateCcw className="w-4 h-4" />
                   <span>다시 도전하기</span>
                 </button>
@@ -407,7 +415,7 @@ export default function PangolinGame({ onScoreSubmitted }) {
           </div>
         )}
 
-        {/* 4. GAMEOVER OVERLAY */}
+        {/* GAMEOVER OVERLAY */}
         {gameState === 'GAMEOVER' && (
           <div className="pangolin-overlay-center">
             <div className="pangolin-result-box border-rose-500/50">
@@ -466,7 +474,7 @@ export default function PangolinGame({ onScoreSubmitted }) {
               )}
 
               <div className="mt-4">
-                <button onClick={startGame} className="pangolin-btn-start w-full py-2.5 flex items-center justify-center gap-1.5">
+                <button onClick={startGame} className="pangolin-btn-start w-full py-2.5">
                   <RotateCcw className="w-4 h-4" />
                   <span>처음부터 다시하기</span>
                 </button>
@@ -476,54 +484,104 @@ export default function PangolinGame({ onScoreSubmitted }) {
         )}
       </div>
 
-      {/* Mobile On-Screen Virtual Controls */}
-      <div className="pangolin-mobile-controls">
-        {/* Left / Right */}
-        <div className="flex gap-2">
+      {/* 4. Universal Tablet & Mobile Gamepad Controller Bar */}
+      <div className="pangolin-gamepad-bar">
+        {/* Left Direction Pad: Left & Right */}
+        <div className="pangolin-pad-group">
           <button
-            onPointerDown={() => { mobileInputRef.current.left = true; }}
-            onPointerUp={() => { mobileInputRef.current.left = false; }}
-            onPointerLeave={() => { mobileInputRef.current.left = false; }}
-            className="pangolin-ctrl-btn px-5"
+            onPointerDown={(e) => {
+              e.preventDefault();
+              mobileInputRef.current.left = true;
+              setPadActive(p => ({ ...p, left: true }));
+            }}
+            onPointerUp={(e) => {
+              e.preventDefault();
+              mobileInputRef.current.left = false;
+              setPadActive(p => ({ ...p, left: false }));
+            }}
+            onPointerLeave={() => {
+              mobileInputRef.current.left = false;
+              setPadActive(p => ({ ...p, left: false }));
+            }}
+            className={`pangolin-pad-btn ${padActive.left ? 'is-active' : ''}`}
+            title="왼쪽으로 이동 (A / ◀)"
           >
-            ◀
+            <span>◀ 왼쪽</span>
+            <span className="pangolin-pad-key-hint">[A / ◀]</span>
           </button>
+
           <button
-            onPointerDown={() => { mobileInputRef.current.right = true; }}
-            onPointerUp={() => { mobileInputRef.current.right = false; }}
-            onPointerLeave={() => { mobileInputRef.current.right = false; }}
-            className="pangolin-ctrl-btn px-5"
+            onPointerDown={(e) => {
+              e.preventDefault();
+              mobileInputRef.current.right = true;
+              setPadActive(p => ({ ...p, right: true }));
+            }}
+            onPointerUp={(e) => {
+              e.preventDefault();
+              mobileInputRef.current.right = false;
+              setPadActive(p => ({ ...p, right: false }));
+            }}
+            onPointerLeave={() => {
+              mobileInputRef.current.right = false;
+              setPadActive(p => ({ ...p, right: false }));
+            }}
+            className={`pangolin-pad-btn ${padActive.right ? 'is-active' : ''}`}
+            title="오른쪽으로 이동 및 질주 (D / ▶)"
           >
-            ▶
+            <span>오른쪽 ▶</span>
+            <span className="pangolin-pad-key-hint">[D / ▶]</span>
           </button>
         </div>
 
-        {/* Roll & Jump */}
-        <div className="flex gap-2">
+        {/* Right Action Pad: Roll & Jump */}
+        <div className="pangolin-pad-group">
           <button
-            onPointerDown={() => { mobileInputRef.current.roll = true; }}
-            onPointerUp={() => { mobileInputRef.current.roll = false; }}
-            onPointerLeave={() => { mobileInputRef.current.roll = false; }}
-            className="pangolin-ctrl-btn btn-roll px-4 flex items-center gap-1"
+            onPointerDown={(e) => {
+              e.preventDefault();
+              mobileInputRef.current.roll = true;
+              setPadActive(p => ({ ...p, roll: true }));
+            }}
+            onPointerUp={(e) => {
+              e.preventDefault();
+              mobileInputRef.current.roll = false;
+              setPadActive(p => ({ ...p, roll: false }));
+            }}
+            onPointerLeave={() => {
+              mobileInputRef.current.roll = false;
+              setPadActive(p => ({ ...p, roll: false }));
+            }}
+            className={`pangolin-pad-btn btn-roll ${padActive.roll ? 'is-active' : ''}`}
+            title="몸을 둥글게 말아 데굴데굴 고속 질주 (Shift / Z)"
           >
-            <Zap className="w-4 h-4" />
-            <span>롤링</span>
+            <span>⚡ 롤링</span>
+            <span className="pangolin-pad-key-hint">[Shift / Z]</span>
           </button>
+
           <button
-            onPointerDown={() => {
+            onPointerDown={(e) => {
+              e.preventDefault();
+              setPadActive(p => ({ ...p, jump: true }));
               if (logicRef.current && gameState === 'PLAYING') {
                 logicRef.current.jump();
               }
             }}
-            className="pangolin-ctrl-btn btn-jump px-5 flex items-center gap-1"
+            onPointerUp={(e) => {
+              e.preventDefault();
+              setPadActive(p => ({ ...p, jump: false }));
+            }}
+            onPointerLeave={() => {
+              setPadActive(p => ({ ...p, jump: false }));
+            }}
+            className={`pangolin-pad-btn btn-jump ${padActive.jump ? 'is-active' : ''}`}
+            title="점프 및 2단 도약 (Space / ⬆)"
           >
-            <ArrowUp className="w-4 h-4" />
-            <span>점프</span>
+            <span>🦘 점프</span>
+            <span className="pangolin-pad-key-hint">[Space / ⬆]</span>
           </button>
         </div>
       </div>
 
-      {/* How to Play Guide Modal */}
+      {/* 5. How to Play Guide Modal */}
       <PangolinHowToPlayModal
         isOpen={isHowToPlayOpen}
         onClose={() => setIsHowToPlayOpen(false)}

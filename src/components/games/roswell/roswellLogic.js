@@ -166,8 +166,8 @@ export class RoswellLogic {
 
   // 1. Scene 1: Crash Site Interactions
   handleCrashSiteClick(x, y, selectedItem) {
-    // UFO Ship (x: 280~520, y: 190~360)
-    if (x >= 280 && x <= 520 && y >= 190 && y <= 360) {
+    // UFO Ship (x: 240~560, y: 160~380)
+    if (x >= 240 && x <= 560 && y >= 160 && y <= 380) {
       if (this.collectedParts.length === 3) {
         // All parts ready to assemble!
         if (this.installedParts.length < 3) {
@@ -175,7 +175,7 @@ export class RoswellLogic {
           this.ufoState = 'REPAIRED';
           this.score += 500;
           roswellAudio.playPartFound();
-          this.setDialogue('✨ 찌리릿! 3개의 핵심 부품을 모두 장착해 UFO가 완벽히 수리되었습니다!');
+          this.setDialogue('✨ 찌리릿! 3개의 핵심 부품을 모두 장착해 UFO가 완벽히 수리되었습니다! (UFO를 한 번 더 클릭하면 이륙합니다!)');
         } else if (this.ufoState === 'REPAIRED') {
           // Launch UFO!
           this.ufoState = 'LAUNCHING';
@@ -184,52 +184,57 @@ export class RoswellLogic {
         }
       } else {
         const remaining = 3 - this.collectedParts.length;
-        this.setDialogue(`🛸 고장 난 UFO: 연기가 피어오릅니다. 아직 ${remaining}개의 부품이 부족합니다. (오른쪽으로 이동해 찾아보세요!)`);
+        this.setDialogue(`🛸 고장 난 UFO: 아직 ${remaining}개의 부품이 부족합니다. (우측 ▶ 버튼을 눌러 들판과 마을을 탐험하세요!)`);
       }
       return;
     }
 
-    // Debris search
-    if (x >= 140 && x <= 220 && y >= 330 && y <= 390) {
+    // Debris search (x: 120~240, y: 310~410)
+    if (x >= 120 && x <= 240 && y >= 310 && y <= 410) {
       if (!this.ropeFound) {
         this.ropeFound = true;
         this.inventory.push(ITEMS.ROPE);
         this.score += SCORE_CONFIG.INTERACTION_BONUS;
         roswellAudio.playItemPickup();
-        this.setDialogue('🪢 잔해 속에서 [튼튼한 밧줄]을 발견해 가방에 넣었습니다!');
+        this.setDialogue('🪢 잔해 속에서 [튼튼한 밧줄]을 발견해 가방에 넣었습니다! (높은 곳에 걸 수 있습니다)');
       } else {
         this.setDialogue('불타버린 잔해 더미입니다. 더 이상 쓸 만한 물건은 없습니다.');
       }
+      return;
     }
   }
 
   // 2. Scene 2: Farmland Interactions
   handleFarmlandClick(x, y, selectedItem) {
-    // Carrot Patch (x: 180~270, y: 330~400)
-    if (x >= 180 && x <= 270 && y >= 330 && y <= 400) {
+    // Carrot Patch (x: 150~300, y: 310~420)
+    if (x >= 150 && x <= 300 && y >= 310 && y <= 420) {
       if (!this.carrotHarvested) {
         this.carrotHarvested = true;
         this.inventory.push(ITEMS.CARROT);
         this.score += SCORE_CONFIG.INTERACTION_BONUS;
         roswellAudio.playItemPickup();
-        this.setDialogue('🥕 싱싱한 도촌 [유기농 당근]을 밭에서 뽑았습니다!');
+        this.setDialogue('🥕 싱싱한 도촌 [유기농 당근]을 밭에서 뽑았습니다! (배고픈 동물에게 줘보세요)');
       } else {
         this.setDialogue('당근을 뽑아낸 흙구덩이입니다.');
       }
       return;
     }
 
-    // Sleeping Cow (x: 460~640, y: 260~380)
-    if (x >= 460 && x <= 640 && y >= 260 && y <= 380) {
+    // Sleeping Cow (x: 420~680, y: 240~400)
+    if (x >= 420 && x <= 680 && y >= 240 && y <= 400) {
       if (!this.cowFed) {
+        const hasCarrotInInv = this.inventory.some(i => i.id === 'carrot');
         if (selectedItem && selectedItem.id === 'carrot') {
           this.cowFed = true;
           this.inventory = this.inventory.filter(i => i.id !== 'carrot');
           this.score += 150;
           roswellAudio.playItemPickup();
-          this.setDialogue('🐮 음메~ 배고픈 소가 당근을 맛있게 먹고 자리를 비켜주었습니다!');
+          this.setDialogue('🐮 음메~ 배고픈 소가 당근을 맛있게 먹고 자리를 비켜주었습니다! (바닥을 조사해보세요)');
+        } else if (hasCarrotInInv) {
+          // If player has carrot but didn't select it, use it or guide
+          this.setDialogue('🐮 가방 속의 [유기농 당근 🥕]을 선택(클릭)한 상태로 소를 터치해보세요!');
         } else {
-          this.setDialogue('🐮 커다란 점박이 소가 길을 막고 졸고 있습니다. 맛있는 먹이를 주면 비켜줄 것 같습니다.');
+          this.setDialogue('🐮 커다란 점박이 소가 길을 막고 졸고 있습니다. 좌측 당근 밭에서 먹이를 구해와야 합니다.');
         }
       } else if (!this.coreFound) {
         this.coreFound = true;
@@ -246,38 +251,43 @@ export class RoswellLogic {
 
   // 3. Scene 3: Barn Interactions
   handleBarnClick(x, y, selectedItem) {
-    // Windmill / Pulley on Barn (x: 320~460, y: 140~260)
-    if (x >= 320 && x <= 460 && y >= 140 && y <= 260) {
+    // Windmill / Pulley / Roof Dome on Barn (x: 220~580, y: 50~290)
+    if (x >= 220 && x <= 580 && y >= 50 && y <= 290) {
       if (!this.barnRopeUsed) {
+        const hasRopeInInv = this.inventory.some(i => i.id === 'rope');
         if (selectedItem && selectedItem.id === 'rope') {
           this.barnRopeUsed = true;
           this.inventory = this.inventory.filter(i => i.id !== 'rope');
-          this.score += 150;
-          roswellAudio.playItemPickup();
-          this.setDialogue('🪢 풍차 도르래에 밧줄을 걸었습니다! 지붕 위에 걸린 부품을 끌어내릴 수 있게 되었습니다!');
+          this.domeFound = true;
+          this.collectedParts.push('part_dome');
+          this.score += 450;
+          roswellAudio.playPartFound();
+          this.setDialogue('🔮 🪢 밧줄을 도르래에 걸어 지붕 위의 [UFO 조종석 유리 돔]을 회수했습니다! (부품 2/3 획득)');
+        } else if (hasRopeInInv) {
+          this.setDialogue('🪢 가방 속의 [튼튼한 밧줄 🪢]을 선택(클릭)한 후 지붕이나 풍차를 클릭해보세요!');
         } else {
-          this.setDialogue('헛간 높은 지붕 위에 반짝이는 물건이 걸려 있습니다. 밧줄을 걸 수 있는 도르래가 보입니다.');
+          this.setDialogue('🔮 헛간 높은 지붕 위에 부품이 걸려 있습니다! 불시착 지점(Scene 1)의 잔해에서 밧줄을 구해와야 합니다.');
         }
       } else if (!this.domeFound) {
         this.domeFound = true;
         this.collectedParts.push('part_dome');
         this.score += 300;
         roswellAudio.playPartFound();
-        this.setDialogue('🔮 밧줄을 당겨 지붕 위의 [UFO 조종석 유리 돔]을 안전하게 내려받았습니다! (부품 2/3 획득)');
+        this.setDialogue('🔮 밧줄을 당겨 지붕 위의 [UFO 조종석 유리 돔]을 회수했습니다! (부품 2/3 획득)');
       } else {
         this.setDialogue('풍차 날개가 평화롭게 돌고 있습니다.');
       }
       return;
     }
 
-    // Barn Tool Box / Key (x: 580~670, y: 330~400)
-    if (x >= 580 && x <= 670 && y >= 330 && y <= 400) {
+    // Barn Haystack & Bone Box (x: 540~740, y: 280~420)
+    if (x >= 540 && x <= 740 && y >= 280 && y <= 420) {
       if (!this.boneFound) {
         this.boneFound = true;
         this.inventory.push(ITEMS.BONE);
         this.score += SCORE_CONFIG.INTERACTION_BONUS;
         roswellAudio.playItemPickup();
-        this.setDialogue('🦴 건초더미 아래에서 농부의 강아지가 숨겨둔 [맛있는 뼈다귀]를 발견했습니다!');
+        this.setDialogue('🦴 건초더미 아래에서 농부의 강아지가 숨겨둔 [맛있는 뼈다귀]를 발견했습니다! (가방에 보관)');
       } else {
         this.setDialogue('비어있는 건초더미입니다.');
       }
@@ -287,17 +297,20 @@ export class RoswellLogic {
 
   // 4. Scene 4: Farmhouse Interactions
   handleFarmhouseClick(x, y, selectedItem) {
-    // Watchdog (x: 200~320, y: 310~390)
-    if (x >= 200 && x <= 320 && y >= 310 && y <= 390) {
+    // Watchdog (x: 100~340, y: 270~410)
+    if (x >= 100 && x <= 340 && y >= 270 && y <= 410) {
       if (!this.dogFed) {
+        const hasBoneInInv = this.inventory.some(i => i.id === 'bone');
         if (selectedItem && selectedItem.id === 'bone') {
           this.dogFed = true;
           this.inventory = this.inventory.filter(i => i.id !== 'bone');
           this.score += 150;
           roswellAudio.playItemPickup();
-          this.setDialogue('🐶 멍멍! 강아지가 뼈다귀를 물고 신나서 구석으로 달려갔습니다!');
+          this.setDialogue('🐶 멍멍! 강아지가 뼈다귀를 물고 신나서 구석으로 달려갔습니다! 이제 조용합니다.');
+        } else if (hasBoneInInv) {
+          this.setDialogue('🐶 가방 속의 [맛있는 뼈다귀 🦴]를 선택(클릭)한 후 강아지를 터치해보세요!');
         } else {
-          this.setDialogue('🐶 경비견이 으르렁거리며 침대 쪽을 지키고 있습니다. 맛있는 간식으로 유인해야 합니다.');
+          this.setDialogue('🐶 경비견이 으르렁거리며 침대를 지키고 있습니다. 헛간(Scene 3)의 건초더미에서 뼈다귀를 구해오세요.');
         }
       } else {
         this.setDialogue('🐶 강아지가 뼈다귀를 행복하게 갉아먹고 있습니다.');
@@ -305,10 +318,10 @@ export class RoswellLogic {
       return;
     }
 
-    // Sleeping Farmer & Bed Drawer (x: 480~680, y: 240~380)
-    if (x >= 480 && x <= 680 && y >= 240 && y <= 380) {
+    // Sleeping Farmer & Bed Drawer (x: 440~760, y: 210~410)
+    if (x >= 440 && x <= 760 && y >= 210 && y <= 410) {
       if (!this.dogFed) {
-        this.setDialogue('🐶 강아지가 짖으면 농부가 깨어날 수 있습니다! 먼저 강아지를 조용히 시켜야 합니다.');
+        this.setDialogue('🐶 경비견이 짖으면 농부가 깨어납니다! 먼저 강아지에게 뼈다귀를 줘서 조용히 시키세요.');
         return;
       }
 
@@ -317,9 +330,9 @@ export class RoswellLogic {
         this.collectedParts.push('part_engine');
         this.score += 300;
         roswellAudio.playPartFound();
-        this.setDialogue('📡 드르렁~ 자고 있는 농부의 협탁에서 [초공간 추진 안테나]를 조용히 획득했습니다! (부품 3/3 획득 완료!)');
+        this.setDialogue('📡 드르렁~ 자고 있는 농부의 협탁에서 [초공간 추진 안테나]를 조용히 획득했습니다! (부품 3/3 획득 완료! 불시착지로 돌아가세요!)');
       } else {
-        this.setDialogue('농부가 쿨쿨 잠들어 있습니다. (Zzz...)');
+        this.setDialogue('농부가 쿨쿨 깊은 잠에 빠져 있습니다. (Zzz...)');
       }
       return;
     }
@@ -483,14 +496,22 @@ export class RoswellLogic {
     ctx.ellipse(400, 355, 140, 35, 0, 0, Math.PI * 2);
     ctx.fill();
 
-    // Broken Debris Box (Rope source)
+    // Broken Debris Box (Rope source) with Glow Pulse
     ctx.fillStyle = '#3a4a38';
     ctx.fillRect(160, 345, 50, 30);
     ctx.fillStyle = '#2d3b2c';
     ctx.fillRect(165, 350, 40, 20);
     if (!this.ropeFound) {
-      ctx.font = '20px sans-serif';
-      ctx.fillText('🪢', 172, 368);
+      const ropePulse = Math.sin(this.elapsedTime * 3.5) * 3;
+      ctx.save();
+      ctx.fillStyle = 'rgba(254, 240, 138, 0.25)';
+      ctx.beginPath();
+      ctx.arc(185, 360, 16 + ropePulse, 0, Math.PI * 2);
+      ctx.fill();
+      ctx.restore();
+
+      ctx.font = '22px sans-serif';
+      ctx.fillText('🪢', 174, 368);
     }
 
     // Render UFO
@@ -518,13 +539,21 @@ export class RoswellLogic {
       ctx.fillRect(x, 285, 10, 50);
     }
 
-    // Carrot Patch
+    // Carrot Patch with Glow
     ctx.fillStyle = '#2b3d29';
     ctx.beginPath();
     ctx.ellipse(225, 365, 55, 25, 0, 0, Math.PI * 2);
     ctx.fill();
 
     if (!this.carrotHarvested) {
+      const carrotPulse = Math.sin(this.elapsedTime * 3) * 3;
+      ctx.save();
+      ctx.fillStyle = 'rgba(74, 222, 128, 0.2)';
+      ctx.beginPath();
+      ctx.arc(225, 365, 24 + carrotPulse, 0, Math.PI * 2);
+      ctx.fill();
+      ctx.restore();
+
       ctx.font = '28px sans-serif';
       ctx.fillText('🥕', 200, 365);
       ctx.fillText('🥕', 225, 372);
@@ -558,8 +587,16 @@ export class RoswellLogic {
     ctx.arc(cowX - 50, cowY - 14, 3, 0, Math.PI * 2);
     ctx.fill();
 
-    // Power Core under Cow
+    // Power Core under Cow with Glow Pulse
     if (this.cowFed && !this.coreFound) {
+      const corePulse = Math.sin(this.elapsedTime * 4) * 4;
+      ctx.save();
+      ctx.fillStyle = 'rgba(34, 197, 94, 0.3)';
+      ctx.beginPath();
+      ctx.arc(495, 352, 18 + corePulse, 0, Math.PI * 2);
+      ctx.fill();
+      ctx.restore();
+
       ctx.font = '26px sans-serif';
       ctx.fillText('💎', 480, 360);
     }
@@ -596,11 +633,22 @@ export class RoswellLogic {
     }
     ctx.restore();
 
-    // Cockpit Dome on Roof / Lowered
+    // Cockpit Dome on Roof / Lowered with Glowing Pulse
     if (!this.domeFound) {
       const domeY = this.barnRopeUsed ? 230 : 110;
+      const pulse = Math.sin(this.elapsedTime * 4) * 4;
+
+      // Glow halo around dome
+      ctx.save();
+      ctx.fillStyle = 'rgba(168, 85, 247, 0.25)';
+      ctx.beginPath();
+      ctx.arc(400, domeY - 8, 20 + pulse, 0, Math.PI * 2);
+      ctx.fill();
+      ctx.restore();
+
       ctx.font = '28px sans-serif';
       ctx.fillText('🔮', 386, domeY);
+
       if (this.barnRopeUsed) {
         ctx.strokeStyle = '#c4b5a0';
         ctx.lineWidth = 3;
@@ -611,14 +659,23 @@ export class RoswellLogic {
       }
     }
 
-    // Haystack & Bone Box
+    // Haystack & Bone Box with Interactive Glow
     ctx.fillStyle = '#4a5948';
     ctx.beginPath();
     ctx.arc(630, 350, 40, 0, Math.PI, true);
     ctx.fill();
+
     if (!this.boneFound) {
-      ctx.font = '22px sans-serif';
-      ctx.fillText('🦴', 620, 355);
+      const bonePulse = Math.sin(this.elapsedTime * 3.5) * 3;
+      ctx.save();
+      ctx.fillStyle = 'rgba(254, 240, 138, 0.2)';
+      ctx.beginPath();
+      ctx.arc(635, 345, 16 + bonePulse, 0, Math.PI * 2);
+      ctx.fill();
+      ctx.restore();
+
+      ctx.font = '24px sans-serif';
+      ctx.fillText('🦴', 622, 354);
     }
 
     // Ground
@@ -688,10 +745,18 @@ export class RoswellLogic {
     ctx.fillStyle = '#d5e3cf';
     ctx.fillText('Zzz...', 535, 270);
 
-    // Bedside Table & UFO Antenna
+    // Bedside Table & UFO Antenna with Glow Pulse
     ctx.fillStyle = '#3a2b22';
     ctx.fillRect(670, 295, 45, 50);
     if (!this.engineFound) {
+      const antPulse = Math.sin(this.elapsedTime * 4) * 4;
+      ctx.save();
+      ctx.fillStyle = 'rgba(56, 189, 248, 0.3)';
+      ctx.beginPath();
+      ctx.arc(690, 280, 18 + antPulse, 0, Math.PI * 2);
+      ctx.fill();
+      ctx.restore();
+
       ctx.font = '26px sans-serif';
       ctx.fillText('📡', 678, 290);
     }
