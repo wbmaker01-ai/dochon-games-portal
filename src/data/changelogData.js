@@ -3,11 +3,30 @@
 
 export const CHANGELOG_DATA = [
   {
+    version: 'v1.35.4',
+    date: '2026-08-22',
+    title: '[도촌 피자 마스터] 선분 기반 정밀 컷팅 엔진 개편 & 3등분(Y자 커팅) 완벽 지원',
+    badge: 'LATEST',
+    badgeColor: 'emerald',
+    items: [
+      {
+        tag: 'PHYSICS & SLICE',
+        tagColor: 'amber',
+        text: '[선분 기반 정밀 커팅 엔진으로 전면 개편] 마우스 드래그 지점을 관통하여 무한 연장되던 직선 렌더링을 사용자가 그은 실제 선분(Segment) 궤적만 정확히 자르는 정밀 방식으로 개편하여 중심점 출발 1/3 3등분(Y자 컷) 및 자유자재 부분 커팅 지원'
+      },
+      {
+        tag: 'SMART SNAPPING',
+        tagColor: 'teal',
+        text: '[중심점 & 크러스트 스마트 스냅 및 래스터 플러드필 분할] 피자 중심 부근 및 테두리 외곽 지점의 미세한 틈새를 보정하는 스마트 스냅과 2D Raster Wall BFS 알고리즘을 구축하여 3등분·4등분 등 모든 분수 단계의 분할 판정 정밀도 극대화'
+      }
+    ]
+  },
+  {
     version: 'v1.35.3',
     date: '2026-08-22',
     title: '[도촌 미니 올림픽] 컨트롤 버튼 가독성 전면 개편 & 경기장 고화질 벡터 그래픽 및 HUD 업그레이드',
-    badge: 'LATEST',
-    badgeColor: 'emerald',
+    badge: 'UPDATE',
+    badgeColor: 'blue',
     items: [
       {
         tag: 'UI & READABILITY',

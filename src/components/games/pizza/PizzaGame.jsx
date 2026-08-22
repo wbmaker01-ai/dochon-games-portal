@@ -265,7 +265,7 @@ export default function PizzaGame({ onScoreSubmitted }) {
       }
     } else {
       pizzaAudio.playFail();
-      haptics.error();
+      haptics.warning();
       setCombo(0); // Reset combo on fail
     }
   };

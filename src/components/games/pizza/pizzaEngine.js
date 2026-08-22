@@ -38,36 +38,60 @@ export class PizzaEngine {
     this.isDragging = false;
   }
 
-  // Add a cutting line from (x1, y1) to (x2, y2)
+  // Add a cutting segment from (x1, y1) to (x2, y2) with smart center & boundary snapping
   addCut(p1, p2) {
-    const dx = p2.x - p1.x;
-    const dy = p2.y - p1.y;
+    let p1x = p1.x;
+    let p1y = p1.y;
+    let p2x = p2.x;
+    let p2y = p2.y;
+
+    const dx = p2x - p1x;
+    const dy = p2y - p1y;
     const len = Math.hypot(dx, dy);
-    if (len < 30) return false; // Too short to be a valid slice
+    if (len < 25) return false; // Too short to be a valid slice
 
-    // Normalize line formula: ax + by + c = 0
-    const a = -dy / len;
-    const b = dx / len;
-    const c = -(a * p1.x + b * p1.y);
+    const cx = PIZZA_CENTER.x;
+    const cy = PIZZA_CENTER.y;
+    const r = PIZZA_RADIUS;
 
-    // Extend line across the entire pizza bounds
-    const centerDist = Math.abs(a * PIZZA_CENTER.x + b * PIZZA_CENTER.y + c);
-    if (centerDist > PIZZA_RADIUS + 10) {
-      return false; // Cut does not intersect pizza
+    // 1. Center snap: If either point is near center (within 35px), snap to exact center
+    const dist1ToCenter = Math.hypot(p1x - cx, p1y - cy);
+    const dist2ToCenter = Math.hypot(p2x - cx, p2y - cy);
+
+    if (dist1ToCenter <= 35) {
+      p1x = cx;
+      p1y = cy;
+    }
+    if (dist2ToCenter <= 35) {
+      p2x = cx;
+      p2y = cy;
+    }
+
+    // 2. Crust/Outer boundary snap: If endpoint reaches near outer crust (within 28px of radius), extend cleanly to boundary
+    const updatedDist1 = Math.hypot(p1x - cx, p1y - cy);
+    if (updatedDist1 >= r - 28 && updatedDist1 > 0) {
+      const scale = (r + 10) / updatedDist1;
+      p1x = cx + (p1x - cx) * scale;
+      p1y = cy + (p1y - cy) * scale;
+    }
+
+    const updatedDist2 = Math.hypot(p2x - cx, p2y - cy);
+    if (updatedDist2 >= r - 28 && updatedDist2 > 0) {
+      const scale = (r + 10) / updatedDist2;
+      p2x = cx + (p2x - cx) * scale;
+      p2y = cy + (p2y - cy) * scale;
     }
 
     this.cuts.push({
-      x1: p1.x,
-      y1: p1.y,
-      x2: p2.x,
-      y2: p2.y,
-      a,
-      b,
-      c
+      x1: p1x,
+      y1: p1y,
+      x2: p2x,
+      y2: p2y,
+      len: Math.hypot(p2x - p1x, p2y - p1y)
     });
 
-    // Spawn cut particles along the cut line
-    this.spawnCutParticles(p1, p2);
+    // Spawn cut particles along the cut segment
+    this.spawnCutParticles({ x: p1x, y: p1y }, { x: p2x, y: p2y });
     return true;
   }
 
@@ -111,62 +135,192 @@ export class PizzaEngine {
     }
   }
 
-  // Get the Region ID for any point (x, y) based on active cut lines
-  getRegionKey(x, y) {
-    if (this.cuts.length === 0) return '0';
-    return this.cuts
-      .map(cut => {
-        const val = cut.a * x + cut.b * y + cut.c;
-        return val >= 0 ? '1' : '0';
-      })
-      .join('');
+  // Robust 2D Line Segment Intersection Helper
+  static doSegmentsIntersect(p1, p2, p3, p4) {
+    function orientation(p, q, r) {
+      const val = (q.y - p.y) * (r.x - q.x) - (q.x - p.x) * (r.y - q.y);
+      if (Math.abs(val) < 1e-7) return 0; // colinear
+      return val > 0 ? 1 : 2; // clock or counterclock
+    }
+
+    function onSegment(p, q, r) {
+      return (
+        q.x <= Math.max(p.x, r.x) + 1e-7 &&
+        q.x >= Math.min(p.x, r.x) - 1e-7 &&
+        q.y <= Math.max(p.y, r.y) + 1e-7 &&
+        q.y >= Math.min(p.y, r.y) - 1e-7
+      );
+    }
+
+    const o1 = orientation(p1, p2, p3);
+    const o2 = orientation(p1, p2, p4);
+    const o3 = orientation(p3, p4, p1);
+    const o4 = orientation(p3, p4, p2);
+
+    // General case
+    if (o1 !== o2 && o3 !== o4) return true;
+
+    // Colinear edge cases
+    if (o1 === 0 && onSegment(p1, p3, p2)) return true;
+    if (o2 === 0 && onSegment(p1, p4, p2)) return true;
+    if (o3 === 0 && onSegment(p3, p1, p4)) return true;
+    if (o4 === 0 && onSegment(p3, p2, p4)) return true;
+
+    return false;
   }
 
-  // Analyze all slices, calculate slice areas, accuracy, and topping distributions
+  // Analyze all slices using 2D Raster Wall Flood-Fill over active cut segments
   analyzeSlices(stageToppings, targetSlices) {
-    const sampleGridStep = 6;
-    const regionCounts = {};
+    const STEP = 4; // High precision grid cell step in pixels
+    const cx = PIZZA_CENTER.x;
+    const cy = PIZZA_CENTER.y;
+    const r = PIZZA_RADIUS;
+    const rSq = r * r;
+
+    const minX = cx - r;
+    const maxX = cx + r;
+    const minY = cy - r;
+    const maxY = cy + r;
+
+    const cols = Math.ceil((maxX - minX) / STEP) + 1;
+    const rows = Math.ceil((maxY - minY) / STEP) + 1;
+
+    // Grid: -1 = outside pizza, 0 = unvisited pizza cell, -2 = cut wall, >0 = regionId
+    const grid = Array.from({ length: rows }, () => new Int32Array(cols));
     let totalSamples = 0;
 
-    // Sample points across pizza disk
-    const rSq = PIZZA_RADIUS * PIZZA_RADIUS;
-    for (let y = PIZZA_CENTER.y - PIZZA_RADIUS; y <= PIZZA_CENTER.y + PIZZA_RADIUS; y += sampleGridStep) {
-      for (let x = PIZZA_CENTER.x - PIZZA_RADIUS; x <= PIZZA_CENTER.x + PIZZA_RADIUS; x += sampleGridStep) {
-        const dSq = (x - PIZZA_CENTER.x) ** 2 + (y - PIZZA_CENTER.y) ** 2;
+    for (let ry = 0; ry < rows; ry++) {
+      const y = minY + ry * STEP;
+      for (let rx = 0; rx < cols; rx++) {
+        const x = minX + rx * STEP;
+        const dSq = (x - cx) ** 2 + (y - cy) ** 2;
         if (dSq <= rSq) {
-          const key = this.getRegionKey(x, y);
-          regionCounts[key] = (regionCounts[key] || 0) + 1;
+          grid[ry][rx] = 0;
           totalSamples++;
+        } else {
+          grid[ry][rx] = -1;
         }
       }
     }
 
-    // Filter regions with negligible area (< 3% of pizza)
-    const validRegions = Object.entries(regionCounts).filter(([_, count]) => count / totalSamples >= 0.03);
+    if (totalSamples === 0) {
+      return { sliceCount: 1, validRegions: [], regionToppings: {}, uniformityScore: 0 };
+    }
+
+    // Helper: Distance squared from point (px, py) to line segment (x1, y1)-(x2, y2)
+    function distSqToSegment(px, py, x1, y1, x2, y2) {
+      const l2 = (x2 - x1) ** 2 + (y2 - y1) ** 2;
+      if (l2 === 0) return (px - x1) ** 2 + (py - y1) ** 2;
+      let t = ((px - x1) * (x2 - x1) + (py - y1) * (y2 - y1)) / l2;
+      t = Math.max(0, Math.min(1, t));
+      const projX = x1 + t * (x2 - x1);
+      const projY = y1 + t * (y2 - y1);
+      return (px - projX) ** 2 + (py - projY) ** 2;
+    }
+
+    // 1. Mark cut segments as WALL cells (-2) with safe barrier radius
+    const wallDistSq = (STEP * 0.75) ** 2;
+    const cuts = this.cuts;
+
+    for (let cIdx = 0; cIdx < cuts.length; cIdx++) {
+      const cut = cuts[cIdx];
+      for (let ry = 0; ry < rows; ry++) {
+        const y = minY + ry * STEP;
+        for (let rx = 0; rx < cols; rx++) {
+          if (grid[ry][rx] === 0) {
+            const x = minX + rx * STEP;
+            if (distSqToSegment(x, y, cut.x1, cut.y1, cut.x2, cut.y2) <= wallDistSq) {
+              grid[ry][rx] = -2; // Mark as Cut Wall
+            }
+          }
+        }
+      }
+    }
+
+    // 2. Flood Fill BFS across non-wall cells
+    let currentRegionId = 1;
+    const regionCounts = {};
+
+    for (let ry = 0; ry < rows; ry++) {
+      for (let rx = 0; rx < cols; rx++) {
+        if (grid[ry][rx] === 0) {
+          const regionId = currentRegionId++;
+          regionCounts[regionId] = 0;
+
+          const queue = [[rx, ry]];
+          grid[ry][rx] = regionId;
+
+          let head = 0;
+          while (head < queue.length) {
+            const [cx_idx, cy_idx] = queue[head++];
+            regionCounts[regionId]++;
+
+            const neighbors = [
+              [cx_idx + 1, cy_idx],
+              [cx_idx, cy_idx + 1],
+              [cx_idx - 1, cy_idx],
+              [cx_idx, cy_idx - 1]
+            ];
+
+            for (let i = 0; i < neighbors.length; i++) {
+              const [nx, ny] = neighbors[i];
+              if (nx >= 0 && nx < cols && ny >= 0 && ny < rows && grid[ny][nx] === 0) {
+                grid[ny][nx] = regionId;
+                queue.push([nx, ny]);
+              }
+            }
+          }
+        }
+      }
+    }
+
+    // 3. Filter regions with significant area (>= 3.5% of total pizza)
+    const validRegions = Object.entries(regionCounts).filter(([_, count]) => count / totalSamples >= 0.035);
     const sliceCount = validRegions.length;
 
     // Calculate Area Uniformity (Score from 0 to 100%)
     const expectedRatio = 1 / targetSlices;
     let totalVariance = 0;
+    const validTotalSamples = validRegions.reduce((sum, [_, count]) => sum + count, 0);
+
     validRegions.forEach(([_, count]) => {
-      const ratio = count / totalSamples;
+      const ratio = count / (validTotalSamples || 1);
       totalVariance += Math.abs(ratio - expectedRatio);
     });
 
-    // If slice count mismatch, apply penalty
     const countPenalty = Math.abs(sliceCount - targetSlices) * 25;
     const uniformityScore = Math.max(0, Math.min(100, Math.round((1 - totalVariance / 2) * 100 - countPenalty)));
 
-    // Distribute toppings to regions
+    // Map stage toppings to their containing or nearest regionId
     const regionToppings = {};
     validRegions.forEach(([key]) => {
       regionToppings[key] = [];
     });
 
     stageToppings.forEach(top => {
-      const key = this.getRegionKey(top.x, top.y);
-      if (regionToppings[key]) {
-        regionToppings[key].push(top);
+      const rx = Math.max(0, Math.min(cols - 1, Math.round((top.x - minX) / STEP)));
+      const ry = Math.max(0, Math.min(rows - 1, Math.round((top.y - minY) / STEP)));
+      
+      let nearestReg = null;
+      let minDist = Infinity;
+      validRegions.forEach(([vRegId]) => {
+        const vId = Number(vRegId);
+        for (let yIdx = Math.max(0, ry - 8); yIdx <= Math.min(rows - 1, ry + 8); yIdx++) {
+          for (let xIdx = Math.max(0, rx - 8); xIdx <= Math.min(cols - 1, rx + 8); xIdx++) {
+            if (grid[yIdx][xIdx] === vId) {
+              const cellX = minX + xIdx * STEP;
+              const cellY = minY + yIdx * STEP;
+              const dist = Math.hypot(cellX - top.x, cellY - top.y);
+              if (dist < minDist) {
+                minDist = dist;
+                nearestReg = vRegId;
+              }
+            }
+          }
+        }
+      });
+      if (nearestReg && regionToppings[nearestReg]) {
+        regionToppings[nearestReg].push(top);
       }
     });
 
@@ -548,20 +702,15 @@ export class PizzaEngine {
 
     ctx.save();
     this.cuts.forEach((cut, idx) => {
-      // Find intersection with pizza circle to draw clean slice line
-      const { a, b, c } = cut;
-      // Project line across canvas
-      const x0 = -a * c;
-      const y0 = -b * c;
-      const d = 500;
-      const p1x = x0 + d * -b;
-      const p1y = y0 + d * a;
-      const p2x = x0 - d * -b;
-      const p2y = y0 - d * a;
+      const p1x = cut.x1;
+      const p1y = cut.y1;
+      const p2x = cut.x2;
+      const p2y = cut.y2;
 
       // 1. Cut Shadow & Cheese Seam
-      ctx.strokeStyle = 'rgba(120, 40, 31, 0.7)';
-      ctx.lineWidth = 4;
+      ctx.strokeStyle = 'rgba(120, 40, 31, 0.75)';
+      ctx.lineWidth = 4.5;
+      ctx.lineCap = 'round';
       ctx.beginPath();
       ctx.moveTo(p1x, p1y);
       ctx.lineTo(p2x, p2y);
@@ -569,13 +718,21 @@ export class PizzaEngine {
 
       // 2. Bright Sharp Knife Cut Line
       ctx.strokeStyle = '#FFFFFF';
-      ctx.lineWidth = 1.8;
+      ctx.lineWidth = 2;
+      ctx.lineCap = 'round';
       ctx.beginPath();
       ctx.moveTo(p1x, p1y);
       ctx.lineTo(p2x, p2y);
       ctx.stroke();
 
-      // 3. Cut Index Badge
+      // 3. Cut Start/End Dot Pins
+      ctx.fillStyle = 'rgba(255, 255, 255, 0.9)';
+      ctx.beginPath();
+      ctx.arc(p1x, p1y, 3, 0, Math.PI * 2);
+      ctx.arc(p2x, p2y, 3, 0, Math.PI * 2);
+      ctx.fill();
+
+      // 4. Cut Index Badge
       const midX = (cut.x1 + cut.x2) / 2;
       const midY = (cut.y1 + cut.y2) / 2;
       ctx.fillStyle = '#F59E0B';
