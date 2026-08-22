@@ -199,19 +199,21 @@ export const PLAYABLE_GAMES = [
     category: '스포츠',
     imageSrc: getThumb('olympics.jpg'),
     isPlayable: true,
-    badgeText: '🏅 NEW 23위',
+    badgeText: '🏅 23위',
     description: '100m 허들 달리기 · 3점슛 챌린지 · 급류 카누 슬라럼 3대 릴레이 스포츠 챔피언십!'
-  }
-];
-
-export const COMING_SOON_GAMES = [
+  },
   {
     id: 'pangolin',
     title: '도촌 천산갑의 모험',
     category: '어드벤처',
     imageSrc: getThumb('pangolin.jpg'),
-    isPlayable: false
-  },
+    isPlayable: true,
+    badgeText: '🦔 NEW 24위',
+    description: '몸을 둥글게 말아 데굴데굴 질주하고 점프하는 구글 두들 모티브 4대 테마 횡스크롤 플랫폼 액션!'
+  }
+];
+
+export const COMING_SOON_GAMES = [
   {
     id: 'roswell',
     title: '도촌 UFO 탈출작전',

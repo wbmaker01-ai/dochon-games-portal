@@ -22,6 +22,7 @@ import BubbleTeaGame from './components/games/bubbletea/BubbleTeaGame';
 import PizzaGame from './components/games/pizza/PizzaGame';
 import EarthBeeGame from './components/games/earthbee/EarthBeeGame';
 import OlympicsGame from './components/games/olympics/OlympicsGame';
+import PangolinGame from './components/games/pangolin/PangolinGame';
 import GameCard from './components/GameCard';
 import LeaderboardModal from './components/LeaderboardModal';
 import ChangelogModal from './components/ChangelogModal';
@@ -464,6 +465,7 @@ export default function App() {
                   {activeGame === 'pizza' && '🍕 도촌 피자 마스터 (DOCHON PIZZA MASTER)'}
                   {activeGame === 'earthbee' && '🐝 도촌 꿀벌의 비행 (DOCHON EARTH BEE)'}
                   {activeGame === 'olympics' && '🏅 도촌 미니 올림픽 (DOCHON MINI OLYMPICS)'}
+                  {activeGame === 'pangolin' && '🦔 도촌 천산갑의 모험 (PANGOLIN ADVENTURE)'}
                 </span>
                 <span style={{
                   backgroundColor: 'rgba(251, 191, 36, 0.2)',
@@ -582,6 +584,9 @@ export default function App() {
               )}
               {activeGame === 'olympics' && (
                 <OlympicsGame onScoreSubmitted={() => openInPageLeaderboardModal('olympics')} />
+              )}
+              {activeGame === 'pangolin' && (
+                <PangolinGame onScoreSubmitted={() => openInPageLeaderboardModal('pangolin')} />
               )}
             </div>
           </div>

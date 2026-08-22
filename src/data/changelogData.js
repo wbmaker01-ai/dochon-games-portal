@@ -3,11 +3,45 @@
 
 export const CHANGELOG_DATA = [
   {
+    version: 'v1.37.0',
+    date: '2026-08-22',
+    title: '[도촌 천산갑의 모험] 24번째 신작 정식 개장! 구글 두들 모티브 횡스크롤 플랫폼 액션 독립 컴포넌트 탑재',
+    badge: 'LATEST',
+    badgeColor: 'emerald',
+    items: [
+      {
+        tag: 'NEW GAME',
+        tagColor: 'emerald',
+        text: '[24번째 공식 신작 게임 개장] 2017 발렌타인데이 구글 두들 명작 "천산갑의 사랑(Pangolin Love)"을 모티브로 한 힐링 횡스크롤 플랫폼 어드벤처 "도촌 천산갑의 모험" 정식 런칭'
+      },
+      {
+        tag: 'PHYSICS & CONTROLS',
+        tagColor: 'amber',
+        text: '[자체 Canvas 2D 물리 엔진] 몸을 둥글게 말아 데굴데굴 질주하는 롤링 가속, 부드러운 사인파 언덕 슬로프 물리, 2단 점프 및 스프링 버섯 슈퍼 도약 구현'
+      },
+      {
+        tag: 'GLOBAL STAGES',
+        tagColor: 'blue',
+        text: '[4대 글로벌 테마 월드] 가나 카카오 숲(카카오 열매 수집) → 인도 향신료 언덕(꽃잎 수집) → 중국 대나무 계곡(사랑의 악보) → 필리핀 별빛 해변(별빛 보석) 완주 및 +5,000점 엔딩 보너스 지급'
+      },
+      {
+        tag: 'WEB AUDIO',
+        tagColor: 'purple',
+        text: '[Web Audio API 실시간 합성 사운드] 롤링 휘익음, 콤보 아르페지오 사운드, 스프링 도약음 및 테마별 BGM 프로시저럴 탑재'
+      },
+      {
+        tag: 'LEADERBOARD',
+        tagColor: 'teal',
+        text: '[도촌초 명예의 전당 연동] 100점 초과 달성 시 랭킹 등록 폼 활성화 및 등록 완료 시 천산갑 리더보드 탭 자동 연동'
+      }
+    ]
+  },
+  {
     version: 'v1.36.8',
     date: '2026-08-22',
     title: '[도촌 피자 마스터] 명예의 전당 점수 등록 API 응답 처리 버그 수정 및 실시간 랭킹 연동 정상화',
-    badge: 'LATEST',
-    badgeColor: 'emerald',
+    badge: 'UPDATE',
+    badgeColor: 'blue',
     items: [
       {
         tag: 'BUG FIX',

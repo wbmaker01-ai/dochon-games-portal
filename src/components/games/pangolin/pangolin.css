@@ -1,0 +1,298 @@
+/* Dochon Pangolin Adventure Responsive & Neo-Brutalism Stylesheet */
+
+.pangolin-wrapper {
+  position: relative;
+  width: 100%;
+  max-width: 960px;
+  margin: 0 auto;
+  background: #020617;
+  border-radius: 1.25rem;
+  overflow: hidden;
+  box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.8), 0 0 0 1px rgba(251, 191, 36, 0.2);
+  user-select: none;
+  font-family: inherit;
+}
+
+/* Canvas Container */
+.pangolin-canvas-container {
+  position: relative;
+  width: 100%;
+  aspect-ratio: 16 / 9;
+  background: #000;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.pangolin-canvas {
+  width: 100%;
+  height: 100%;
+  display: block;
+  object-fit: contain;
+}
+
+/* Top HUD Bar */
+.pangolin-hud {
+  position: absolute;
+  top: 12px;
+  left: 12px;
+  right: 12px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  pointer-events: none;
+  z-index: 20;
+}
+
+.pangolin-hud-chip {
+  background: rgba(15, 23, 42, 0.85);
+  backdrop-filter: blur(8px);
+  border: 1px solid rgba(255, 255, 255, 0.15);
+  padding: 6px 12px;
+  border-radius: 9999px;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.4);
+  font-weight: 800;
+  font-size: 0.82rem;
+  color: #f8fafc;
+}
+
+.pangolin-progress-container {
+  position: absolute;
+  bottom: 12px;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 60%;
+  max-width: 400px;
+  background: rgba(15, 23, 42, 0.85);
+  backdrop-filter: blur(8px);
+  border: 1px solid rgba(255, 255, 255, 0.15);
+  padding: 6px 12px;
+  border-radius: 9999px;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  z-index: 20;
+  pointer-events: none;
+}
+
+.pangolin-progress-bar-bg {
+  width: 100%;
+  height: 8px;
+  background: rgba(255, 255, 255, 0.15);
+  border-radius: 9999px;
+  overflow: hidden;
+}
+
+.pangolin-progress-bar-fill {
+  height: 100%;
+  background: linear-gradient(90deg, #f59e0b, #ec4899, #38bdf8);
+  border-radius: 9999px;
+  transition: width 0.1s linear;
+}
+
+/* On-Screen Mobile Controls */
+.pangolin-mobile-controls {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 10px 16px;
+  background: #090d16;
+  border-top: 1px solid rgba(255, 255, 255, 0.1);
+  touch-action: manipulation;
+}
+
+@media (min-width: 768px) {
+  .pangolin-mobile-controls {
+    display: none;
+  }
+}
+
+.pangolin-ctrl-btn {
+  background: #1e293b;
+  border: 2px solid #334155;
+  color: #ffffff;
+  padding: 12px 18px;
+  border-radius: 14px;
+  font-size: 1.1rem;
+  font-weight: 900;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 0 4px 0 #0f172a;
+  transition: all 0.05s ease;
+  user-select: none;
+  -webkit-user-select: none;
+}
+
+.pangolin-ctrl-btn:active {
+  transform: translateY(3px);
+  box-shadow: 0 1px 0 #0f172a;
+}
+
+.pangolin-ctrl-btn.btn-jump {
+  background: linear-gradient(135deg, #ec4899, #db2777);
+  border-color: #f472b6;
+  box-shadow: 0 4px 0 #9d174d;
+}
+
+.pangolin-ctrl-btn.btn-roll {
+  background: linear-gradient(135deg, #f59e0b, #d97706);
+  border-color: #fbbf24;
+  box-shadow: 0 4px 0 #92400e;
+}
+
+/* Modals and Overlays */
+.pangolin-overlay-center {
+  position: absolute;
+  inset: 0;
+  background: rgba(2, 6, 23, 0.85);
+  backdrop-filter: blur(10px);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 16px;
+  z-index: 30;
+}
+
+.pangolin-result-box {
+  background: linear-gradient(180deg, #1e293b, #0f172a);
+  border: 2px solid rgba(251, 191, 36, 0.4);
+  border-radius: 1.5rem;
+  padding: 24px;
+  max-width: 460px;
+  width: 100%;
+  text-align: center;
+  box-shadow: 0 20px 40px rgba(0, 0, 0, 0.8);
+  animation: pangolinPopIn 0.25s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+}
+
+@keyframes pangolinPopIn {
+  0% { transform: scale(0.9); opacity: 0; }
+  100% { transform: scale(1); opacity: 1; }
+}
+
+/* Buttons */
+.pangolin-btn-start {
+  background: linear-gradient(135deg, #f59e0b, #d97706);
+  color: #0f172a;
+  font-weight: 900;
+  font-size: 1rem;
+  padding: 10px 24px;
+  border-radius: 9999px;
+  border: none;
+  cursor: pointer;
+  box-shadow: 0 4px 0 #92400e, 0 10px 20px rgba(245, 158, 11, 0.3);
+  transition: all 0.1s ease;
+}
+
+.pangolin-btn-start:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 0 #92400e, 0 12px 25px rgba(245, 158, 11, 0.4);
+}
+
+.pangolin-btn-start:active {
+  transform: translateY(2px);
+  box-shadow: 0 2px 0 #92400e;
+}
+
+.pangolin-btn-submit {
+  background: linear-gradient(135deg, #10b981, #059669);
+  color: #ffffff;
+  font-weight: 900;
+  font-size: 0.95rem;
+  padding: 9px 18px;
+  border-radius: 9999px;
+  border: none;
+  cursor: pointer;
+  box-shadow: 0 4px 0 #047857;
+  transition: all 0.1s ease;
+}
+
+.pangolin-btn-submit:hover:not(:disabled) {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 0 #047857;
+}
+
+.pangolin-btn-submit:active:not(:disabled) {
+  transform: translateY(2px);
+  box-shadow: 0 2px 0 #047857;
+}
+
+.pangolin-btn-submit:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+/* Inputs */
+.pangolin-input-name {
+  background: #090d16;
+  border: 2px solid #334155;
+  color: #f8fafc;
+  font-weight: 700;
+  font-size: 0.95rem;
+  padding: 8px 14px;
+  border-radius: 9999px;
+  width: 100%;
+  outline: none;
+  transition: border-color 0.2s ease;
+}
+
+.pangolin-input-name:focus {
+  border-color: #f59e0b;
+  box-shadow: 0 0 0 3px rgba(245, 158, 11, 0.2);
+}
+
+/* Guide Modal Backdrop */
+.pangolin-modal-backdrop {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.75);
+  backdrop-filter: blur(6px);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 100;
+  padding: 16px;
+}
+
+.pangolin-guide-modal {
+  background: #0f172a;
+  border: 1px solid #334155;
+  border-radius: 1.25rem;
+  max-width: 540px;
+  width: 100%;
+  overflow: hidden;
+  box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.9);
+}
+
+.pangolin-guide-header {
+  padding: 14px 18px;
+  background: #1e293b;
+  border-bottom: 1px solid #334155;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.pangolin-guide-close-btn {
+  background: transparent;
+  border: none;
+  cursor: pointer;
+  padding: 4px;
+}
+
+.pangolin-guide-body {
+  padding: 16px;
+  max-height: 70vh;
+  overflow-y: auto;
+}
+
+.pangolin-guide-card {
+  background: #1e293b;
+  border: 1px solid #334155;
+  border-radius: 0.75rem;
+  padding: 12px;
+}
