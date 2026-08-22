@@ -3,11 +3,35 @@
 
 export const CHANGELOG_DATA = [
   {
+    version: 'v1.36.0',
+    date: '2026-08-22',
+    title: '[포털 & 피자 마스터] 전체 UI 가독성 전면 개편 & 고대비 타이포그래피 및 대형 액션 버튼 적용',
+    badge: 'LATEST',
+    badgeColor: 'emerald',
+    items: [
+      {
+        tag: 'UI & CONTRAST',
+        tagColor: 'amber',
+        text: '[주문서 & 텍스트 시인성 대폭 강화] 도촌 피자 마스터의 손님 주문 대사, 토핑 요구조건 뱃지, 분할 정확도(%) 및 결과 팝업 폰트를 고대비 순백색 볼드 타이포그래피로 전면 개편하여 한눈에 명확히 읽히도록 개선'
+      },
+      {
+        tag: 'TACTILE BUTTONS',
+        tagColor: 'emerald',
+        text: '[조작 버튼 스케일업 & 터치 친화적 UI] 피자 서빙하기, 컷팅 초기화, 다음 주문 받기, 게임 시작/재도전 버튼의 크기와 높이(52px+)를 확대하고 고대비 그라데이션 및 클릭 피드백 강화'
+      },
+      {
+        tag: 'PORTAL REFINEMENT',
+        tagColor: 'blue',
+        text: '[포털 메인 카테고리 칩 & 헤더 버튼 개선] 메인 포털 카테고리 필터 탭과 랭킹/다이스 버튼의 폰트 및 배경 대비를 향상하여 작은 화면에서도 글자와 아이콘이 선명하게 노출되도록 최적화'
+      }
+    ]
+  },
+  {
     version: 'v1.35.4',
     date: '2026-08-22',
     title: '[도촌 피자 마스터] 선분 기반 정밀 컷팅 엔진 개편 & 3등분(Y자 커팅) 완벽 지원',
-    badge: 'LATEST',
-    badgeColor: 'emerald',
+    badge: 'UPDATE',
+    badgeColor: 'blue',
     items: [
       {
         tag: 'PHYSICS & SLICE',

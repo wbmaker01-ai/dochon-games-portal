@@ -435,15 +435,15 @@ export default function PizzaGame({ onScoreSubmitted }) {
         {/* Stage Result / Clear Overlay */}
         {stageResult && (
           <div className="pizza-stage-result-overlay">
-            <div className={`text-4xl mb-2 ${stageResult.isSuccess ? 'animate-bounce' : ''}`}>
+            <div className={`text-5xl mb-3 ${stageResult.isSuccess ? 'animate-bounce' : ''}`}>
               {stageResult.isSuccess ? '🍕' : '😢'}
             </div>
 
-            <h3 className={`text-xl font-black mb-1 ${stageResult.isSuccess ? 'text-amber-400' : 'text-rose-400'}`}>
+            <h3 className={`text-2xl sm:text-3xl font-black mb-2 tracking-tight ${stageResult.isSuccess ? 'text-amber-400' : 'text-rose-400'}`}>
               {stageResult.isSuccess ? '주문 완수 성공!' : '주문 실패!'}
             </h3>
 
-            <p className="text-sm text-slate-300 max-w-sm mb-3">
+            <p className="text-base sm:text-lg text-slate-100 font-medium max-w-sm mb-4 leading-relaxed">
               {stageResult.message}
             </p>
 
@@ -459,19 +459,19 @@ export default function PizzaGame({ onScoreSubmitted }) {
               </div>
             )}
 
-            <div className="text-xs text-slate-400 mb-5">
-              분할 정확도: <strong className="text-amber-300 font-bold">{stageResult.uniformityScore}%</strong>
+            <div className="text-sm sm:text-base text-slate-200 mb-6 font-semibold">
+              분할 정확도: <strong className="text-amber-400 font-black text-xl sm:text-2xl ml-1">{stageResult.uniformityScore}%</strong>
             </div>
 
             <div className="flex items-center gap-3">
               {stageResult.isSuccess ? (
-                <button onClick={handleNextStage} className="pizza-btn pizza-btn-serve">
-                  <Sparkles className="w-4 h-4" />
+                <button onClick={handleNextStage} className="pizza-btn pizza-btn-serve py-3.5 px-8 text-base sm:text-lg">
+                  <Sparkles className="w-5 h-5 text-slate-950" />
                   <span>다음 주문 받기</span>
                 </button>
               ) : (
-                <button onClick={handleRetryStage} className="pizza-btn pizza-btn-serve">
-                  <RotateCcw className="w-4 h-4" />
+                <button onClick={handleRetryStage} className="pizza-btn pizza-btn-serve py-3.5 px-8 text-base sm:text-lg">
+                  <RotateCcw className="w-5 h-5 text-slate-950" />
                   <span>다시 자르기</span>
                 </button>
               )}
@@ -482,15 +482,15 @@ export default function PizzaGame({ onScoreSubmitted }) {
         {/* Start Game Splash Overlay */}
         {!isPlaying && !isGameOver && (
           <div className="pizza-stage-result-overlay">
-            <div className="text-5xl mb-3 animate-pulse">🍕</div>
-            <h2 className="text-2xl font-black text-amber-400 mb-2">도촌 피자 마스터</h2>
-            <p className="text-xs sm:text-sm text-slate-300 max-w-xs mb-6 leading-relaxed">
+            <div className="text-6xl mb-3 animate-pulse">🍕</div>
+            <h2 className="text-3xl font-black text-amber-400 mb-2 tracking-tight">도촌 피자 마스터</h2>
+            <p className="text-sm sm:text-base text-slate-100 font-semibold max-w-xs mb-7 leading-relaxed">
               피자를 자르고 분수를 마스터하라!<br />
               손님의 주문 조건에 맞게 정확하게 등분해보세요.
             </p>
             <button
               onClick={handleStartGame}
-              className="pizza-btn pizza-btn-serve py-3 px-8 text-base shadow-xl"
+              className="pizza-btn pizza-btn-serve py-3.5 px-9 text-base sm:text-lg font-black shadow-2xl"
             >
               <Play className="w-5 h-5 fill-slate-950" />
               <span>주방 오픈 & 게임 시작</span>
@@ -503,7 +503,7 @@ export default function PizzaGame({ onScoreSubmitted }) {
       {isPlaying && !isGameOver && !stageResult && (
         <div className="pizza-action-bar">
           <button onClick={handleResetCuts} className="pizza-btn pizza-btn-reset">
-            <RotateCcw className="w-4 h-4" />
+            <RotateCcw className="w-5 h-5" />
             <span>컷팅 초기화</span>
           </button>
 
@@ -512,7 +512,7 @@ export default function PizzaGame({ onScoreSubmitted }) {
             disabled={engineRef.current?.cuts.length === 0}
             className="pizza-btn pizza-btn-serve"
           >
-            <CheckCircle2 className="w-4 h-4" />
+            <CheckCircle2 className="w-5 h-5 text-slate-950" />
             <span>피자 서빙하기 ({currentStage.targetSlices}등분 확인)</span>
           </button>
         </div>
@@ -520,28 +520,28 @@ export default function PizzaGame({ onScoreSubmitted }) {
 
       {/* 6. Game Over & Hall of Fame Modal */}
       {isGameOver && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/80 backdrop-blur-md animate-fade-in">
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/85 backdrop-blur-md animate-fade-in">
           <div className="pizza-gameover-card">
-            <div className="text-5xl mb-2">🏆</div>
-            <h2 className="text-2xl font-black text-amber-400 mb-1">영업 마감!</h2>
-            <p className="text-xs text-slate-400 mb-4">오늘의 피자 주방이 마감되었습니다.</p>
+            <div className="text-6xl mb-2">🏆</div>
+            <h2 className="text-3xl font-black text-amber-400 mb-1">영업 마감!</h2>
+            <p className="text-sm text-slate-300 mb-4 font-semibold">오늘의 피자 주방이 마감되었습니다.</p>
 
-            <div className="bg-slate-800/80 border border-slate-700 rounded-2xl p-4 mb-5">
-              <div className="text-xs text-slate-400 mb-1">최종 달성 점수</div>
-              <div className="text-3xl font-black text-amber-400">{score.toLocaleString()}점</div>
+            <div className="bg-slate-800/90 border border-slate-600 rounded-2xl p-4 mb-5 shadow-inner">
+              <div className="text-xs text-slate-300 font-bold mb-1">최종 달성 점수</div>
+              <div className="text-4xl font-black text-amber-400">{score.toLocaleString()}점</div>
             </div>
 
             {/* Hall of Fame Submission Form (Strictly > 100 points rule) */}
             {score > 100 ? (
-              <div className="bg-slate-800/60 border border-amber-500/30 rounded-2xl p-4 mb-5 text-left">
+              <div className="bg-slate-800/80 border border-amber-500/40 rounded-2xl p-4 mb-5 text-left shadow-md">
                 <div className="flex items-center gap-2 mb-2">
-                  <Trophy className="w-4 h-4 text-amber-400" />
-                  <h3 className="text-sm font-bold text-amber-300">명예의 전당 점수 등록</h3>
+                  <Trophy className="w-5 h-5 text-amber-400" />
+                  <h3 className="text-base font-black text-amber-300">명예의 전당 점수 등록</h3>
                 </div>
 
                 {isSubmitted ? (
                   <div className="flex items-center gap-2 text-emerald-400 text-sm font-bold py-2">
-                    <CheckCircle2 className="w-4 h-4" />
+                    <CheckCircle2 className="w-5 h-5" />
                     <span>명예의 전당에 랭킹이 성공적으로 등록되었습니다!</span>
                   </div>
                 ) : (
@@ -554,16 +554,16 @@ export default function PizzaGame({ onScoreSubmitted }) {
                         placeholder="예: 홍길동"
                         maxLength={10}
                         required
-                        className="w-full px-3.5 py-2 bg-slate-900 border border-slate-700 rounded-xl text-white text-sm focus:outline-none focus:border-amber-400"
+                        className="w-full px-4 py-2.5 bg-slate-900 border border-slate-600 rounded-xl text-white text-base font-bold placeholder:text-slate-500 focus:outline-none focus:border-amber-400"
                       />
                     </div>
                     {submitError && (
-                      <p className="text-xs text-rose-400">{submitError}</p>
+                      <p className="text-xs text-rose-400 font-bold">{submitError}</p>
                     )}
                     <button
                       type="submit"
                       disabled={isSubmitting || !playerName.trim()}
-                      className="w-full py-2.5 bg-gradient-to-r from-amber-500 to-orange-500 hover:from-amber-400 hover:to-orange-400 text-slate-950 font-black rounded-xl text-sm transition-all disabled:opacity-50"
+                      className="w-full py-3 bg-gradient-to-r from-amber-500 to-orange-500 hover:from-amber-400 hover:to-orange-400 text-slate-950 font-black rounded-xl text-base transition-all disabled:opacity-50 shadow-md"
                     >
                       {isSubmitting ? '등록 중...' : '명예의 전당에 기록하기'}
                     </button>
@@ -571,16 +571,16 @@ export default function PizzaGame({ onScoreSubmitted }) {
                 )}
               </div>
             ) : (
-              <p className="text-xs text-slate-500 mb-5">
+              <p className="text-xs text-slate-400 mb-5 font-semibold">
                 (100점 초과 달성 시 명예의 전당에 등록할 수 있습니다)
               </p>
             )}
 
             <button
               onClick={handleStartGame}
-              className="w-full py-3 bg-gradient-to-r from-amber-500 to-orange-500 text-slate-950 font-black rounded-xl shadow-lg transition-transform active:scale-95 text-sm flex items-center justify-center gap-2"
+              className="w-full py-3.5 bg-gradient-to-r from-amber-500 to-orange-500 text-slate-950 font-black rounded-xl shadow-xl transition-transform active:scale-95 text-base flex items-center justify-center gap-2"
             >
-              <RotateCcw className="w-4 h-4" />
+              <RotateCcw className="w-5 h-5 text-slate-950" />
               <span>다시 도전하기</span>
             </button>
           </div>

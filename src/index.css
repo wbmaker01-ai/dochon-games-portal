@@ -201,24 +201,24 @@ body {
 .btn-dice {
   background: linear-gradient(135deg, #10B981 0%, #059669 100%);
   color: #FFFFFF;
-  border: 1.5px solid rgba(110, 231, 183, 0.6);
-  padding: 8px 16px;
+  border: 1.5px solid #6EE7B7;
+  padding: 9px 18px;
   border-radius: 9999px;
   font-weight: 900;
-  font-size: 0.82rem;
+  font-size: 0.88rem;
   cursor: pointer;
   transition: all 0.2s ease;
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  gap: 5px;
-  box-shadow: 0 4px 12px rgba(16, 185, 129, 0.35);
+  gap: 6px;
+  box-shadow: 0 4px 14px rgba(16, 185, 129, 0.45);
   white-space: nowrap;
 }
 
 .btn-dice:hover {
   transform: translateY(-2px) rotate(-3deg);
-  box-shadow: 0 6px 16px rgba(16, 185, 129, 0.5);
+  box-shadow: 0 6px 18px rgba(16, 185, 129, 0.6);
   filter: brightness(1.1);
 }
 
@@ -229,26 +229,26 @@ body {
 /* 🏆 School Ranking Button */
 .btn-gold {
   background: linear-gradient(135deg, #FBBF24 0%, #F59E0B 100%);
-  color: #78350F;
+  color: #0F172A;
   border: 1.5px solid #FEF08A;
-  padding: 8px 18px;
+  padding: 9px 20px;
   border-radius: 9999px;
   font-weight: 900;
-  font-size: 0.82rem;
+  font-size: 0.88rem;
   cursor: pointer;
   transition: all 0.2s ease;
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  gap: 6px;
-  box-shadow: 0 4px 14px rgba(245, 158, 11, 0.4);
+  gap: 7px;
+  box-shadow: 0 4px 16px rgba(245, 158, 11, 0.45);
   white-space: nowrap;
 }
 
 .btn-gold:hover {
   transform: translateY(-2px);
   filter: brightness(1.08);
-  box-shadow: 0 6px 18px rgba(245, 158, 11, 0.55);
+  box-shadow: 0 6px 20px rgba(245, 158, 11, 0.6);
 }
 
 .btn-gold:active {
@@ -457,14 +457,14 @@ body {
 .portal-category-chip {
   display: inline-flex;
   align-items: center;
-  gap: 4px;
-  padding: 4px 9px;
+  gap: 5px;
+  padding: 6px 12px;
   border-radius: 9999px;
-  font-size: 10px;
+  font-size: 11.5px;
   font-weight: 800;
-  background-color: rgba(30, 41, 59, 0.8);
-  color: #CBD5E1;
-  border: 1px solid rgba(255, 255, 255, 0.12);
+  background-color: rgba(30, 41, 59, 0.95);
+  color: #F1F5F9;
+  border: 1.5px solid rgba(255, 255, 255, 0.2);
   cursor: pointer;
   transition: all 0.2s ease;
   user-select: none;
@@ -472,32 +472,33 @@ body {
 }
 
 .portal-category-chip:hover {
-  background-color: rgba(51, 65, 85, 0.9);
+  background-color: rgba(51, 65, 85, 0.95);
   color: #FFFFFF;
+  border-color: #F59E0B;
   transform: translateY(-1px);
 }
 
 .portal-category-chip.active {
   background: linear-gradient(135deg, #FBBF24 0%, #F59E0B 100%);
-  color: #78350F;
+  color: #0F172A;
   font-weight: 900;
   border-color: #FEF08A;
-  box-shadow: 0 3px 12px rgba(245, 158, 11, 0.4);
+  box-shadow: 0 4px 14px rgba(245, 158, 11, 0.45);
   transform: scale(1.04);
 }
 
 .portal-category-counter {
-  font-size: 9px;
+  font-size: 10px;
   font-weight: 900;
-  padding: 1px 4px;
+  padding: 2px 5px;
   border-radius: 9999px;
-  background-color: rgba(0, 0, 0, 0.3);
-  color: #94A3B8;
+  background-color: rgba(0, 0, 0, 0.45);
+  color: #CBD5E1;
 }
 
 .portal-category-counter.active {
-  background-color: rgba(120, 53, 15, 0.25);
-  color: #78350F;
+  background-color: rgba(15, 23, 42, 0.35);
+  color: #0F172A;
 }
 
 /* ------------------------------------------------------------- */
@@ -920,14 +921,15 @@ body {
 }
 
 .game-tile-title {
-  font-size: 12.5px;
-  font-weight: 800;
+  font-size: 13px;
+  font-weight: 900;
   color: #FFFFFF;
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
   text-align: center;
   width: 100%;
+  letter-spacing: -0.01em;
 }
 
 .game-tile-card:hover .game-tile-title {
@@ -935,9 +937,9 @@ body {
 }
 
 .game-tile-category {
-  font-size: 10.5px;
-  font-weight: 600;
-  color: #94A3B8;
+  font-size: 11px;
+  font-weight: 700;
+  color: #CBD5E1;
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
@@ -947,13 +949,14 @@ body {
 
 /* 👑 Live Champion Score Chip */
 .game-tile-champion-chip {
-  font-size: 10px;
+  font-size: 10.5px;
   font-weight: 900;
   color: #FDE047;
-  background: rgba(251, 191, 36, 0.15);
-  border: 1px solid rgba(251, 191, 36, 0.35);
-  padding: 1px 6px;
-  border-radius: 6px;
+  background: rgba(245, 158, 11, 0.2);
+  border: 1px solid rgba(251, 191, 36, 0.5);
+  padding: 2px 7px;
+  border-radius: 9999px;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.3);
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
