@@ -330,8 +330,8 @@
   background: linear-gradient(135deg, #f59e0b, #d97706);
   color: #0f172a;
   font-weight: 900;
-  font-size: 1rem;
-  padding: 10px 24px;
+  font-size: 0.95rem;
+  padding: 10px 20px;
   border-radius: 9999px;
   border: none;
   cursor: pointer;
@@ -341,6 +341,7 @@
   align-items: center;
   justify-content: center;
   gap: 6px;
+  white-space: nowrap;
 }
 
 .pangolin-btn-start:hover {

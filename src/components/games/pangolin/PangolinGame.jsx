@@ -357,12 +357,14 @@ export default function PangolinGame({ onScoreSubmitted }) {
                 현재 누적 점수: <span className="text-lg text-white">{hudData.score.toLocaleString()}</span> 점
               </div>
 
-              <button onClick={handleNextStage} className="pangolin-btn-start w-full py-2.5">
-                <span>다음 스테이지로 이동 ({hudData.stageIndex + 2}/4)</span>
-                <span className="text-[10px] bg-amber-950/40 text-amber-200 px-2 py-0.5 rounded-full border border-amber-500/30 font-extrabold">
-                  [Space / Enter ↵]
+              <button onClick={handleNextStage} className="pangolin-btn-start w-full py-2.5 px-3 flex items-center justify-center gap-1.5 sm:gap-2 whitespace-nowrap">
+                <span className="text-xs sm:text-sm font-extrabold whitespace-nowrap">
+                  다음 스테이지로 이동 ({hudData.stageIndex + 2}/4)
                 </span>
-                <ArrowRight className="w-4 h-4" />
+                <span className="text-[9px] sm:text-[10px] bg-amber-950/50 text-amber-200 px-1.5 py-0.5 rounded-full border border-amber-500/40 font-bold whitespace-nowrap shrink-0">
+                  [Space / Enter]
+                </span>
+                <ArrowRight className="w-3.5 h-3.5 sm:w-4 sm:h-4 shrink-0" />
               </button>
             </div>
           </div>

@@ -3,11 +3,25 @@
 
 export const CHANGELOG_DATA = [
   {
+    version: 'v1.39.5',
+    date: '2026-08-22',
+    title: '[도촌 천산갑의 모험] 스테이지 클리어 버튼 텍스트 및 [Space / Enter] 단축키 뱃지 1줄 정렬 최적화',
+    badge: 'LATEST',
+    badgeColor: 'emerald',
+    items: [
+      {
+        tag: 'UI REFINEMENT',
+        tagColor: 'amber',
+        text: '[단축키 뱃지 폰트 및 여백 최적화] 다음 스테이지 이동 버튼 내 [Space / Enter] 뱃지의 폰트 크기와 패딩을 슬림하게 조정하고, white-space: nowrap을 적용하여 줄바꿈 없이 깔끔한 1줄 레이아웃 완성'
+      }
+    ]
+  },
+  {
     version: 'v1.39.4',
     date: '2026-08-22',
     title: '[도촌 페탕크 마스터] 프리미엄 아케이드 디자인 버튼 전면 개편 및 태블릿/모바일 전용 하단 조작 패널 탑재',
-    badge: 'LATEST',
-    badgeColor: 'emerald',
+    badge: 'UPDATE',
+    badgeColor: 'blue',
     items: [
       {
         tag: 'UI OVERHAUL',
