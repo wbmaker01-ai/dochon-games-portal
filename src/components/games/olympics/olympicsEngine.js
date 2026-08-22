@@ -665,7 +665,7 @@ export class OlympicsRenderEngine {
   }) {
     const ctx = this.ctx;
     const playerScreenY = height * 0.72; // Player fixed at Y = 288px
-    const pixelsPerMeter = 1.6;
+    const pixelsPerMeter = 1.0;
 
     // A. Forest Riverbank Sides
     ctx.fillStyle = '#064E3B';

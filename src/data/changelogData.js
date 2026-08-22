@@ -3,11 +3,30 @@
 
 export const CHANGELOG_DATA = [
   {
+    version: 'v1.36.3',
+    date: '2026-08-22',
+    title: '[도촌 미니 올림픽] 카누 슬라럼 코스 대폭 확장 (2,400m 롱코스) & 체크포인트 세로 간격 2.2배 확대',
+    badge: 'LATEST',
+    badgeColor: 'emerald',
+    items: [
+      {
+        tag: 'CANOE EXTENDED MAP',
+        tagColor: 'blue',
+        text: '[카누 코스 2,400m 롱코스 확장 & 여유로운 조작 시간 확보] 체크포인트가 너무 금방 다가오던 문제를 해결하기 위해 총 코스를 2,400m로 대폭 확장하고, 게이트 간격을 220m로 널찍하게 분산 배치하여 게이트 통과를 준비할 수 있는 충분한 시야와 시간(2~4초)을 제공'
+      },
+      {
+        tag: 'VIEWPORT SCALE',
+        tagColor: 'teal',
+        text: '[화면 줌 스케일 최적화] 전방 280m 앞의 게이트와 강물 장애물이 화면 상단에서 서서히 다가오는 광활한 시야를 제공하여 급류 슬라럼의 속도감과 조작의 손맛을 극대화'
+      }
+    ]
+  },
+  {
     version: 'v1.36.2',
     date: '2026-08-22',
     title: '[도촌 미니 올림픽] 카누 슬라럼 물살 정방향 물리 개편 & 플레이 타임 밸런싱(1,200m/10발) & 수평 1줄 조작계 적용',
-    badge: 'LATEST',
-    badgeColor: 'emerald',
+    badge: 'UPDATE',
+    badgeColor: 'blue',
     items: [
       {
         tag: 'CANOE FORWARD FLOW',

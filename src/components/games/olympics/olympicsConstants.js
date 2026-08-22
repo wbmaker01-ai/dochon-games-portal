@@ -65,15 +65,15 @@ export const BASKETBALL_CONFIG = {
   GAUGE_SPEED: 2.0
 };
 
-// Canoe Slalom Configuration (Balanced for 20~28s exciting whitewater course)
+// Canoe Slalom Configuration (2,400m Extended Course with Wide Gate Spacing)
 export const CANOE_CONFIG = {
-  COURSE_LENGTH: 1200,
-  RIVER_SPEED: 2.2,
-  BOOST_SPEED: 3.8,
-  STEER_SPEED: 5.2,
+  COURSE_LENGTH: 2400,
+  RIVER_SPEED: 2.4,
+  BOOST_SPEED: 4.2,
+  STEER_SPEED: 5.6,
   TOTAL_GATES: 10,
-  GATE_PASS_SCORE: 90,
-  PERFECT_LINE_BONUS: 40,
+  GATE_PASS_SCORE: 100,
+  PERFECT_LINE_BONUS: 50,
   ROCK_COLLISION_PENALTY: 40
 };
 

@@ -107,22 +107,22 @@ export default function OlympicsGame({ onScoreSubmitted }) {
       gates: Array.from({ length: CANOE_CONFIG.TOTAL_GATES }, (_, i) => ({
         id: i,
         num: i + 1,
-        targetDist: 100 + i * 100, // 100m, 200m, ..., 1000m
-        x: 320 + Math.sin(i * 1.5) * 125,
-        width: 90,
+        targetDist: 200 + i * 220, // 200m, 420m, 640m, 860m, ..., 2180m
+        x: 320 + Math.sin(i * 1.6) * 130,
+        width: 100,
         isPassed: false
       })),
       obstacles: [
-        { id: 1, type: 'rock', targetDist: 150, x: 230, radius: 18 },
-        { id: 2, type: 'log', targetDist: 250, x: 390 },
-        { id: 3, type: 'rock', targetDist: 350, x: 190, radius: 20 },
-        { id: 4, type: 'rock', targetDist: 450, x: 360, radius: 19 },
-        { id: 5, type: 'log', targetDist: 550, x: 260 },
-        { id: 6, type: 'rock', targetDist: 650, x: 410, radius: 22 },
-        { id: 7, type: 'rock', targetDist: 750, x: 180, radius: 18 },
-        { id: 8, type: 'log', targetDist: 850, x: 330 },
-        { id: 9, type: 'rock', targetDist: 950, x: 220, radius: 20 },
-        { id: 10, type: 'log', targetDist: 1080, x: 380 }
+        { id: 1, type: 'rock', targetDist: 310, x: 230, radius: 18 },
+        { id: 2, type: 'log', targetDist: 530, x: 390 },
+        { id: 3, type: 'rock', targetDist: 750, x: 190, radius: 20 },
+        { id: 4, type: 'rock', targetDist: 970, x: 360, radius: 19 },
+        { id: 5, type: 'log', targetDist: 1190, x: 260 },
+        { id: 6, type: 'rock', targetDist: 1410, x: 410, radius: 22 },
+        { id: 7, type: 'rock', targetDist: 1630, x: 180, radius: 18 },
+        { id: 8, type: 'log', targetDist: 1850, x: 330 },
+        { id: 9, type: 'rock', targetDist: 2070, x: 220, radius: 20 },
+        { id: 10, type: 'log', targetDist: 2290, x: 380 }
       ],
       elapsedTime: 0
     }
@@ -173,7 +173,7 @@ export default function OlympicsGame({ onScoreSubmitted }) {
       s.basketball.elapsedTime = 0;
       s.basketball.ball = { x: 0, y: 0, vx: 0, vy: 0, rot: 0, isActive: false };
     } else if (eventKey === GAME_EVENTS.CANOE) {
-      setLiveProgressText('0m / 1,200m');
+      setLiveProgressText('0m / 2,400m');
       s.canoe.playerX = 320;
       s.canoe.playerAngle = 0;
       s.canoe.targetAngle = 0;
@@ -565,7 +565,7 @@ export default function OlympicsGame({ onScoreSubmitted }) {
 
         // Slalom Gates Passing Check (Forward)
         const playerScreenY = height * 0.72;
-        const pixelsPerMeter = 1.6;
+        const pixelsPerMeter = 1.0;
 
         s.canoe.gates.forEach(gate => {
           const distAhead = gate.targetDist - s.canoe.distanceTraveled;

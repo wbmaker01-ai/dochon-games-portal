@@ -74,7 +74,7 @@ export default function OlympicsHowToPlayModal({ isOpen, onClose }) {
               <div className="flex items-center gap-2 mb-1.5">
                 <span className="text-2xl">🛶</span>
                 <h4 className="text-sm font-black text-cyan-400">
-                  3종목: 급류 카누 슬라럼 (1,200m)
+                  3종목: 급류 카누 슬라럼 (2,400m 롱코스)
                 </h4>
               </div>
               <ul className="text-xs text-slate-200 space-y-1.5 pl-4 list-disc font-medium">
