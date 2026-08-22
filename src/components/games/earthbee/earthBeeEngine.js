@@ -3,7 +3,12 @@ import {
   CANVAS_HEIGHT,
   BEE_CONFIG,
   FLOWER_TYPES,
-  ECO_LEVELS
+  ECO_LEVELS,
+  MAX_GAME_TIME,
+  GOAL_BLOOMS,
+  CLEAR_BONUS_SCORE,
+  LEVEL_TIME_BONUS,
+  LEVELUP_TIME_BONUS
 } from './earthBeeConstants';
 
 export class EarthBeeEngine {
@@ -50,6 +55,8 @@ export class EarthBeeEngine {
     this.ecoLevel = 1;
     this.combo = 0;
     this.comboTimer = 0;
+    this.isSunset = false;
+    this.isCleared = false;
 
     // Visual time
     this.time = 0;
@@ -58,6 +65,7 @@ export class EarthBeeEngine {
     this.onBloomCallback = null;
     this.onPollenCollectCallback = null;
     this.onLevelUpCallback = null;
+    this.onGameClearCallback = null;
 
     // Control Mode: 'pointer' | 'keyboard'
     this.controlMode = 'pointer';
@@ -83,6 +91,8 @@ export class EarthBeeEngine {
     this.ecoLevel = 1;
     this.combo = 0;
     this.comboTimer = 0;
+    this.isSunset = false;
+    this.isCleared = false;
     this.controlMode = 'pointer';
     this.keyVelocity = { dx: 0, dy: 0 };
 
@@ -400,7 +410,8 @@ export class EarthBeeEngine {
 
           const comboMultiplier = Math.min(this.combo, 5);
           const earnedScore = flower.type.score * comboMultiplier;
-          const timeBonus = flower.type.timeBonus;
+          // Diminishing dynamic time bonus based on ecosystem level (Lv.1~2: +1.0s, Lv.3~4: +0.5s, Lv.5: +0.2s)
+          const timeBonus = LEVEL_TIME_BONUS[this.ecoLevel] !== undefined ? LEVEL_TIME_BONUS[this.ecoLevel] : 0.5;
 
           // Bloom Explosion Particles
           this.spawnBloomFireworks(flower.x, flower.y, flower.type.petalColor, flower.type.centerColor);
@@ -419,6 +430,21 @@ export class EarthBeeEngine {
 
           // Check Ecosystem Level Progression
           this.checkEcosystemLevel();
+
+          // Check Sunset Clear Ending (60 Blooms Goal)
+          if (this.totalBlooms >= GOAL_BLOOMS && !this.isCleared) {
+            this.isCleared = true;
+            this.isSunset = true;
+            this.spawnRainbowShower();
+            this.addFloatingText(this.bee.x, this.bee.y - 50, '🌇 [생태계 완성] 꿀벌의 하루 비행 완료!', '#FDE047');
+            if (this.onGameClearCallback) {
+              this.onGameClearCallback({
+                score: CLEAR_BONUS_SCORE,
+                totalBlooms: this.totalBlooms,
+                ecoLevel: this.ecoLevel
+              });
+            }
+          }
 
           // Chain reaction: check nearby buds and give them a mini bloom boost
           this.triggerNearbyPollenDispersion(flower.x, flower.y);
@@ -670,6 +696,18 @@ export class EarthBeeEngine {
       ctx.quadraticCurveTo(blade.x + sway * 0.5, blade.y - blade.height * 0.6, blade.x + sway, blade.y - blade.height);
       ctx.stroke();
     });
+
+    // Golden Sunset Atmospheric Overlay if Cleared
+    if (this.isSunset) {
+      ctx.save();
+      const sunsetGrad = ctx.createLinearGradient(0, 0, 0, this.gardenHeight);
+      sunsetGrad.addColorStop(0, 'rgba(251, 146, 60, 0.38)'); // Warm Golden Sunset
+      sunsetGrad.addColorStop(0.6, 'rgba(244, 63, 94, 0.25)'); // Pink Dusk
+      sunsetGrad.addColorStop(1, 'rgba(168, 85, 247, 0.22)'); // Twilight Purple
+      ctx.fillStyle = sunsetGrad;
+      ctx.fillRect(0, 0, this.gardenWidth, this.gardenHeight);
+      ctx.restore();
+    }
   }
 
   drawClouds(ctx) {

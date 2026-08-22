@@ -6,6 +6,10 @@ import {
   CANVAS_WIDTH,
   CANVAS_HEIGHT,
   INITIAL_GAME_TIME,
+  MAX_GAME_TIME,
+  GOAL_BLOOMS,
+  LEVELUP_TIME_BONUS,
+  CLEAR_BONUS_SCORE,
   ECO_FACTS
 } from './earthBeeConstants';
 import { submitScoreToDB } from '../../../utils/leaderboardApi';
@@ -24,7 +28,9 @@ import {
   ArrowUp,
   ArrowDown,
   ArrowLeft,
-  ArrowRight
+  ArrowRight,
+  Sun,
+  Sunset
 } from 'lucide-react';
 import './earthbee.css';
 
@@ -76,12 +82,13 @@ export default function EarthBeeGame({ onScoreSubmitted }) {
     }
   });
   const [timeLeft, setTimeLeft] = useState(INITIAL_GAME_TIME);
-  const [pollenPct, setPollenPct] = useState(20);
+  const [pollenPct, setPollenPct] = useState(40);
   const [combo, setCombo] = useState(0);
   const [totalBlooms, setTotalBlooms] = useState(0);
   const [ecoLevel, setEcoLevel] = useState(1);
   const [isPlaying, setIsPlaying] = useState(true);
   const [isGameOver, setIsGameOver] = useState(false);
+  const [isCleared, setIsCleared] = useState(false);
 
   // Sound & Modals
   const [isMuted, setIsMuted] = useState(false);
@@ -128,12 +135,13 @@ export default function EarthBeeGame({ onScoreSubmitted }) {
       engineRef.current = engine;
 
       // Event Callbacks from Engine
-      engine.onBloomCallback = ({ score: earned, timeBonus, combo: curCombo, totalBlooms: blooms, ecoLevel: lvl }) => {
+      engine.onBloomCallback = ({ score: earned, timeBonus, combo: curCombo, totalBlooms: blooms, ecoLevel: lvl, pollenCount }) => {
         setScore(prev => prev + earned);
-        setTimeLeft(prev => Math.min(prev + timeBonus, 99));
+        // Diminishing dynamic time bonus capped at MAX_GAME_TIME (45s)
+        setTimeLeft(prev => Math.min(prev + (timeBonus || 0), MAX_GAME_TIME));
         setCombo(curCombo);
         setTotalBlooms(blooms);
-        setPollenPct(engine.bee.pollenCount);
+        setPollenPct(pollenCount !== undefined ? pollenCount : engine.bee.pollenCount);
 
         earthBeeAudio.playBloom(curCombo);
         if (curCombo >= 2) {
@@ -142,8 +150,8 @@ export default function EarthBeeGame({ onScoreSubmitted }) {
         haptics.light();
       };
 
-      engine.onPollenCollectCallback = () => {
-        setPollenPct(engine.bee.pollenCount);
+      engine.onPollenCollectCallback = (flowerType, newPollenCount) => {
+        setPollenPct(newPollenCount !== undefined ? newPollenCount : engine.bee.pollenCount);
         earthBeeAudio.playPollenCollect();
         haptics.light();
       };
@@ -151,11 +159,23 @@ export default function EarthBeeGame({ onScoreSubmitted }) {
       engine.onLevelUpCallback = (lvl, name) => {
         setEcoLevel(lvl);
         setScore(prev => prev + 250); // Big level up bonus!
-        setTimeLeft(prev => Math.min(prev + 10, 99));
-        setFactMessage(`🎉 [생태계 레벨 ${lvl}] ${name} 달성! 보너스 +10초`);
+        setTimeLeft(prev => Math.min(prev + LEVELUP_TIME_BONUS, MAX_GAME_TIME));
+        setFactMessage(`🎉 [생태계 레벨 ${lvl}] ${name} 달성! 보너스 +${LEVELUP_TIME_BONUS}초`);
         setShowFact(true);
         earthBeeAudio.playLevelUp();
         haptics.medium();
+      };
+
+      // Sunset Day Clear Ending Callback (60 Blooms Goal)
+      engine.onGameClearCallback = ({ score: clearBonus, totalBlooms: finalBlooms }) => {
+        setScore(prev => prev + clearBonus);
+        setTotalBlooms(finalBlooms);
+        setIsCleared(true);
+        setIsGameOver(true);
+        setIsPlaying(false);
+        earthBeeAudio.stopFlightHum();
+        earthBeeAudio.playLevelUp();
+        haptics.success();
       };
     }
   }, []);
@@ -305,7 +325,8 @@ export default function EarthBeeGame({ onScoreSubmitted }) {
     setCombo(0);
     setTotalBlooms(0);
     setEcoLevel(1);
-    setPollenPct(20);
+    setPollenPct(40);
+    setIsCleared(false);
     setIsGameOver(false);
     setIsPlaying(true);
     setIsSubmitted(false);
@@ -387,17 +408,17 @@ export default function EarthBeeGame({ onScoreSubmitted }) {
           </div>
         </div>
 
-        {/* Time Left & Eco Level */}
+        {/* Time Left & Eco Level & Goal */}
         <div className="flex items-center gap-3">
           <div className="earthbee-stat-item">
-            <span className="earthbee-stat-label">TIME</span>
+            <span className="earthbee-stat-label">TIME (MAX 45s)</span>
             <span className={`earthbee-stat-value font-mono ${timeLeft <= 10 ? 'text-rose-400 animate-pulse' : 'text-emerald-400'}`}>
               {timeLeft}s
             </span>
           </div>
 
           <div className="earthbee-stat-item hidden sm:flex">
-            <span className="earthbee-stat-label">생태계</span>
+            <span className="earthbee-stat-label">목표 ({totalBlooms}/{GOAL_BLOOMS})</span>
             <span className="earthbee-stat-value text-purple-300">
               Lv.{ecoLevel}
             </span>
@@ -450,11 +471,18 @@ export default function EarthBeeGame({ onScoreSubmitted }) {
         {/* 3. Game Over / Result Modal Overlay */}
         {isGameOver && (
           <div className="earthbee-overlay">
-            <div className="earthbee-result-card">
-              <div className="text-4xl mb-2 animate-bounce">🐝</div>
+            <div className={`earthbee-result-card ${isCleared ? 'cleared' : ''}`}>
+              <div className="text-4xl mb-2 animate-bounce">
+                {isCleared ? '🌇' : '🌙'}
+              </div>
               <h2 className="earthbee-result-title">
-                도촌 꿀벌의 하루 비행 완료!
+                {isCleared ? '도촌 생태계 정원 완벽 완성!' : '꿀벌의 하루 활동 시간 종료!'}
               </h2>
+              <p className="text-xs text-amber-200 mb-3 px-2 leading-relaxed">
+                {isCleared
+                  ? '🎉 60송이 개화 완벽 달성! (+1,000점 완벽 보너스) 도촌초 정원에 노을이 지고 꿀벌이 집으로 돌아갑니다.'
+                  : `총 ${totalBlooms}송이의 꽃을 피워 도촌초 정원을 가꿨어요!`}
+              </p>
 
               <div className="earthbee-score-grid">
                 <div className="earthbee-score-box">

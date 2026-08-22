@@ -103,4 +103,17 @@ export const ECO_FACTS = [
   '꽃가루를 옮겨주는 꿀벌 덕분에 아름다운 숲과 생태계가 번성해요! 🌲'
 ];
 
-export const INITIAL_GAME_TIME = 50; // seconds
+export const INITIAL_GAME_TIME = 40; // seconds (Starts at 40s)
+export const MAX_GAME_TIME = 45;     // seconds (Strict cap: cannot exceed 45s)
+export const GOAL_BLOOMS = 60;       // blooms needed for Sunset Day Clear Ending
+export const CLEAR_BONUS_SCORE = 1000;
+
+// Dynamic Diminishing Time Bonus per Level
+export const LEVEL_TIME_BONUS = {
+  1: 1.0,  // Lv.1: +1.0s per bloom
+  2: 1.0,  // Lv.2: +1.0s per bloom
+  3: 0.5,  // Lv.3: +0.5s per bloom
+  4: 0.5,  // Lv.4: +0.5s per bloom
+  5: 0.2   // Lv.5: +0.2s per bloom
+};
+export const LEVELUP_TIME_BONUS = 5.0; // +5s on ecosystem level up

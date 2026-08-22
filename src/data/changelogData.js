@@ -3,11 +3,30 @@
 
 export const CHANGELOG_DATA = [
   {
+    version: 'v1.36.5',
+    date: '2026-08-22',
+    title: '[도촌 꿀벌의 비행] 60송이 일몰 완성 클리어 엔딩 & 최대 45초 시간 상한 캡 및 점진 감쇠 밸런싱',
+    badge: 'LATEST',
+    badgeColor: 'emerald',
+    items: [
+      {
+        tag: 'SUNSET ENDING',
+        tagColor: 'amber',
+        text: '[도촌 생태계 완성 일몰 엔딩 & +1,000점 완벽 보너스] Lv.5에서 총 60송이의 꽃을 피워 도촌초 정원을 완성하면 아름다운 황금빛 노을 연출과 함께 꿀벌의 하루 비행 성공 클리어 모달 출력'
+      },
+      {
+        tag: 'TIME BALANCING',
+        tagColor: 'blue',
+        text: '[시간 상한 45초 캡 & 레벨별 보너스 감쇠] 초기 40초 시작, 최대 45초 캡을 적용하고 레벨이 오를수록 개화 보너스 시간이 점진 감쇠(Lv.1~2: +1.0초 → Lv.3~4: +0.5초 → Lv.5: +0.2초)되어 2~3분 내외의 긴장감 넘치는 세션 템포 확보'
+      }
+    ]
+  },
+  {
     version: 'v1.36.4',
     date: '2026-08-22',
     title: '[도촌 꿀벌의 비행] 꽃가루 게이지 소비·채취 루프 정상화 및 황금빛 개화 이펙트 강화',
-    badge: 'LATEST',
-    badgeColor: 'emerald',
+    badge: 'UPDATE',
+    badgeColor: 'blue',
     items: [
       {
         tag: 'POLLEN ECONOMY',

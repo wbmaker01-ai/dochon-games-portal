@@ -54,22 +54,22 @@ export default function EarthBeeHowToPlayModal({ isOpen, onClose }) {
               <Clock className="w-5 h-5" />
             </div>
             <div>
-              <h4 className="font-bold text-pink-200 mb-1">3. 연속 콤보 & 보너스 시간</h4>
+              <h4 className="font-bold text-pink-200 mb-1">3. 연속 콤보 & 보너스 시간 (최대 45초)</h4>
               <p className="text-xs text-slate-300 leading-relaxed">
-                시간이 끝나기 전에 연속으로 꽃을 피우면 <strong className="text-pink-300">최대 x5배 콤보 점수</strong>와 <strong className="text-sky-300">추가 시간 ⏰</strong>을 획득하여 오랫동안 비행할 수 있습니다.
+                시간이 끝나기 전에 연속으로 꽃을 피우면 <strong className="text-pink-300">최대 x5배 콤보 점수</strong>와 <strong className="text-sky-300">추가 시간 ⏰</strong>을 획득합니다. 시간은 최대 45초까지 누적되며 후반으로 갈수록 긴장감이 높아집니다.
               </p>
             </div>
           </div>
 
-          {/* 4. Eco Level Up */}
+          {/* 4. Eco Level Up & Sunset Clear */}
           <div className="bg-slate-800/80 p-3.5 rounded-2xl border border-purple-500/20 flex gap-3 items-start">
             <div className="p-2 bg-purple-500/20 rounded-xl text-purple-300 shrink-0">
               <Sparkles className="w-5 h-5" />
             </div>
             <div>
-              <h4 className="font-bold text-purple-200 mb-1">4. 생태계 정원 레벨업 & 랭킹</h4>
+              <h4 className="font-bold text-purple-200 mb-1">4. 생태계 레벨업 & 60송이 일몰 완성</h4>
               <p className="text-xs text-slate-300 leading-relaxed">
-                꽃을 많이 피울수록 도촌 생태계 레벨이 상승하며 <strong>무지개 신비꽃</strong>이 등장합니다! <strong className="text-amber-300">100점을 초과</strong>하면 도촌초 명예의 전당에 이름을 올릴 수 있습니다.
+                꽃을 피워 <strong className="text-purple-300">총 60송이 개화 완성</strong> 시 황금빛 노을과 함께 <strong className="text-yellow-300">완벽 개화 보너스(+1,000점)</strong>를 획득하며 승리합니다! <strong className="text-amber-300">100점을 초과</strong>하면 도촌초 명예의 전당에 이름을 남길 수 있습니다.
               </p>
             </div>
           </div>
