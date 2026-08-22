@@ -107,6 +107,25 @@ export default function PangolinGame({ onScoreSubmitted }) {
   // Keyboard Event Listeners
   useEffect(() => {
     const handleKeyDown = (e) => {
+      // 1. STAGE_CLEAR 상태일 때 스페이스바 또는 엔터 입력 시 다음 스테이지 이동
+      if (gameState === 'STAGE_CLEAR') {
+        if (e.code === 'Space' || e.code === 'Enter') {
+          e.preventDefault();
+          handleNextStage();
+          return;
+        }
+      }
+
+      // 2. START 상태일 때 스페이스바 또는 엔터 입력 시 모험 시작
+      if (gameState === 'START') {
+        if (e.code === 'Space' || e.code === 'Enter') {
+          e.preventDefault();
+          startGame();
+          return;
+        }
+      }
+
+      // 3. 인게임 플레이 중 키 처리
       keysRef.current[e.code] = true;
 
       // Prevent scrolling on Space / Arrow Keys
@@ -340,6 +359,9 @@ export default function PangolinGame({ onScoreSubmitted }) {
 
               <button onClick={handleNextStage} className="pangolin-btn-start w-full py-2.5">
                 <span>다음 스테이지로 이동 ({hudData.stageIndex + 2}/4)</span>
+                <span className="text-[10px] bg-amber-950/40 text-amber-200 px-2 py-0.5 rounded-full border border-amber-500/30 font-extrabold">
+                  [Space / Enter ↵]
+                </span>
                 <ArrowRight className="w-4 h-4" />
               </button>
             </div>

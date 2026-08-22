@@ -258,6 +258,144 @@
   animation: roswell-fade-in 0.4s ease-out;
 }
 
+/* Roswell Custom Design Buttons */
+.roswell-start-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  padding: 12px 28px;
+  border-radius: 16px;
+  background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+  border: 1px solid #34d399;
+  color: #022c22 !important;
+  font-size: 15px;
+  font-weight: 900;
+  box-shadow: 0 8px 20px rgba(16, 185, 129, 0.4), inset 0 1px 0 rgba(255, 255, 255, 0.3);
+  cursor: pointer;
+  transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.roswell-start-btn:hover {
+  background: linear-gradient(135deg, #34d399 0%, #10b981 100%);
+  box-shadow: 0 0 25px rgba(52, 211, 153, 0.6), inset 0 1px 0 rgba(255, 255, 255, 0.4);
+  transform: translateY(-2px);
+  color: #022c22 !important;
+}
+
+.roswell-start-btn:active {
+  transform: scale(0.96);
+}
+
+.roswell-guide-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  padding: 12px 20px;
+  border-radius: 16px;
+  background: rgba(20, 35, 20, 0.85);
+  border: 1px solid rgba(74, 222, 128, 0.4);
+  color: #86efac !important;
+  font-size: 14px;
+  font-weight: 700;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.5);
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.roswell-guide-btn:hover {
+  background: rgba(30, 50, 30, 0.95);
+  border-color: #4ade80;
+  color: #bbf7d0 !important;
+  box-shadow: 0 0 16px rgba(74, 222, 128, 0.35);
+  transform: translateY(-2px);
+}
+
+.roswell-guide-btn:active {
+  transform: scale(0.96);
+}
+
+.roswell-submit-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  padding: 10px 18px;
+  border-radius: 12px;
+  background: linear-gradient(135deg, #10b981, #059669);
+  border: 1px solid #34d399;
+  color: #022c22 !important;
+  font-size: 13px;
+  font-weight: 900;
+  box-shadow: 0 4px 12px rgba(16, 185, 129, 0.35);
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.roswell-submit-btn:hover:not(:disabled) {
+  background: linear-gradient(135deg, #34d399, #10b981);
+  box-shadow: 0 0 16px rgba(52, 211, 153, 0.5);
+  transform: translateY(-1px);
+}
+
+.roswell-submit-btn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.roswell-restart-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  padding: 11px 22px;
+  border-radius: 14px;
+  background: rgba(30, 45, 30, 0.85);
+  border: 1px solid rgba(74, 222, 128, 0.4);
+  color: #86efac !important;
+  font-size: 14px;
+  font-weight: 700;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.5);
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.roswell-restart-btn:hover {
+  background: rgba(40, 60, 40, 0.95);
+  border-color: #4ade80;
+  color: #dcfce7 !important;
+  box-shadow: 0 0 16px rgba(74, 222, 128, 0.4);
+  transform: translateY(-2px);
+}
+
+.roswell-modal-confirm-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+  padding: 12px 20px;
+  border-radius: 14px;
+  background: linear-gradient(135deg, #059669 0%, #0d9488 100%);
+  border: 1px solid #34d399;
+  color: #ffffff !important;
+  font-size: 15px;
+  font-weight: 800;
+  box-shadow: 0 6px 18px rgba(5, 150, 105, 0.4);
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.roswell-modal-confirm-btn:hover {
+  background: linear-gradient(135deg, #10b981 0%, #14b8a6 100%);
+  box-shadow: 0 0 20px rgba(16, 185, 129, 0.6);
+  transform: translateY(-2px);
+}
+
+.roswell-modal-confirm-btn:active {
+  transform: scale(0.98);
+}
+
 /* Responsive adjustments */
 @media (max-width: 640px) {
   .roswell-inventory-bar {

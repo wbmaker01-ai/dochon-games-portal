@@ -3,11 +3,30 @@
 
 export const CHANGELOG_DATA = [
   {
+    version: 'v1.39.2',
+    date: '2026-08-22',
+    title: '[도촌 천산갑의 모험] 스테이지 클리어 시 스페이스바 / 엔터 키로 다음 스테이지 즉시 이동 기능 지원',
+    badge: 'LATEST',
+    badgeColor: 'emerald',
+    items: [
+      {
+        tag: 'CONTROLS & UX',
+        tagColor: 'amber',
+        text: '[스페이스바 / 엔터 단축키 탑재] 스테이지 클리어 팝업이 노출되었을 때 마우스 클릭 없이 스페이스바(Space) 또는 엔터(Enter) 키를 누르면 다음 스테이지로 즉시 이동할 수 있도록 조작 편의성 강화'
+      },
+      {
+        tag: 'SHORTCUT HINT',
+        tagColor: 'teal',
+        text: '[버튼 단축키 안내 뱃지] 다음 스테이지 이동 버튼 내에 [Space / Enter ↵] 안내 캡슐 뱃지를 추가하여 시각적 직관성 극대화'
+      }
+    ]
+  },
+  {
     version: 'v1.39.1',
     date: '2026-08-22',
     title: '[도촌 UFO 탈출작전] 3번째 씬 헛간 인터랙션 버그 수정 & 상단 액션 버튼 네온 디자인 개선',
-    badge: 'LATEST',
-    badgeColor: 'emerald',
+    badge: 'UPDATE',
+    badgeColor: 'blue',
     items: [
       {
         tag: 'BUG FIX',

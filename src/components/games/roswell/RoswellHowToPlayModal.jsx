@@ -94,7 +94,7 @@ export default function RoswellHowToPlayModal({ isOpen, onClose }) {
         <div className="roswell-modal-footer">
           <button
             onClick={onClose}
-            className="w-full py-2.5 rounded-xl bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-500 hover:to-teal-500 font-bold text-white shadow-lg shadow-emerald-900/40 transition-all active:scale-[0.98]"
+            className="roswell-modal-confirm-btn"
           >
             외계인 탈출 도우러 가기!
           </button>

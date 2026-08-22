@@ -231,16 +231,16 @@ export default function RoswellGame({ onScoreSubmitted }) {
             <div className="flex items-center gap-3">
               <button
                 onClick={handleStartGame}
-                className="px-6 py-3 rounded-2xl bg-gradient-to-r from-emerald-500 to-teal-500 hover:from-emerald-400 hover:to-teal-400 font-black text-slate-950 text-base shadow-xl shadow-emerald-500/20 flex items-center gap-2 transition-all active:scale-95"
+                className="roswell-start-btn"
               >
                 <Play className="w-5 h-5 fill-current" />
                 <span>작전 시작하기</span>
               </button>
               <button
                 onClick={() => setIsHowToPlayOpen(true)}
-                className="px-4 py-3 rounded-2xl bg-slate-800/80 hover:bg-slate-700 text-slate-200 border border-slate-600 font-bold text-sm transition-all"
+                className="roswell-guide-btn"
               >
-                게임 방법
+                <span>게임 방법</span>
               </button>
             </div>
           </div>
@@ -280,7 +280,7 @@ export default function RoswellGame({ onScoreSubmitted }) {
                         <button
                           type="submit"
                           disabled={!playerName.trim() || isSubmitting}
-                          className="px-4 py-2 bg-emerald-500 hover:bg-emerald-400 disabled:opacity-50 text-slate-950 font-black rounded-xl text-sm flex items-center gap-1 transition-all"
+                          className="roswell-submit-btn"
                         >
                           <Send className="w-3.5 h-3.5" />
                           <span>등록</span>
@@ -300,7 +300,7 @@ export default function RoswellGame({ onScoreSubmitted }) {
 
             <button
               onClick={handleStartGame}
-              className="px-5 py-2.5 rounded-xl bg-slate-800 hover:bg-slate-700 border border-slate-600 text-white font-bold text-sm flex items-center gap-2 transition-all active:scale-95"
+              className="roswell-restart-btn"
             >
               <RotateCcw className="w-4 h-4" />
               <span>다시 플레이하기</span>
