@@ -3,11 +3,35 @@
 
 export const CHANGELOG_DATA = [
   {
+    version: 'v1.36.6',
+    date: '2026-08-22',
+    title: '[도촌 피자 마스터] 10단계 정규 코스 완주 엔딩 시스템 & 플레이 타임 2~3분 밸런싱 적용',
+    badge: 'LATEST',
+    badgeColor: 'emerald',
+    items: [
+      {
+        tag: 'GAMEPLAY & ENDING',
+        tagColor: 'amber',
+        text: '[정규 10개 코스 완주 엔딩 시스템 도입] 무한 반복되던 스테이지 구조를 정규 10단계 코스로 개편하고, 10단계 마스터 승급전을 클리어하면 "전설의 피자 마스터 등극!" 축하 팝업과 함께 +5,000점 완주 보너스를 지급하며 승리 종료되도록 구현'
+      },
+      {
+        tag: 'SESSION DURATION',
+        tagColor: 'teal',
+        text: '[2~3분 플레이 타임 밸런싱 최적화] 각 단계별 제한시간을 25~35초로 스피디하게 조율하여 전체 코스를 완주했을 때 약 2분~2분 30초 내에 깔끔하게 게임이 종료되도록 아케이드 밸런싱 완료'
+      },
+      {
+        tag: 'PROGRESS HUD',
+        tagColor: 'blue',
+        text: '[주문서 진행도 (1/10) 인디케이터 탑재] 상단 주문서에 현재 몇 번째 손님의 주문인지 한눈에 알 수 있는 진행도 뱃지를 추가하여 성취감 강화'
+      }
+    ]
+  },
+  {
     version: 'v1.36.5',
     date: '2026-08-22',
     title: '[도촌 꿀벌의 비행] 60송이 일몰 완성 클리어 엔딩 & 최대 45초 시간 상한 캡 및 점진 감쇠 밸런싱',
-    badge: 'LATEST',
-    badgeColor: 'emerald',
+    badge: 'UPDATE',
+    badgeColor: 'blue',
     items: [
       {
         tag: 'SUNSET ENDING',

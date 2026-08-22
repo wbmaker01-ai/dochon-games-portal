@@ -7,12 +7,13 @@ import {
   CANVAS_WIDTH,
   CANVAS_HEIGHT,
   STAGES,
-  generateEndlessStage,
+  TOTAL_STAGES,
   TOPPING_INFO,
   SCORE_BASE_SUCCESS,
   SCORE_PER_PERFECT_STAR,
   SCORE_COMBO_MULTIPLIER,
-  SCORE_TIME_BONUS_PER_SEC
+  SCORE_TIME_BONUS_PER_SEC,
+  SCORE_ALL_CLEAR_BONUS
 } from './pizzaConstants';
 import { submitScoreToDB } from '../../../utils/leaderboardApi';
 import { haptics } from '../../../utils/haptics';
@@ -29,7 +30,9 @@ import {
   Play,
   Flame,
   Clock,
-  Sparkles
+  Sparkles,
+  Award,
+  Crown
 } from 'lucide-react';
 import './pizza.css';
 
@@ -46,6 +49,7 @@ export default function PizzaGame({ onScoreSubmitted }) {
   const [combo, setCombo] = useState(0);
   const [timeLeft, setTimeLeft] = useState(STAGES[0].timeLimit);
   const [isGameOver, setIsGameOver] = useState(false);
+  const [isGameClear, setIsGameClear] = useState(false);
   const [highScore, setHighScore] = useState(() => {
     try {
       return Number(localStorage.getItem('dochon_pizza_highscore')) || 0;
@@ -95,12 +99,8 @@ export default function PizzaGame({ onScoreSubmitted }) {
 
   // Stage Setup function
   const loadStage = useCallback((index) => {
-    let stage;
-    if (index < STAGES.length) {
-      stage = STAGES[index];
-    } else {
-      stage = generateEndlessStage(index + 1);
-    }
+    if (index >= STAGES.length) return;
+    const stage = STAGES[index];
 
     setCurrentStage(stage);
     setTimeLeft(stage.timeLimit);
@@ -118,6 +118,7 @@ export default function PizzaGame({ onScoreSubmitted }) {
     haptics.medium();
     setIsPlaying(true);
     setIsGameOver(false);
+    setIsGameClear(false);
     setScore(0);
     setCombo(0);
     setStageIndex(0);
@@ -275,8 +276,27 @@ export default function PizzaGame({ onScoreSubmitted }) {
     haptics.medium();
     pizzaAudio.playClick();
     const nextIdx = stageIndex + 1;
-    setStageIndex(nextIdx);
-    loadStage(nextIdx);
+
+    if (nextIdx >= TOTAL_STAGES) {
+      // 🎉 All 10 Stages Cleared! Total Victory Ending!
+      setIsGameClear(true);
+      setIsGameOver(true);
+      pizzaAudio.playSuccess();
+      haptics.success();
+
+      const finalTotalScore = score + SCORE_ALL_CLEAR_BONUS;
+      setScore(finalTotalScore);
+      setHighScore(prev => {
+        const newHigh = Math.max(prev, finalTotalScore);
+        try {
+          localStorage.setItem('dochon_pizza_highscore', String(newHigh));
+        } catch (e) {}
+        return newHigh;
+      });
+    } else {
+      setStageIndex(nextIdx);
+      loadStage(nextIdx);
+    }
   };
 
   // Retry Current Stage on Fail
@@ -375,7 +395,9 @@ export default function PizzaGame({ onScoreSubmitted }) {
           <div className="pizza-order-header">
             <div className="pizza-customer-badge">
               <span className="pizza-customer-avatar">{currentStage.customerAvatar}</span>
-              <span className="pizza-customer-name">{currentStage.customerName}의 주문</span>
+              <span className="pizza-customer-name">
+                {currentStage.customerName}의 주문 <span className="text-amber-300 font-bold ml-1">({stageIndex + 1}/{TOTAL_STAGES})</span>
+              </span>
             </div>
             <span className="pizza-fraction-badge">{currentStage.fractionText}</span>
           </div>
@@ -398,7 +420,7 @@ export default function PizzaGame({ onScoreSubmitted }) {
         <div className="pizza-timer-bar-wrap">
           <div
             className="pizza-timer-bar-fill"
-            style={{ width: `${(timeLeft / (currentStage?.timeLimit || 45)) * 100}%` }}
+            style={{ width: `${(timeLeft / (currentStage?.timeLimit || 30)) * 100}%` }}
           />
         </div>
       )}
@@ -440,7 +462,7 @@ export default function PizzaGame({ onScoreSubmitted }) {
             </div>
 
             <h3 className={`text-2xl sm:text-3xl font-black mb-2 tracking-tight ${stageResult.isSuccess ? 'text-amber-400' : 'text-rose-400'}`}>
-              {stageResult.isSuccess ? '주문 완수 성공!' : '주문 실패!'}
+              {stageResult.isSuccess ? (stageIndex + 1 === TOTAL_STAGES ? '🎉 최종 승급전 완수!' : '주문 완수 성공!') : '주문 실패!'}
             </h3>
 
             <p className="text-base sm:text-lg text-slate-100 font-medium max-w-sm mb-4 leading-relaxed">
@@ -466,8 +488,17 @@ export default function PizzaGame({ onScoreSubmitted }) {
             <div className="flex items-center gap-3">
               {stageResult.isSuccess ? (
                 <button onClick={handleNextStage} className="pizza-btn pizza-btn-serve py-3.5 px-8 text-base sm:text-lg">
-                  <Sparkles className="w-5 h-5 text-slate-950" />
-                  <span>다음 주문 받기</span>
+                  {stageIndex + 1 === TOTAL_STAGES ? (
+                    <>
+                      <Crown className="w-5 h-5 text-slate-950" />
+                      <span>최종 결과 & 마스터 등극</span>
+                    </>
+                  ) : (
+                    <>
+                      <Sparkles className="w-5 h-5 text-slate-950" />
+                      <span>다음 주문 받기 ({stageIndex + 2}/{TOTAL_STAGES})</span>
+                    </>
+                  )}
                 </button>
               ) : (
                 <button onClick={handleRetryStage} className="pizza-btn pizza-btn-serve py-3.5 px-8 text-base sm:text-lg">
@@ -486,14 +517,14 @@ export default function PizzaGame({ onScoreSubmitted }) {
             <h2 className="text-3xl font-black text-amber-400 mb-2 tracking-tight">도촌 피자 마스터</h2>
             <p className="text-sm sm:text-base text-slate-100 font-semibold max-w-xs mb-7 leading-relaxed">
               피자를 자르고 분수를 마스터하라!<br />
-              손님의 주문 조건에 맞게 정확하게 등분해보세요.
+              총 10개 코스 주문을 완성하고 마스터 셰프에 등극해보세요! (플레이 타임 약 2분)
             </p>
             <button
               onClick={handleStartGame}
               className="pizza-btn pizza-btn-serve py-3.5 px-9 text-base sm:text-lg font-black shadow-2xl"
             >
               <Play className="w-5 h-5 fill-slate-950" />
-              <span>주방 오픈 & 게임 시작</span>
+              <span>주방 오픈 & 10개 코스 도전</span>
             </button>
           </div>
         )}
@@ -522,13 +553,24 @@ export default function PizzaGame({ onScoreSubmitted }) {
       {isGameOver && (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/85 backdrop-blur-md animate-fade-in">
           <div className="pizza-gameover-card">
-            <div className="text-6xl mb-2">🏆</div>
-            <h2 className="text-3xl font-black text-amber-400 mb-1">영업 마감!</h2>
-            <p className="text-sm text-slate-300 mb-4 font-semibold">오늘의 피자 주방이 마감되었습니다.</p>
+            <div className="text-6xl mb-2">{isGameClear ? '👑' : '⏰'}</div>
+            <h2 className="text-3xl font-black text-amber-400 mb-1">
+              {isGameClear ? '피자 마스터 등극!' : '영업 마감!'}
+            </h2>
+            <p className="text-sm text-slate-300 mb-4 font-semibold">
+              {isGameClear
+                ? '축하합니다! 10개 코스를 완벽하게 제패하여 전설의 피자 셰프가 되었습니다!'
+                : `오늘의 피자 주방이 마감되었습니다. (도달 코스: ${stageIndex + 1}/${TOTAL_STAGES})`}
+            </p>
 
             <div className="bg-slate-800/90 border border-slate-600 rounded-2xl p-4 mb-5 shadow-inner">
               <div className="text-xs text-slate-300 font-bold mb-1">최종 달성 점수</div>
               <div className="text-4xl font-black text-amber-400">{score.toLocaleString()}점</div>
+              {isGameClear && (
+                <div className="text-xs font-extrabold text-emerald-400 mt-1">
+                  ✨ 10개 코스 완주 보너스 (+5,000점) 포함!
+                </div>
+              )}
             </div>
 
             {/* Hall of Fame Submission Form (Strictly > 100 points rule) */}
@@ -581,7 +623,7 @@ export default function PizzaGame({ onScoreSubmitted }) {
               className="w-full py-3.5 bg-gradient-to-r from-amber-500 to-orange-500 text-slate-950 font-black rounded-xl shadow-xl transition-transform active:scale-95 text-base flex items-center justify-center gap-2"
             >
               <RotateCcw className="w-5 h-5 text-slate-950" />
-              <span>다시 도전하기</span>
+              <span>{isGameClear ? '처음부터 다시 도전하기' : '다시 도전하기'}</span>
             </button>
           </div>
         </div>

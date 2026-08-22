@@ -72,7 +72,7 @@ export const STAGES = [
     fractionText: '1/2 (2등분)',
     targetSlices: 2,
     maxCuts: 1,
-    timeLimit: 45,
+    timeLimit: 25,
     toppings: [
       { id: 1, type: TOPPING_TYPES.PEPPERONI, x: 250, y: 220 },
       { id: 2, type: TOPPING_TYPES.PEPPERONI, x: 240, y: 320 },
@@ -93,7 +93,7 @@ export const STAGES = [
     fractionText: '1/4 (4등분)',
     targetSlices: 4,
     maxCuts: 2,
-    timeLimit: 45,
+    timeLimit: 25,
     toppings: [
       { id: 1, type: TOPPING_TYPES.OLIVE, x: 250, y: 205 },
       { id: 2, type: TOPPING_TYPES.OLIVE, x: 390, y: 205 },
@@ -113,7 +113,7 @@ export const STAGES = [
     fractionText: '1/4 (4등분)',
     targetSlices: 4,
     maxCuts: 2,
-    timeLimit: 50,
+    timeLimit: 25,
     toppings: [
       { id: 1, type: TOPPING_TYPES.PEPPERONI, x: 240, y: 210 },
       { id: 2, type: TOPPING_TYPES.PEPPERONI, x: 240, y: 340 },
@@ -134,7 +134,7 @@ export const STAGES = [
     fractionText: '1/3 (3등분)',
     targetSlices: 3,
     maxCuts: 3,
-    timeLimit: 55,
+    timeLimit: 30,
     toppings: [
       { id: 1, type: TOPPING_TYPES.TOMATO, x: 300, y: 170 },
       { id: 2, type: TOPPING_TYPES.TOMATO, x: 340, y: 170 },
@@ -156,7 +156,7 @@ export const STAGES = [
     fractionText: '1/6 (6등분)',
     targetSlices: 6,
     maxCuts: 3,
-    timeLimit: 60,
+    timeLimit: 30,
     toppings: [
       { id: 1, type: TOPPING_TYPES.PAPRIKA, x: 320, y: 160 },
       { id: 2, type: TOPPING_TYPES.PAPRIKA, x: 415, y: 220 },
@@ -178,7 +178,7 @@ export const STAGES = [
     fractionText: '1/4 (4등분)',
     targetSlices: 4,
     maxCuts: 2,
-    timeLimit: 50,
+    timeLimit: 30,
     toppings: [
       { id: 1, type: TOPPING_TYPES.PEPPERONI, x: 240, y: 200 },
       { id: 2, type: TOPPING_TYPES.MUSHROOM, x: 275, y: 235 },
@@ -203,7 +203,7 @@ export const STAGES = [
     fractionText: '1/8 (8등분)',
     targetSlices: 8,
     maxCuts: 4,
-    timeLimit: 65,
+    timeLimit: 35,
     toppings: [
       { id: 1, type: TOPPING_TYPES.OLIVE, x: 320, y: 150 },
       { id: 2, type: TOPPING_TYPES.OLIVE, x: 400, y: 190 },
@@ -227,7 +227,7 @@ export const STAGES = [
     fractionText: '1/6 (6등분)',
     targetSlices: 6,
     maxCuts: 3,
-    timeLimit: 60,
+    timeLimit: 35,
     toppings: [
       { id: 1, type: TOPPING_TYPES.BASIL, x: 305, y: 165 },
       { id: 2, type: TOPPING_TYPES.TOMATO, x: 335, y: 165 },
@@ -256,7 +256,7 @@ export const STAGES = [
     fractionText: '1/8 (8등분)',
     targetSlices: 8,
     maxCuts: 4,
-    timeLimit: 70,
+    timeLimit: 35,
     toppings: [
       { id: 1, type: TOPPING_TYPES.PEPPERONI, x: 320, y: 155 },
       { id: 2, type: TOPPING_TYPES.OLIVE, x: 395, y: 195 },
@@ -285,7 +285,7 @@ export const STAGES = [
     fractionText: '1/8 (8등분)',
     targetSlices: 8,
     maxCuts: 4,
-    timeLimit: 65,
+    timeLimit: 35,
     toppings: [
       { id: 1, type: TOPPING_TYPES.PEPPERONI, x: 320, y: 150 },
       { id: 2, type: TOPPING_TYPES.MUSHROOM, x: 400, y: 190 },
@@ -305,50 +305,11 @@ export const STAGES = [
   }
 ];
 
-// Helper to generate procedural stages for endless mode after Level 10
-export function generateEndlessStage(levelNumber) {
-  const sliceOptions = [4, 6, 8];
-  const targetSlices = sliceOptions[Math.floor(Math.random() * sliceOptions.length)];
-  const maxCuts = targetSlices / 2;
-  const availableToppings = [TOPPING_TYPES.PEPPERONI, TOPPING_TYPES.OLIVE, TOPPING_TYPES.MUSHROOM, TOPPING_TYPES.PAPRIKA, TOPPING_TYPES.TOMATO];
-  const chosenTopping = availableToppings[Math.floor(Math.random() * availableToppings.length)];
-
-  const toppings = [];
-  const angleStep = (Math.PI * 2) / targetSlices;
-  const dist = PIZZA_RADIUS * 0.6;
-
-  for (let i = 0; i < targetSlices; i++) {
-    const angle = angleStep * i + (angleStep / 2) + (Math.random() - 0.5) * 0.2;
-    toppings.push({
-      id: i + 1,
-      type: chosenTopping,
-      x: PIZZA_CENTER.x + Math.cos(angle) * dist,
-      y: PIZZA_CENTER.y + Math.sin(angle) * dist
-    });
-  }
-
-  const avatars = ['🦊', '🐰', '🐻', '🐼', '🦁', '🦉', '🐱', '🐶', '🦄'];
-  const avatar = avatars[Math.floor(Math.random() * avatars.length)];
-
-  return {
-    level: levelNumber,
-    title: `무한 챌린지: Level ${levelNumber}`,
-    customerName: `도촌 VIP 손님`,
-    customerAvatar: avatar,
-    customerSpeech: `피자를 똑같이 ${targetSlices}조각(1/${targetSlices})으로 나누고, ${TOPPING_INFO[chosenTopping].name}을 1개씩 넣어주세요!`,
-    fractionText: `1/${targetSlices} (${targetSlices}등분)`,
-    targetSlices,
-    maxCuts,
-    timeLimit: Math.max(35, 60 - (levelNumber - 10) * 2),
-    toppings,
-    requirements: [
-      { type: chosenTopping, countPerSlice: 1, description: `각 조각마다 ${TOPPING_INFO[chosenTopping].name} 1개` }
-    ]
-  };
-}
+export const TOTAL_STAGES = STAGES.length; // Exactly 10 stages (~2 to 2.5 minutes total gameplay)
 
 // Scoring & Star thresholds
 export const SCORE_BASE_SUCCESS = 500;
 export const SCORE_PER_PERFECT_STAR = 200;
 export const SCORE_COMBO_MULTIPLIER = 100;
-export const SCORE_TIME_BONUS_PER_SEC = 10;
+export const SCORE_TIME_BONUS_PER_SEC = 15;
+export const SCORE_ALL_CLEAR_BONUS = 5000; // Grand Champion Victory Bonus
