@@ -3,11 +3,30 @@
 
 export const CHANGELOG_DATA = [
   {
+    version: 'v1.36.8',
+    date: '2026-08-22',
+    title: '[도촌 피자 마스터] 명예의 전당 점수 등록 API 응답 처리 버그 수정 및 실시간 랭킹 연동 정상화',
+    badge: 'LATEST',
+    badgeColor: 'emerald',
+    items: [
+      {
+        tag: 'BUG FIX',
+        tagColor: 'rose',
+        text: '[점수 등록 응답 조건문 버그 수정] submitScoreToDB의 boolean 반환값 검증 로직(res.success 검사 오류)을 수정하여, 점수 등록 시 항상 "명예의 전당에 랭킹이 성공적으로 등록되었습니다!" 완료 피드백과 함께 Cloud DB에 정상 반영되도록 해결'
+      },
+      {
+        tag: 'LEADERBOARD SYNC',
+        tagColor: 'blue',
+        text: '[실시간 랭킹 모달 자동 전환] 점수 등록 완료 후 성공 사운드 재생 및 0.7초 후 도촌 명예의 전당 리더보드 모달이 자동으로 열려 방금 등록한 순위를 바로 확인할 수 있도록 개선'
+      }
+    ]
+  },
+  {
     version: 'v1.36.7',
     date: '2026-08-22',
     title: '[도촌 피자 마스터] 결과 & 명예의 전당 등록 화면 반응형 오버레이 팝업 모달 전면 개편 및 고대비 디자인 적용',
-    badge: 'LATEST',
-    badgeColor: 'emerald',
+    badge: 'UPDATE',
+    badgeColor: 'blue',
     items: [
       {
         tag: 'MODAL OVERLAY',

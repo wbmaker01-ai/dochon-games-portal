@@ -318,12 +318,15 @@ export default function PizzaGame({ onScoreSubmitted }) {
 
     try {
       const res = await submitScoreToDB('pizza', playerName.trim(), score);
-      if (res && res.success) {
+      if (res) {
         setIsSubmitted(true);
         haptics.success();
-        if (onScoreSubmitted) {
-          onScoreSubmitted();
-        }
+        pizzaAudio.playSuccess();
+        setTimeout(() => {
+          if (onScoreSubmitted) {
+            onScoreSubmitted();
+          }
+        }, 700);
       } else {
         setSubmitError('등록 중 오류가 발생했습니다. 다시 시도해주세요.');
       }
