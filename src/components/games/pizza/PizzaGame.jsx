@@ -147,6 +147,7 @@ export default function PizzaGame({ onScoreSubmitted }) {
   // Game Over Handler
   const handleGameOver = () => {
     setIsGameOver(true);
+    setStageResult(null);
     pizzaAudio.playFail();
     setHighScore(prev => {
       const newHigh = Math.max(prev, score);
@@ -275,6 +276,7 @@ export default function PizzaGame({ onScoreSubmitted }) {
   const handleNextStage = () => {
     haptics.medium();
     pizzaAudio.playClick();
+    setStageResult(null);
     const nextIdx = stageIndex + 1;
 
     if (nextIdx >= TOTAL_STAGES) {
@@ -549,25 +551,44 @@ export default function PizzaGame({ onScoreSubmitted }) {
         </div>
       )}
 
-      {/* 6. Game Over & Hall of Fame Modal */}
+      {/* 6. Game Over & Hall of Fame Modal (Responsive Overlay Popup) */}
       {isGameOver && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/85 backdrop-blur-md animate-fade-in">
+        <div className="pizza-gameover-overlay">
           <div className="pizza-gameover-card">
-            <div className="text-6xl mb-2">{isGameClear ? '👑' : '⏰'}</div>
-            <h2 className="text-3xl font-black text-amber-400 mb-1">
-              {isGameClear ? '피자 마스터 등극!' : '영업 마감!'}
+            <span className="pizza-gameover-icon">
+              {isGameClear ? '👑' : '⏰'}
+            </span>
+
+            <div className="pizza-gameover-badge">
+              {isGameClear ? (
+                <>
+                  <Crown className="w-4 h-4 text-amber-400" />
+                  <span>10개 코스 완주 제패</span>
+                </>
+              ) : (
+                <>
+                  <Clock className="w-4 h-4 text-amber-400" />
+                  <span>도달 코스 {stageIndex + 1}/{TOTAL_STAGES}</span>
+                </>
+              )}
+            </div>
+
+            <h2 className="pizza-gameover-title">
+              {isGameClear ? '전설의 피자 마스터 등극!' : '영업 마감!'}
             </h2>
-            <p className="text-sm text-slate-300 mb-4 font-semibold">
+
+            <p className="pizza-gameover-desc">
               {isGameClear
-                ? '축하합니다! 10개 코스를 완벽하게 제패하여 전설의 피자 셰프가 되었습니다!'
-                : `오늘의 피자 주방이 마감되었습니다. (도달 코스: ${stageIndex + 1}/${TOTAL_STAGES})`}
+                ? '축하합니다! 10개 코스를 완벽하게 제패하여 도촌 최고의 피자 셰프로 인증되었습니다!'
+                : `오늘의 피자 주방 영업이 마감되었습니다. (총 ${TOTAL_STAGES}개 코스 중 ${stageIndex + 1}단계 도달)`}
             </p>
 
-            <div className="bg-slate-800/90 border border-slate-600 rounded-2xl p-4 mb-5 shadow-inner">
-              <div className="text-xs text-slate-300 font-bold mb-1">최종 달성 점수</div>
-              <div className="text-4xl font-black text-amber-400">{score.toLocaleString()}점</div>
+            {/* Score Display Card */}
+            <div className="pizza-score-card">
+              <div className="pizza-score-label">최종 달성 점수</div>
+              <div className="pizza-score-number">{score.toLocaleString()}점</div>
               {isGameClear && (
-                <div className="text-xs font-extrabold text-emerald-400 mt-1">
+                <div className="pizza-score-bonus">
                   ✨ 10개 코스 완주 보너스 (+5,000점) 포함!
                 </div>
               )}
@@ -575,19 +596,19 @@ export default function PizzaGame({ onScoreSubmitted }) {
 
             {/* Hall of Fame Submission Form (Strictly > 100 points rule) */}
             {score > 100 ? (
-              <div className="bg-slate-800/80 border border-amber-500/40 rounded-2xl p-4 mb-5 text-left shadow-md">
-                <div className="flex items-center gap-2 mb-2">
+              <div className="pizza-hall-card">
+                <div className="pizza-hall-header">
                   <Trophy className="w-5 h-5 text-amber-400" />
-                  <h3 className="text-base font-black text-amber-300">명예의 전당 점수 등록</h3>
+                  <span>명예의 전당 점수 등록</span>
                 </div>
 
                 {isSubmitted ? (
-                  <div className="flex items-center gap-2 text-emerald-400 text-sm font-bold py-2">
-                    <CheckCircle2 className="w-5 h-5" />
+                  <div className="pizza-hall-success">
+                    <CheckCircle2 className="w-5 h-5 text-emerald-400 shrink-0" />
                     <span>명예의 전당에 랭킹이 성공적으로 등록되었습니다!</span>
                   </div>
                 ) : (
-                  <form onSubmit={handleScoreSubmit} className="space-y-3">
+                  <form onSubmit={handleScoreSubmit} className="pizza-input-group">
                     <div>
                       <input
                         type="text"
@@ -596,7 +617,7 @@ export default function PizzaGame({ onScoreSubmitted }) {
                         placeholder="예: 홍길동"
                         maxLength={10}
                         required
-                        className="w-full px-4 py-2.5 bg-slate-900 border border-slate-600 rounded-xl text-white text-base font-bold placeholder:text-slate-500 focus:outline-none focus:border-amber-400"
+                        className="pizza-hall-input"
                       />
                     </div>
                     {submitError && (
@@ -605,9 +626,10 @@ export default function PizzaGame({ onScoreSubmitted }) {
                     <button
                       type="submit"
                       disabled={isSubmitting || !playerName.trim()}
-                      className="w-full py-3 bg-gradient-to-r from-amber-500 to-orange-500 hover:from-amber-400 hover:to-orange-400 text-slate-950 font-black rounded-xl text-base transition-all disabled:opacity-50 shadow-md"
+                      className="pizza-btn-submit-hall"
                     >
-                      {isSubmitting ? '등록 중...' : '명예의 전당에 기록하기'}
+                      <Trophy className="w-4 h-4 text-slate-950" />
+                      <span>{isSubmitting ? '등록 중...' : '명예의 전당에 기록하기'}</span>
                     </button>
                   </form>
                 )}
@@ -618,11 +640,9 @@ export default function PizzaGame({ onScoreSubmitted }) {
               </p>
             )}
 
-            <button
-              onClick={handleStartGame}
-              className="w-full py-3.5 bg-gradient-to-r from-amber-500 to-orange-500 text-slate-950 font-black rounded-xl shadow-xl transition-transform active:scale-95 text-base flex items-center justify-center gap-2"
-            >
-              <RotateCcw className="w-5 h-5 text-slate-950" />
+            {/* Restart Button */}
+            <button onClick={handleStartGame} className="pizza-btn-restart">
+              <RotateCcw className="w-5 h-5" />
               <span>{isGameClear ? '처음부터 다시 도전하기' : '다시 도전하기'}</span>
             </button>
           </div>
