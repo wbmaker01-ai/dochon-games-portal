@@ -10,8 +10,55 @@ import {
 } from './earthBeeConstants';
 import { submitScoreToDB } from '../../../utils/leaderboardApi';
 import { haptics } from '../../../utils/haptics';
-import { Volume2, VolumeX, HelpCircle, RotateCcw, Trophy, Star, Sparkles, Check, Heart, Play } from 'lucide-react';
+import {
+  Volume2,
+  VolumeX,
+  HelpCircle,
+  RotateCcw,
+  Trophy,
+  Star,
+  Sparkles,
+  Check,
+  Heart,
+  Play,
+  ArrowUp,
+  ArrowDown,
+  ArrowLeft,
+  ArrowRight
+} from 'lucide-react';
 import './earthbee.css';
+
+const DIRECTION_KEYS = {
+  // Arrow keys (standard & legacy)
+  'ArrowUp': 'up',
+  'Up': 'up',
+  'ArrowDown': 'down',
+  'Down': 'down',
+  'ArrowLeft': 'left',
+  'Left': 'left',
+  'ArrowRight': 'right',
+  'Right': 'right',
+  // WASD (codes)
+  'KeyW': 'up',
+  'KeyS': 'down',
+  'KeyA': 'left',
+  'KeyD': 'right',
+  // WASD (keys English)
+  'w': 'up',
+  'W': 'up',
+  's': 'down',
+  'S': 'down',
+  'a': 'left',
+  'A': 'left',
+  'd': 'right',
+  'D': 'right',
+  // WASD (Korean IME on WASD keys)
+  'ㅈ': 'up',
+  'ㅉ': 'up',
+  'ㄴ': 'down',
+  'ㅁ': 'left',
+  'ㅇ': 'right'
+};
 
 export default function EarthBeeGame({ onScoreSubmitted }) {
   const canvasRef = useRef(null);
@@ -50,8 +97,8 @@ export default function EarthBeeGame({ onScoreSubmitted }) {
   const [isSubmitted, setIsSubmitted] = useState(false);
   const [submitError, setSubmitError] = useState('');
 
-  // Key pressed map
-  const keysRef = useRef({});
+  // Active key state tracking
+  const keysPressedRef = useRef({ up: false, down: false, left: false, right: false });
 
   // High Score Persistence
   useEffect(() => {
@@ -136,19 +183,17 @@ export default function EarthBeeGame({ onScoreSubmitted }) {
           });
         }
 
-        // Keyboard Steering
-        const k = keysRef.current;
+        // Directional Keyboard & D-Pad Steering
+        const kp = keysPressedRef.current;
         let dx = 0;
         let dy = 0;
-        if (k['ArrowLeft'] || k['KeyA']) dx -= 1;
-        if (k['ArrowRight'] || k['KeyD']) dx += 1;
-        if (k['ArrowUp'] || k['KeyW']) dy -= 1;
-        if (k['ArrowDown'] || k['KeyS']) dy += 1;
+        if (kp.left) dx -= 1;
+        if (kp.right) dx += 1;
+        if (kp.up) dy -= 1;
+        if (kp.down) dy += 1;
 
         if (engineRef.current) {
-          if (dx !== 0 || dy !== 0) {
-            engineRef.current.setDirection(dx, dy);
-          }
+          engineRef.current.setKeyboardInput(dx, dy);
           engineRef.current.update(dt);
           engineRef.current.render();
           setPollenPct(engineRef.current.bee.pollenCount);
@@ -172,30 +217,50 @@ export default function EarthBeeGame({ onScoreSubmitted }) {
     };
   }, [isPlaying, isGameOver]);
 
-  // Keyboard Event Listeners
+  // Robust Global Keyboard Event Listeners for Arrow Keys & WASD
   useEffect(() => {
     const handleKeyDown = (e) => {
-      if (['ArrowUp', 'ArrowDown', 'ArrowLeft', 'ArrowRight', 'KeyW', 'KeyA', 'KeyS', 'KeyD'].includes(e.code)) {
-        keysRef.current[e.code] = true;
+      // Don't intercept when typing player name in an input form
+      if (e.target && (e.target.tagName === 'INPUT' || e.target.tagName === 'TEXTAREA')) {
+        return;
+      }
+
+      const dir = DIRECTION_KEYS[e.code] || DIRECTION_KEYS[e.key];
+      if (dir) {
+        e.preventDefault();
+        keysPressedRef.current[dir] = true;
         earthBeeAudio.startFlightHum();
       }
     };
 
     const handleKeyUp = (e) => {
-      keysRef.current[e.code] = false;
+      const dir = DIRECTION_KEYS[e.code] || DIRECTION_KEYS[e.key];
+      if (dir) {
+        e.preventDefault();
+        keysPressedRef.current[dir] = false;
+      }
     };
 
-    window.addEventListener('keydown', handleKeyDown);
-    window.addEventListener('keyup', handleKeyUp);
+    const handleBlur = () => {
+      keysPressedRef.current = { up: false, down: false, left: false, right: false };
+      earthBeeAudio.stopFlightHum();
+    };
+
+    window.addEventListener('keydown', handleKeyDown, { passive: false });
+    window.addEventListener('keyup', handleKeyUp, { passive: false });
+    window.addEventListener('blur', handleBlur);
+
     return () => {
       window.removeEventListener('keydown', handleKeyDown);
       window.removeEventListener('keyup', handleKeyUp);
+      window.removeEventListener('blur', handleBlur);
     };
   }, []);
 
   const handleGameOver = () => {
     setIsGameOver(true);
     setIsPlaying(false);
+    keysPressedRef.current = { up: false, down: false, left: false, right: false };
     earthBeeAudio.stopFlightHum();
     earthBeeAudio.playGameOver();
     haptics.heavy();
@@ -234,6 +299,7 @@ export default function EarthBeeGame({ onScoreSubmitted }) {
     if (engineRef.current) {
       engineRef.current.initWorld();
     }
+    keysPressedRef.current = { up: false, down: false, left: false, right: false };
     setScore(0);
     setTimeLeft(INITIAL_GAME_TIME);
     setCombo(0);
@@ -245,6 +311,17 @@ export default function EarthBeeGame({ onScoreSubmitted }) {
     setIsSubmitted(false);
     setSubmitError('');
     setPlayerName('');
+  };
+
+  // D-Pad Button Helper for Touch & Click Controls
+  const handleDpadAction = (dir, isDown) => {
+    if (!isPlaying || isGameOver) return;
+    keysPressedRef.current[dir] = isDown;
+    if (isDown) {
+      earthBeeAudio.init();
+      earthBeeAudio.startFlightHum();
+      haptics.light();
+    }
   };
 
   // Leaderboard Score Submission (strictly score > 100)
@@ -444,14 +521,58 @@ export default function EarthBeeGame({ onScoreSubmitted }) {
         )}
       </div>
 
-      {/* 4. Tips Footer Bar */}
+      {/* 4. Controls Bar (Keyboard Directions & On-Screen D-Pad) */}
       <div className="earthbee-footer-bar">
-        <div className="flex items-center gap-1.5">
-          <span>🎮</span>
-          <span>마우스 이동 / 화면 터치 드래그 / WASD 키로 꿀벌 조종</span>
+        <div className="flex items-center gap-2">
+          <span className="text-amber-400 font-bold text-xs">🎮 비행 조작:</span>
+          <span className="text-slate-300 text-xs hidden sm:inline">
+            키보드 방향키 (<kbd className="px-1.5 py-0.5 bg-slate-800 border border-slate-700 rounded text-amber-300 font-mono text-[10px]">↑</kbd> <kbd className="px-1.5 py-0.5 bg-slate-800 border border-slate-700 rounded text-amber-300 font-mono text-[10px]">↓</kbd> <kbd className="px-1.5 py-0.5 bg-slate-800 border border-slate-700 rounded text-amber-300 font-mono text-[10px]">←</kbd> <kbd className="px-1.5 py-0.5 bg-slate-800 border border-slate-700 rounded text-amber-300 font-mono text-[10px]">→</kbd> / WASD) 또는 마우스/터치 드래그
+          </span>
+          <span className="text-slate-300 text-xs sm:hidden">
+            방향키 / 터치 드래그
+          </span>
         </div>
-        <div className="hidden sm:block text-slate-400">
-          <span>✨ 만개한 꽃에서 꽃가루를 묻혀 봉오리에 전달하세요!</span>
+
+        {/* On-Screen Touch / Click Directional Buttons (D-Pad) */}
+        <div className="earthbee-dpad-compact">
+          <button
+            onPointerDown={(e) => { e.preventDefault(); handleDpadAction('left', true); }}
+            onPointerUp={(e) => { e.preventDefault(); handleDpadAction('left', false); }}
+            onPointerLeave={() => handleDpadAction('left', false)}
+            className="earthbee-dpad-btn"
+            title="왼쪽으로 비행 (← / A)"
+          >
+            <ArrowLeft className="w-3.5 h-3.5" />
+          </button>
+          <div className="flex flex-col gap-1">
+            <button
+              onPointerDown={(e) => { e.preventDefault(); handleDpadAction('up', true); }}
+              onPointerUp={(e) => { e.preventDefault(); handleDpadAction('up', false); }}
+              onPointerLeave={() => handleDpadAction('up', false)}
+              className="earthbee-dpad-btn"
+              title="위로 비행 (↑ / W)"
+            >
+              <ArrowUp className="w-3.5 h-3.5" />
+            </button>
+            <button
+              onPointerDown={(e) => { e.preventDefault(); handleDpadAction('down', true); }}
+              onPointerUp={(e) => { e.preventDefault(); handleDpadAction('down', false); }}
+              onPointerLeave={() => handleDpadAction('down', false)}
+              className="earthbee-dpad-btn"
+              title="아래로 비행 (↓ / S)"
+            >
+              <ArrowDown className="w-3.5 h-3.5" />
+            </button>
+          </div>
+          <button
+            onPointerDown={(e) => { e.preventDefault(); handleDpadAction('right', true); }}
+            onPointerUp={(e) => { e.preventDefault(); handleDpadAction('right', false); }}
+            onPointerLeave={() => handleDpadAction('right', false)}
+            className="earthbee-dpad-btn"
+            title="오른쪽으로 비행 (→ / D)"
+          >
+            <ArrowRight className="w-3.5 h-3.5" />
+          </button>
         </div>
       </div>
 

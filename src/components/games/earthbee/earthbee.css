@@ -272,11 +272,49 @@
   justify-content: space-between;
   width: 100%;
   margin-top: 8px;
-  padding: 6px 12px;
-  background: rgba(15, 23, 42, 0.6);
-  border-radius: 14px;
+  padding: 8px 14px;
+  background: rgba(15, 23, 42, 0.75);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 16px;
   font-size: 11px;
   color: #94A3B8;
+  gap: 8px;
+}
+
+/* Compact D-Pad Directional Controls */
+.earthbee-dpad-compact {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  shrink: 0;
+}
+
+.earthbee-dpad-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 32px;
+  height: 28px;
+  background: rgba(30, 41, 59, 0.9);
+  border: 1px solid rgba(251, 191, 36, 0.4);
+  color: #FDE047;
+  border-radius: 8px;
+  cursor: pointer;
+  touch-action: manipulation;
+  transition: all 0.1s ease;
+  user-select: none;
+}
+
+.earthbee-dpad-btn:hover {
+  background: rgba(51, 65, 85, 0.95);
+  border-color: #FDE047;
+  transform: translateY(-1px);
+}
+
+.earthbee-dpad-btn:active {
+  background: #F59E0B;
+  color: #0F172A;
+  transform: scale(0.92);
 }
 
 /* 5. Modal Backdrop & Card */

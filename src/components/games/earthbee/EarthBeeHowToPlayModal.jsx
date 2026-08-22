@@ -30,7 +30,7 @@ export default function EarthBeeHowToPlayModal({ isOpen, onClose }) {
             <div>
               <h4 className="font-bold text-amber-200 mb-1">1. 꿀벌 조종 및 비행</h4>
               <p className="text-xs text-slate-300 leading-relaxed">
-                마우스 이동, 모바일 화면 터치 드래그, 또는 키보드 <kbd className="px-1.5 py-0.5 bg-slate-700 rounded text-amber-300 font-mono">WASD / 방향키</kbd>를 사용하여 꿀벌을 자유롭게 비행시킬 수 있습니다.
+                마우스 이동, 모바일 화면 터치 드래그, 또는 키보드 방향키(<kbd className="px-1.5 py-0.5 bg-slate-700 rounded text-amber-300 font-mono">↑ ↓ ← →</kbd>) 및 <kbd className="px-1.5 py-0.5 bg-slate-700 rounded text-amber-300 font-mono">WASD</kbd> 키를 사용하여 꿀벌을 자유롭게 비행시킬 수 있습니다.
               </p>
             </div>
           </div>

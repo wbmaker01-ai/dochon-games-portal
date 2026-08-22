@@ -195,22 +195,6 @@ export class PizzaEngine {
 
     // Check each requirement
     for (const req of stage.requirements) {
-      if (req.countPerSlice !== undefined) {
-        // Every slice must have exact count of this topping
-        for (const [_, toppings] of Object.entries(regionToppings)) {
-          const matchCount = toppings.filter(t => t.type === req.type).length;
-          if (matchCount !== req.countPerSlice) {
-            return {
-              isSuccess: false,
-              stars: 0,
-              message: `${TOPPING_INFO[req.type].name} 분배가 맞지 않아요! (각 조각에 ${req.countPerSlice}개 필요)`,
-              uniformityScore,
-              sliceCount
-            };
-          }
-        }
-      }
-
       if (req.requiredTotalSlices !== undefined) {
         // Slices that have this topping >= countPerSlice
         let qualifiedSlices = 0;
@@ -220,18 +204,16 @@ export class PizzaEngine {
             qualifiedSlices++;
           }
         }
-        if (qualifiedSlices < req.requiredTotalSlices) {
+        if (qualifiedSlices !== req.requiredTotalSlices) {
           return {
             isSuccess: false,
             stars: 0,
-            message: `${TOPPING_INFO[req.type].name} 조각이 ${req.requiredTotalSlices}개 이상 필요해요! (현재: ${qualifiedSlices}개)`,
+            message: `${TOPPING_INFO[req.type].name} 조각이 ${req.requiredTotalSlices}개여야 해요! (현재: ${qualifiedSlices}개)`,
             uniformityScore,
             sliceCount
           };
         }
-      }
-
-      if (req.minTotalSlices !== undefined) {
+      } else if (req.minTotalSlices !== undefined) {
         let qualifiedSlices = 0;
         for (const [_, toppings] of Object.entries(regionToppings)) {
           if (toppings.some(t => t.type === req.type)) {
@@ -246,6 +228,20 @@ export class PizzaEngine {
             uniformityScore,
             sliceCount
           };
+        }
+      } else if (req.countPerSlice !== undefined) {
+        // Every single slice must have exact count of this topping
+        for (const [_, toppings] of Object.entries(regionToppings)) {
+          const matchCount = toppings.filter(t => t.type === req.type).length;
+          if (matchCount !== req.countPerSlice) {
+            return {
+              isSuccess: false,
+              stars: 0,
+              message: `${TOPPING_INFO[req.type].name} 분배가 맞지 않아요! (각 조각에 ${req.countPerSlice}개 필요)`,
+              uniformityScore,
+              sliceCount
+            };
+          }
         }
       }
     }

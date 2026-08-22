@@ -3,11 +3,44 @@
 
 export const CHANGELOG_DATA = [
   {
+    version: 'v1.35.2',
+    date: '2026-08-22',
+    title: '[도촌 꿀벌의 비행] 키보드 방향키(↑ ↓ ← → / WASD) 직접 조향 물리 엔진 개편 및 터치 D-Pad 추가',
+    badge: 'LATEST',
+    badgeColor: 'emerald',
+    items: [
+      {
+        tag: 'KEYBOARD CONTROL',
+        tagColor: 'amber',
+        text: '[키보드 방향키 조향 전면 개편] 키보드 상·하·좌·우 화살표(↑ ↓ ← →), WASD 및 한글 입력 모드 키를 누를 때 꿀벌이 해당 방향으로 즉각적이고 부드럽게 가속 비행하도록 독립 키보드 조향 물리 엔진 구축 및 화면 스크롤 간섭 방지'
+      },
+      {
+        tag: 'TOUCH D-PAD',
+        tagColor: 'teal',
+        text: '[하단 미니 D-Pad 컨트롤러 탑재] 키보드 외에도 마우스 클릭 및 모바일 터치로 방향을 미세 조종할 수 있는 4방향 가상 버튼 배치'
+      }
+    ]
+  },
+  {
+    version: 'v1.35.1',
+    date: '2026-08-22',
+    title: '[도촌 피자 마스터] 3단계 반반 피자 분할 판정 조건 알고리즘 긴급 패치',
+    badge: 'UPDATE',
+    badgeColor: 'blue',
+    items: [
+      {
+        tag: 'BUG FIX',
+        tagColor: 'rose',
+        text: '[3단계 반반 피자 판정 로직 정상화] 페퍼로니 2조각·버섯 2조각 분할 요구조건 검사 시 전체 조각 검사 분기가 우선 적용되어 무조건 실패 처리되던 조건문 우선순위 결함을 수정하여 십자 4등분 시 정상 클리어되도록 조치'
+      }
+    ]
+  },
+  {
     version: 'v1.35.0',
     date: '2026-08-21',
     title: '제23탄 신규 게임 [도촌 미니 올림픽 (3대 릴레이 스포츠 챔피언십)] 정식 개장',
-    badge: 'LATEST',
-    badgeColor: 'emerald',
+    badge: 'UPDATE',
+    badgeColor: 'blue',
     items: [
       {
         tag: 'NEW GAME',

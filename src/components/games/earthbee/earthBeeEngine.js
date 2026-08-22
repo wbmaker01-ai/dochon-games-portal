@@ -59,6 +59,10 @@ export class EarthBeeEngine {
     this.onPollenCollectCallback = null;
     this.onLevelUpCallback = null;
 
+    // Control Mode: 'pointer' | 'keyboard'
+    this.controlMode = 'pointer';
+    this.keyVelocity = { dx: 0, dy: 0 };
+
     this.initWorld();
   }
 
@@ -79,11 +83,15 @@ export class EarthBeeEngine {
     this.ecoLevel = 1;
     this.combo = 0;
     this.comboTimer = 0;
+    this.controlMode = 'pointer';
+    this.keyVelocity = { dx: 0, dy: 0 };
 
     this.bee.x = this.gardenWidth / 2;
     this.bee.y = this.gardenHeight / 2;
     this.bee.targetX = this.bee.x;
     this.bee.targetY = this.bee.y;
+    this.bee.vx = 0;
+    this.bee.vy = 0;
     this.bee.pollenCount = 20; // Start with a little starter pollen
     this.bee.carryingType = FLOWER_TYPES.DAISY;
 
@@ -160,6 +168,9 @@ export class EarthBeeEngine {
 
   // Smoothly steer Bee towards mouse/touch world position
   setTargetPosition(screenX, screenY) {
+    this.controlMode = 'pointer';
+    this.keyVelocity.dx = 0;
+    this.keyVelocity.dy = 0;
     const worldX = screenX + this.camera.x;
     const worldY = screenY + this.camera.y;
     this.bee.targetX = Math.max(30, Math.min(this.gardenWidth - 30, worldX));
@@ -167,39 +178,80 @@ export class EarthBeeEngine {
   }
 
   // Directional steering for Keyboard WASD / Arrows
-  setDirection(dx, dy) {
+  setKeyboardInput(dx, dy) {
     if (dx !== 0 || dy !== 0) {
-      const step = 220;
-      this.bee.targetX = Math.max(30, Math.min(this.gardenWidth - 30, this.bee.x + dx * step));
-      this.bee.targetY = Math.max(30, Math.min(this.gardenHeight - 30, this.bee.y + dy * step));
+      this.controlMode = 'keyboard';
+      this.keyVelocity.dx = dx;
+      this.keyVelocity.dy = dy;
+    } else if (this.controlMode === 'keyboard') {
+      this.keyVelocity.dx = 0;
+      this.keyVelocity.dy = 0;
     }
+  }
+
+  setDirection(dx, dy) {
+    this.setKeyboardInput(dx, dy);
   }
 
   update(dt) {
     this.time += dt;
 
-    // 1. Bee Physics & Steering
-    const dx = this.bee.targetX - this.bee.x;
-    const dy = this.bee.targetY - this.bee.y;
-    const dist = Math.hypot(dx, dy);
+    // 1. Bee Physics & Steering (Keyboard Mode vs Pointer Mode)
+    if (this.controlMode === 'keyboard') {
+      const kdx = this.keyVelocity.dx;
+      const kdy = this.keyVelocity.dy;
+      const isMoving = kdx !== 0 || kdy !== 0;
 
-    if (dist > 3) {
-      const targetAngle = Math.atan2(dy, dx);
-      // Smooth angle interpolation
-      let angleDiff = targetAngle - this.bee.angle;
-      while (angleDiff < -Math.PI) angleDiff += Math.PI * 2;
-      while (angleDiff > Math.PI) angleDiff -= Math.PI * 2;
-      this.bee.angle += angleDiff * Math.min(dt * 10, 1);
+      if (isMoving) {
+        // Direct target heading angle from keyboard arrow inputs
+        const targetAngle = Math.atan2(kdy, kdx);
+        let angleDiff = targetAngle - this.bee.angle;
+        while (angleDiff < -Math.PI) angleDiff += Math.PI * 2;
+        while (angleDiff > Math.PI) angleDiff -= Math.PI * 2;
+        this.bee.angle += angleDiff * Math.min(dt * 15, 1);
 
-      const moveSpeed = Math.min(BEE_CONFIG.SPEED, dist * 5.5);
-      this.bee.vx = Math.cos(this.bee.angle) * moveSpeed;
-      this.bee.vy = Math.sin(this.bee.angle) * moveSpeed;
+        const moveSpeed = BEE_CONFIG.SPEED;
+        this.bee.vx = Math.cos(this.bee.angle) * moveSpeed;
+        this.bee.vy = Math.sin(this.bee.angle) * moveSpeed;
+      } else {
+        // Inertial deceleration on key release
+        this.bee.vx *= Math.pow(0.02, dt);
+        this.bee.vy *= Math.pow(0.02, dt);
+      }
 
       this.bee.x += this.bee.vx * dt;
       this.bee.y += this.bee.vy * dt;
+
+      // Clamp inside garden bounds
+      this.bee.x = Math.max(30, Math.min(this.gardenWidth - 30, this.bee.x));
+      this.bee.y = Math.max(30, Math.min(this.gardenHeight - 30, this.bee.y));
+
+      // Keep target position synced
+      this.bee.targetX = this.bee.x;
+      this.bee.targetY = this.bee.y;
     } else {
-      this.bee.vx *= 0.8;
-      this.bee.vy *= 0.8;
+      // Pointer Mode (Mouse & Touch)
+      const dx = this.bee.targetX - this.bee.x;
+      const dy = this.bee.targetY - this.bee.y;
+      const dist = Math.hypot(dx, dy);
+
+      if (dist > 3) {
+        const targetAngle = Math.atan2(dy, dx);
+        let angleDiff = targetAngle - this.bee.angle;
+        while (angleDiff < -Math.PI) angleDiff += Math.PI * 2;
+        while (angleDiff > Math.PI) angleDiff -= Math.PI * 2;
+        this.bee.angle += angleDiff * Math.min(dt * 10, 1);
+
+        const moveSpeed = Math.min(BEE_CONFIG.SPEED, dist * 5.5);
+        this.bee.vx = Math.cos(this.bee.angle) * moveSpeed;
+        this.bee.vy = Math.sin(this.bee.angle) * moveSpeed;
+
+        this.bee.x += this.bee.vx * dt;
+        this.bee.y += this.bee.vy * dt;
+      } else {
+        this.bee.vx *= 0.8;
+        this.bee.vy *= 0.8;
+      }
     }
 
     // Wing flapping
