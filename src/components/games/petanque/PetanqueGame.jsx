@@ -26,7 +26,10 @@ import {
   Send,
   Target,
   Zap,
-  ChevronRight
+  ChevronRight,
+  ChevronLeft,
+  Minus,
+  Plus
 } from 'lucide-react';
 import './petanque.css';
 
@@ -373,6 +376,17 @@ export default function PetanqueGame({ onScoreSubmitted }) {
     executePlayerThrow();
   };
 
+  // Stepper handlers for tablet buttons
+  const stepAngle = (delta) => {
+    haptics.impact();
+    setAimAngle(prev => Math.max(65, Math.min(115, prev + delta)));
+  };
+
+  const stepPower = (delta) => {
+    haptics.impact();
+    setAimPower(prev => Math.max(25, Math.min(98, prev + delta)));
+  };
+
   // Keyboard Shortcuts (Arrow keys to aim, Space to charge/throw)
   useEffect(() => {
     const handleKeyDown = (e) => {
@@ -457,14 +471,14 @@ export default function PetanqueGame({ onScoreSubmitted }) {
             className="petanque-btn-icon"
             title="게임 방법 보기"
           >
-            <HelpCircle className="w-4 h-4" />
+            <HelpCircle className="w-5 h-5" />
           </button>
           <button
             onClick={toggleMute}
             className="petanque-btn-icon"
             title={isMuted ? '음소거 해제' : '음소거'}
           >
-            {isMuted ? <VolumeX className="w-4 h-4 text-rose-400" /> : <Volume2 className="w-4 h-4 text-emerald-400" />}
+            {isMuted ? <VolumeX className="w-5 h-5 text-rose-400" /> : <Volume2 className="w-5 h-5 text-emerald-400" />}
           </button>
         </div>
       </div>
@@ -473,9 +487,9 @@ export default function PetanqueGame({ onScoreSubmitted }) {
       <div className="petanque-scoreboard-banner">
         {/* Player Team */}
         <div className="petanque-team-card">
-          <div className="text-right">
-            <div className="text-xs font-bold text-blue-400">🔵 도촌 청팀 (나)</div>
-            <div className="text-lg font-black text-blue-200">{scores.player}점</div>
+          <div className="petanque-team-info-left">
+            <div className="petanque-team-label-blue">🔵 도촌 청팀 (나)</div>
+            <div className="petanque-team-score-blue">{scores.player}점</div>
           </div>
           <div className="petanque-team-balls">
             {Array.from({ length: MATCH_CONFIG.BALLS_PER_PLAYER }).map((_, idx) => (
@@ -493,16 +507,16 @@ export default function PetanqueGame({ onScoreSubmitted }) {
           <div className="petanque-round-pill">
             {gameState === GAME_STATES.INTRO ? '대기 중' : `${currentRound} / ${MATCH_CONFIG.TOTAL_ROUNDS} 엔드`}
           </div>
-          <div className="petanque-score-text">
+          <div className="petanque-score-vs-text">
             {scores.player} : {scores.ai}
           </div>
         </div>
 
         {/* AI Team */}
-        <div className="petanque-team-card flex-row-reverse">
-          <div className="text-left">
-            <div className="text-xs font-bold text-rose-400">🔴 도촌 백팀 (AI)</div>
-            <div className="text-lg font-black text-rose-200">{scores.ai}점</div>
+        <div className="petanque-team-card" style={{ flexDirection: 'row-reverse' }}>
+          <div className="petanque-team-info-right">
+            <div className="petanque-team-label-red">🔴 도촌 백팀 (AI)</div>
+            <div className="petanque-team-score-red">{scores.ai}점</div>
           </div>
           <div className="petanque-team-balls">
             {Array.from({ length: MATCH_CONFIG.BALLS_PER_PLAYER }).map((_, idx) => (
@@ -535,29 +549,25 @@ export default function PetanqueGame({ onScoreSubmitted }) {
         {/* 3-A. Intro Screen Overlay */}
         {gameState === GAME_STATES.INTRO && (
           <div className="petanque-overlay-modal">
-            <div className="petanque-intro-card">
-              <div className="text-4xl mb-2">🎯 🇫🇷 ⚪</div>
-              <h2 className="text-xl font-black text-amber-300 mb-1">
+            <div className="petanque-card-panel animate-fade-in">
+              <span className="petanque-card-icon-hero">🎯 🇫🇷 ⚪</span>
+              <h2 className="petanque-card-title">
                 도촌 페탕크 마스터
               </h2>
-              <p className="text-xs text-slate-300 mb-4 leading-relaxed">
+              <p className="petanque-card-desc">
                 노란 표적구(뷔슈)에 쇠구슬을 가장 가깝게 붙이거나,<br />
                 상대방 공을 쳐내어 승리하세요!
               </p>
 
-              {/* Difficulty Selection */}
-              <div className="mb-4">
-                <div className="text-[11px] font-bold text-slate-400 mb-1.5">AI 상대 난이도 선택</div>
-                <div className="grid grid-cols-3 gap-2">
+              {/* Difficulty Selection with Arcade Buttons */}
+              <div className="petanque-difficulty-box">
+                <div className="petanque-difficulty-title">AI 상대 난이도 선택</div>
+                <div className="petanque-difficulty-grid">
                   {Object.values(AI_DIFFICULTY).map((diff) => (
                     <button
                       key={diff.name}
                       onClick={() => setDifficulty(diff)}
-                      className={`py-1.5 text-xs font-bold rounded-lg border transition-all ${
-                        difficulty.name === diff.name
-                          ? 'bg-amber-500 text-slate-950 border-amber-400 shadow-md'
-                          : 'bg-slate-800/80 text-slate-300 border-slate-700 hover:bg-slate-700'
-                      }`}
+                      className={`petanque-btn-difficulty ${difficulty.name === diff.name ? 'active' : ''}`}
                     >
                       {diff.name}
                     </button>
@@ -565,19 +575,19 @@ export default function PetanqueGame({ onScoreSubmitted }) {
                 </div>
               </div>
 
-              <div className="space-y-2">
+              <div>
                 <button
                   onClick={() => startMatch(difficulty)}
-                  className="w-full py-3 bg-gradient-to-r from-amber-500 to-amber-400 text-slate-950 font-black rounded-xl shadow-lg hover:from-amber-400 hover:to-amber-300 transition-all flex items-center justify-center gap-2"
+                  className="petanque-btn-primary"
                 >
                   <Play className="w-5 h-5 fill-current" />
                   <span>경기 시작하기</span>
                 </button>
                 <button
                   onClick={() => setIsHowToPlayOpen(true)}
-                  className="w-full py-2 bg-slate-800 hover:bg-slate-700 text-slate-300 font-bold rounded-xl border border-slate-700 text-xs flex items-center justify-center gap-1.5"
+                  className="petanque-btn-secondary"
                 >
-                  <HelpCircle className="w-4 h-4" />
+                  <HelpCircle className="w-4 h-4 text-amber-400" />
                   <span>게임 방법 & 규칙 보기</span>
                 </button>
               </div>
@@ -588,11 +598,11 @@ export default function PetanqueGame({ onScoreSubmitted }) {
         {/* 3-B. End of Round Score Popup Overlay */}
         {gameState === GAME_STATES.END_ROUND && roundResultInfo && (
           <div className="petanque-overlay-modal">
-            <div className="petanque-result-card animate-fade-in">
-              <div className="text-3xl mb-1">
+            <div className="petanque-card-panel animate-fade-in">
+              <span className="petanque-card-icon-hero">
                 {roundResultInfo.winningTeam === TEAMS.PLAYER.id ? '🎉 🔵' : '😢 🔴'}
-              </div>
-              <h3 className="text-lg font-black text-amber-300 mb-1">
+              </span>
+              <h3 className="petanque-card-title">
                 {currentRound}엔드 종료!
               </h3>
               <p className="text-sm font-bold text-white mb-3">
@@ -603,28 +613,28 @@ export default function PetanqueGame({ onScoreSubmitted }) {
 
               {/* Bonus Information */}
               {roundResultInfo.roundBonus > 0 && (
-                <div className="p-2 mb-3 bg-amber-950/40 border border-amber-500/40 rounded-lg text-xs text-amber-300 font-bold flex items-center justify-center gap-1.5">
+                <div className="p-2 mb-3 bg-amber-950/50 border border-amber-500/50 rounded-xl text-xs text-amber-300 font-bold flex items-center justify-center gap-1.5">
                   <Sparkles className="w-4 h-4 text-amber-400" />
                   <span>정밀 투구 보너스 +{roundResultInfo.roundBonus}점 획득!</span>
                 </div>
               )}
 
               {/* Distances List */}
-              <div className="bg-slate-900/80 p-2.5 rounded-xl border border-slate-800 mb-4 text-xs space-y-1 max-h-28 overflow-y-auto">
+              <div className="bg-slate-900/90 p-3 rounded-xl border border-slate-800 mb-4 text-xs space-y-1.5 max-h-32 overflow-y-auto">
                 <div className="text-[11px] text-slate-400 font-bold mb-1">뷔슈(목표구)와의 최종 거리</div>
                 {roundResultInfo.distances.map((d, i) => (
                   <div key={i} className="flex justify-between items-center text-slate-200">
                     <span className={d.team === TEAMS.PLAYER.id ? 'text-blue-400 font-bold' : 'text-rose-400 font-bold'}>
                       {i + 1}위: {d.team === TEAMS.PLAYER.id ? '🔵 나' : '🔴 AI'}
                     </span>
-                    <span className="font-mono text-amber-200">{d.cmDist} cm</span>
+                    <span className="font-mono text-amber-300 font-bold">{d.cmDist} cm</span>
                   </div>
                 ))}
               </div>
 
               <button
                 onClick={handleNextRoundOrFinish}
-                className="w-full py-2.5 bg-amber-500 hover:bg-amber-400 text-slate-950 font-black rounded-xl shadow-md transition-all flex items-center justify-center gap-1.5 text-sm"
+                className="petanque-btn-primary"
               >
                 <span>{currentRound < MATCH_CONFIG.TOTAL_ROUNDS ? '다음 엔드 진행하기' : '최종 경기 결과 보기'}</span>
                 <ChevronRight className="w-4 h-4" />
@@ -636,40 +646,40 @@ export default function PetanqueGame({ onScoreSubmitted }) {
         {/* 3-C. Match Over & Hall of Fame Screen */}
         {gameState === GAME_STATES.GAME_OVER && (
           <div className="petanque-overlay-modal">
-            <div className="petanque-result-card animate-fade-in">
-              <div className="text-4xl mb-1">
+            <div className="petanque-card-panel animate-fade-in">
+              <span className="petanque-card-icon-hero">
                 {scores.player > scores.ai ? '🏆 🥇' : '🥈 👏'}
-              </div>
-              <h2 className="text-xl font-black text-amber-300 mb-1">
+              </span>
+              <h2 className="petanque-card-title">
                 {scores.player > scores.ai ? '도촌 페탕크 챔피언 등극!' : '경기 종료! 아쉬운 준우승'}
               </h2>
-              <p className="text-xs text-slate-300 mb-3">
+              <p className="petanque-card-desc" style={{ marginBottom: '10px' }}>
                 최종 스코어 {scores.player} : {scores.ai} (도촌 청팀 vs 백팀)
               </p>
 
               {/* Total Score Display */}
-              <div className="p-3 bg-amber-950/40 border border-amber-500/50 rounded-xl mb-4 text-center">
-                <div className="text-xs text-amber-400 font-bold">최종 획득 점수</div>
-                <div className="text-3xl font-black text-amber-300 font-mono tracking-tight mt-0.5">
+              <div className="petanque-score-result-box">
+                <div className="petanque-score-result-label">최종 획득 점수</div>
+                <div className="petanque-score-result-value">
                   {scores.totalFinalScore} <span className="text-sm font-bold text-amber-400">점</span>
                 </div>
               </div>
 
               {/* Hall of Fame Submission Form (Strict rule: Only when score > 100) */}
               {scores.totalFinalScore > 100 ? (
-                <div className="mb-4 bg-slate-900/80 p-3.5 rounded-xl border border-slate-700">
-                  <div className="text-xs font-bold text-amber-300 mb-2 flex items-center justify-center gap-1">
-                    <Trophy className="w-3.5 h-3.5 text-amber-400" />
+                <div className="petanque-hall-box">
+                  <div className="petanque-hall-title">
+                    <Trophy className="w-4 h-4 text-amber-400" />
                     <span>명예의 전당 랭킹 등록</span>
                   </div>
 
                   {isSubmitted ? (
-                    <div className="p-2 bg-emerald-950/60 border border-emerald-500/50 rounded-lg text-emerald-300 text-xs font-bold flex items-center justify-center gap-1.5">
+                    <div className="petanque-hall-success-pill">
                       <Sparkles className="w-4 h-4 text-emerald-400" />
                       <span>성공적으로 랭킹에 등록되었습니다!</span>
                     </div>
                   ) : (
-                    <form onSubmit={handleScoreSubmit} className="flex gap-2">
+                    <form onSubmit={handleScoreSubmit} className="petanque-hall-form-row">
                       <input
                         type="text"
                         value={playerName}
@@ -678,12 +688,12 @@ export default function PetanqueGame({ onScoreSubmitted }) {
                         maxLength={10}
                         required
                         disabled={isSubmitting}
-                        className="flex-1 px-3 py-2 bg-slate-800 border border-slate-600 rounded-lg text-white placeholder-slate-400 text-xs focus:outline-none focus:border-amber-400"
+                        className="petanque-hall-input"
                       />
                       <button
                         type="submit"
                         disabled={isSubmitting || !playerName.trim()}
-                        className="px-3.5 py-2 bg-amber-500 hover:bg-amber-400 disabled:opacity-50 text-slate-950 font-bold rounded-lg text-xs flex items-center gap-1 shadow transition-all"
+                        className="petanque-hall-btn-submit"
                       >
                         <Send className="w-3.5 h-3.5" />
                         <span>{isSubmitting ? '등록 중...' : '등록'}</span>
@@ -700,7 +710,7 @@ export default function PetanqueGame({ onScoreSubmitted }) {
               {/* Retry Button */}
               <button
                 onClick={() => startMatch(difficulty)}
-                className="w-full py-2.5 bg-slate-700 hover:bg-slate-600 text-white font-bold rounded-xl border border-slate-600 transition-all flex items-center justify-center gap-2 text-xs"
+                className="petanque-btn-secondary"
               >
                 <RotateCcw className="w-4 h-4 text-amber-400" />
                 <span>새 경기 다시하기</span>
@@ -710,67 +720,98 @@ export default function PetanqueGame({ onScoreSubmitted }) {
         )}
       </div>
 
-      {/* 4. Controls Gamepad Panel */}
-      {gameState === GAME_STATES.READY_THROW && currentTurnTeam === TEAMS.PLAYER.id && (
-        <div className="petanque-controls-panel">
-          <div className="petanque-controls-row">
-            {/* Shot Type Switcher */}
-            <div className="petanque-shot-selector">
-              <button
-                onClick={() => setShotType(SHOT_TYPES.POINTER)}
-                className={`petanque-shot-btn ${shotType === SHOT_TYPES.POINTER ? 'active-pointer' : ''}`}
-              >
-                🎯 포앵테 (정밀 롤링)
-              </button>
-              <button
-                onClick={() => setShotType(SHOT_TYPES.TIRER)}
-                className={`petanque-shot-btn ${shotType === SHOT_TYPES.TIRER ? 'active-tirer' : ''}`}
-              >
-                💥 티레 (타격 샷)
-              </button>
-            </div>
-
-            {/* Angle Slider */}
-            <div className="petanque-slider-group">
-              <span className="petanque-slider-label">각도: {aimAngle}°</span>
-              <input
-                type="range"
-                min="65"
-                max="115"
-                value={aimAngle}
-                onChange={(e) => setAimAngle(Number(e.target.value))}
-                className="petanque-slider-range"
-              />
-            </div>
-
-            {/* Power Slider */}
-            <div className="petanque-slider-group">
-              <span className="petanque-slider-label">파워: {Math.round(aimPower)}%</span>
-              <input
-                type="range"
-                min="25"
-                max="98"
-                value={aimPower}
-                onChange={(e) => setAimPower(Number(e.target.value))}
-                className="petanque-slider-range"
-              />
-            </div>
+      {/* 4. High-Visibility Tablet & Touch On-Screen Controls Panel (하단 아케이드 패드) */}
+      <div className="petanque-controls-panel">
+        <div className="petanque-controls-top-row">
+          {/* Shot Type Switcher */}
+          <div className="petanque-shot-selector">
+            <button
+              onClick={() => setShotType(SHOT_TYPES.POINTER)}
+              className={`petanque-shot-btn ${shotType === SHOT_TYPES.POINTER ? 'active-pointer' : ''}`}
+            >
+              🎯 포앵테 (롤링)
+            </button>
+            <button
+              onClick={() => setShotType(SHOT_TYPES.TIRER)}
+              className={`petanque-shot-btn ${shotType === SHOT_TYPES.TIRER ? 'active-tirer' : ''}`}
+            >
+              💥 티레 (타격)
+            </button>
           </div>
 
-          {/* Launch Action Button with Hold-to-Charge Support */}
-          <button
-            onPointerDown={startCharging}
-            onPointerUp={stopChargingAndThrow}
-            onPointerLeave={stopChargingAndThrow}
-            className="petanque-btn-launch"
-          >
-            <Target className="w-5 h-5" />
-            <span>
-              {isChargingPower ? '🔥 게이지 충전 중! (손을 떼면 발사)' : '🚀 쇠구슬 투구 (스페이스바 / 터치 홀드)'}
-            </span>
-          </button>
+          {/* Angle Stepper & Slider Cluster for Tablets */}
+          <div className="petanque-arcade-cluster">
+            <span className="petanque-cluster-label">각도 {aimAngle}°</span>
+            <button
+              onClick={() => stepAngle(-3)}
+              className="petanque-cluster-btn"
+              title="각도 좌회전 (←)"
+            >
+              <ChevronLeft className="w-4 h-4" />
+            </button>
+            <input
+              type="range"
+              min="65"
+              max="115"
+              value={aimAngle}
+              onChange={(e) => setAimAngle(Number(e.target.value))}
+              className="petanque-slider-range"
+            />
+            <button
+              onClick={() => stepAngle(3)}
+              className="petanque-cluster-btn"
+              title="각도 우회전 (→)"
+            >
+              <ChevronRight className="w-4 h-4" />
+            </button>
+          </div>
+
+          {/* Power Stepper & Slider Cluster for Tablets */}
+          <div className="petanque-arcade-cluster">
+            <span className="petanque-cluster-label">파워 {Math.round(aimPower)}%</span>
+            <button
+              onClick={() => stepPower(-5)}
+              className="petanque-cluster-btn"
+              title="파워 감소"
+            >
+              <Minus className="w-4 h-4" />
+            </button>
+            <input
+              type="range"
+              min="25"
+              max="98"
+              value={aimPower}
+              onChange={(e) => setAimPower(Number(e.target.value))}
+              className="petanque-slider-range"
+            />
+            <button
+              onClick={() => stepPower(5)}
+              className="petanque-cluster-btn"
+              title="파워 증가"
+            >
+              <Plus className="w-4 h-4" />
+            </button>
+          </div>
         </div>
-      )}
+
+        {/* Big Launch Action Button with Hold-to-Charge Support */}
+        <button
+          onPointerDown={startCharging}
+          onPointerUp={stopChargingAndThrow}
+          onPointerLeave={stopChargingAndThrow}
+          disabled={gameState !== GAME_STATES.READY_THROW || currentTurnTeam !== TEAMS.PLAYER.id}
+          className={`petanque-btn-launch ${isChargingPower ? 'charging' : ''}`}
+        >
+          <Target className="w-5 h-5" />
+          <span>
+            {gameState !== GAME_STATES.READY_THROW
+              ? (gameState === GAME_STATES.BALLS_MOVING ? '⏳ 공이 이동 중입니다...' : '대기 중')
+              : isChargingPower
+                ? '🔥 게이지 충전 중! (손을 떼면 발사)'
+                : '🚀 쇠구슬 투구 (스페이스바 / 터치 홀드)'}
+          </span>
+        </button>
+      </div>
 
       {/* How to Play Modal */}
       <PetanqueHowToPlayModal

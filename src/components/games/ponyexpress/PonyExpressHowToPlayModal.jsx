@@ -114,9 +114,19 @@ export default function PonyExpressHowToPlayModal({ isOpen, onClose }) {
         <div className="px-6 py-4 bg-slate-950 border-t border-slate-800 flex justify-end">
           <button
             onClick={onClose}
-            className="px-5 py-2 bg-gradient-to-r from-amber-500 to-amber-600 hover:from-amber-400 hover:to-amber-500 text-slate-950 font-bold rounded-xl shadow-lg transition-all"
+            style={{
+              background: 'linear-gradient(135deg, #f59e0b, #d97706)',
+              border: '1px solid #fbbf24',
+              borderRadius: '12px',
+              color: '#0f172a',
+              padding: '10px 20px',
+              fontWeight: 800,
+              cursor: 'pointer',
+              boxShadow: '0 4px 12px rgba(217, 119, 6, 0.4)',
+              transition: 'all 0.15s ease'
+            }}
           >
-            확인 및 게임 시작
+            확인 및 게임 시작 🏇
           </button>
         </div>
       </div>

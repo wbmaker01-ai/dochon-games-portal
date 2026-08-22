@@ -3,11 +3,49 @@
 
 export const CHANGELOG_DATA = [
   {
+    version: 'v1.39.4',
+    date: '2026-08-22',
+    title: '[도촌 페탕크 마스터] 프리미엄 아케이드 디자인 버튼 전면 개편 및 태블릿/모바일 전용 하단 조작 패널 탑재',
+    badge: 'LATEST',
+    badgeColor: 'emerald',
+    items: [
+      {
+        tag: 'UI OVERHAUL',
+        tagColor: 'amber',
+        text: '[기본 흰색 버튼 전면 교체] 인트로 카드, AI 난이도 선택(초급/중급/고급), 경기 시작하기, 게임 방법, 결과 화면 및 명예의 전당 입력 폼의 모든 기본 버튼을 고대비 골드/다크 슬레이트 아케이드 디자인 버튼으로 전면 개편'
+      },
+      {
+        tag: 'TABLET GAMEPAD',
+        tagColor: 'teal',
+        text: '[태블릿/터치 전용 하단 조작 패널 탑재] 화면 하단에 ◀/▶ 각도 조준 스텝퍼, 🎯포앵테/💥티레 원터치 전환 탭, ➖/➕ 파워 조절 스텝퍼 및 🚀대형 투구 액션 버튼을 상시 배치하여 태블릿에서도 완벽한 플레이 지원'
+      }
+    ]
+  },
+  {
+    version: 'v1.39.3',
+    date: '2026-08-22',
+    title: '[UI/UX 디자인] 전역 기본 버튼 리셋 및 테마별 전용 네온 디자인 버튼 전면 개편',
+    badge: 'UPDATE',
+    badgeColor: 'blue',
+    items: [
+      {
+        tag: 'GLOBAL RESET',
+        tagColor: 'emerald',
+        text: '[브라우저 기본 흰색 버튼 영구 제거] 전역 CSS(index.css)에 button reset 및 테마 디자인 시스템을 구축하여 모든 모달, 오버레이, 게임 화면에서 흰색 각진 기본 버튼이 노출되지 않도록 전면 개선'
+      },
+      {
+        tag: 'THEME BUTTONS',
+        tagColor: 'amber',
+        text: '[게임별 전용 디자인 버튼 탑재] 도촌 UFO 탈출작전(작전 시작하기, 게임 방법, 등록, 다시하기) 및 도촌 페탕크 마스터 등 신작 게임 내 모든 액션 버튼을 테마 컬러 그라디언트 + 네온 글로우 + 마이크로 인터랙션 버튼으로 전면 교체'
+      }
+    ]
+  },
+  {
     version: 'v1.39.2',
     date: '2026-08-22',
     title: '[도촌 천산갑의 모험] 스테이지 클리어 시 스페이스바 / 엔터 키로 다음 스테이지 즉시 이동 기능 지원',
-    badge: 'LATEST',
-    badgeColor: 'emerald',
+    badge: 'UPDATE',
+    badgeColor: 'blue',
     items: [
       {
         tag: 'CONTROLS & UX',
