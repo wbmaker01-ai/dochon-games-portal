@@ -244,8 +244,17 @@ export const PLAYABLE_GAMES = [
     category: '퍼즐',
     imageSrc: getThumb('panipuri.jpg'),
     isPlayable: true,
-    badgeText: '🫓 NEW 28위',
+    badgeText: '🫓 28위',
     description: '바삭한 푸리에 4가지 맛있는 소스를 채워 손님들의 주문을 빠르게 서빙하는 인도 길거리 음식 타이쿤 퍼즐!'
+  },
+  {
+    id: 'memory',
+    title: '도촌 기억력 마스터',
+    category: '퍼즐',
+    imageSrc: getThumb('memory.jpg'),
+    isPlayable: true,
+    badgeText: '🧠 NEW 29위',
+    description: '뒤집힌 카드의 짝을 맞추고 빛나는 멜로디의 순서를 기억하는 2가지 두뇌 트레이닝 퍼즐!'
   }
 ];
 
@@ -297,13 +306,6 @@ export const COMING_SOON_GAMES = [
     title: '도촌 로봇 사이버 어드벤처',
     category: '어드벤처',
     imageSrc: getThumb('robotadventure.jpg'),
-    isPlayable: false
-  },
-  {
-    id: 'memory',
-    title: '기억력 게임',
-    category: '퍼즐',
-    imageSrc: getThumb('memory.jpg'),
     isPlayable: false
   }
 ];

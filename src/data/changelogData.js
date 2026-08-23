@@ -3,11 +3,40 @@
 
 export const CHANGELOG_DATA = [
   {
+    version: 'v1.43.0',
+    date: '2026-08-23',
+    title: '🧠 [신규 정식 게임] 29번째 두뇌 트레이닝 아케이드 「도촌 기억력 마스터」 그랜드 오픈',
+    badge: 'LATEST',
+    badgeColor: 'emerald',
+    items: [
+      {
+        tag: 'NEW GAME',
+        tagColor: 'emerald',
+        text: '[도촌 기억력 마스터 정식 출시] 3D 카드 짝 맞추기(Card Match)와 구글 두들 스타일 멜로디 & 순서 기억(Simon Rhythm) 듀얼 모드를 지원하는 신규 두뇌 트레이닝 퍼즐 게임 전격 개장'
+      },
+      {
+        tag: 'DUAL MODE',
+        tagColor: 'blue',
+        text: '[다채로운 테마 및 난이도] 동물·디저트·우주·학교생활 4대 카드 테마와 3단계 난이도(초급/중급/고급), 4가지 동물 캐릭터 멜로디 악기 사운드 시퀀스 챌린지 탑재'
+      },
+      {
+        tag: 'WEB AUDIO SYNTH',
+        tagColor: 'purple',
+        text: '[자체 Web Audio API 사운드 엔진] 외부 음원 에셋 다운로드 없이 브라우저에서 맑고 청명한 실로폰/피아노 음계, 카드 플립, 매칭 콤보 화음, 클리어 팡파르 효과음 실시간 합성 연주'
+      },
+      {
+        tag: 'LEADERBOARD',
+        tagColor: 'amber',
+        text: '[도촌초 명예의 전당 연동] 100점 초과 달성 시 학교 실시간 랭킹 등록 및 도촌 기억력 마스터 전용 리더보드 탭 자동 연동 지원'
+      }
+    ]
+  },
+  {
     version: 'v1.42.1',
     date: '2026-08-23',
     title: '[도촌 페탕크 마스터] AI 턴 투구 상태 머신 락 강화 및 공 중복 발사 버그 근절',
-    badge: 'LATEST',
-    badgeColor: 'emerald',
+    badge: 'UPDATE',
+    badgeColor: 'blue',
     items: [
       {
         tag: 'STATE MACHINE LOCK',

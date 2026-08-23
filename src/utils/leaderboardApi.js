@@ -464,6 +464,13 @@ function getLocalLeaderboardFallback(gameKey) {
       { id: 'bt3', name: '이타로 (5B)', score: 1950, date: '2026-08-21' },
       { id: 'bt4', name: '박밀크 (4C)', score: 1500, date: '2026-08-21' },
       { id: 'bt5', name: '최흑당 (3A)', score: 1100, date: '2026-08-21' }
+    ],
+    memory: [
+      { id: 'mem1', name: '김홍년선생님', score: 4800, date: '2026-08-23' },
+      { id: 'mem2', name: '김두뇌 (6A)', score: 3950, date: '2026-08-23' },
+      { id: 'mem3', name: '이기억 (5B)', score: 3100, date: '2026-08-23' },
+      { id: 'mem4', name: '박퍼즐 (4C)', score: 2250, date: '2026-08-22' },
+      { id: 'mem5', name: '최집중 (3A)', score: 1600, date: '2026-08-22' }
     ]
   };
 

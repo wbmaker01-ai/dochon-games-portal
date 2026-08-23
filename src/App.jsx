@@ -27,6 +27,7 @@ import RoswellGame from './components/games/roswell/RoswellGame';
 import PetanqueGame from './components/games/petanque/PetanqueGame';
 import HalfMoonGame from './components/games/halfmoon/HalfMoonGame';
 import PaniPuriGame from './components/games/panipuri/PaniPuriGame';
+import MemoryGame from './components/games/memory/MemoryGame';
 import GameCard from './components/GameCard';
 import LeaderboardModal from './components/LeaderboardModal';
 import ChangelogModal from './components/ChangelogModal';
@@ -604,6 +605,9 @@ export default function App() {
               )}
               {activeGame === 'panipuri' && (
                 <PaniPuriGame onScoreSubmitted={() => openInPageLeaderboardModal('panipuri')} />
+              )}
+              {activeGame === 'memory' && (
+                <MemoryGame onScoreSubmitted={() => openInPageLeaderboardModal('memory')} />
               )}
             </div>
           </div>
