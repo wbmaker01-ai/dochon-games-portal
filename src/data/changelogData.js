@@ -3,11 +3,55 @@
 
 export const CHANGELOG_DATA = [
   {
+    version: 'v1.42.0',
+    date: '2026-08-23',
+    title: '신규 순차 개장 준비(Coming Soon) 명작 구글 두들 라인업 7종 등록 & 고화질 3D 썸네일 탑재',
+    badge: 'LATEST',
+    badgeColor: 'emerald',
+    items: [
+      {
+        tag: 'COMING SOON',
+        tagColor: 'amber',
+        text: '[도촌 영혼 대결 (The Great Ghoul Duel 모티브)] 영혼 불꽃을 모으고 꼬리를 가로채는 스릴 만점의 4:4 유령 팀 태그 배틀 개장 준비 라인업 등록 및 3D 썸네일 탑재'
+      },
+      {
+        tag: 'COMING SOON',
+        tagColor: 'blue',
+        text: '[도촌 바흐 AI 작곡기 (Celebrating J.S. Bach 모티브)] 멜로디 음표를 입력하면 머신러닝 AI가 4성부 클래식 하모니를 자동 작곡하는 음악 퍼즐 개장 준비 라인업 등록 및 3D 썸네일 탑재'
+      },
+      {
+        tag: 'COMING SOON',
+        tagColor: 'purple',
+        text: '[도촌 레트로 신디사이저 (Bob Moog Synth 모티브)] 오실레이터와 필터 노브를 돌려 전자음을 디자인하고 4트랙으로 녹음하는 아날로그 사운드 스튜디오 개장 준비 라인업 등록 및 3D 썸네일 탑재'
+      },
+      {
+        tag: 'COMING SOON',
+        tagColor: 'emerald',
+        text: '[도촌 3D 루빅스 큐브 (Rubik\'s Cube 40th 모티브)] 브라우저에서 3차원 입체 큐브를 직접 회전시키고 맞춰 나가는 공간지각 3D 두뇌 퍼즐 개장 준비 라인업 등록 및 3D 썸네일 탑재'
+      },
+      {
+        tag: 'COMING SOON',
+        tagColor: 'teal',
+        text: '[도촌 타디스 탈출작전 (Doctor Who 50th 모티브)] 외계 악당들의 시야를 피해 시공간 미로에서 부품을 모아 타디스로 탈출하는 레트로 잠입 어드벤처 개장 준비 라인업 등록 및 3D 썸네일 탑재'
+      },
+      {
+        tag: 'COMING SOON',
+        tagColor: 'blue',
+        text: '[도촌 튜링 암호 머신 (Alan Turing 100th 모티브)] 0과 1 테이프와 비트 논리 명령어를 프로그래밍하여 암호를 해독하는 컴퓨터 과학 퍼즐 개장 준비 라인업 등록 및 3D 썸네일 탑재'
+      },
+      {
+        tag: 'COMING SOON',
+        tagColor: 'amber',
+        text: '[도촌 로봇 사이버 어드벤처 (Stanisław Lem 60th 모티브)] 신비로운 로봇 행성을 탐험하며 사물을 조작하고 수수께끼를 푸는 포인트 앤 클릭 어드벤처 개장 준비 라인업 등록 및 3D 썸네일 탑재'
+      }
+    ]
+  },
+  {
     version: 'v1.41.1',
     date: '2026-08-23',
     title: '[도촌 페탕크 마스터] 조준 각도 범위 30°~150°(좌우 ±60° 폭) 대폭 확장 및 사이드 쿠션 샷 지원',
-    badge: 'LATEST',
-    badgeColor: 'emerald',
+    badge: 'UPDATE',
+    badgeColor: 'blue',
     items: [
       {
         tag: 'WIDE ANGLE AIM',

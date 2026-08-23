@@ -251,6 +251,55 @@ export const PLAYABLE_GAMES = [
 
 export const COMING_SOON_GAMES = [
   {
+    id: 'ghoulduel',
+    title: '도촌 영혼 대결',
+    category: '액션',
+    imageSrc: getThumb('ghoulduel.jpg'),
+    isPlayable: false
+  },
+  {
+    id: 'bachai',
+    title: '도촌 바흐 AI 작곡기',
+    category: '퍼즐',
+    imageSrc: getThumb('bachai.jpg'),
+    isPlayable: false
+  },
+  {
+    id: 'moogsynth',
+    title: '도촌 레트로 신디사이저',
+    category: '클래식',
+    imageSrc: getThumb('moogsynth.jpg'),
+    isPlayable: false
+  },
+  {
+    id: 'rubikscube',
+    title: '도촌 3D 루빅스 큐브',
+    category: '퍼즐',
+    imageSrc: getThumb('rubikscube.jpg'),
+    isPlayable: false
+  },
+  {
+    id: 'doctorwho',
+    title: '도촌 타디스 탈출작전',
+    category: '어드벤처',
+    imageSrc: getThumb('doctorwho.jpg'),
+    isPlayable: false
+  },
+  {
+    id: 'turingmachine',
+    title: '도촌 튜링 암호 머신',
+    category: '퍼즐',
+    imageSrc: getThumb('turingmachine.jpg'),
+    isPlayable: false
+  },
+  {
+    id: 'robotadventure',
+    title: '도촌 로봇 사이버 어드벤처',
+    category: '어드벤처',
+    imageSrc: getThumb('robotadventure.jpg'),
+    isPlayable: false
+  },
+  {
     id: 'memory',
     title: '기억력 게임',
     category: '퍼즐',
