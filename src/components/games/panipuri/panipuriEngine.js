@@ -140,6 +140,9 @@ export class PaniPuriEngine {
   addPuri(flavor) {
     if (!this.isPlaying || this.isGameOver) return;
 
+    const flavorId = typeof flavor === 'string' ? flavor : (flavor?.id || 'mint');
+    const flavorObj = PANI_FLAVORS[flavorId.toUpperCase()] || PANI_FLAVORS.MINT;
+
     if (this.preparedPuris.length >= PREP_TRAY_MAX_PURIS) {
       haptics.light();
       this.addFloatingText('접시가 가득 찼어요!', 660, 360, '#F59E0B', 14);
@@ -147,14 +150,14 @@ export class PaniPuriEngine {
     }
 
     panipuriAudio.playCrack();
-    panipuriAudio.playSplash(flavor.id);
+    panipuriAudio.playSplash(flavorId);
     haptics.light();
 
-    this.addParticle(660, 410, flavor.color, 6, 3, 'liquid');
+    this.addParticle(660, 410, flavorObj.color, 6, 3, 'liquid');
 
     this.preparedPuris.push({
       id: Date.now() + Math.random(),
-      flavorKey: flavor.id
+      flavorKey: flavorId
     });
 
     this.notifyState();
@@ -377,9 +380,15 @@ export class PaniPuriEngine {
           this.notifyState();
         }
       }
+
+      // 4. Regular UI State Sync (every 80ms)
+      if (!this.lastUiSyncTime || currentTime - this.lastUiSyncTime > 80) {
+        this.lastUiSyncTime = currentTime;
+        this.notifyState();
+      }
     }
 
-    // 4. Render All Visuals
+    // 5. Render All Visuals
     this.render();
   }
 

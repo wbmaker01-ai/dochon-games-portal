@@ -1,6 +1,7 @@
-// Dochon Pani Puri Master - Main Game Controller Component (Robust State & Render Architecture)
+// Dochon Pani Puri Master - React UI Wrapper
+// Connects UI controls directly to the PaniPuriEngine Single Source of Truth
 
-import React, { useState, useEffect, useRef, useCallback } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { PaniPuriEngine } from './panipuriEngine';
 import { panipuriAudio } from './panipuriAudio';
 import PaniPuriHowToPlayModal from './PaniPuriHowToPlayModal';
@@ -9,32 +10,18 @@ import {
   CANVAS_HEIGHT,
   PANI_FLAVORS,
   FLAVOR_LIST,
-  CUSTOMER_PROFILES,
-  INITIAL_TIME_LIMIT,
-  MAX_TIME_LIMIT,
-  TIME_BONUS_ON_SUCCESS,
-  TIME_PENALTY_ON_WRONG,
-  BASE_SCORE_PER_PURI,
-  PERFECT_ORDER_BONUS,
-  COMBO_MULTIPLIER_STEP,
-  FEVER_DURATION,
-  FEVER_SCORE_MULTIPLIER,
-  FEVER_REQ_POINTS,
   PREP_TRAY_MAX_PURIS
 } from './panipuriConstants';
 import { submitScoreToDB } from '../../../utils/leaderboardApi';
-import { haptics } from '../../../utils/haptics';
 import {
   Volume2,
   VolumeX,
   HelpCircle,
   RotateCcw,
   Trophy,
-  Star,
   Sparkles,
   Flame,
   Clock,
-  Award,
   Crown,
   Play,
   CheckCircle2,
@@ -48,13 +35,21 @@ export default function PaniPuriGame({ onScoreSubmitted }) {
   const engineRef = useRef(null);
   const animFrameIdRef = useRef(null);
 
-  // Game Lifecycle States
-  const [isPlaying, setIsPlaying] = useState(false);
-  const [isGameOver, setIsGameOver] = useState(false);
-  const [score, setScore] = useState(0);
-  const [combo, setCombo] = useState(0);
-  const [servedCount, setServedCount] = useState(0);
-  const [timeLeft, setTimeLeft] = useState(INITIAL_TIME_LIMIT);
+  // Engine Synced States for UI Rendering
+  const [gameState, setGameState] = useState({
+    isPlaying: false,
+    isGameOver: false,
+    score: 0,
+    combo: 0,
+    servedCount: 0,
+    timeLeft: 60,
+    feverGauge: 0,
+    isFever: false,
+    currentCustomer: null,
+    customerPatience: 1.0,
+    preparedPuris: []
+  });
+
   const [highScore, setHighScore] = useState(() => {
     try {
       return Number(localStorage.getItem('dochon_panipuri_highscore')) || 0;
@@ -62,16 +57,6 @@ export default function PaniPuriGame({ onScoreSubmitted }) {
       return 0;
     }
   });
-
-  // Fever Mode States
-  const [feverGauge, setFeverGauge] = useState(0);
-  const [isFever, setIsFever] = useState(false);
-  const feverTimerRef = useRef(null);
-
-  // In-Game Cooking & Customer States
-  const [currentCustomer, setCurrentCustomer] = useState(null);
-  const [customerPatience, setCustomerPatience] = useState(1.0); // 1.0 down to 0
-  const [preparedPuris, setPreparedPuris] = useState([]);
 
   // Audio & How to play modal
   const [isMuted, setIsMuted] = useState(false);
@@ -83,198 +68,87 @@ export default function PaniPuriGame({ onScoreSubmitted }) {
   const [isSubmitted, setIsSubmitted] = useState(false);
   const [submitError, setSubmitError] = useState('');
 
-  // Latest State Ref for 60fps Animation Loop without re-creating engine
-  const stateRef = useRef({
-    currentCustomer: null,
-    customerPatience: 1.0,
-    preparedPuris: [],
-    isFever: false,
-    score: 0,
-    combo: 0
-  });
+  // Handle Game Over
+  const handleGameOverCallback = (finalScore, finalServed) => {
+    setHighScore(prev => {
+      if (finalScore > prev) {
+        try {
+          localStorage.setItem('dochon_panipuri_highscore', String(finalScore));
+        } catch (e) {}
+        return finalScore;
+      }
+      return prev;
+    });
+  };
 
-  useEffect(() => {
-    stateRef.current = {
-      currentCustomer,
-      customerPatience,
-      preparedPuris,
-      isFever,
-      score,
-      combo
-    };
-  }, [currentCustomer, customerPatience, preparedPuris, isFever, score, combo]);
-
-  // Generate a realistic customer order based on difficulty
-  const spawnNewCustomer = useCallback((currentServed = 0) => {
-    const profile = CUSTOMER_PROFILES[Math.floor(Math.random() * CUSTOMER_PROFILES.length)];
-    
-    // Order difficulty grows with served count
-    let distinctFlavorsCount = 1;
-    if (currentServed >= 3) distinctFlavorsCount = 2;
-    if (currentServed >= 8) distinctFlavorsCount = Math.random() > 0.4 ? 3 : 2;
-
-    // Pick random distinct flavors
-    const shuffledFlavors = [...FLAVOR_LIST].sort(() => Math.random() - 0.5);
-    const orderItems = [];
-
-    for (let i = 0; i < distinctFlavorsCount; i++) {
-      const flavor = shuffledFlavors[i];
-      const maxCount = distinctFlavorsCount === 1 ? (currentServed > 5 ? 3 : 2) : (Math.random() > 0.5 ? 2 : 1);
-      orderItems.push({
-        flavorKey: flavor.id,
-        count: maxCount
-      });
-    }
-
-    const newCustomer = {
-      ...profile,
-      order: orderItems,
-      maxPatience: profile.patienceTime,
-      remainingPatience: profile.patienceTime
-    };
-
-    setCurrentCustomer(newCustomer);
-    setCustomerPatience(1.0);
-  }, []);
-
-  // Initialize Canvas & Engine ONLY ONCE
+  // Initialize Canvas & Engine Loop ONLY ONCE
   useEffect(() => {
     if (!canvasRef.current) return;
     const canvas = canvasRef.current;
     canvas.width = CANVAS_WIDTH;
     canvas.height = CANVAS_HEIGHT;
-    const engine = new PaniPuriEngine(canvas);
+
+    const engine = new PaniPuriEngine(
+      canvas,
+      (newState) => setGameState(newState),
+      handleGameOverCallback
+    );
     engineRef.current = engine;
 
-    const renderLoop = () => {
+    // Continuous 60fps Loop using performance.now()
+    const loop = (timestamp) => {
       if (engineRef.current) {
-        engineRef.current.render(stateRef.current);
+        engineRef.current.tick(timestamp);
       }
-      animFrameIdRef.current = requestAnimationFrame(renderLoop);
+      animFrameIdRef.current = requestAnimationFrame(loop);
     };
-    animFrameIdRef.current = requestAnimationFrame(renderLoop);
+    animFrameIdRef.current = requestAnimationFrame(loop);
 
     return () => {
       if (animFrameIdRef.current) {
         cancelAnimationFrame(animFrameIdRef.current);
       }
+      if (engineRef.current) {
+        engineRef.current.endGame();
+      }
     };
   }, []);
 
-  // Customer Timeout handler
-  const handleCustomerLeaveTimeout = useCallback(() => {
-    panipuriAudio.playWrong();
-    haptics.heavy();
-    setCombo(0);
-    setTimeLeft(t => Math.max(0, t - TIME_PENALTY_ON_WRONG));
-    
-    if (engineRef.current) {
-      engineRef.current.addFloatingText('손님이 기다리다 떠났어요! 💦', 240, 180, '#EF4444', 20);
-    }
-    setPreparedPuris([]);
-    spawnNewCustomer(servedCount);
-  }, [servedCount, spawnNewCustomer]);
-
-  // Main Game Timer & Customer Patience Tick
-  useEffect(() => {
-    if (!isPlaying || isGameOver) return;
-
-    const timer = setInterval(() => {
-      // 1. Overall Game Time
-      setTimeLeft(prev => {
-        if (prev <= 0.1) {
-          clearInterval(timer);
-          handleGameOver();
-          return 0;
-        }
-        return prev - 0.1;
-      });
-
-      // 2. Customer Patience Decay
-      setCustomerPatience(prev => {
-        const decayRate = 0.1 / (currentCustomer?.maxPatience || 14);
-        const next = prev - decayRate;
-        if (next <= 0) {
-          handleCustomerLeaveTimeout();
-          return 1.0;
-        }
-        return next;
-      });
-    }, 100);
-
-    return () => clearInterval(timer);
-  }, [isPlaying, isGameOver, currentCustomer, handleCustomerLeaveTimeout]);
-
-  // Start / Restart Game
+  // Controls directly calling Engine methods
   const handleStartGame = () => {
-    setIsPlaying(true);
-    setIsGameOver(false);
-    setScore(0);
-    setCombo(0);
-    setServedCount(0);
-    setTimeLeft(INITIAL_TIME_LIMIT);
-    setFeverGauge(0);
-    setIsFever(false);
-    setPreparedPuris([]);
     setIsSubmitted(false);
     setSubmitError('');
-
-    panipuriAudio.startBgm();
-    spawnNewCustomer(0);
-  };
-
-  // End Game
-  const handleGameOver = () => {
-    setIsPlaying(false);
-    setIsGameOver(true);
-    panipuriAudio.stopBgm();
-    panipuriAudio.playGameOver();
-    haptics.success();
-
-    setScore(currentScore => {
-      setHighScore(prev => {
-        if (currentScore > prev) {
-          try {
-            localStorage.setItem('dochon_panipuri_highscore', String(currentScore));
-          } catch (e) {}
-          return currentScore;
-        }
-        return prev;
-      });
-      return currentScore;
-    });
-  };
-
-  // Add Puri to Tray (Chef clicks a Pot)
-  const handlePotClick = (flavor) => {
-    if (!isPlaying || isGameOver) return;
-
-    if (preparedPuris.length >= PREP_TRAY_MAX_PURIS) {
-      haptics.light();
-      if (engineRef.current) {
-        engineRef.current.addFloatingText('접시가 가득 찼어요!', 660, 360, '#F59E0B', 14);
-      }
-      return;
-    }
-
-    panipuriAudio.playCrack();
-    panipuriAudio.playSplash(flavor.id);
-    haptics.light();
-
     if (engineRef.current) {
-      engineRef.current.addParticle(660, 410, flavor.color, 6, 3, 'liquid');
+      engineRef.current.startGame();
     }
-
-    const newPuri = {
-      id: Date.now() + Math.random(),
-      flavorKey: flavor.id
-    };
-    setPreparedPuris(prev => [...prev, newPuri]);
   };
 
-  // Direct Canvas Click Handling
+  const handlePotClick = (flavor) => {
+    if (engineRef.current) {
+      engineRef.current.addPuri(flavor);
+    }
+  };
+
+  const handleRemovePuri = (index) => {
+    if (engineRef.current) {
+      engineRef.current.removePuri(index);
+    }
+  };
+
+  const handleClearTray = () => {
+    if (engineRef.current) {
+      engineRef.current.clearTray();
+    }
+  };
+
+  const handleServe = () => {
+    if (engineRef.current) {
+      engineRef.current.serveDish();
+    }
+  };
+
   const handleCanvasClick = (e) => {
-    if (!isPlaying || isGameOver || !canvasRef.current || !engineRef.current) return;
+    if (!canvasRef.current || !engineRef.current) return;
     const rect = canvasRef.current.getBoundingClientRect();
     const scaleX = CANVAS_WIDTH / rect.width;
     const scaleY = CANVAS_HEIGHT / rect.height;
@@ -283,158 +157,42 @@ export default function PaniPuriGame({ onScoreSubmitted }) {
 
     const clickedPot = engineRef.current.getClickedPot(canvasX, canvasY);
     if (clickedPot) {
-      handlePotClick(clickedPot);
+      engineRef.current.addPuri(clickedPot);
     }
   };
 
-  // Remove single puri from tray
-  const handleRemovePuri = (indexToRemove) => {
-    if (!isPlaying || isGameOver) return;
-    panipuriAudio.playCrack();
-    haptics.light();
-    setPreparedPuris(prev => prev.filter((_, idx) => idx !== indexToRemove));
-  };
-
-  // Clear all puris on tray
-  const handleClearTray = () => {
-    if (!isPlaying || isGameOver || preparedPuris.length === 0) return;
-    haptics.medium();
-    setPreparedPuris([]);
-    if (engineRef.current) {
-      engineRef.current.addFloatingText('접시 비움', 660, 410, '#94A3B8', 14);
-    }
-  };
-
-  // Trigger Golden Fever Mode
-  const triggerFeverMode = () => {
-    setIsFever(true);
-    panipuriAudio.playFeverStart();
-    haptics.success();
-
-    if (engineRef.current) {
-      engineRef.current.addFloatingText('✨ GOLDEN FEVER TIME! (점수 2배) ✨', CANVAS_WIDTH / 2, 120, '#FEF08A', 26);
-    }
-
-    if (feverTimerRef.current) clearTimeout(feverTimerRef.current);
-    feverTimerRef.current = setTimeout(() => {
-      setIsFever(false);
-    }, FEVER_DURATION * 1000);
-  };
-
-  // Serve Dish to Customer!
-  const handleServe = () => {
-    if (!isPlaying || isGameOver || !currentCustomer) return;
-
-    if (preparedPuris.length === 0) {
-      haptics.light();
-      if (engineRef.current) {
-        engineRef.current.addFloatingText('파니 푸리를 먼저 담으세요!', 660, 360, '#F59E0B', 14);
-      }
-      return;
-    }
-
-    // Count prepared puris by flavor
-    const preparedCounts = {};
-    preparedPuris.forEach(p => {
-      preparedCounts[p.flavorKey] = (preparedCounts[p.flavorKey] || 0) + 1;
-    });
-
-    // Check against customer order
-    let isMatch = true;
-    let totalRequiredCount = 0;
-
-    currentCustomer.order.forEach(item => {
-      totalRequiredCount += item.count;
-      if (!isFever) {
-        if ((preparedCounts[item.flavorKey] || 0) !== item.count) {
-          isMatch = false;
-        }
-      }
-    });
-
-    // In non-fever mode, total count must match exactly
-    if (!isFever && preparedPuris.length !== totalRequiredCount) {
-      isMatch = false;
-    }
-
-    // In Fever mode: any Puri combination works as long as count matches!
-    if (isFever && preparedPuris.length < totalRequiredCount) {
-      isMatch = false;
-    }
-
-    if (isMatch) {
-      // 🌟 SUCCESSFUL SERVE!
-      const newCombo = combo + 1;
-      const nextServed = servedCount + 1;
-      
-      setCombo(newCombo);
-      setServedCount(nextServed);
-
-      // Score Calculation
-      const basePoints = preparedPuris.length * BASE_SCORE_PER_PURI;
-      const speedBonus = Math.floor(customerPatience * SPEED_BONUS_MAX);
-      const comboMultiplier = 1 + (newCombo - 1) * COMBO_MULTIPLIER_STEP;
-      const feverMultiplier = isFever ? FEVER_SCORE_MULTIPLIER : 1.0;
-      
-      const earnedScore = Math.floor((basePoints + PERFECT_ORDER_BONUS + speedBonus) * comboMultiplier * feverMultiplier);
-      setScore(prev => prev + earnedScore);
-
-      // Time Bonus
-      setTimeLeft(t => Math.min(MAX_TIME_LIMIT, t + TIME_BONUS_ON_SUCCESS));
-
-      // Audio & Haptics & Particles
-      panipuriAudio.playServeSuccess();
-      if (newCombo >= 2) {
-        panipuriAudio.playCombo(newCombo);
-      }
-      haptics.medium();
-
-      if (engineRef.current) {
-        engineRef.current.addFloatingText(`+${earnedScore}!`, 380, 180, '#FACC15', 24);
-        if (newCombo >= 3) {
-          engineRef.current.addFloatingText(`🔥 ${newCombo} 콤보!`, 380, 215, '#F97316', 18);
-        }
-        engineRef.current.addParticle(380, 200, '#FDE047', 14, 5, 'sparkle');
-      }
-
-      // Fever Gauge Progress
-      if (!isFever) {
-        setFeverGauge(prev => {
-          const next = prev + 25;
-          if (next >= FEVER_REQ_POINTS) {
-            triggerFeverMode();
-            return 0;
-          }
-          return next;
-        });
-      }
-
-      // Clear Tray & Spawn Next Customer IMMEDIATELY
-      setPreparedPuris([]);
-      spawnNewCustomer(nextServed);
-
-    } else {
-      // ❌ WRONG ORDER
-      panipuriAudio.playWrong();
-      haptics.heavy();
-      setCombo(0);
-      setTimeLeft(t => Math.max(0, t - TIME_PENALTY_ON_WRONG));
-
-      if (engineRef.current) {
-        engineRef.current.addFloatingText('주문이 달라요! (-3초)', 380, 190, '#EF4444', 20);
-      }
-    }
-  };
-
-  // Sound Toggle
   const toggleMute = () => {
     const nextMuted = !isMuted;
     setIsMuted(nextMuted);
     panipuriAudio.setMuted(nextMuted);
-    if (!nextMuted && isPlaying) {
+    if (!nextMuted && gameState.isPlaying) {
       panipuriAudio.startBgm();
     }
   };
+
+  // Calculate if plate matches current customer order
+  const isOrderMatching = React.useMemo(() => {
+    if (!gameState.currentCustomer || gameState.preparedPuris.length === 0) return false;
+    const preparedCounts = {};
+    gameState.preparedPuris.forEach(p => {
+      preparedCounts[p.flavorKey] = (preparedCounts[p.flavorKey] || 0) + 1;
+    });
+
+    let totalReq = 0;
+    let match = true;
+    gameState.currentCustomer.order.forEach(item => {
+      totalReq += item.count;
+      if (!gameState.isFever) {
+        if ((preparedCounts[item.flavorKey] || 0) !== item.count) {
+          match = false;
+        }
+      }
+    });
+
+    if (!gameState.isFever && gameState.preparedPuris.length !== totalReq) match = false;
+    if (gameState.isFever && gameState.preparedPuris.length < totalReq) match = false;
+    return match;
+  }, [gameState.currentCustomer, gameState.preparedPuris, gameState.isFever]);
 
   // Submit Score to Dochon Leaderboard
   const handleScoreSubmit = async (e) => {
@@ -445,7 +203,7 @@ export default function PaniPuriGame({ onScoreSubmitted }) {
     setSubmitError('');
 
     try {
-      const res = await submitScoreToDB('panipuri', playerName.trim(), score);
+      const res = await submitScoreToDB('panipuri', playerName.trim(), gameState.score);
       if (res && res.success) {
         setIsSubmitted(true);
         if (onScoreSubmitted) {
@@ -475,9 +233,9 @@ export default function PaniPuriGame({ onScoreSubmitted }) {
           </div>
 
           {/* Time Display */}
-          <div className={`panipuri-stat-pill ${timeLeft <= 10 ? 'animate-pulse border-red-500 bg-red-950/80 text-red-300' : 'text-cyan-300'}`}>
+          <div className={`panipuri-stat-pill ${gameState.timeLeft <= 10 ? 'animate-pulse border-red-500 bg-red-950/80 text-red-300' : 'text-cyan-300'}`}>
             <Clock className="w-4 h-4" />
-            <span className="font-mono text-base font-bold">{Math.ceil(timeLeft)}s</span>
+            <span className="font-mono text-base font-bold">{Math.ceil(gameState.timeLeft)}s</span>
           </div>
 
           {/* Fever Bar */}
@@ -485,14 +243,14 @@ export default function PaniPuriGame({ onScoreSubmitted }) {
             <div className="flex items-center justify-between text-[10px] text-amber-200 px-1 mb-0.5">
               <span className="flex items-center gap-1 font-bold">
                 <Flame className="w-3 h-3 text-amber-400" />
-                {isFever ? '✨ FEVER 2X ✨' : 'FEVER'}
+                {gameState.isFever ? '✨ FEVER 2X ✨' : 'FEVER'}
               </span>
-              <span>{isFever ? 'ON!' : `${feverGauge}%`}</span>
+              <span>{gameState.isFever ? 'ON!' : `${gameState.feverGauge}%`}</span>
             </div>
             <div className="panipuri-fever-track">
               <div
-                className={`panipuri-fever-fill ${isFever ? 'bg-gradient-to-r from-amber-300 via-yellow-200 to-amber-400 animate-pulse' : 'bg-gradient-to-r from-amber-500 to-yellow-400'}`}
-                style={{ width: isFever ? '100%' : `${feverGauge}%` }}
+                className={`panipuri-fever-fill ${gameState.isFever ? 'bg-gradient-to-r from-amber-300 via-yellow-200 to-amber-400 animate-pulse' : 'bg-gradient-to-r from-amber-500 to-yellow-400'}`}
+                style={{ width: gameState.isFever ? '100%' : `${gameState.feverGauge}%` }}
               />
             </div>
           </div>
@@ -500,16 +258,16 @@ export default function PaniPuriGame({ onScoreSubmitted }) {
 
         {/* Score & Combo */}
         <div className="flex items-center gap-2">
-          {combo >= 2 && (
+          {gameState.combo >= 2 && (
             <div className="panipuri-combo-badge animate-bounce">
               <Sparkles className="w-3 h-3 text-amber-300" />
-              <span>{combo} COMBO</span>
+              <span>{gameState.combo} COMBO</span>
             </div>
           )}
 
           <div className="panipuri-stat-pill text-amber-300">
             <Trophy className="w-4 h-4 text-amber-400" />
-            <span className="font-mono text-base font-black">{score.toLocaleString()}</span>
+            <span className="font-mono text-base font-black">{gameState.score.toLocaleString()}</span>
             <span className="text-[11px] text-slate-400">점</span>
           </div>
 
@@ -553,7 +311,7 @@ export default function PaniPuriGame({ onScoreSubmitted }) {
         />
 
         {/* Ready / Start Overlay */}
-        {!isPlaying && !isGameOver && (
+        {!gameState.isPlaying && !gameState.isGameOver && (
           <div className="panipuri-overlay">
             <div className="panipuri-overlay-card text-center">
               <span className="text-5xl mb-2 block animate-bounce">🫓</span>
@@ -585,28 +343,28 @@ export default function PaniPuriGame({ onScoreSubmitted }) {
         )}
 
         {/* Game Over / Result Overlay */}
-        {isGameOver && (
+        {gameState.isGameOver && (
           <div className="panipuri-overlay">
             <div className="panipuri-overlay-card text-center max-w-sm">
               <div className="text-4xl mb-2">🏆</div>
               <h2 className="text-xl font-black text-amber-300 mb-1">영업 마감!</h2>
               <p className="text-xs text-slate-300 mb-3">
-                총 <strong className="text-amber-300">{servedCount}명</strong>의 손님을 만족시켰습니다!
+                총 <strong className="text-amber-300">{gameState.servedCount}명</strong>의 손님을 만족시켰습니다!
               </p>
 
               {/* Score Display */}
               <div className="bg-slate-950/80 border border-amber-500/30 rounded-xl p-3 mb-4">
                 <p className="text-xs text-slate-400">최종 획득 점수</p>
                 <p className="text-3xl font-black text-amber-400 font-mono">
-                  {score.toLocaleString()} <span className="text-sm">점</span>
+                  {gameState.score.toLocaleString()} <span className="text-sm">점</span>
                 </p>
-                {score > highScore && (
+                {gameState.score > highScore && (
                   <p className="text-[11px] text-emerald-400 font-bold mt-1">🎉 최고 기록 경신!</p>
                 )}
               </div>
 
               {/* Hall of Fame Score Submission (Strict rule: score > 100 only) */}
-              {score > 100 && (
+              {gameState.score > 100 && (
                 <div className="bg-slate-900/90 border border-amber-500/40 rounded-xl p-3 mb-3 text-left">
                   <div className="flex items-center gap-1.5 text-xs font-bold text-amber-300 mb-2">
                     <Crown className="w-3.5 h-3.5 text-amber-400" />
@@ -666,7 +424,7 @@ export default function PaniPuriGame({ onScoreSubmitted }) {
             <button
               key={flavor.id}
               onClick={() => handlePotClick(flavor)}
-              disabled={!isPlaying || isGameOver}
+              disabled={!gameState.isPlaying || gameState.isGameOver}
               className="panipuri-flavor-btn group"
               style={{
                 borderColor: flavor.color,
@@ -688,9 +446,9 @@ export default function PaniPuriGame({ onScoreSubmitted }) {
         <div className="panipuri-tray-actions">
           {/* Prepared Puris Mini Badges Preview */}
           <div className="panipuri-tray-preview">
-            <span className="text-[10px] text-slate-400 mr-1">접시 ({preparedPuris.length}/{PREP_TRAY_MAX_PURIS})</span>
+            <span className="text-[10px] text-slate-400 mr-1">접시 ({gameState.preparedPuris.length}/{PREP_TRAY_MAX_PURIS})</span>
             <div className="flex gap-1 items-center">
-              {preparedPuris.map((puri, idx) => {
+              {gameState.preparedPuris.map((puri, idx) => {
                 const flavor = PANI_FLAVORS[puri.flavorKey.toUpperCase()] || PANI_FLAVORS.MINT;
                 return (
                   <button
@@ -709,7 +467,7 @@ export default function PaniPuriGame({ onScoreSubmitted }) {
 
           <button
             onClick={handleClearTray}
-            disabled={!isPlaying || isGameOver || preparedPuris.length === 0}
+            disabled={!gameState.isPlaying || gameState.isGameOver || gameState.preparedPuris.length === 0}
             className="panipuri-btn-clear"
             title="접시 비우기"
           >
@@ -719,11 +477,12 @@ export default function PaniPuriGame({ onScoreSubmitted }) {
 
           <button
             onClick={handleServe}
-            disabled={!isPlaying || isGameOver || preparedPuris.length === 0}
-            className="panipuri-btn-serve"
+            disabled={!gameState.isPlaying || gameState.isGameOver || gameState.preparedPuris.length === 0}
+            className={`panipuri-btn-serve ${isOrderMatching ? 'active-ready animate-pulse' : ''}`}
+            title="손님에게 서빙하기"
           >
             <Send className="w-4 h-4" />
-            <span>서빙하기!</span>
+            <span>{isOrderMatching ? '✨ 서빙 완료!' : '서빙하기!'}</span>
           </button>
         </div>
       </div>

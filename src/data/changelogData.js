@@ -3,11 +3,35 @@
 
 export const CHANGELOG_DATA = [
   {
+    version: 'v1.44.1',
+    date: '2026-08-23',
+    title: '🫓 [파니 푸리 마스터] 서빙 판정 엔진 및 실시간 점수 누적 동기화 전면 개선',
+    badge: 'LATEST',
+    badgeColor: 'emerald',
+    items: [
+      {
+        tag: 'ENGINE FIX',
+        tagColor: 'emerald',
+        text: '[서빙 판정 및 상태 동기화 개선] 손님 주문 대조 및 점수 계산, 접시 비우기, 다음 손님 연속 생성을 단일 게임 엔진 구조로 통합하여 무지연 실시간 처리 지원'
+      },
+      {
+        tag: 'UI FEEDBACK',
+        tagColor: 'amber',
+        text: '[서빙 준비 완료 시각 피드백] 주문한 푸리 수량과 일치할 때 서빙 버튼이 초록빛 펄스로 빛나며 직관적인 조리 완료 상태 안내'
+      },
+      {
+        tag: 'BALANCE',
+        tagColor: 'teal',
+        text: '[손님 인내심 밸런스 조정] 주문 난이도에 맞추어 손님 대기 시간을 22~28초로 여유 있게 상향하고 서빙 성공 시 시간 보너스(+3.5초) 증가'
+      }
+    ]
+  },
+  {
     version: 'v1.44.0',
     date: '2026-08-23',
     title: '👻 [신규 정식 게임] 30번째 실시간 팀 액션 배틀 「도촌 영혼 대결」 4 vs 4 그랜드 오픈',
-    badge: 'LATEST',
-    badgeColor: 'emerald',
+    badge: 'UPDATE',
+    badgeColor: 'blue',
     items: [
       {
         tag: '4 VS 4 TEAM BATTLE',

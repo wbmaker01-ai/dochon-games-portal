@@ -96,7 +96,7 @@ export const CUSTOMER_PROFILES = [
     shirtColor: '#3B82F6',
     glasses: false,
     turban: false,
-    patienceTime: 14,
+    patienceTime: 26,
     catchphrase: '바삭하고 시원한 걸로 부탁해요!'
   },
   {
@@ -109,7 +109,7 @@ export const CUSTOMER_PROFILES = [
     shirtColor: '#EC4899',
     glasses: false,
     turban: false,
-    patienceTime: 12,
+    patienceTime: 24,
     catchphrase: '아주 화끈하게 맵게 해주세요!'
   },
   {
@@ -122,7 +122,7 @@ export const CUSTOMER_PROFILES = [
     shirtColor: '#10B981',
     glasses: true,
     turban: false,
-    patienceTime: 16,
+    patienceTime: 28,
     catchphrase: '오늘도 달콤새콤한 타마린드로~'
   },
   {
@@ -135,7 +135,7 @@ export const CUSTOMER_PROFILES = [
     shirtColor: '#8B5CF6',
     glasses: false,
     turban: false,
-    patienceTime: 13,
+    patienceTime: 25,
     catchphrase: '망고 요거트 맛이 정말 최고예요!'
   },
   {
@@ -149,7 +149,7 @@ export const CUSTOMER_PROFILES = [
     glasses: false,
     turban: true,
     turbanColor: '#EF4444',
-    patienceTime: 15,
+    patienceTime: 27,
     catchphrase: '골고루 듬뿍 담아줘 보시게!'
   },
   {
@@ -162,7 +162,7 @@ export const CUSTOMER_PROFILES = [
     shirtColor: '#06B6D4',
     glasses: false,
     turban: false,
-    patienceTime: 11,
+    patienceTime: 22,
     catchphrase: '서둘러 주세요, 연습 가야 해요!'
   }
 ];
@@ -170,8 +170,8 @@ export const CUSTOMER_PROFILES = [
 // Game Balance & Scoring Constants
 export const INITIAL_TIME_LIMIT = 60; // 60 seconds for Time Attack
 export const MAX_TIME_LIMIT = 90;
-export const TIME_BONUS_ON_SUCCESS = 2.5; // +2.5s per success
-export const TIME_PENALTY_ON_WRONG = 3.0; // -3s on wrong serve
+export const TIME_BONUS_ON_SUCCESS = 3.5; // +3.5s per success
+export const TIME_PENALTY_ON_WRONG = 2.5; // -2.5s on wrong serve
 
 export const BASE_SCORE_PER_PURI = 100;
 export const PERFECT_ORDER_BONUS = 150;
