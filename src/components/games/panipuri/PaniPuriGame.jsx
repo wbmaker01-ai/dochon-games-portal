@@ -1,4 +1,4 @@
-// Dochon Pani Puri Master - Main Game Controller Component
+// Dochon Pani Puri Master - Main Game Controller Component (Robust State & Render Architecture)
 
 import React, { useState, useEffect, useRef, useCallback } from 'react';
 import { PaniPuriEngine } from './panipuriEngine';
@@ -83,14 +83,35 @@ export default function PaniPuriGame({ onScoreSubmitted }) {
   const [isSubmitted, setIsSubmitted] = useState(false);
   const [submitError, setSubmitError] = useState('');
 
+  // Latest State Ref for 60fps Animation Loop without re-creating engine
+  const stateRef = useRef({
+    currentCustomer: null,
+    customerPatience: 1.0,
+    preparedPuris: [],
+    isFever: false,
+    score: 0,
+    combo: 0
+  });
+
+  useEffect(() => {
+    stateRef.current = {
+      currentCustomer,
+      customerPatience,
+      preparedPuris,
+      isFever,
+      score,
+      combo
+    };
+  }, [currentCustomer, customerPatience, preparedPuris, isFever, score, combo]);
+
   // Generate a realistic customer order based on difficulty
-  const spawnNewCustomer = useCallback((currentServed = servedCount) => {
+  const spawnNewCustomer = useCallback((currentServed = 0) => {
     const profile = CUSTOMER_PROFILES[Math.floor(Math.random() * CUSTOMER_PROFILES.length)];
     
-    // Order difficulty grows as servedCount increases
+    // Order difficulty grows with served count
     let distinctFlavorsCount = 1;
-    if (currentServed >= 4) distinctFlavorsCount = 2;
-    if (currentServed >= 10) distinctFlavorsCount = Math.random() > 0.4 ? 3 : 2;
+    if (currentServed >= 3) distinctFlavorsCount = 2;
+    if (currentServed >= 8) distinctFlavorsCount = Math.random() > 0.4 ? 3 : 2;
 
     // Pick random distinct flavors
     const shuffledFlavors = [...FLAVOR_LIST].sort(() => Math.random() - 0.5);
@@ -98,7 +119,7 @@ export default function PaniPuriGame({ onScoreSubmitted }) {
 
     for (let i = 0; i < distinctFlavorsCount; i++) {
       const flavor = shuffledFlavors[i];
-      const maxCount = distinctFlavorsCount === 1 ? (currentServed > 6 ? 3 : 2) : (Math.random() > 0.5 ? 2 : 1);
+      const maxCount = distinctFlavorsCount === 1 ? (currentServed > 5 ? 3 : 2) : (Math.random() > 0.5 ? 2 : 1);
       orderItems.push({
         flavorKey: flavor.id,
         count: maxCount
@@ -114,39 +135,45 @@ export default function PaniPuriGame({ onScoreSubmitted }) {
 
     setCurrentCustomer(newCustomer);
     setCustomerPatience(1.0);
-  }, [servedCount]);
+  }, []);
 
-  // Real-time animation render loop
-  const renderLoop = useCallback(() => {
-    if (engineRef.current) {
-      engineRef.current.render({
-        currentCustomer,
-        customerPatience,
-        preparedPuris,
-        isFever,
-        score,
-        combo
-      });
-    }
-    animFrameIdRef.current = requestAnimationFrame(renderLoop);
-  }, [currentCustomer, customerPatience, preparedPuris, isFever, score, combo]);
-
-  // Initialize Canvas & Engine
+  // Initialize Canvas & Engine ONLY ONCE
   useEffect(() => {
-    if (canvasRef.current) {
-      const canvas = canvasRef.current;
-      canvas.width = CANVAS_WIDTH;
-      canvas.height = CANVAS_HEIGHT;
-      const engine = new PaniPuriEngine(canvas);
-      engineRef.current = engine;
-      renderLoop();
-    }
+    if (!canvasRef.current) return;
+    const canvas = canvasRef.current;
+    canvas.width = CANVAS_WIDTH;
+    canvas.height = CANVAS_HEIGHT;
+    const engine = new PaniPuriEngine(canvas);
+    engineRef.current = engine;
+
+    const renderLoop = () => {
+      if (engineRef.current) {
+        engineRef.current.render(stateRef.current);
+      }
+      animFrameIdRef.current = requestAnimationFrame(renderLoop);
+    };
+    animFrameIdRef.current = requestAnimationFrame(renderLoop);
+
     return () => {
       if (animFrameIdRef.current) {
         cancelAnimationFrame(animFrameIdRef.current);
       }
     };
-  }, [renderLoop]);
+  }, []);
+
+  // Customer Timeout handler
+  const handleCustomerLeaveTimeout = useCallback(() => {
+    panipuriAudio.playWrong();
+    haptics.heavy();
+    setCombo(0);
+    setTimeLeft(t => Math.max(0, t - TIME_PENALTY_ON_WRONG));
+    
+    if (engineRef.current) {
+      engineRef.current.addFloatingText('손님이 기다리다 떠났어요! 💦', 240, 180, '#EF4444', 20);
+    }
+    setPreparedPuris([]);
+    spawnNewCustomer(servedCount);
+  }, [servedCount, spawnNewCustomer]);
 
   // Main Game Timer & Customer Patience Tick
   useEffect(() => {
@@ -155,11 +182,12 @@ export default function PaniPuriGame({ onScoreSubmitted }) {
     const timer = setInterval(() => {
       // 1. Overall Game Time
       setTimeLeft(prev => {
-        if (prev <= 1) {
+        if (prev <= 0.1) {
+          clearInterval(timer);
           handleGameOver();
           return 0;
         }
-        return Math.max(0, prev - 0.1);
+        return prev - 0.1;
       });
 
       // 2. Customer Patience Decay
@@ -167,7 +195,6 @@ export default function PaniPuriGame({ onScoreSubmitted }) {
         const decayRate = 0.1 / (currentCustomer?.maxPatience || 14);
         const next = prev - decayRate;
         if (next <= 0) {
-          // Customer ran out of patience!
           handleCustomerLeaveTimeout();
           return 1.0;
         }
@@ -176,21 +203,7 @@ export default function PaniPuriGame({ onScoreSubmitted }) {
     }, 100);
 
     return () => clearInterval(timer);
-  }, [isPlaying, isGameOver, currentCustomer]);
-
-  // Handle Customer timeout when patience reaches 0
-  const handleCustomerLeaveTimeout = () => {
-    panipuriAudio.playWrong();
-    haptics.heavy();
-    setCombo(0);
-    setTimeLeft(t => Math.max(0, t - TIME_PENALTY_ON_WRONG));
-    
-    if (engineRef.current) {
-      engineRef.current.addFloatingText('손님이 떠났어요! 💦', 240, 180, '#EF4444', 20);
-    }
-    setPreparedPuris([]);
-    spawnNewCustomer();
-  };
+  }, [isPlaying, isGameOver, currentCustomer, handleCustomerLeaveTimeout]);
 
   // Start / Restart Game
   const handleStartGame = () => {
@@ -218,15 +231,17 @@ export default function PaniPuriGame({ onScoreSubmitted }) {
     panipuriAudio.playGameOver();
     haptics.success();
 
-    // High Score Update
-    setHighScore(prev => {
-      if (score > prev) {
-        try {
-          localStorage.setItem('dochon_panipuri_highscore', String(score));
-        } catch (e) {}
-        return score;
-      }
-      return prev;
+    setScore(currentScore => {
+      setHighScore(prev => {
+        if (currentScore > prev) {
+          try {
+            localStorage.setItem('dochon_panipuri_highscore', String(currentScore));
+          } catch (e) {}
+          return currentScore;
+        }
+        return prev;
+      });
+      return currentScore;
     });
   };
 
@@ -246,7 +261,6 @@ export default function PaniPuriGame({ onScoreSubmitted }) {
     panipuriAudio.playSplash(flavor.id);
     haptics.light();
 
-    // Add particle burst
     if (engineRef.current) {
       engineRef.current.addParticle(660, 410, flavor.color, 6, 3, 'liquid');
     }
@@ -256,6 +270,21 @@ export default function PaniPuriGame({ onScoreSubmitted }) {
       flavorKey: flavor.id
     };
     setPreparedPuris(prev => [...prev, newPuri]);
+  };
+
+  // Direct Canvas Click Handling
+  const handleCanvasClick = (e) => {
+    if (!isPlaying || isGameOver || !canvasRef.current || !engineRef.current) return;
+    const rect = canvasRef.current.getBoundingClientRect();
+    const scaleX = CANVAS_WIDTH / rect.width;
+    const scaleY = CANVAS_HEIGHT / rect.height;
+    const canvasX = (e.clientX - rect.left) * scaleX;
+    const canvasY = (e.clientY - rect.top) * scaleY;
+
+    const clickedPot = engineRef.current.getClickedPot(canvasX, canvasY);
+    if (clickedPot) {
+      handlePotClick(clickedPot);
+    }
   };
 
   // Remove single puri from tray
@@ -274,6 +303,22 @@ export default function PaniPuriGame({ onScoreSubmitted }) {
     if (engineRef.current) {
       engineRef.current.addFloatingText('접시 비움', 660, 410, '#94A3B8', 14);
     }
+  };
+
+  // Trigger Golden Fever Mode
+  const triggerFeverMode = () => {
+    setIsFever(true);
+    panipuriAudio.playFeverStart();
+    haptics.success();
+
+    if (engineRef.current) {
+      engineRef.current.addFloatingText('✨ GOLDEN FEVER TIME! (점수 2배) ✨', CANVAS_WIDTH / 2, 120, '#FEF08A', 26);
+    }
+
+    if (feverTimerRef.current) clearTimeout(feverTimerRef.current);
+    feverTimerRef.current = setTimeout(() => {
+      setIsFever(false);
+    }, FEVER_DURATION * 1000);
   };
 
   // Serve Dish to Customer!
@@ -307,7 +352,7 @@ export default function PaniPuriGame({ onScoreSubmitted }) {
       }
     });
 
-    // In non-fever mode, total count must match
+    // In non-fever mode, total count must match exactly
     if (!isFever && preparedPuris.length !== totalRequiredCount) {
       isMatch = false;
     }
@@ -320,8 +365,10 @@ export default function PaniPuriGame({ onScoreSubmitted }) {
     if (isMatch) {
       // 🌟 SUCCESSFUL SERVE!
       const newCombo = combo + 1;
+      const nextServed = servedCount + 1;
+      
       setCombo(newCombo);
-      setServedCount(prev => prev + 1);
+      setServedCount(nextServed);
 
       // Score Calculation
       const basePoints = preparedPuris.length * BASE_SCORE_PER_PURI;
@@ -330,7 +377,7 @@ export default function PaniPuriGame({ onScoreSubmitted }) {
       const feverMultiplier = isFever ? FEVER_SCORE_MULTIPLIER : 1.0;
       
       const earnedScore = Math.floor((basePoints + PERFECT_ORDER_BONUS + speedBonus) * comboMultiplier * feverMultiplier);
-      setScore(s => s + earnedScore);
+      setScore(prev => prev + earnedScore);
 
       // Time Bonus
       setTimeLeft(t => Math.min(MAX_TIME_LIMIT, t + TIME_BONUS_ON_SUCCESS));
@@ -362,9 +409,9 @@ export default function PaniPuriGame({ onScoreSubmitted }) {
         });
       }
 
-      // Clear Tray & Spawn Next Customer
+      // Clear Tray & Spawn Next Customer IMMEDIATELY
       setPreparedPuris([]);
-      spawnNewCustomer(servedCount + 1);
+      spawnNewCustomer(nextServed);
 
     } else {
       // ❌ WRONG ORDER
@@ -377,22 +424,6 @@ export default function PaniPuriGame({ onScoreSubmitted }) {
         engineRef.current.addFloatingText('주문이 달라요! (-3초)', 380, 190, '#EF4444', 20);
       }
     }
-  };
-
-  // Trigger Golden Fever Mode
-  const triggerFeverMode = () => {
-    setIsFever(true);
-    panipuriAudio.playFeverStart();
-    haptics.success();
-
-    if (engineRef.current) {
-      engineRef.current.addFloatingText('✨ GOLDEN FEVER TIME! (점수 2배) ✨', CANVAS_WIDTH / 2, 120, '#FEF08A', 26);
-    }
-
-    if (feverTimerRef.current) clearTimeout(feverTimerRef.current);
-    feverTimerRef.current = setTimeout(() => {
-      setIsFever(false);
-    }, FEVER_DURATION * 1000);
   };
 
   // Sound Toggle
@@ -427,21 +458,6 @@ export default function PaniPuriGame({ onScoreSubmitted }) {
       setSubmitError('네트워크 오류가 발생했습니다.');
     } finally {
       setIsSubmitting(false);
-    }
-  };
-
-  // Direct Canvas Click Handling (Clicking pots directly on Canvas)
-  const handleCanvasClick = (e) => {
-    if (!isPlaying || isGameOver || !canvasRef.current || !engineRef.current) return;
-    const rect = canvasRef.current.getBoundingClientRect();
-    const scaleX = CANVAS_WIDTH / rect.width;
-    const scaleY = CANVAS_HEIGHT / rect.height;
-    const canvasX = (e.clientX - rect.left) * scaleX;
-    const canvasY = (e.clientY - rect.top) * scaleY;
-
-    const clickedPot = engineRef.current.getClickedPot(canvasX, canvasY);
-    if (clickedPot) {
-      handlePotClick(clickedPot);
     }
   };
 
@@ -642,7 +658,7 @@ export default function PaniPuriGame({ onScoreSubmitted }) {
         )}
       </div>
 
-      {/* 3. Bottom Interactive Control Bar (Chef's Prep Stations) */}
+      {/* 3. Bottom Interactive Control Dock (Chef's Prep Stations) */}
       <div className="panipuri-control-dock">
         {/* Flavor Selection Buttons (Pani Pots) */}
         <div className="panipuri-flavor-grid">
