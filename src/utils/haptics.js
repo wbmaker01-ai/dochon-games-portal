@@ -29,6 +29,10 @@ class HapticEngine {
     this.vibrate(12);
   }
 
+  selection() {
+    this.light();
+  }
+
   /**
    * 2. Medium Impact (25ms) - Brick break, regular jump, fruit merge step, dot eat
    */
@@ -59,6 +63,10 @@ class HapticEngine {
    */
   warning() {
     this.vibrate([45, 40, 45]);
+  }
+
+  error() {
+    this.warning();
   }
 
   /**

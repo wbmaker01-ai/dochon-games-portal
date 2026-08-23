@@ -398,19 +398,34 @@ export default function PetanqueGame({ onScoreSubmitted }) {
     setAimPower(prev => Math.max(25, Math.min(98, prev + delta)));
   };
 
-  // Keyboard Shortcuts (Arrow keys to aim, Space to charge/throw)
+  // Keyboard Shortcuts (Arrow keys & WASD to aim/power, Space/Enter to charge/throw)
   useEffect(() => {
     const handleKeyDown = (e) => {
       if (gameState !== GAME_STATES.READY_THROW || currentTurnTeam !== TEAMS.PLAYER.id) return;
 
+      // Angle Controls: Left / Right, A / D
       if (e.key === 'ArrowLeft' || e.key === 'a' || e.key === 'A') {
+        e.preventDefault();
         setAimAngle(prev => Math.max(65, prev - 2));
       } else if (e.key === 'ArrowRight' || e.key === 'd' || e.key === 'D') {
+        e.preventDefault();
         setAimAngle(prev => Math.min(115, prev + 2));
-      } else if (e.key === ' ' && !e.repeat && !isChargingPower) {
+      }
+      // Power Controls: Up / Down, W / S
+      else if (e.key === 'ArrowUp' || e.key === 'w' || e.key === 'W') {
+        e.preventDefault();
+        setAimPower(prev => Math.min(98, prev + 2));
+      } else if (e.key === 'ArrowDown' || e.key === 's' || e.key === 'S') {
+        e.preventDefault();
+        setAimPower(prev => Math.max(25, prev - 2));
+      }
+      // Throw Action: Space or Enter
+      else if ((e.key === ' ' || e.key === 'Enter') && !e.repeat && !isChargingPower) {
         e.preventDefault();
         startCharging();
-      } else if (e.key === '1') {
+      }
+      // Shot Type Switching: 1 (Pointer) / 2 (Tirer)
+      else if (e.key === '1') {
         setShotType(SHOT_TYPES.POINTER);
       } else if (e.key === '2') {
         setShotType(SHOT_TYPES.TIRER);
@@ -418,7 +433,7 @@ export default function PetanqueGame({ onScoreSubmitted }) {
     };
 
     const handleKeyUp = (e) => {
-      if (e.key === ' ' && isChargingPower) {
+      if ((e.key === ' ' || e.key === 'Enter') && isChargingPower) {
         e.preventDefault();
         stopChargingAndThrow();
       }
@@ -819,7 +834,7 @@ export default function PetanqueGame({ onScoreSubmitted }) {
               ? (gameState === GAME_STATES.BALLS_MOVING ? '⏳ 공이 이동 중입니다...' : '대기 중')
               : isChargingPower
                 ? '🔥 게이지 충전 중! (손을 떼면 발사)'
-                : '🚀 쇠구슬 투구 (스페이스바 / 터치 홀드)'}
+                : '🚀 쇠구슬 투구 (스페이스바 / 엔터 / 터치 홀드)'}
           </span>
         </button>
       </div>

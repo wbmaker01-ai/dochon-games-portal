@@ -3,11 +3,30 @@
 
 export const CHANGELOG_DATA = [
   {
+    version: 'v1.40.2',
+    date: '2026-08-23',
+    title: '[도촌 페탕크 마스터] 상/하 화살표 및 WASD 파워·각도 키보드 컨트롤 & Enter 투구 발사 지원',
+    badge: 'LATEST',
+    badgeColor: 'emerald',
+    items: [
+      {
+        tag: 'POWER SHORTCUTS',
+        tagColor: 'amber',
+        text: '[상/하 화살표 & W/S 파워 조절] 상하 화살표(↑ / ↓) 및 W / S 키로 투구 세기(파워)를 직관적으로 미세 조절할 수 있도록 단축키 확장'
+      },
+      {
+        tag: 'WASD & ENTER CONTROLS',
+        tagColor: 'teal',
+        text: '[WASD 및 Enter 키보드 완벽 대응] A / D 좌우 조준 + W / S 상하 파워 조절 + Space / Enter 홀드 릴리즈 투구 지원으로 PC/노트북 플레이 편의성 극대화'
+      }
+    ]
+  },
+  {
     version: 'v1.40.1',
     date: '2026-08-23',
     title: '[도촌 페탕크 마스터] 쇠구슬 투구 방향 및 조준 가이드라인 전방(위쪽) 물리 좌표계 정상화',
-    badge: 'LATEST',
-    badgeColor: 'emerald',
+    badge: 'UPDATE',
+    badgeColor: 'blue',
     items: [
       {
         tag: 'AIM VECTOR FIX',

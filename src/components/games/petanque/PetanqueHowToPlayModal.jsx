@@ -72,16 +72,19 @@ export default function PetanqueHowToPlayModal({ isOpen, onClose }) {
             </div>
             <ul className="petanque-info-desc" style={{ paddingLeft: '18px', listStyleType: 'disc' }}>
               <li>
-                <strong style={{ color: '#ffffff' }}>각도 조절:</strong> 하단 ◀ / ▶ 버튼 또는 방향키(← / →)
+                <strong style={{ color: '#ffffff' }}>각도 조절:</strong> 하단 ◀ / ▶ 버튼 또는 방향키(← / →) / <kbd style={{ padding: '1px 5px', background: '#334155', borderRadius: '4px', color: '#93c5fd', fontFamily: 'monospace' }}>A / D</kbd>
               </li>
               <li>
-                <strong style={{ color: '#ffffff' }}>파워 조절 & 발사:</strong> 하단 ➖ / ➕ 버튼 또는 <kbd style={{ padding: '2px 6px', background: '#334155', borderRadius: '4px', color: '#fbbf24', fontFamily: 'monospace' }}>SPACE / 투구 버튼</kbd> 홀드
+                <strong style={{ color: '#ffffff' }}>파워 조절:</strong> 하단 ➖ / ➕ 버튼 또는 방향키(↑ / ↓) / <kbd style={{ padding: '1px 5px', background: '#334155', borderRadius: '4px', color: '#93c5fd', fontFamily: 'monospace' }}>W / S</kbd>
               </li>
               <li>
-                <strong style={{ color: '#ffffff' }}>경기 구성:</strong> 총 3엔드 진행 (엔드당 나 3구 vs AI 3구 투구)
+                <strong style={{ color: '#ffffff' }}>투구 발사:</strong> <kbd style={{ padding: '2px 6px', background: '#334155', borderRadius: '4px', color: '#fbbf24', fontFamily: 'monospace' }}>Space / Enter / 터치</kbd> 홀드로 파워 충전 후 릴리즈
               </li>
               <li>
-                <strong style={{ color: '#ffffff' }}>득점 계산:</strong> 상대의 가장 가까운 공보다 뷔슈에 더 가까운 내 공의 개수만큼 득점!
+                <strong style={{ color: '#ffffff' }}>전술 샷 전환:</strong> <kbd style={{ padding: '1px 5px', background: '#334155', borderRadius: '4px', color: '#fde047', fontFamily: 'monospace' }}>1 (포앵테)</kbd> / <kbd style={{ padding: '1px 5px', background: '#334155', borderRadius: '4px', color: '#fca5a5', fontFamily: 'monospace' }}>2 (티레)</kbd>
+              </li>
+              <li>
+                <strong style={{ color: '#ffffff' }}>경기 구성 & 득점:</strong> 총 3엔드 진행, 뷔슈에 더 가까운 승리팀 구슬 개수만큼 득점!
               </li>
             </ul>
           </div>
