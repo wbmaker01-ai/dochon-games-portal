@@ -1,0 +1,883 @@
+/* Half Moon (Rise of the Half Moon) Game Stylesheet */
+
+.halfmoon-game-root {
+  display: flex;
+  flex-direction: column;
+  width: 100%;
+  height: 100%;
+  min-height: 540px;
+  background: radial-gradient(circle at 50% 10%, #0c122c 0%, #060919 60%, #02040a 100%);
+  color: #f8fafc;
+  font-family: 'Outfit', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+  user-select: none;
+  overflow: hidden;
+  position: relative;
+}
+
+/* Header Toolbar */
+.halfmoon-header-bar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 10px 16px;
+  background: rgba(15, 23, 42, 0.85);
+  backdrop-filter: blur(12px);
+  border-bottom: 1px solid rgba(255, 215, 0, 0.15);
+  z-index: 20;
+}
+
+.halfmoon-title-badge {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.halfmoon-title-text {
+  font-weight: 800;
+  font-size: 15px;
+  letter-spacing: 0.5px;
+  background: linear-gradient(135deg, #ffffff 30%, #ffd166 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+}
+
+.halfmoon-header-actions {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.halfmoon-tool-btn {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 6px 10px;
+  background: rgba(30, 41, 59, 0.8);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 8px;
+  color: #e2e8f0;
+  font-size: 12px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.halfmoon-tool-btn:hover {
+  background: rgba(51, 65, 85, 0.9);
+  border-color: rgba(255, 215, 0, 0.3);
+  transform: translateY(-1px);
+}
+
+/* Viewport */
+.halfmoon-viewport {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  position: relative;
+  overflow-y: auto;
+  overflow-x: hidden;
+}
+
+/* Intro Overlay */
+.halfmoon-intro-overlay {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex: 1;
+  padding: 20px;
+  background: radial-gradient(circle at center, rgba(30, 41, 80, 0.4) 0%, rgba(2, 4, 10, 0.8) 100%);
+}
+
+.halfmoon-intro-card {
+  background: rgba(15, 23, 42, 0.92);
+  border: 1px solid rgba(255, 215, 0, 0.25);
+  box-shadow: 0 15px 35px rgba(0, 0, 0, 0.6), 0 0 25px rgba(255, 209, 102, 0.15);
+  border-radius: 24px;
+  padding: 32px 24px;
+  text-align: center;
+  max-width: 460px;
+  width: 100%;
+}
+
+.intro-moon-visual {
+  font-size: 54px;
+  margin-bottom: 8px;
+  filter: drop-shadow(0 0 16px rgba(255, 215, 0, 0.5));
+}
+
+/* Playing View Layout */
+.halfmoon-play-layout {
+  display: flex;
+  flex-direction: column;
+  flex: 1;
+  padding: 12px 16px;
+  gap: 10px;
+  max-width: 680px;
+  margin: 0 auto;
+  width: 100%;
+}
+
+/* Top Dashboard */
+.halfmoon-dashboard {
+  background: rgba(15, 23, 42, 0.75);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 14px;
+  padding: 8px 14px;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.dashboard-stage-info {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.stage-pill {
+  font-size: 11px;
+  font-weight: 700;
+  color: #ffd166;
+  background: rgba(255, 209, 102, 0.12);
+  padding: 2px 8px;
+  border-radius: 6px;
+  border: 1px solid rgba(255, 209, 102, 0.3);
+}
+
+.stage-subtitle {
+  font-size: 11px;
+  color: #94a3b8;
+}
+
+.dashboard-scores-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+}
+
+.score-badge {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  background: rgba(30, 41, 59, 0.6);
+  padding: 4px 10px;
+  border-radius: 8px;
+  min-width: 70px;
+}
+
+.player-badge {
+  border-left: 3px solid #38bdf8;
+}
+
+.ai-badge {
+  border-left: 3px solid #f43f5e;
+}
+
+.total-badge {
+  border-left: 3px solid #f59e0b;
+}
+
+.score-label {
+  font-size: 10px;
+  color: #94a3b8;
+}
+
+.score-val {
+  font-size: 13px;
+  font-weight: 800;
+  color: #f8fafc;
+}
+
+.score-vs-divider {
+  font-size: 11px;
+  font-weight: 900;
+  color: #64748b;
+}
+
+/* In-Game Live Toast */
+.halfmoon-combo-toast {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  background: linear-gradient(90deg, rgba(255, 209, 102, 0.2), rgba(244, 63, 94, 0.2));
+  border: 1px solid rgba(255, 209, 102, 0.4);
+  color: #fff;
+  padding: 6px 12px;
+  border-radius: 20px;
+  font-size: 12px;
+  font-weight: 700;
+  text-align: center;
+}
+
+/* Card Component & Visuals */
+.halfmoon-card {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: space-between;
+  background: linear-gradient(145deg, #18223c 0%, #0d1322 100%);
+  border: 1.5px solid var(--card-glow, #ffd166);
+  border-radius: 12px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.4), inset 0 1px 1px rgba(255, 255, 255, 0.15);
+  cursor: pointer;
+  transition: all 0.22s cubic-bezier(0.34, 1.56, 0.64, 1);
+  position: relative;
+  overflow: hidden;
+  user-select: none;
+}
+
+.halfmoon-card::after {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 40%;
+  background: linear-gradient(180deg, rgba(255, 255, 255, 0.15) 0%, transparent 100%);
+  pointer-events: none;
+}
+
+.halfmoon-card:hover {
+  transform: translateY(-4px) scale(1.03);
+  box-shadow: 0 8px 20px rgba(0, 0, 0, 0.6), 0 0 12px var(--card-glow, #ffd166);
+}
+
+.card-selected {
+  transform: translateY(-8px) scale(1.06) !important;
+  border-color: #ffd166 !important;
+  box-shadow: 0 0 20px #ffd166, 0 10px 25px rgba(0, 0, 0, 0.8) !important;
+  z-index: 10;
+}
+
+.card-disabled {
+  opacity: 0.65;
+  cursor: not-allowed;
+}
+
+.card-disabled:hover {
+  transform: none;
+  box-shadow: none;
+}
+
+/* Card Sizes */
+.halfmoon-card.size-normal {
+  width: 74px;
+  height: 106px;
+  padding: 4px 3px;
+}
+
+.halfmoon-card.size-board {
+  width: 100%;
+  height: 100%;
+  padding: 3px 2px;
+}
+
+.card-top-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  width: 100%;
+  padding: 0 2px;
+}
+
+.card-phase-icon {
+  font-size: 11px;
+}
+
+.card-short-title {
+  font-size: 9px;
+  font-weight: 800;
+  color: #e2e8f0;
+}
+
+.card-center-art {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex: 1;
+  width: 100%;
+  max-height: 60px;
+}
+
+.moon-svg-graphic {
+  width: 100%;
+  height: 100%;
+  max-width: 52px;
+  max-height: 52px;
+}
+
+.card-bottom-footer {
+  width: 100%;
+  text-align: center;
+}
+
+.card-step-badge {
+  font-size: 8px;
+  font-weight: 600;
+  color: #94a3b8;
+  background: rgba(0, 0, 0, 0.35);
+  padding: 1px 4px;
+  border-radius: 4px;
+}
+
+.card-special-badge {
+  font-size: 8px;
+  font-weight: 800;
+  color: #ff007f;
+  background: rgba(255, 0, 127, 0.2);
+  padding: 1px 4px;
+  border-radius: 4px;
+  border: 0.5px solid #ff007f;
+}
+
+/* Owner Styles on Board */
+.owner-player {
+  border-color: #38bdf8 !important;
+  box-shadow: 0 0 10px rgba(56, 189, 248, 0.35);
+}
+
+.owner-ai {
+  border-color: #f43f5e !important;
+  box-shadow: 0 0 10px rgba(244, 63, 94, 0.35);
+}
+
+.card-owner-indicator {
+  position: absolute;
+  bottom: 2px;
+  right: 2px;
+  font-size: 7px;
+  font-weight: 800;
+  padding: 1px 3px;
+  border-radius: 3px;
+}
+
+.indicator-player {
+  background: rgba(14, 165, 233, 0.85);
+  color: #fff;
+}
+
+.indicator-ai {
+  background: rgba(225, 29, 72, 0.85);
+  color: #fff;
+}
+
+/* Hand Component Rack */
+.halfmoon-hand-panel {
+  background: rgba(15, 23, 42, 0.6);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 16px;
+  padding: 8px 12px;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.hand-player {
+  background: linear-gradient(180deg, rgba(15, 23, 42, 0.7) 0%, rgba(30, 58, 138, 0.25) 100%);
+  border-color: rgba(56, 189, 248, 0.25);
+}
+
+.hand-ai {
+  background: linear-gradient(180deg, rgba(136, 19, 55, 0.2) 0%, rgba(15, 23, 42, 0.7) 100%);
+  border-color: rgba(244, 63, 94, 0.25);
+}
+
+.hand-header-bar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.hand-owner-title {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 11px;
+  font-weight: 700;
+  color: #cbd5e1;
+}
+
+.hand-turn-badge {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  font-size: 10px;
+  font-weight: 700;
+  color: #ffd166;
+  background: rgba(255, 209, 102, 0.15);
+  padding: 2px 8px;
+  border-radius: 12px;
+  border: 1px solid rgba(255, 209, 102, 0.3);
+}
+
+.hand-cards-rack {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  min-height: 110px;
+}
+
+.hand-card-slot {
+  position: relative;
+}
+
+/* Card Back (AI Hidden Cards) */
+.halfmoon-card-back {
+  width: 60px;
+  height: 84px;
+  background: linear-gradient(135deg, #1e1b4b 0%, #311042 100%);
+  border: 1.5px solid rgba(255, 215, 0, 0.3);
+  border-radius: 10px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.4);
+}
+
+.card-back-pattern {
+  width: 90%;
+  height: 90%;
+  border: 1px dashed rgba(255, 215, 0, 0.3);
+  border-radius: 6px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.card-back-center-moon {
+  font-size: 20px;
+  filter: drop-shadow(0 0 6px rgba(255, 215, 0, 0.6));
+}
+
+/* Grid Board */
+.halfmoon-board-container {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex: 1;
+  min-height: 220px;
+  padding: 4px 0;
+}
+
+.halfmoon-grid-board {
+  display: grid;
+  gap: 8px;
+  background: rgba(10, 15, 30, 0.8);
+  border: 2px solid rgba(255, 215, 0, 0.2);
+  box-shadow: inset 0 0 25px rgba(0, 0, 0, 0.8), 0 0 20px rgba(255, 215, 0, 0.05);
+  border-radius: 18px;
+  padding: 10px;
+  width: 100%;
+  max-width: 440px;
+  aspect-ratio: 1 / 1;
+}
+
+.halfmoon-board-slot {
+  background: rgba(18, 25, 48, 0.6);
+  border: 1.5px dashed rgba(255, 255, 255, 0.12);
+  border-radius: 12px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  position: relative;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  overflow: hidden;
+}
+
+.slot-empty:hover {
+  background: rgba(30, 45, 80, 0.5);
+  border-color: rgba(255, 255, 255, 0.25);
+}
+
+.slot-valid-target {
+  border: 1.5px solid #ffd166 !important;
+  background: radial-gradient(circle, rgba(255, 209, 102, 0.2) 0%, rgba(18, 25, 48, 0.6) 100%) !important;
+  animation: slotPulse 1.8s infinite;
+}
+
+@keyframes slotPulse {
+  0%, 100% { box-shadow: inset 0 0 8px rgba(255, 209, 102, 0.3); }
+  50% { box-shadow: inset 0 0 16px rgba(255, 209, 102, 0.6); }
+}
+
+.slot-preview-overlay {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 2px;
+  pointer-events: none;
+}
+
+.slot-place-prompt {
+  font-size: 10px;
+  font-weight: 800;
+  color: #ffd166;
+}
+
+.slot-preview-points {
+  font-size: 9px;
+  font-weight: 800;
+  background: #10b981;
+  color: #fff;
+  padding: 1px 5px;
+  border-radius: 4px;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
+}
+
+.slot-card-wrapper {
+  width: 100%;
+  height: 100%;
+}
+
+.slot-last-move-ping {
+  position: absolute;
+  inset: 0;
+  border: 2px solid #ffd166;
+  border-radius: 12px;
+  animation: pingOnce 1.2s ease-out;
+  pointer-events: none;
+}
+
+@keyframes pingOnce {
+  0% { transform: scale(1.1); opacity: 1; }
+  100% { transform: scale(1); opacity: 0; }
+}
+
+/* Result Overlays */
+.halfmoon-result-overlay {
+  position: absolute;
+  inset: 0;
+  background: rgba(5, 8, 20, 0.88);
+  backdrop-filter: blur(8px);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 20px;
+  z-index: 30;
+}
+
+.halfmoon-result-card {
+  background: rgba(15, 23, 42, 0.95);
+  border: 1.5px solid rgba(255, 215, 0, 0.3);
+  box-shadow: 0 20px 40px rgba(0, 0, 0, 0.8), 0 0 30px rgba(255, 209, 102, 0.2);
+  border-radius: 20px;
+  padding: 28px 20px;
+  text-align: center;
+  max-width: 420px;
+  width: 100%;
+}
+
+.result-icon-glow, .result-crown-glow {
+  font-size: 40px;
+  margin-bottom: 6px;
+  filter: drop-shadow(0 0 12px #ffd166);
+}
+
+.result-score-summary {
+  background: rgba(30, 41, 59, 0.6);
+  border-radius: 12px;
+  padding: 12px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.result-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  font-size: 13px;
+  color: #cbd5e1;
+}
+
+.highlight-row {
+  border-top: 1px solid rgba(255, 255, 255, 0.1);
+  padding-top: 6px;
+}
+
+/* Hall of Fame Box */
+.halfmoon-hall-box {
+  background: rgba(30, 41, 59, 0.8);
+  border: 1px solid rgba(255, 215, 0, 0.25);
+  border-radius: 14px;
+  padding: 12px;
+  margin-bottom: 12px;
+}
+
+.halfmoon-hall-title {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  font-size: 12px;
+  font-weight: 700;
+  color: #ffd166;
+  margin-bottom: 8px;
+}
+
+.halfmoon-hall-form-row {
+  display: flex;
+  gap: 6px;
+}
+
+.halfmoon-hall-input {
+  flex: 1;
+  background: rgba(15, 23, 42, 0.9);
+  border: 1px solid rgba(255, 255, 255, 0.15);
+  border-radius: 8px;
+  padding: 8px 10px;
+  font-size: 13px;
+  color: #fff;
+  outline: none;
+}
+
+.halfmoon-hall-input:focus {
+  border-color: #ffd166;
+  box-shadow: 0 0 8px rgba(255, 209, 102, 0.4);
+}
+
+.halfmoon-hall-btn-submit {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  background: linear-gradient(135deg, #f59e0b, #d97706);
+  color: #0f172a;
+  font-weight: 800;
+  font-size: 12px;
+  padding: 8px 14px;
+  border-radius: 8px;
+  border: none;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.halfmoon-hall-btn-submit:hover:not(:disabled) {
+  background: linear-gradient(135deg, #fbbf24, #f59e0b);
+  transform: translateY(-1px);
+}
+
+.halfmoon-hall-success-pill {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  background: rgba(16, 185, 129, 0.2);
+  border: 1px solid #10b981;
+  color: #34d399;
+  font-size: 12px;
+  font-weight: 700;
+  padding: 8px;
+  border-radius: 8px;
+}
+
+/* Action Buttons */
+.halfmoon-btn-primary {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  width: 100%;
+  background: linear-gradient(135deg, #ffd166 0%, #ffb703 100%);
+  color: #0f172a;
+  font-weight: 800;
+  font-size: 14px;
+  padding: 12px 18px;
+  border-radius: 12px;
+  border: none;
+  cursor: pointer;
+  box-shadow: 0 4px 15px rgba(255, 183, 3, 0.35);
+  transition: all 0.2s ease;
+}
+
+.halfmoon-btn-primary:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 20px rgba(255, 183, 3, 0.5);
+}
+
+.halfmoon-btn-secondary {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  width: 100%;
+  background: rgba(30, 41, 59, 0.8);
+  border: 1px solid rgba(255, 255, 255, 0.15);
+  color: #e2e8f0;
+  font-weight: 700;
+  font-size: 13px;
+  padding: 10px 16px;
+  border-radius: 12px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.halfmoon-btn-secondary:hover {
+  background: rgba(51, 65, 85, 0.9);
+  border-color: rgba(255, 215, 0, 0.3);
+}
+
+/* How to Play Modal Styles */
+.halfmoon-modal-backdrop {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.8);
+  backdrop-filter: blur(6px);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 16px;
+  z-index: 50;
+}
+
+.halfmoon-modal-dialog {
+  background: #0f172a;
+  border: 1px solid rgba(255, 215, 0, 0.25);
+  box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.9);
+  border-radius: 20px;
+  max-width: 580px;
+  width: 100%;
+  max-height: 85vh;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+}
+
+.halfmoon-modal-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 16px 20px;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+  background: rgba(15, 23, 42, 0.8);
+}
+
+.halfmoon-modal-content {
+  padding: 20px;
+  overflow-y: auto;
+  flex: 1;
+}
+
+.halfmoon-modal-footer {
+  padding: 14px 20px;
+  border-top: 1px solid rgba(255, 255, 255, 0.1);
+  background: rgba(15, 23, 42, 0.9);
+}
+
+.guide-heading {
+  font-size: 13px;
+  font-weight: 800;
+  color: #ffd166;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  margin-bottom: 8px;
+}
+
+.lunar-phase-grid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 6px;
+}
+
+.phase-guide-card {
+  background: rgba(30, 41, 59, 0.6);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 8px;
+  padding: 6px 4px;
+  text-align: center;
+}
+
+.phase-guide-icon {
+  font-size: 18px;
+}
+
+.phase-guide-name {
+  font-size: 11px;
+  font-weight: 700;
+  color: #e2e8f0;
+  margin-top: 2px;
+}
+
+.phase-guide-desc {
+  font-size: 9px;
+  color: #94a3b8;
+  line-height: 1.2;
+}
+
+.guide-score-item {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  background: rgba(30, 41, 59, 0.4);
+  padding: 6px 10px;
+  border-radius: 8px;
+}
+
+.guide-score-badge {
+  font-size: 10px;
+  font-weight: 800;
+  padding: 2px 6px;
+  border-radius: 4px;
+  min-width: 60px;
+  text-align: center;
+}
+
+.special-guide-card {
+  background: rgba(30, 41, 59, 0.6);
+  border: 1px solid rgba(255, 0, 127, 0.25);
+  border-radius: 10px;
+  padding: 10px;
+  text-align: center;
+}
+
+/* Animations */
+@keyframes fadeIn {
+  from { opacity: 0; transform: scale(0.96); }
+  to { opacity: 1; transform: scale(1); }
+}
+
+@keyframes slideDown {
+  from { opacity: 0; transform: translateY(-8px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+.animate-fade-in {
+  animation: fadeIn 0.25s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+}
+
+.animate-slide-down {
+  animation: slideDown 0.25s ease-out forwards;
+}
+
+.animate-spin-slow {
+  animation: spin 15s linear infinite;
+}
+
+@keyframes spin {
+  from { transform: rotate(0deg); }
+  to { transform: rotate(360deg); }
+}
+
+/* Responsive Rules for Small Screens */
+@media (max-width: 640px) {
+  .halfmoon-card.size-normal {
+    width: 62px;
+    height: 92px;
+  }
+  .moon-svg-graphic {
+    max-width: 44px;
+    max-height: 44px;
+  }
+  .halfmoon-grid-board {
+    max-width: 320px;
+    gap: 6px;
+    padding: 8px;
+  }
+  .lunar-phase-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}

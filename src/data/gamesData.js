@@ -226,19 +226,21 @@ export const PLAYABLE_GAMES = [
     category: '스포츠',
     imageSrc: getThumb('petanque.jpg'),
     isPlayable: true,
-    badgeText: '🎯 NEW 26위',
+    badgeText: '🎯 26위',
     description: '노란 표적구(뷔슈)에 쇠구슬을 가깝게 붙이고 상대 공을 쳐내는 프랑스 전통 구기 스포츠 2.5D 물리 챌린지!'
+  },
+  {
+    id: 'halfmoon',
+    title: '반달 (Half Moon)',
+    category: '카드',
+    imageSrc: getThumb('halfmoon.jpg'),
+    isPlayable: true,
+    badgeText: '🌙 NEW 27위',
+    description: '달의 8가지 위상(삭망월 주기)을 연결하고 보드를 점령하여 달의 정령 Luna를 이기는 천문 전략 카드 배틀!'
   }
 ];
 
 export const COMING_SOON_GAMES = [
-  {
-    id: 'halfmoon',
-    title: '반달',
-    category: '카드',
-    imageSrc: getThumb('halfmoon.jpg'),
-    isPlayable: false
-  },
   {
     id: 'panipuri',
     title: '파니 푸리',

@@ -25,6 +25,7 @@ import OlympicsGame from './components/games/olympics/OlympicsGame';
 import PangolinGame from './components/games/pangolin/PangolinGame';
 import RoswellGame from './components/games/roswell/RoswellGame';
 import PetanqueGame from './components/games/petanque/PetanqueGame';
+import HalfMoonGame from './components/games/halfmoon/HalfMoonGame';
 import GameCard from './components/GameCard';
 import LeaderboardModal from './components/LeaderboardModal';
 import ChangelogModal from './components/ChangelogModal';
@@ -221,16 +222,16 @@ export default function App() {
           </p>
         </div>
 
-        {/* Quick Action Button Toolbar: Random Game, School Leaderboard, Update History & Guide */}
+        {/* Quick Action Button Toolbar: Random Game, School Leaderboard, Update History, Guide & Rules */}
         <div className="portal-search-row">
-          <div className="flex items-center gap-2.5 flex-wrap justify-center">
+          <div className="portal-header-btn-row">
             {/* 🎲 Lucky Random Pick Button */}
             <button
               onClick={handleRandomPlay}
               className="btn-dice shadow-md flex items-center gap-1.5"
               title="어떤 게임을 할지 고민될 때! 랜덤 게임 시작"
             >
-              <Dices className="w-4 h-4 text-emerald-300" />
+              <Dices className="w-3.5 h-3.5 text-emerald-300" />
               <span>랜덤 게임</span>
             </button>
 
@@ -240,7 +241,7 @@ export default function App() {
               className="btn-gold shadow-md flex items-center gap-1.5"
               title="학교 랭킹 팝업 열기"
             >
-              <Trophy className="w-4 h-4 text-slate-950" />
+              <Trophy className="w-3.5 h-3.5 text-slate-950" />
               <span>학교 랭킹</span>
             </button>
 
@@ -596,6 +597,9 @@ export default function App() {
               )}
               {activeGame === 'petanque' && (
                 <PetanqueGame onScoreSubmitted={() => openInPageLeaderboardModal('petanque')} />
+              )}
+              {activeGame === 'halfmoon' && (
+                <HalfMoonGame onScoreSubmitted={() => openInPageLeaderboardModal('halfmoon')} />
               )}
             </div>
           </div>

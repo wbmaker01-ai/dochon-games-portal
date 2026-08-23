@@ -3,11 +3,64 @@
 
 export const CHANGELOG_DATA = [
   {
+    version: 'v1.40.0',
+    date: '2026-08-23',
+    title: '신규 천문 전략 카드 게임 [반달 (Rise of the Half Moon)] 공식 출시!',
+    badge: 'LATEST',
+    badgeColor: 'emerald',
+    items: [
+      {
+        tag: 'NEW GAME',
+        tagColor: 'amber',
+        text: '[반달 정식 오픈] 구글 두들 모티브의 달의 8대 위상(삭, 초승달, 상현달, 보름달 등) 연계 및 Luna AI 대전 카드 퍼즐 게임 출시'
+      },
+      {
+        tag: 'LUNAR PHASES',
+        tagColor: 'blue',
+        text: '[달의 삭망월 콤보 시스템] 동일 위상 페어(+60점), 연속 위상 사이클(+100점), 대칭 위상 조화(+80점), 3연속 풀 사이클 라인 완성(+300점) 등 전략적 연계 점수 체계 탑재'
+      },
+      {
+        tag: 'SPECIAL CARDS',
+        tagColor: 'pink',
+        text: '[특수 와일드카드] 슈퍼문(아군 점수 증폭), 개기월식(상대 카드 잠식 전환), 별똥별(보너스 별빛 파편) 등 판세를 뒤집는 우주 스킬 구현'
+      },
+      {
+        tag: 'STAGES & AI',
+        tagColor: 'purple',
+        text: '[3단계 스테이지 & AI 배틀] 초승달의 인도(1단계)부터 4x4 보름달의 결전(3단계)까지 점진적 난이도 및 지능형 Luna AI 대결 지원'
+      },
+      {
+        tag: 'LEADERBOARD',
+        tagColor: 'emerald',
+        text: '[명예의 전당 연동] 최종 승리 및 100점 초과 달성 시 학교 랭킹 등록 및 실시간 반달 리더보드 자동 팝업 연동'
+      }
+    ]
+  },
+  {
+    version: 'v1.39.8',
+    date: '2026-08-23',
+    title: '메인 헤더 액션 툴바 5개 버튼 1줄(Single-Row) 완벽 고정 및 반응형 최적화',
+    badge: 'UPDATE',
+    badgeColor: 'blue',
+    items: [
+      {
+        tag: 'HEADER UI',
+        tagColor: 'amber',
+        text: '[상단 툴바 1줄 고정] 랜덤 게임, 학교 랭킹, 업데이트, 이용안내, 이용수칙 5개 버튼이 줄바꿈(2줄)되지 않고 항상 깔끔한 1줄(Single-row)로 균일하게 배치되도록 레이아웃 및 여백 최적화'
+      },
+      {
+        tag: 'RESPONSIVE',
+        tagColor: 'blue',
+        text: '[모바일/태블릿 반응형 지원] 화면 해상도에 맞춰 버튼 패딩 및 글자 크기가 유연하게 조정되어 모바일에서도 줄바꿈 없이 한눈에 확인할 수 있도록 개선'
+      }
+    ]
+  },
+  {
     version: 'v1.39.7',
     date: '2026-08-23',
     title: '[도촌 페탕크 마스터] 경기 시작하기 클릭 시 라운드 진입 정상화 및 햅틱 엔진 안전성 강화',
-    badge: 'LATEST',
-    badgeColor: 'emerald',
+    badge: 'UPDATE',
+    badgeColor: 'blue',
     items: [
       {
         tag: 'BUG FIX',
