@@ -3,11 +3,45 @@
 
 export const CHANGELOG_DATA = [
   {
+    version: 'v1.44.0',
+    date: '2026-08-23',
+    title: '👻 [신규 정식 게임] 30번째 실시간 팀 액션 배틀 「도촌 영혼 대결」 4 vs 4 그랜드 오픈',
+    badge: 'LATEST',
+    badgeColor: 'emerald',
+    items: [
+      {
+        tag: '4 VS 4 TEAM BATTLE',
+        tagColor: 'emerald',
+        text: '[도촌 영혼 대결 정식 출시] 초록 영혼팀 vs 보라 유령팀 8인 팀 대항전! 7마리의 스마트 AI 봇(FSM 및 자율 길찾기) 탑재로 대기 시간 없이 0초 만에 즐기는 실시간 액션 배틀'
+      },
+      {
+        tag: 'TAIL STEAL PHYSICS',
+        tagColor: 'purple',
+        text: '[역기구학 꼬리 & 가로채기 시스템] 영혼 불꽃을 모아 길어지는 뱀 형태의 꼬리 물리 엔진 및 상대 꼬리를 끊어 가로채는 짜릿한 꼬리 스틸(Steal) 판정 구현'
+      },
+      {
+        tag: 'MANSION & POWERUPS',
+        tagColor: 'blue',
+        text: '[대저택 맵 & 3대 마법 파워업] 팀 기지 점수 납품, 미니맵 레이더, 질주 부스트(Speed)·벽 통과(Ghost Walk)·영혼 자석(Magnet) 파워업 탑재'
+      },
+      {
+        tag: 'CONTROLS & AUDIO',
+        tagColor: 'amber',
+        text: '[완벽한 반응형 조작 & 자체 사운드] PC 키보드(방향키/WASD) 및 모바일 화면 가상 조이스틱 지원, Web Audio API 무손실 절차적 할로윈 아케이드 사운드 합성'
+      },
+      {
+        tag: 'LEADERBOARD',
+        tagColor: 'emerald',
+        text: '[도촌초 명예의 전당 연동] 100점 초과 달성 시 학교 실시간 랭킹 등록 및 도촌 영혼 대결 전용 리더보드 탭 자동 연동 지원'
+      }
+    ]
+  },
+  {
     version: 'v1.43.0',
     date: '2026-08-23',
     title: '🧠 [신규 정식 게임] 29번째 두뇌 트레이닝 아케이드 「도촌 기억력 마스터」 그랜드 오픈',
-    badge: 'LATEST',
-    badgeColor: 'emerald',
+    badge: 'UPDATE',
+    badgeColor: 'blue',
     items: [
       {
         tag: 'NEW GAME',

@@ -253,19 +253,21 @@ export const PLAYABLE_GAMES = [
     category: '퍼즐',
     imageSrc: getThumb('memory.jpg'),
     isPlayable: true,
-    badgeText: '🧠 NEW 29위',
+    badgeText: '🧠 29위',
     description: '뒤집힌 카드의 짝을 맞추고 빛나는 멜로디의 순서를 기억하는 2가지 두뇌 트레이닝 퍼즐!'
-  }
-];
-
-export const COMING_SOON_GAMES = [
+  },
   {
     id: 'ghoulduel',
     title: '도촌 영혼 대결',
     category: '액션',
     imageSrc: getThumb('ghoulduel.jpg'),
-    isPlayable: false
-  },
+    isPlayable: true,
+    badgeText: '👻 NEW 30위',
+    description: '초록팀 vs 보라팀 4:4 실시간 대결! 영혼 불꽃을 모아 기지에 반납하고 상대 꼬리를 가로채세요!'
+  }
+];
+
+export const COMING_SOON_GAMES = [
   {
     id: 'bachai',
     title: '도촌 바흐 AI 작곡기',

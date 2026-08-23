@@ -28,6 +28,7 @@ import PetanqueGame from './components/games/petanque/PetanqueGame';
 import HalfMoonGame from './components/games/halfmoon/HalfMoonGame';
 import PaniPuriGame from './components/games/panipuri/PaniPuriGame';
 import MemoryGame from './components/games/memory/MemoryGame';
+import GhoulDuelGame from './components/games/ghoulduel/GhoulDuelGame';
 import GameCard from './components/GameCard';
 import LeaderboardModal from './components/LeaderboardModal';
 import ChangelogModal from './components/ChangelogModal';
@@ -608,6 +609,9 @@ export default function App() {
               )}
               {activeGame === 'memory' && (
                 <MemoryGame onScoreSubmitted={() => openInPageLeaderboardModal('memory')} />
+              )}
+              {activeGame === 'ghoulduel' && (
+                <GhoulDuelGame onScoreSubmitted={() => openInPageLeaderboardModal('ghoulduel')} />
               )}
             </div>
           </div>
