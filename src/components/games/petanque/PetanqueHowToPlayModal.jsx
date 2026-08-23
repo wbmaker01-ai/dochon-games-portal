@@ -72,7 +72,7 @@ export default function PetanqueHowToPlayModal({ isOpen, onClose }) {
             </div>
             <ul className="petanque-info-desc" style={{ paddingLeft: '18px', listStyleType: 'disc' }}>
               <li>
-                <strong style={{ color: '#ffffff' }}>각도 조절:</strong> 하단 ◀ / ▶ 버튼 또는 방향키(← / →) / <kbd style={{ padding: '1px 5px', background: '#334155', borderRadius: '4px', color: '#93c5fd', fontFamily: 'monospace' }}>A / D</kbd>
+                <strong style={{ color: '#ffffff' }}>각도 조절 (30°~150°, 좌우 ±60°):</strong> 하단 ◀ / ▶ 버튼 또는 방향키(← / →) / <kbd style={{ padding: '1px 5px', background: '#334155', borderRadius: '4px', color: '#93c5fd', fontFamily: 'monospace' }}>A / D</kbd>
               </li>
               <li>
                 <strong style={{ color: '#ffffff' }}>파워 조절:</strong> 하단 ➖ / ➕ 버튼 또는 방향키(↑ / ↓) / <kbd style={{ padding: '1px 5px', background: '#334155', borderRadius: '4px', color: '#93c5fd', fontFamily: 'monospace' }}>W / S</kbd>

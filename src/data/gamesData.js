@@ -235,19 +235,21 @@ export const PLAYABLE_GAMES = [
     category: '카드',
     imageSrc: getThumb('halfmoon.jpg'),
     isPlayable: true,
-    badgeText: '🌙 NEW 27위',
+    badgeText: '🌙 27위',
     description: '달의 8가지 위상(삭망월 주기)을 연결하고 보드를 점령하여 달의 정령 Luna를 이기는 천문 전략 카드 배틀!'
+  },
+  {
+    id: 'panipuri',
+    title: '파니 푸리 (Pani Puri)',
+    category: '퍼즐',
+    imageSrc: getThumb('panipuri.jpg'),
+    isPlayable: true,
+    badgeText: '🫓 NEW 28위',
+    description: '바삭한 푸리에 4가지 맛있는 소스를 채워 손님들의 주문을 빠르게 서빙하는 인도 길거리 음식 타이쿤 퍼즐!'
   }
 ];
 
 export const COMING_SOON_GAMES = [
-  {
-    id: 'panipuri',
-    title: '파니 푸리',
-    category: '퍼즐',
-    imageSrc: getThumb('panipuri.jpg'),
-    isPlayable: false
-  },
   {
     id: 'memory',
     title: '기억력 게임',

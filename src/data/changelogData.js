@@ -3,11 +3,64 @@
 
 export const CHANGELOG_DATA = [
   {
+    version: 'v1.41.1',
+    date: '2026-08-23',
+    title: '[도촌 페탕크 마스터] 조준 각도 범위 30°~150°(좌우 ±60° 폭) 대폭 확장 및 사이드 쿠션 샷 지원',
+    badge: 'LATEST',
+    badgeColor: 'emerald',
+    items: [
+      {
+        tag: 'WIDE ANGLE AIM',
+        tagColor: 'emerald',
+        text: '[조준 각도 30°~150° 대폭 확장] 기존 65°~115°(±25°)에서 30°~150°(±60°)로 조준 범위를 대폭 확장하여 코트 양쪽 구석 및 사이드 펜스 쿠션 샷까지 자유롭게 구사할 수 있도록 개선'
+      },
+      {
+        tag: 'AI & UI SYNC',
+        tagColor: 'blue',
+        text: '[AI 전방위 조준 및 슬라이더 동기화] 하단 각도 조절 슬라이더 및 스텝퍼, AI 지능형 목표 조준 각도까지 확장된 30°~150° 범위에 완벽 동기화'
+      }
+    ]
+  },
+  {
+    version: 'v1.41.0',
+    date: '2026-08-23',
+    title: '신규 인도 길거리 음식 타이쿤 퍼즐 게임 [파니 푸리 (Pani Puri)] 공식 출시!',
+    badge: 'UPDATE',
+    badgeColor: 'blue',
+    items: [
+      {
+        tag: 'NEW GAME',
+        tagColor: 'amber',
+        text: '[파니 푸리 정식 오픈] 구글 두들 모티브의 인도 최고 인기 길거리 간식 파니 푸리 서빙 타이쿤 & 매칭 퍼즐 아케이드 게임 공식 출시'
+      },
+      {
+        tag: '4 SIGNATURE FLAVORS',
+        tagColor: 'emerald',
+        text: '[4대 시그니처 파니] 상쾌한 민트·고수, 달콤새콤 타마린드, 얼큰한 스파이시 칠리, 부드러운 망고 요거트 등 4가지 특색 있는 소스 조리 시스템 탑재'
+      },
+      {
+        tag: 'FEVER & COMBO',
+        tagColor: 'teal',
+        text: '[골든 피버 & 콤보 시스템] 연속 서빙 콤보 배수 보너스 및 피버 게이지 100% 달성 시 8초간 2배 점수를 획득하는 골든 레인보우 피버 모드 지원'
+      },
+      {
+        tag: 'AUDIO SYNTH',
+        tagColor: 'blue',
+        text: '[웹 오디오 신디사이저] 바삭한 크런치 사운드, 찰랑이는 파니 소스 효과음, 서빙 벨, 인도풍 스트리트 리듬 배경음악 100% 코드 기반 실시간 합성 지원'
+      },
+      {
+        tag: 'HALL OF FAME',
+        tagColor: 'purple',
+        text: '[명예의 전당 연동] 100점 초과 달성 시 도촌초등학교 실시간 클라우드 랭킹에 즉시 점수 등록 및 자동 탭 연동'
+      }
+    ]
+  },
+  {
     version: 'v1.40.2',
     date: '2026-08-23',
     title: '[도촌 페탕크 마스터] 상/하 화살표 및 WASD 파워·각도 키보드 컨트롤 & Enter 투구 발사 지원',
-    badge: 'LATEST',
-    badgeColor: 'emerald',
+    badge: 'UPDATE',
+    badgeColor: 'blue',
     items: [
       {
         tag: 'POWER SHORTCUTS',

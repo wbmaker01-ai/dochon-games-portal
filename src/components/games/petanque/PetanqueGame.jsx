@@ -218,9 +218,9 @@ export default function PetanqueGame({ onScoreSubmitted }) {
 
       const aiShotType = shouldTirer ? SHOT_TYPES.TIRER : SHOT_TYPES.POINTER;
 
-      // Apply organic AI variance based on difficulty
+      // Apply organic AI variance based on difficulty (expanded 30~150 deg range)
       const variance = (Math.random() - 0.5) * difficulty.errorVariance * 35;
-      const finalAngle = Math.max(65, Math.min(115, baseAngle + variance));
+      const finalAngle = Math.max(30, Math.min(150, baseAngle + variance));
 
       // Calculate distance power ratio
       const distPx = Math.hypot(dx, dy);
@@ -390,7 +390,7 @@ export default function PetanqueGame({ onScoreSubmitted }) {
   // Stepper handlers for tablet buttons
   const stepAngle = (delta) => {
     try { haptics.light(); } catch (e) {}
-    setAimAngle(prev => Math.max(65, Math.min(115, prev + delta)));
+    setAimAngle(prev => Math.max(30, Math.min(150, prev + delta)));
   };
 
   const stepPower = (delta) => {
@@ -403,13 +403,13 @@ export default function PetanqueGame({ onScoreSubmitted }) {
     const handleKeyDown = (e) => {
       if (gameState !== GAME_STATES.READY_THROW || currentTurnTeam !== TEAMS.PLAYER.id) return;
 
-      // Angle Controls: Left / Right, A / D
+      // Angle Controls: Left / Right, A / D (Expanded 30° ~ 150°)
       if (e.key === 'ArrowLeft' || e.key === 'a' || e.key === 'A') {
         e.preventDefault();
-        setAimAngle(prev => Math.max(65, prev - 2));
+        setAimAngle(prev => Math.max(30, prev - 2));
       } else if (e.key === 'ArrowRight' || e.key === 'd' || e.key === 'D') {
         e.preventDefault();
-        setAimAngle(prev => Math.min(115, prev + 2));
+        setAimAngle(prev => Math.min(150, prev + 2));
       }
       // Power Controls: Up / Down, W / S
       else if (e.key === 'ArrowUp' || e.key === 'w' || e.key === 'W') {
@@ -777,8 +777,8 @@ export default function PetanqueGame({ onScoreSubmitted }) {
             </button>
             <input
               type="range"
-              min="65"
-              max="115"
+              min="30"
+              max="150"
               value={aimAngle}
               onChange={(e) => setAimAngle(Number(e.target.value))}
               className="petanque-slider-range"

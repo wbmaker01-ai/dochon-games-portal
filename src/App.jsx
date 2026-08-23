@@ -26,6 +26,7 @@ import PangolinGame from './components/games/pangolin/PangolinGame';
 import RoswellGame from './components/games/roswell/RoswellGame';
 import PetanqueGame from './components/games/petanque/PetanqueGame';
 import HalfMoonGame from './components/games/halfmoon/HalfMoonGame';
+import PaniPuriGame from './components/games/panipuri/PaniPuriGame';
 import GameCard from './components/GameCard';
 import LeaderboardModal from './components/LeaderboardModal';
 import ChangelogModal from './components/ChangelogModal';
@@ -600,6 +601,9 @@ export default function App() {
               )}
               {activeGame === 'halfmoon' && (
                 <HalfMoonGame onScoreSubmitted={() => openInPageLeaderboardModal('halfmoon')} />
+              )}
+              {activeGame === 'panipuri' && (
+                <PaniPuriGame onScoreSubmitted={() => openInPageLeaderboardModal('panipuri')} />
               )}
             </div>
           </div>

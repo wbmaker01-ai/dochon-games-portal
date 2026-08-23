@@ -1,0 +1,389 @@
+/* Dochon Pani Puri Master - Stylesheet */
+
+.panipuri-container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: flex-start;
+  width: 100%;
+  max-width: 860px;
+  margin: 0 auto;
+  background: #0f172a;
+  border-radius: 18px;
+  overflow: hidden;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
+  font-family: inherit;
+  user-select: none;
+  border: 1px solid rgba(245, 158, 11, 0.2);
+}
+
+/* 1. Header Toolbar */
+.panipuri-toolbar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  width: 100%;
+  padding: 8px 14px;
+  background: #1e293b;
+  border-bottom: 1px solid rgba(245, 158, 11, 0.2);
+  gap: 8px;
+  flex-wrap: nowrap;
+}
+
+.panipuri-badge-title {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.panipuri-stat-pill {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  background: rgba(15, 23, 42, 0.85);
+  border: 1px solid rgba(245, 158, 11, 0.3);
+  padding: 4px 8px;
+  border-radius: 10px;
+  font-size: 12px;
+  font-weight: 700;
+  white-space: nowrap;
+}
+
+.panipuri-combo-badge {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  background: linear-gradient(135deg, #f97316, #ef4444);
+  color: #ffffff;
+  padding: 3px 8px;
+  border-radius: 10px;
+  font-size: 10px;
+  font-weight: 900;
+  box-shadow: 0 2px 8px rgba(239, 68, 68, 0.4);
+  white-space: nowrap;
+}
+
+.panipuri-fever-bar-container {
+  display: flex;
+  flex-direction: column;
+  width: 90px;
+}
+
+.panipuri-fever-track {
+  width: 100%;
+  height: 7px;
+  background: #0f172a;
+  border-radius: 4px;
+  overflow: hidden;
+  border: 1px solid rgba(245, 158, 11, 0.3);
+}
+
+.panipuri-fever-fill {
+  height: 100%;
+  transition: width 0.2s ease-out;
+}
+
+.panipuri-tool-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 32px;
+  height: 32px;
+  background: rgba(15, 23, 42, 0.7);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 10px;
+  cursor: pointer;
+  transition: all 0.15s ease;
+}
+
+.panipuri-tool-btn:hover {
+  background: rgba(245, 158, 11, 0.2);
+  border-color: rgba(245, 158, 11, 0.4);
+}
+
+/* 2. Canvas Area */
+.panipuri-canvas-wrapper {
+  position: relative;
+  width: 100%;
+  aspect-ratio: 800 / 520;
+  max-width: 800px;
+  background: #000;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  overflow: hidden;
+}
+
+.panipuri-canvas {
+  width: 100%;
+  height: 100%;
+  display: block;
+  object-fit: contain;
+}
+
+/* 3. Overlays (Start / Game Over) */
+.panipuri-overlay {
+  position: absolute;
+  inset: 0;
+  background: rgba(15, 23, 42, 0.85);
+  backdrop-filter: blur(6px);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 16px;
+  z-index: 20;
+}
+
+.panipuri-overlay-card {
+  background: #1e293b;
+  border: 2px solid rgba(245, 158, 11, 0.4);
+  border-radius: 20px;
+  padding: 24px 28px;
+  box-shadow: 0 16px 36px rgba(0, 0, 0, 0.6);
+  width: 100%;
+  max-width: 420px;
+}
+
+.panipuri-btn-start {
+  background: linear-gradient(135deg, #f59e0b, #fbbf24);
+  color: #0f172a;
+  font-weight: 900;
+  font-size: 14px;
+  padding: 10px 24px;
+  border-radius: 14px;
+  border: none;
+  cursor: pointer;
+  box-shadow: 0 4px 16px rgba(245, 158, 11, 0.4);
+  transition: transform 0.15s ease, filter 0.15s ease;
+}
+
+.panipuri-btn-start:hover {
+  transform: translateY(-2px);
+  filter: brightness(1.1);
+}
+
+.panipuri-btn-secondary {
+  background: rgba(51, 65, 85, 0.8);
+  color: #e2e8f0;
+  font-weight: 700;
+  font-size: 13px;
+  padding: 10px 18px;
+  border-radius: 14px;
+  border: 1px solid rgba(255, 255, 255, 0.15);
+  cursor: pointer;
+  transition: all 0.15s ease;
+}
+
+.panipuri-btn-secondary:hover {
+  background: rgba(71, 85, 105, 0.9);
+  color: #ffffff;
+}
+
+.panipuri-btn-primary {
+  background: linear-gradient(135deg, #f59e0b, #eab308);
+  color: #0f172a;
+  font-weight: 900;
+  border: none;
+  cursor: pointer;
+  box-shadow: 0 4px 12px rgba(245, 158, 11, 0.3);
+  transition: all 0.15s ease;
+}
+
+.panipuri-btn-primary:hover {
+  filter: brightness(1.1);
+  transform: translateY(-1px);
+}
+
+/* 4. Bottom Interactive Control Dock */
+.panipuri-control-dock {
+  width: 100%;
+  padding: 12px 16px;
+  background: #1e293b;
+  border-top: 1px solid rgba(245, 158, 11, 0.2);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  flex-wrap: wrap;
+}
+
+.panipuri-flavor-grid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 8px;
+  flex: 1;
+  min-width: 320px;
+}
+
+.panipuri-flavor-btn {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 12px;
+  border-radius: 14px;
+  border: 1.5px solid;
+  cursor: pointer;
+  transition: transform 0.1s ease, filter 0.15s ease;
+}
+
+.panipuri-flavor-btn:hover:not(:disabled) {
+  transform: translateY(-2px);
+  filter: brightness(1.15);
+}
+
+.panipuri-flavor-btn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.panipuri-tray-actions {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.panipuri-tray-preview {
+  display: flex;
+  align-items: center;
+  background: rgba(15, 23, 42, 0.8);
+  padding: 6px 10px;
+  border-radius: 12px;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  min-height: 42px;
+}
+
+.panipuri-btn-clear {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  background: rgba(239, 68, 68, 0.15);
+  border: 1px solid rgba(239, 68, 68, 0.4);
+  color: #fca5a5;
+  font-size: 11px;
+  font-weight: 700;
+  padding: 8px 12px;
+  border-radius: 12px;
+  cursor: pointer;
+  transition: all 0.15s ease;
+}
+
+.panipuri-btn-clear:hover:not(:disabled) {
+  background: rgba(239, 68, 68, 0.3);
+  color: #ffffff;
+}
+
+.panipuri-btn-clear:disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
+}
+
+.panipuri-btn-serve {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  background: linear-gradient(135deg, #10b981, #059669);
+  color: #ffffff;
+  font-weight: 900;
+  font-size: 13px;
+  padding: 9px 20px;
+  border-radius: 14px;
+  border: none;
+  cursor: pointer;
+  box-shadow: 0 4px 14px rgba(16, 185, 129, 0.4);
+  transition: transform 0.15s ease, filter 0.15s ease;
+}
+
+.panipuri-btn-serve:hover:not(:disabled) {
+  transform: translateY(-2px);
+  filter: brightness(1.1);
+}
+
+.panipuri-btn-serve:disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
+  transform: none;
+}
+
+/* 5. Guide Modal Backdrop */
+.panipuri-modal-backdrop {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.75);
+  backdrop-filter: blur(6px);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 16px;
+  z-index: 9999;
+}
+
+.panipuri-modal-card {
+  background: #1e293b;
+  border: 2px solid rgba(245, 158, 11, 0.4);
+  border-radius: 20px;
+  width: 100%;
+  max-width: 480px;
+  max-height: 90vh;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  box-shadow: 0 20px 40px rgba(0, 0, 0, 0.8);
+}
+
+.panipuri-modal-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 16px 20px;
+  background: #0f172a;
+  border-bottom: 1px solid rgba(245, 158, 11, 0.2);
+}
+
+.panipuri-modal-body {
+  padding: 20px;
+  overflow-y: auto;
+}
+
+.panipuri-guide-section {
+  background: rgba(15, 23, 42, 0.6);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 14px;
+  padding: 12px 14px;
+}
+
+.panipuri-flavor-badge {
+  display: flex;
+  align-items: center;
+}
+
+.panipuri-modal-footer {
+  padding: 14px 20px;
+  background: #0f172a;
+  border-top: 1px solid rgba(255, 255, 255, 0.08);
+}
+
+.panipuri-btn-close {
+  background: transparent;
+  border: none;
+  cursor: pointer;
+  padding: 4px;
+  border-radius: 8px;
+}
+
+.panipuri-btn-close:hover {
+  background: rgba(255, 255, 255, 0.1);
+}
+
+/* Mobile Responsive Adjustments */
+@media (max-width: 640px) {
+  .panipuri-flavor-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+  .panipuri-control-dock {
+    flex-direction: column;
+    align-items: stretch;
+  }
+  .panipuri-tray-actions {
+    justify-content: space-between;
+  }
+}
