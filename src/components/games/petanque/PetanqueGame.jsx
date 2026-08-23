@@ -202,10 +202,11 @@ export default function PetanqueGame({ onScoreSubmitted }) {
       const targetX = cochonnet ? cochonnet.x : 400;
       const targetY = cochonnet ? cochonnet.y : 250;
 
-      // Calculate base angle to target Cochonnet
+      // Calculate base angle to target Cochonnet (where 90 deg is straight up towards -Y)
       const dx = targetX - FIELD_CONFIG.LAUNCH_X;
       const dy = targetY - FIELD_CONFIG.LAUNCH_Y;
-      let baseAngle = (Math.atan2(dy, dx) * 180 / Math.PI) + 90;
+      const targetRad = Math.atan2(dx, -dy);
+      let baseAngle = 90 + (targetRad * 180 / Math.PI);
 
       // AI shot type decision: If player is very close to Cochonnet, try Tirer to smash player's ball
       const distances = engineRef.current.calculateDistances();

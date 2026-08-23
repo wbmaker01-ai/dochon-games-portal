@@ -3,11 +3,30 @@
 
 export const CHANGELOG_DATA = [
   {
+    version: 'v1.40.1',
+    date: '2026-08-23',
+    title: '[도촌 페탕크 마스터] 쇠구슬 투구 방향 및 조준 가이드라인 전방(위쪽) 물리 좌표계 정상화',
+    badge: 'LATEST',
+    badgeColor: 'emerald',
+    items: [
+      {
+        tag: 'AIM VECTOR FIX',
+        tagColor: 'emerald',
+        text: '[전방 투구 물리 벡터 전면 교정] 90도 각도 투구 시 우측 수평으로 날아가던 삼각함수 좌표 계산을 캔버스 2.5D 전방(-Y축, 12시 방향) 직진 벡터로 완벽 수정'
+      },
+      {
+        tag: 'GUIDE & AI REPAIR',
+        tagColor: 'blue',
+        text: '[조준 가이드 & AI 조준 동기화] 플레이어 조준 점선 및 타겟팅 레티클이 뷔슈를 향해 똑바로 뻗어나가도록 개선하고, AI의 자동 표적 조준 계산식도 전방 좌표계에 맞추어 완벽 정렬'
+      }
+    ]
+  },
+  {
     version: 'v1.40.0',
     date: '2026-08-23',
     title: '신규 천문 전략 카드 게임 [반달 (Rise of the Half Moon)] 공식 출시!',
-    badge: 'LATEST',
-    badgeColor: 'emerald',
+    badge: 'UPDATE',
+    badgeColor: 'blue',
     items: [
       {
         tag: 'NEW GAME',

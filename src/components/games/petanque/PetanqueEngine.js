@@ -96,7 +96,11 @@ export class PetanqueEngine {
     petanqueAudio.playThrowRelease();
 
     const powerRatio = Math.max(0.1, Math.min(1.0, powerPercent / 100));
-    const rad = (angleDeg - 90) * (Math.PI / 180);
+    
+    // 90 deg is straight forward (-Y direction), <90 is left, >90 is right
+    const offsetRad = (angleDeg - 90) * (Math.PI / 180);
+    const dirX = Math.sin(offsetRad);
+    const dirY = -Math.cos(offsetRad);
 
     // Initial launch coordinates (near bottom center throw circle)
     const startX = FIELD_CONFIG.LAUNCH_X;
@@ -116,8 +120,8 @@ export class PetanqueEngine {
       verticalSpeed = 6.8 + powerRatio * 7.5;
     }
 
-    const vx = Math.cos(rad) * forwardSpeed * 1.1;
-    const vy = Math.sin(rad) * forwardSpeed * 0.95; // Moving upward towards target
+    const vx = dirX * forwardSpeed * 1.1;
+    const vy = dirY * forwardSpeed * 0.95; // Moving upward towards target (-Y)
 
     const newBoule = {
       id: `boule_${Date.now()}_${Math.random().toString(36).substr(2, 4)}`,
@@ -470,16 +474,20 @@ export class PetanqueEngine {
 
   renderAimGuide(ctx, angleDeg, powerPercent, shotType, team) {
     ctx.save();
-    const rad = (angleDeg - 90) * (Math.PI / 180);
+    // 90 deg is straight forward (-Y direction), <90 is left, >90 is right
+    const offsetRad = (angleDeg - 90) * (Math.PI / 180);
+    const dirX = Math.sin(offsetRad);
+    const dirY = -Math.cos(offsetRad);
+
     const startX = FIELD_CONFIG.LAUNCH_X;
     const startY = FIELD_CONFIG.LAUNCH_Y;
 
     const powerRatio = powerPercent / 100;
     const distancePx = 150 + powerRatio * 280;
 
-    // Target landing point
-    const targetX = startX + Math.cos(rad) * distancePx;
-    const targetY = startY + Math.sin(rad) * distancePx;
+    // Target landing point (moving forward towards top)
+    const targetX = startX + dirX * distancePx;
+    const targetY = startY + dirY * distancePx;
 
     // Projected parabolic curve
     ctx.beginPath();
