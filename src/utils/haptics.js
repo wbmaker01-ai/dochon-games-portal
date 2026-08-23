@@ -36,6 +36,10 @@ class HapticEngine {
     this.vibrate(25);
   }
 
+  impact() {
+    this.medium();
+  }
+
   /**
    * 3. Heavy Blast (Pattern: 40ms - 25ms - 40ms) - Homerun, laser shoot, bomb explosion, magic spell cast
    */

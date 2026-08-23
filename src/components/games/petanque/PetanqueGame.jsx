@@ -127,8 +127,12 @@ export default function PetanqueGame({ onScoreSubmitted }) {
 
   // Start Full Match
   const startMatch = (chosenDifficulty = difficulty) => {
-    haptics.impact();
-    petanqueAudio.playWhistle();
+    try {
+      haptics.medium();
+      petanqueAudio.playWhistle();
+    } catch (e) {
+      console.warn('Audio/Haptics play error:', e);
+    }
     setDifficulty(chosenDifficulty);
     setCurrentRound(1);
     setScores({
@@ -154,7 +158,11 @@ export default function PetanqueGame({ onScoreSubmitted }) {
     setRoundResultInfo(null);
 
     if (engineRef.current) {
-      engineRef.current.initEndRound(roundNum);
+      try {
+        engineRef.current.initEndRound(roundNum);
+      } catch (e) {
+        console.error('initEndRound error:', e);
+      }
     }
     setGameState(GAME_STATES.READY_THROW);
   };
@@ -164,7 +172,9 @@ export default function PetanqueGame({ onScoreSubmitted }) {
     if (gameState !== GAME_STATES.READY_THROW || currentTurnTeam !== TEAMS.PLAYER.id) return;
     if (playerBallsLeft <= 0) return;
 
-    haptics.impact();
+    try {
+      haptics.medium();
+    } catch (e) {}
     setPlayerBallsLeft(prev => prev - 1);
     setGameState(GAME_STATES.BALLS_MOVING);
     setInGameMessage('🔵 공이 날아갑니다!');
@@ -378,12 +388,12 @@ export default function PetanqueGame({ onScoreSubmitted }) {
 
   // Stepper handlers for tablet buttons
   const stepAngle = (delta) => {
-    haptics.impact();
+    try { haptics.light(); } catch (e) {}
     setAimAngle(prev => Math.max(65, Math.min(115, prev + delta)));
   };
 
   const stepPower = (delta) => {
-    haptics.impact();
+    try { haptics.light(); } catch (e) {}
     setAimPower(prev => Math.max(25, Math.min(98, prev + delta)));
   };
 
@@ -427,7 +437,7 @@ export default function PetanqueGame({ onScoreSubmitted }) {
     if (!playerName.trim() || isSubmitting || isSubmitted) return;
 
     setIsSubmitting(true);
-    haptics.impact();
+    try { haptics.medium(); } catch (e) {}
 
     const cleanName = playerName.trim();
     const finalScore = scores.totalFinalScore;

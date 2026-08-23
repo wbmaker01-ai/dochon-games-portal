@@ -3,11 +3,30 @@
 
 export const CHANGELOG_DATA = [
   {
+    version: 'v1.39.7',
+    date: '2026-08-23',
+    title: '[도촌 페탕크 마스터] 경기 시작하기 클릭 시 라운드 진입 정상화 및 햅틱 엔진 안전성 강화',
+    badge: 'LATEST',
+    badgeColor: 'emerald',
+    items: [
+      {
+        tag: 'BUG FIX',
+        tagColor: 'rose',
+        text: '[경기 시작 버튼 정상화] 인트로 화면에서 "경기 시작하기" 버튼 클릭 시 1엔드로 즉시 진입하여 투구가 정상적으로 시작되도록 이벤트 핸들러 및 라운드 초기화 흐름 개선'
+      },
+      {
+        tag: 'HAPTIC ENGINE',
+        tagColor: 'amber',
+        text: '[햅틱 피드백 엔진 호환성 강화] haptics 유틸리티에 impact() 별칭 지원 및 예외 방어 처리를 추가하여 모든 모바일/태블릿 및 데스크톱 브라우저에서 안전하게 동작하도록 최적화'
+      }
+    ]
+  },
+  {
     version: 'v1.39.6',
     date: '2026-08-23',
     title: '[도촌 UFO 탈출작전] 엔딩 화면 리더보드 점수 등록 입력창 다크 에메랄드 네온 디자인 개편',
-    badge: 'LATEST',
-    badgeColor: 'emerald',
+    badge: 'UPDATE',
+    badgeColor: 'blue',
     items: [
       {
         tag: 'INPUT DESIGN',
