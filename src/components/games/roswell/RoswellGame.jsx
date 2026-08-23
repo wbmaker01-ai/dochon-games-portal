@@ -265,31 +265,33 @@ export default function RoswellGame({ onScoreSubmitted }) {
 
               {/* Strict Rule: Score > 100 Form */}
               {finalScoreValue > 100 && (
-                <div>
+                <div style={{ width: '100%' }}>
                   {!isSubmitted ? (
-                    <form onSubmit={handleSubmitScore} className="space-y-2 mt-3">
-                      <div className="flex gap-2">
+                    <form onSubmit={handleSubmitScore} className="roswell-submit-form">
+                      <div className="roswell-input-group">
                         <input
                           type="text"
                           value={playerName}
                           onChange={(e) => setPlayerName(e.target.value)}
                           placeholder="예: 홍길동"
                           maxLength={10}
-                          className="flex-1 px-3 py-2 bg-slate-950/80 border border-emerald-500/40 rounded-xl text-white placeholder-slate-500 text-sm focus:outline-none focus:border-emerald-400"
+                          className="roswell-name-input"
+                          disabled={isSubmitting}
+                          autoFocus
                         />
                         <button
                           type="submit"
                           disabled={!playerName.trim() || isSubmitting}
                           className="roswell-submit-btn"
                         >
-                          <Send className="w-3.5 h-3.5" />
-                          <span>등록</span>
+                          <Send className="w-4 h-4" />
+                          <span>{isSubmitting ? '등록 중...' : '등록'}</span>
                         </button>
                       </div>
-                      {submitError && <div className="text-[11px] text-red-400">{submitError}</div>}
+                      {submitError && <div style={{ color: '#f87171', fontSize: '11px', fontWeight: 'bold', marginTop: '6px' }}>{submitError}</div>}
                     </form>
                   ) : (
-                    <div className="text-xs text-emerald-300 font-bold flex items-center justify-center gap-1 mt-2">
+                    <div style={{ color: '#86efac', fontSize: '13px', fontWeight: 'bold', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '6px', marginTop: '12px' }}>
                       <CheckCircle2 className="w-4 h-4" />
                       <span>명예의 전당에 등록되었습니다!</span>
                     </div>

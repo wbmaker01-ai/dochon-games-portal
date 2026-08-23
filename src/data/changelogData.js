@@ -3,11 +3,30 @@
 
 export const CHANGELOG_DATA = [
   {
+    version: 'v1.39.6',
+    date: '2026-08-23',
+    title: '[도촌 UFO 탈출작전] 엔딩 화면 리더보드 점수 등록 입력창 다크 에메랄드 네온 디자인 개편',
+    badge: 'LATEST',
+    badgeColor: 'emerald',
+    items: [
+      {
+        tag: 'INPUT DESIGN',
+        tagColor: 'emerald',
+        text: '[전용 네온 인풋 탑재] 브라우저 기본 흰색 사각 입력창을 제거하고, 게임 테마에 완벽히 어우러지는 다크 에메랄드 글래스모피즘 입력창(.roswell-name-input)으로 전면 교체'
+      },
+      {
+        tag: 'GLOBAL RESET',
+        tagColor: 'blue',
+        text: '[전역 인풋 리셋 강화] index.css에 input[type="text"] 기본 테마 스타일을 선언하여 프로젝트 전반에서 흰색 기본 입력 박스가 나타나지 않도록 방어 체계 완성'
+      }
+    ]
+  },
+  {
     version: 'v1.39.5',
     date: '2026-08-22',
     title: '[도촌 천산갑의 모험] 스테이지 클리어 버튼 텍스트 및 [Space / Enter] 단축키 뱃지 1줄 정렬 최적화',
-    badge: 'LATEST',
-    badgeColor: 'emerald',
+    badge: 'UPDATE',
+    badgeColor: 'blue',
     items: [
       {
         tag: 'UI REFINEMENT',

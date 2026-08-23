@@ -39,6 +39,35 @@ button:disabled {
   cursor: not-allowed;
 }
 
+/* ------------------------------------------------------------- */
+/* GLOBAL INPUT RESET & THEME DESIGN SYSTEM                      */
+/* ------------------------------------------------------------- */
+input[type="text"],
+input[type="password"] {
+  background: rgba(15, 23, 42, 0.9);
+  border: 1.5px solid rgba(255, 255, 255, 0.2);
+  border-radius: 10px;
+  color: #ffffff;
+  font-family: inherit;
+  font-size: 13px;
+  padding: 8px 14px;
+  outline: none;
+  box-sizing: border-box;
+  transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+input[type="text"]::placeholder,
+input[type="password"]::placeholder {
+  color: rgba(148, 163, 184, 0.6);
+}
+
+input[type="text"]:focus,
+input[type="password"]:focus {
+  border-color: var(--dochon-gold, #FBBF24);
+  box-shadow: 0 0 12px rgba(251, 191, 36, 0.35);
+  background: rgba(15, 23, 42, 0.98);
+}
+
 body {
   background: radial-gradient(circle at 50% 0%, #1E1B4B 0%, #0F172A 45%, #080B12 100%);
   background-color: var(--bg-dark);
