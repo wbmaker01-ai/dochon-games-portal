@@ -3,11 +3,30 @@
 
 export const CHANGELOG_DATA = [
   {
+    version: 'v1.42.1',
+    date: '2026-08-23',
+    title: '[도촌 페탕크 마스터] AI 턴 투구 상태 머신 락 강화 및 공 중복 발사 버그 근절',
+    badge: 'LATEST',
+    badgeColor: 'emerald',
+    items: [
+      {
+        tag: 'STATE MACHINE LOCK',
+        tagColor: 'emerald',
+        text: '[AI 턴 락 및 비동기 타이머 보호] AI 조준 딜레이 도중 캔버스 물리 루프의 정지 감지 트리거가 중복 실행되지 않도록 AI_THINKING 전용 상태와 Ref 동기화 락을 적용하여 단 1구씩만 정상 투구되도록 수정'
+      },
+      {
+        tag: 'BALLS LEFT SYNC',
+        tagColor: 'blue',
+        text: '[남은 공 수량 동기화] 플레이어와 AI의 잔여 공 카운트를 정확하게 1:1 교차 차감하여 엔드 종료 및 거리 측정이 매끄럽게 이어지도록 개선'
+      }
+    ]
+  },
+  {
     version: 'v1.42.0',
     date: '2026-08-23',
     title: '신규 순차 개장 준비(Coming Soon) 명작 구글 두들 라인업 7종 등록 & 고화질 3D 썸네일 탑재',
-    badge: 'LATEST',
-    badgeColor: 'emerald',
+    badge: 'UPDATE',
+    badgeColor: 'blue',
     items: [
       {
         tag: 'COMING SOON',

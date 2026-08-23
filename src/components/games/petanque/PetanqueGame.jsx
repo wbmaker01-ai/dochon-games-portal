@@ -75,6 +75,10 @@ export default function PetanqueGame({ onScoreSubmitted }) {
   const animationFrameRef = useRef(null);
   const chargeIntervalRef = useRef(null);
   const chargeDirRef = useRef(1);
+  const aiTimerRef = useRef(null);
+  const isHandlingStopRef = useRef(false);
+  const ballsLeftRef = useRef({ player: MATCH_CONFIG.BALLS_PER_PLAYER, ai: MATCH_CONFIG.BALLS_PER_PLAYER });
+  const currentTurnTeamRef = useRef(TEAMS.PLAYER.id);
 
   // Initialize Canvas & Engine
   useEffect(() => {
@@ -87,6 +91,9 @@ export default function PetanqueGame({ onScoreSubmitted }) {
       }
       if (chargeIntervalRef.current) {
         clearInterval(chargeIntervalRef.current);
+      }
+      if (aiTimerRef.current) {
+        clearTimeout(aiTimerRef.current);
       }
     };
   }, []);
@@ -103,7 +110,7 @@ export default function PetanqueGame({ onScoreSubmitted }) {
         const isMoving = engineRef.current.updatePhysics(dt);
 
         // Transition from BALLS_MOVING to either next throw or MEASURING
-        if (gameState === GAME_STATES.BALLS_MOVING && !isMoving) {
+        if (gameState === GAME_STATES.BALLS_MOVING && !isMoving && !isHandlingStopRef.current) {
           handleBallsStopped();
         }
 
@@ -151,9 +158,15 @@ export default function PetanqueGame({ onScoreSubmitted }) {
   // Start a specific End (Round)
   const startRound = (roundNum) => {
     setCurrentRound(roundNum);
+    ballsLeftRef.current = { player: MATCH_CONFIG.BALLS_PER_PLAYER, ai: MATCH_CONFIG.BALLS_PER_PLAYER };
     setPlayerBallsLeft(MATCH_CONFIG.BALLS_PER_PLAYER);
     setAiBallsLeft(MATCH_CONFIG.BALLS_PER_PLAYER);
+    currentTurnTeamRef.current = TEAMS.PLAYER.id;
     setCurrentTurnTeam(TEAMS.PLAYER.id);
+    isHandlingStopRef.current = false;
+    if (aiTimerRef.current) {
+      clearTimeout(aiTimerRef.current);
+    }
     setInGameMessage(`제 ${roundNum}엔드 시작! 🔵 나의 첫 번째 투구 차례`);
     setRoundResultInfo(null);
 
@@ -169,13 +182,16 @@ export default function PetanqueGame({ onScoreSubmitted }) {
 
   // Execute Player Throw
   const executePlayerThrow = useCallback(() => {
-    if (gameState !== GAME_STATES.READY_THROW || currentTurnTeam !== TEAMS.PLAYER.id) return;
-    if (playerBallsLeft <= 0) return;
+    if (gameState !== GAME_STATES.READY_THROW || currentTurnTeamRef.current !== TEAMS.PLAYER.id) return;
+    if (ballsLeftRef.current.player <= 0) return;
 
     try {
       haptics.medium();
     } catch (e) {}
-    setPlayerBallsLeft(prev => prev - 1);
+
+    ballsLeftRef.current.player -= 1;
+    setPlayerBallsLeft(ballsLeftRef.current.player);
+    isHandlingStopRef.current = false;
     setGameState(GAME_STATES.BALLS_MOVING);
     setInGameMessage('🔵 공이 날아갑니다!');
 
@@ -187,16 +203,24 @@ export default function PetanqueGame({ onScoreSubmitted }) {
         powerPercent: aimPower
       });
     }
-  }, [gameState, currentTurnTeam, playerBallsLeft, aimAngle, aimPower, shotType]);
+  }, [gameState, aimAngle, aimPower, shotType]);
 
   // Trigger AI Throw with smart heuristic strategy
-  const executeAiThrow = useCallback((pLeft, aLeft) => {
-    if (!engineRef.current) return;
+  const executeAiThrow = useCallback(() => {
+    if (ballsLeftRef.current.ai <= 0) return;
+    setGameState(GAME_STATES.AI_THINKING);
     setInGameMessage('🔴 도촌 백팀 (AI)이 조준하고 있습니다...');
-    setGameState(GAME_STATES.BALLS_MOVING);
 
-    setTimeout(() => {
+    if (aiTimerRef.current) {
+      clearTimeout(aiTimerRef.current);
+    }
+
+    aiTimerRef.current = setTimeout(() => {
       if (!engineRef.current) return;
+      if (ballsLeftRef.current.ai <= 0) return;
+
+      ballsLeftRef.current.ai -= 1;
+      setAiBallsLeft(ballsLeftRef.current.ai);
 
       const cochonnet = engineRef.current.cochonnet;
       const targetX = cochonnet ? cochonnet.x : 400;
@@ -231,7 +255,6 @@ export default function PetanqueGame({ onScoreSubmitted }) {
       const powerVariance = (Math.random() - 0.5) * difficulty.errorVariance * 25;
       const finalPower = Math.max(30, Math.min(95, basePower + powerVariance));
 
-      setAiBallsLeft(prev => prev - 1);
       engineRef.current.launchBoule({
         team: TEAMS.AI.id,
         shotType: aiShotType,
@@ -239,40 +262,46 @@ export default function PetanqueGame({ onScoreSubmitted }) {
         powerPercent: finalPower
       });
 
+      isHandlingStopRef.current = false;
+      setGameState(GAME_STATES.BALLS_MOVING);
       setInGameMessage('🔴 AI가 공을 투구했습니다!');
     }, 900);
   }, [difficulty]);
 
   // Handle when all balls stop rolling
   const handleBallsStopped = () => {
-    if (!engineRef.current) return;
+    if (isHandlingStopRef.current) return;
+    isHandlingStopRef.current = true;
 
-    // Check remaining balls
-    const curPlayerLeft = playerBallsLeft;
-    const curAiLeft = aiBallsLeft;
+    const pLeft = ballsLeftRef.current.player;
+    const aLeft = ballsLeftRef.current.ai;
 
-    if (curPlayerLeft === 0 && curAiLeft === 0) {
+    if (pLeft === 0 && aLeft === 0) {
       // End of this round -> Start measuring
       triggerEndMeasuring();
-    } else if (currentTurnTeam === TEAMS.PLAYER.id) {
+    } else if (currentTurnTeamRef.current === TEAMS.PLAYER.id) {
       // Switch to AI if AI has balls, otherwise keep player
-      if (curAiLeft > 0) {
+      if (aLeft > 0) {
+        currentTurnTeamRef.current = TEAMS.AI.id;
         setCurrentTurnTeam(TEAMS.AI.id);
-        executeAiThrow(curPlayerLeft, curAiLeft);
+        executeAiThrow();
       } else {
+        currentTurnTeamRef.current = TEAMS.PLAYER.id;
         setCurrentTurnTeam(TEAMS.PLAYER.id);
         setGameState(GAME_STATES.READY_THROW);
         setInGameMessage('🔵 나의 연속 투구 차례입니다!');
       }
     } else {
       // Was AI's turn -> Switch to Player if Player has balls, otherwise AI continues
-      if (curPlayerLeft > 0) {
+      if (pLeft > 0) {
+        currentTurnTeamRef.current = TEAMS.PLAYER.id;
         setCurrentTurnTeam(TEAMS.PLAYER.id);
         setGameState(GAME_STATES.READY_THROW);
         setInGameMessage('🔵 나의 투구 차례입니다!');
-      } else if (curAiLeft > 0) {
+      } else if (aLeft > 0) {
+        currentTurnTeamRef.current = TEAMS.AI.id;
         setCurrentTurnTeam(TEAMS.AI.id);
-        executeAiThrow(curPlayerLeft, curAiLeft);
+        executeAiThrow();
       }
     }
   };
