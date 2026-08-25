@@ -1,4 +1,4 @@
-// Dochon Games Portal - The Great Ghoul Duel 2D Canvas Physics, AI & Render Engine
+// Dochon Games Portal - The Great Ghoul Duel 2D Canvas Physics, AI & P2P Network Renderer Engine
 
 import {
   CANVAS_WIDTH,
@@ -21,6 +21,16 @@ export class GhoulDuelLogic {
     this.onGameOver = options.onGameOver || (() => {});
     this.onStateChange = options.onStateChange || (() => {});
 
+    // P2P Network Options
+    this.networkMode = options.networkMode || 'local'; // 'local' | 'host' | 'guest'
+    this.networkPlayers = options.networkPlayers || []; // [{ id, name, team, isHost, slotIndex }]
+    this.myPeerId = options.myPeerId || 'local';
+    this.onBroadcastSnapshot = options.onBroadcastSnapshot || null;
+    this.onSendInput = options.onSendInput || null;
+
+    this.lastBroadcastTime = 0;
+    this.remoteInputs = new Map(); // peerId -> { vx, vy, angle }
+
     this.reset();
   }
 
@@ -28,6 +38,49 @@ export class GhoulDuelLogic {
     if (DIFFICULTY_PRESETS[diffKey]) {
       this.difficultyKey = diffKey;
       this.difficulty = DIFFICULTY_PRESETS[diffKey];
+    }
+  }
+
+  // Handle incoming guest input packet on Host
+  handleGuestInput(peerId, vector, angle) {
+    this.remoteInputs.set(peerId, { vector, angle });
+  }
+
+  // Apply received snapshot on Guest
+  applySnapshot(snapshot) {
+    if (!snapshot || this.networkMode !== 'guest') return;
+
+    this.matchTime = snapshot.time;
+    this.teamScores = { ...snapshot.teamScores };
+
+    // Update ghosts
+    if (snapshot.ghosts) {
+      snapshot.ghosts.forEach((snapG, idx) => {
+        if (this.ghosts[idx]) {
+          const g = this.ghosts[idx];
+          // Smoothly interpolate positions for other players/bots
+          if (!g.isPlayer) {
+            g.x += (snapG.x - g.x) * 0.45;
+            g.y += (snapG.y - g.y) * 0.45;
+            g.angle = snapG.angle;
+            g.vx = snapG.vx;
+            g.vy = snapG.vy;
+          }
+          g.tail = snapG.tail || [];
+          g.depositedCount = snapG.depositedCount;
+          g.stolenCount = snapG.stolenCount;
+          g.invulnerableTimer = snapG.invulnerableTimer;
+          g.activePowerup = snapG.activePowerup;
+          g.fsmState = snapG.fsmState || 'SEARCH';
+        }
+      });
+    }
+
+    if (snapshot.spirits) {
+      this.spirits = snapshot.spirits;
+    }
+    if (snapshot.powerupDrops) {
+      this.powerupDrops = snapshot.powerupDrops;
     }
   }
 
@@ -50,24 +103,61 @@ export class GhoulDuelLogic {
       targetY: 0
     };
 
-    // Initialize 8 Ghost Entities
+    // Build 8 Ghost Entities with Network / Local Mapping
+    const greenPlayers = this.networkPlayers.filter((p) => p.team === 'green');
+    const purplePlayers = this.networkPlayers.filter((p) => p.team === 'purple');
+
     this.ghosts = GHOST_ROSTER.map((info, idx) => {
       const isGreen = info.team === 'green';
       const base = isGreen ? TEAMS.GREEN : TEAMS.PURPLE;
       const startX = base.baseX + base.baseWidth / 2 + (Math.random() - 0.5) * 80;
       const startY = base.baseY + base.baseHeight / 2 + (Math.random() - 0.5) * 80;
 
+      // Determine if slot is assigned to a real human player
+      let isPlayer = false;
+      let isRemoteHuman = false;
+      let networkPeerId = null;
+      let displayName = info.name;
+
+      if (this.networkMode === 'local') {
+        isPlayer = info.isPlayer; // Green leader is local player
+      } else {
+        // Multi-player slot mapping
+        const teamSlotIdx = isGreen ? idx : idx - 4;
+        const targetList = isGreen ? greenPlayers : purplePlayers;
+        const assignedPlayer = targetList[teamSlotIdx];
+
+        if (assignedPlayer) {
+          const isMe =
+            assignedPlayer.id === this.myPeerId ||
+            (assignedPlayer.isHost && this.networkMode === 'host');
+
+          if (isMe) {
+            isPlayer = true;
+            displayName = `${assignedPlayer.name} (나)`;
+          } else {
+            isRemoteHuman = true;
+            networkPeerId = assignedPlayer.id;
+            displayName = assignedPlayer.name;
+          }
+        }
+      }
+
       return {
         ...info,
+        name: displayName,
+        isPlayer,
+        isRemoteHuman,
+        networkPeerId,
         x: startX,
         y: startY,
         vx: 0,
         vy: 0,
         angle: isGreen ? Math.PI / 4 : -3 * Math.PI / 4,
         targetAngle: isGreen ? Math.PI / 4 : -3 * Math.PI / 4,
-        speed: info.isPlayer ? this.difficulty.playerSpeed : this.difficulty.aiSpeed,
+        speed: isPlayer ? this.difficulty.playerSpeed : this.difficulty.aiSpeed,
         radius: 22,
-        tail: [], // Array of { x, y, angle, value: 1 }
+        tail: [], // Array of { x, y, angle, isMega }
         depositedCount: 0,
         stolenCount: 0,
         invulnerableTimer: 0,
@@ -81,7 +171,7 @@ export class GhoulDuelLogic {
       };
     });
 
-    this.player = this.ghosts.find((g) => g.isPlayer);
+    this.player = this.ghosts.find((g) => g.isPlayer) || this.ghosts[0];
 
     // Initialize Floating Spirits & Powerups
     this.spirits = [];
@@ -129,11 +219,10 @@ export class GhoulDuelLogic {
           id: Math.random().toString(36).substring(2, 9),
           x,
           y,
-          type, // 'normal' (1 point) or 'mega' (5 points)
+          type,
           value: type === 'mega' ? 5 : 1,
           radius: type === 'mega' ? 14 : 9,
-          floatOffset: Math.random() * Math.PI * 2,
-          respawnTimer: 0
+          floatOffset: Math.random() * Math.PI * 2
         });
         break;
       }
@@ -201,23 +290,55 @@ export class GhoulDuelLogic {
       ghoulAudio.playCountdownBeep();
     }
 
-    // 2. Periodic Respawn of Spirits & Powerups
-    if (this.spirits.length < 65 && Math.random() < 0.05) {
-      this.spawnSingleSpirit(Math.random() < 0.08 ? 'mega' : 'normal');
-    }
-    if (this.powerupDrops.length < 2 && Math.random() < 0.01) {
-      this.spawnPowerupDrop();
+    // 2. Host / Local: Periodic Respawn of Spirits & Powerups
+    if (this.networkMode !== 'guest') {
+      if (this.spirits.length < 65 && Math.random() < 0.05) {
+        this.spawnSingleSpirit(Math.random() < 0.08 ? 'mega' : 'normal');
+      }
+      if (this.powerupDrops.length < 2 && Math.random() < 0.01) {
+        this.spawnPowerupDrop();
+      }
     }
 
-    // 3. Update Ghosts (Player & AI)
+    // 3. Update Ghosts
     this.ghosts.forEach((ghost) => {
       this.updateGhost(ghost, deltaTime);
     });
 
-    // 4. Check Tail Steal Collisions (Interception)
-    this.checkTailSteals();
+    // 4. Host / Local: Check Tail Steal Collisions
+    if (this.networkMode !== 'guest') {
+      this.checkTailSteals();
+    }
 
-    // 5. Update Camera smoothly tracking Player
+    // 5. Host: 30Hz Snapshot Broadcast to all connected peers
+    if (this.networkMode === 'host' && this.onBroadcastSnapshot) {
+      const now = performance.now();
+      if (now - this.lastBroadcastTime >= 33) {
+        this.lastBroadcastTime = now;
+        const snapshot = {
+          time: Math.ceil(this.matchTime),
+          teamScores: this.teamScores,
+          ghosts: this.ghosts.map((g) => ({
+            x: Math.round(g.x),
+            y: Math.round(g.y),
+            vx: Number(g.vx.toFixed(2)),
+            vy: Number(g.vy.toFixed(2)),
+            angle: Number(g.angle.toFixed(2)),
+            tail: g.tail,
+            depositedCount: g.depositedCount,
+            stolenCount: g.stolenCount,
+            invulnerableTimer: Number(g.invulnerableTimer.toFixed(2)),
+            activePowerup: g.activePowerup,
+            fsmState: g.fsmState
+          })),
+          spirits: this.spirits,
+          powerupDrops: this.powerupDrops
+        };
+        this.onBroadcastSnapshot(snapshot);
+      }
+    }
+
+    // 6. Update Camera smoothly tracking local player
     if (this.player) {
       const targetCamX = this.player.x - CANVAS_WIDTH / 2;
       const targetCamY = this.player.y - CANVAS_HEIGHT / 2;
@@ -229,10 +350,10 @@ export class GhoulDuelLogic {
       this.camera.y = Math.max(0, Math.min(WORLD_HEIGHT - CANVAS_HEIGHT, this.camera.y));
     }
 
-    // 6. Update Particle & Floating Text FX
+    // 7. Update Particle & Floating Text FX
     this.updateParticles(deltaTime);
 
-    // Notify state changes
+    // Notify React state changes
     this.onStateChange({
       teamScores: this.teamScores,
       matchTime: Math.ceil(this.matchTime),
@@ -269,22 +390,35 @@ export class GhoulDuelLogic {
     let moveY = 0;
 
     if (ghost.isPlayer) {
-      // Player Keyboard / Joystick Input
+      // Local Player Keyboard / Joystick Input
       if (this.keys['ArrowUp'] || this.keys['KeyW']) moveY -= 1;
       if (this.keys['ArrowDown'] || this.keys['KeyS']) moveY += 1;
       if (this.keys['ArrowLeft'] || this.keys['KeyA']) moveX -= 1;
       if (this.keys['ArrowRight'] || this.keys['KeyD']) moveX += 1;
 
-      // Add Joystick vector
       if (this.joystickVector.x !== 0 || this.joystickVector.y !== 0) {
         moveX += this.joystickVector.x;
         moveY += this.joystickVector.y;
       }
+
+      // Guest: send input to host via P2P
+      if (this.networkMode === 'guest' && this.onSendInput) {
+        this.onSendInput({ x: moveX, y: moveY }, ghost.angle);
+      }
+    } else if (ghost.isRemoteHuman) {
+      // Remote Network Human Player: Apply received network input
+      const remoteInput = this.remoteInputs.get(ghost.networkPeerId);
+      if (remoteInput && remoteInput.vector) {
+        moveX = remoteInput.vector.x || 0;
+        moveY = remoteInput.vector.y || 0;
+      }
     } else {
       // Smart AI Behavior (FSM)
-      this.updateAIBehavior(ghost, deltaTime);
-      moveX = ghost.vx;
-      moveY = ghost.vy;
+      if (this.networkMode !== 'guest') {
+        this.updateAIBehavior(ghost, deltaTime);
+        moveX = ghost.vx;
+        moveY = ghost.vy;
+      }
     }
 
     // Normalize & Apply Speed
@@ -313,11 +447,9 @@ export class GhoulDuelLogic {
     const newY = ghost.y + ghost.vy;
 
     if (canPassWalls) {
-      // Ghost Walk: Free movement clamped to outer bounds
       ghost.x = Math.max(30, Math.min(WORLD_WIDTH - 30, newX));
       ghost.y = Math.max(30, Math.min(WORLD_HEIGHT - 30, newY));
     } else {
-      // Standard Collision sliding
       const resolved = this.resolveWallCollisions(ghost.x, ghost.y, newX, newY, ghost.radius);
       ghost.x = resolved.x;
       ghost.y = resolved.y;
@@ -326,12 +458,12 @@ export class GhoulDuelLogic {
     // C. Update Chain IK Spirit Tail
     this.updateGhostTail(ghost);
 
-    // D. Collect Spirits & Powerups
-    this.checkSpiritPickups(ghost, magnetRadius);
-    this.checkPowerupPickups(ghost);
-
-    // E. Team Base Spirit Deposit
-    this.checkBaseDeposit(ghost);
+    // D. Collect Spirits & Powerups (Host / Local only)
+    if (this.networkMode !== 'guest') {
+      this.checkSpiritPickups(ghost, magnetRadius);
+      this.checkPowerupPickups(ghost);
+      this.checkBaseDeposit(ghost);
+    }
   }
 
   // Resolve Circle vs Axis-Aligned Bounding Box (AABB) Wall Obstacles
@@ -339,11 +471,9 @@ export class GhoulDuelLogic {
     let finalX = nextX;
     let finalY = nextY;
 
-    // Clamp to Outer World Bounds
     finalX = Math.max(radius + 40, Math.min(WORLD_WIDTH - radius - 40, finalX));
     finalY = Math.max(radius + 40, Math.min(WORLD_HEIGHT - radius - 40, finalY));
 
-    // Check against Mansion Obstacle Walls
     for (const wall of MANSION_WALLS) {
       const closestX = Math.max(wall.x, Math.min(finalX, wall.x + wall.w));
       const closestY = Math.max(wall.y, Math.min(finalY, wall.y + wall.h));
@@ -353,7 +483,6 @@ export class GhoulDuelLogic {
       const distance = Math.hypot(distX, distY);
 
       if (distance < radius) {
-        // Overlap detected: Push back along shortest normal
         if (distance > 0) {
           const overlap = radius - distance;
           finalX += (distX / distance) * overlap;
@@ -407,7 +536,6 @@ export class GhoulDuelLogic {
     if (bot.aiTimer <= 0) {
       bot.aiTimer = 0.25 + Math.random() * 0.35;
 
-      // Find closest threatening enemy (for FLEE check)
       let threateningEnemy = null;
       let closestEnemyDist = 9999;
       for (const enemy of this.ghosts) {
@@ -420,7 +548,6 @@ export class GhoulDuelLogic {
         }
       }
 
-      // Find best enemy tail target (for HUNT_STEAL check)
       let stealTarget = null;
       let bestStealDist = 380;
       for (const enemy of this.ghosts) {
@@ -433,23 +560,16 @@ export class GhoulDuelLogic {
         }
       }
 
-      // --- FSM PRIORITY EVALUATION ---
-      // A. FLEE (위기 시 긴급 회피): 내 꼬리가 길고(>= 4) 적이 가까이(<= 220px) 접근할 때
+      // Priority: FLEE > RETURN > HUNT_STEAL > SEARCH
       if (tailCount >= 4 && threateningEnemy && closestEnemyDist < 220) {
         bot.fsmState = 'FLEE';
         bot.threatGhost = threateningEnemy;
-      }
-      // B. RETURN (기지 복귀): 꼬리가 충분히 길거나(>= 8) 경기 종료 18초 전일 때
-      else if (this.matchTime < 18 || tailCount >= 8 || (tailCount >= 5 && distToBase < 350)) {
+      } else if (this.matchTime < 18 || tailCount >= 8 || (tailCount >= 5 && distToBase < 350)) {
         bot.fsmState = 'RETURN';
-      }
-      // C. HUNT_STEAL (적 꼬리 기습): 뺏을 만한 상대 꼬리가 포착되었을 때
-      else if (stealTarget) {
+      } else if (stealTarget) {
         bot.fsmState = 'HUNT_STEAL';
         bot.targetGhost = stealTarget;
-      }
-      // D. SEARCH (영혼 탐색): 일반 수집 모드
-      else {
+      } else {
         bot.fsmState = 'SEARCH';
       }
     }
@@ -459,7 +579,6 @@ export class GhoulDuelLogic {
     let targetY = baseCenterY;
 
     if (bot.fsmState === 'FLEE' && bot.threatGhost) {
-      // Run in the opposite vector of the threat, biased towards own base
       const awayX = bot.x - bot.threatGhost.x;
       const awayY = bot.y - bot.threatGhost.y;
       const awayLen = Math.hypot(awayX, awayY) || 1;
@@ -468,14 +587,12 @@ export class GhoulDuelLogic {
       const toBaseY = baseCenterY - bot.y;
       const toBaseLen = Math.hypot(toBaseX, toBaseY) || 1;
 
-      // Blend flee vector (70%) + base vector (30%)
       targetX = bot.x + (awayX / awayLen) * 300 + (toBaseX / toBaseLen) * 120;
       targetY = bot.y + (awayY / awayLen) * 300 + (toBaseY / toBaseLen) * 120;
     } else if (bot.fsmState === 'RETURN') {
       targetX = baseCenterX;
       targetY = baseCenterY;
     } else if (bot.fsmState === 'HUNT_STEAL' && bot.targetGhost) {
-      // Intercept enemy tail mid-section with leading velocity prediction
       const targetTail = bot.targetGhost.tail;
       if (targetTail.length > 0) {
         const interceptIdx = Math.min(targetTail.length - 1, Math.max(1, Math.floor(targetTail.length * 0.6)));
@@ -487,11 +604,9 @@ export class GhoulDuelLogic {
         targetY = bot.targetGhost.y;
       }
     } else {
-      // SEARCH: Find highest value / closest floating spirit or powerup
       let bestScore = -99999;
       for (const spirit of this.spirits) {
         const d = Math.hypot(spirit.x - bot.x, spirit.y - bot.y);
-        // Value: mega spirit gets 5x priority, minus distance penalty
         const score = (spirit.value * 200) - d;
         if (score > bestScore) {
           bestScore = score;
@@ -500,7 +615,6 @@ export class GhoulDuelLogic {
         }
       }
 
-      // Check powerup drops as high value targets
       for (const drop of this.powerupDrops) {
         const d = Math.hypot(drop.x - bot.x, drop.y - bot.y);
         const score = 800 - d;
@@ -519,7 +633,6 @@ export class GhoulDuelLogic {
     let dirX = steerX / steerLen;
     let dirY = steerY / steerLen;
 
-    // Raycast Wall Avoidance: check 50px ahead
     if (!bot.activePowerup || bot.activePowerup.type !== 'ghost_walk') {
       const probeDist = 55;
       const probeX = bot.x + dirX * probeDist;
@@ -532,7 +645,6 @@ export class GhoulDuelLogic {
           probeY >= wall.y - 10 &&
           probeY <= wall.y + wall.h + 10
         ) {
-          // Wall detected ahead: slide along perpendicular vector
           const slideX = -dirY;
           const slideY = dirX;
           dirX = dirX * 0.3 + slideX * 0.7;
@@ -542,7 +654,6 @@ export class GhoulDuelLogic {
       }
     }
 
-    // Apply gentle organic wobble
     const wobble = Math.sin(Date.now() * 0.004 + bot.wobbleOffset) * 0.18;
     const finalAngle = Math.atan2(dirY, dirX) + wobble;
 
@@ -558,14 +669,12 @@ export class GhoulDuelLogic {
       const spirit = this.spirits[i];
       const dist = Math.hypot(spirit.x - ghost.x, spirit.y - ghost.y);
 
-      // Magnet pull effect
       if (magnetRadius > 0 && dist < pickupRadius && dist > 20) {
         spirit.x += (ghost.x - spirit.x) * 0.12;
         spirit.y += (ghost.y - spirit.y) * 0.12;
       }
 
       if (dist < ghost.radius + spirit.radius) {
-        // Collect Spirit
         const isMega = spirit.type === 'mega';
         const addCount = isMega ? 5 : 1;
 
@@ -579,7 +688,6 @@ export class GhoulDuelLogic {
           });
         }
 
-        // FX & Sound
         if (ghost.isPlayer) {
           if (isMega) {
             ghoulAudio.playMegaSpirit();
@@ -625,18 +733,15 @@ export class GhoulDuelLogic {
         if (attacker.team === victim.team) continue;
         if (victim.tail.length === 0 || victim.invulnerableTimer > 0) continue;
 
-        // Check if attacker head intersects any segment of victim's tail (skip segment 0 for fairness)
         for (let i = 1; i < victim.tail.length; i++) {
           const seg = victim.tail[i];
           const dist = Math.hypot(attacker.x - seg.x, attacker.y - seg.y);
 
           if (dist < attacker.radius + 12) {
-            // Cut Tail from index i to end
             const severedTail = victim.tail.splice(i);
             const stolenCount = severedTail.length;
 
             if (stolenCount > 0) {
-              // Attach severed tail to attacker
               for (const stolenNode of severedTail) {
                 attacker.tail.push({
                   x: stolenNode.x,
@@ -647,9 +752,8 @@ export class GhoulDuelLogic {
               }
 
               attacker.stolenCount += stolenCount;
-              victim.invulnerableTimer = 1.5; // Immunity flicker
+              victim.invulnerableTimer = 1.5;
 
-              // FX & Audio
               if (attacker.isPlayer) {
                 ghoulAudio.playStealSuccess();
                 this.addFloatingText(attacker.x, attacker.y - 35, `⚡ STEAL! +${stolenCount}`, '#fbbf24');
@@ -660,7 +764,7 @@ export class GhoulDuelLogic {
 
               this.addLightningArc(attacker.x, attacker.y, seg.x, seg.y, attacker.team === 'green' ? '#10b981' : '#a855f7');
               this.addSparks(seg.x, seg.y, '#f59e0b', 20);
-              break; // Break inner loop once stolen
+              break;
             }
           }
         }
@@ -673,7 +777,6 @@ export class GhoulDuelLogic {
     const isGreen = ghost.team === 'green';
     const base = isGreen ? TEAMS.GREEN : TEAMS.PURPLE;
 
-    // Check if inside base boundary
     if (
       ghost.x >= base.baseX &&
       ghost.x <= base.baseX + base.baseWidth &&
@@ -681,7 +784,6 @@ export class GhoulDuelLogic {
       ghost.y <= base.baseY + base.baseHeight
     ) {
       if (ghost.tail.length > 0) {
-        // Fast deposit stream (2 nodes per frame)
         const depositRate = Math.min(3, ghost.tail.length);
         let depositedPoints = 0;
 
@@ -692,7 +794,6 @@ export class GhoulDuelLogic {
           this.teamScores[ghost.team] += pts;
           ghost.depositedCount += pts;
 
-          // Spawn flying orb beam to altar center
           const altarCenterX = base.baseX + base.baseWidth / 2;
           const altarCenterY = base.baseY + base.baseHeight / 2;
           this.addDepositParticle(node.x, node.y, altarCenterX, altarCenterY, base.primaryColor);
@@ -710,7 +811,8 @@ export class GhoulDuelLogic {
     this.isGameOver = true;
     const greenTotal = this.teamScores.green;
     const purpleTotal = this.teamScores.purple;
-    const isVictory = greenTotal > purpleTotal;
+    const isGreenTeam = this.player ? this.player.team === 'green' : true;
+    const isVictory = isGreenTeam ? greenTotal > purpleTotal : purpleTotal > greenTotal;
 
     ghoulAudio.playMatchEnd();
     setTimeout(() => {
@@ -877,11 +979,9 @@ export class GhoulDuelLogic {
   }
 
   renderMansionFloor(ctx) {
-    // Dark gothic slate tiles with subtle grid
     ctx.fillStyle = '#0f172a';
     ctx.fillRect(0, 0, WORLD_WIDTH, WORLD_HEIGHT);
 
-    // Checkered carpet / stone pattern
     ctx.strokeStyle = 'rgba(51, 65, 85, 0.25)';
     ctx.lineWidth = 1;
     const step = 80;
@@ -903,7 +1003,6 @@ export class GhoulDuelLogic {
     const cx = team.baseX + team.baseWidth / 2;
     const cy = team.baseY + team.baseHeight / 2;
 
-    // Glowing base area
     ctx.save();
     ctx.fillStyle = team.baseColor;
     ctx.strokeStyle = team.baseBorder;
@@ -913,7 +1012,6 @@ export class GhoulDuelLogic {
     ctx.fill();
     ctx.stroke();
 
-    // Glowing Altar Rune in Center
     const pulse = Math.sin(Date.now() * 0.005) * 6;
     const grad = ctx.createRadialGradient(cx, cy, 10, cx, cy, 80 + pulse);
     grad.addColorStop(0, team.primaryColor);
@@ -923,14 +1021,12 @@ export class GhoulDuelLogic {
     ctx.arc(cx, cy, 80 + pulse, 0, Math.PI * 2);
     ctx.fill();
 
-    // Beacon Circle
     ctx.strokeStyle = team.glowColor;
     ctx.lineWidth = 2;
     ctx.beginPath();
     ctx.arc(cx, cy, 50, 0, Math.PI * 2);
     ctx.stroke();
 
-    // Base Label
     ctx.fillStyle = '#ffffff';
     ctx.font = 'bold 15px sans-serif';
     ctx.textAlign = 'center';
@@ -945,18 +1041,15 @@ export class GhoulDuelLogic {
   renderMansionWalls(ctx) {
     ctx.save();
     for (const wall of MANSION_WALLS) {
-      // Wall Shadow
       ctx.fillStyle = 'rgba(0, 0, 0, 0.4)';
       ctx.fillRect(wall.x + 4, wall.y + 4, wall.w, wall.h);
 
-      // Wall Body (Dark stone gradient)
       const grad = ctx.createLinearGradient(wall.x, wall.y, wall.x, wall.y + wall.h);
       grad.addColorStop(0, '#334155');
       grad.addColorStop(1, '#1e293b');
       ctx.fillStyle = grad;
       ctx.fillRect(wall.x, wall.y, wall.w, wall.h);
 
-      // Wall Rim Highlight
       ctx.strokeStyle = '#475569';
       ctx.lineWidth = 2;
       ctx.strokeRect(wall.x, wall.y, wall.w, wall.h);
@@ -975,7 +1068,6 @@ export class GhoulDuelLogic {
       ctx.save();
       ctx.translate(spirit.x, spirit.y + floatY);
 
-      // Radial Glow
       const grad = ctx.createRadialGradient(0, 0, 2, 0, 0, rad * 2.2);
       if (isMega) {
         grad.addColorStop(0, '#fef08a');
@@ -992,13 +1084,11 @@ export class GhoulDuelLogic {
       ctx.arc(0, 0, rad * 2.2, 0, Math.PI * 2);
       ctx.fill();
 
-      // Teardrop Flame Core
       ctx.fillStyle = isMega ? '#ffffff' : '#e0f2fe';
       ctx.beginPath();
       ctx.arc(0, 0, rad, 0, Math.PI * 2);
       ctx.fill();
 
-      // Mega Star Sparkle
       if (isMega) {
         ctx.fillStyle = '#fbbf24';
         ctx.font = 'bold 12px sans-serif';
@@ -1018,7 +1108,6 @@ export class GhoulDuelLogic {
       ctx.save();
       ctx.translate(drop.x, drop.y + bounce);
 
-      // Glowing Aura
       const grad = ctx.createRadialGradient(0, 0, 5, 0, 0, 28);
       grad.addColorStop(0, drop.info.color);
       grad.addColorStop(1, 'transparent');
@@ -1027,7 +1116,6 @@ export class GhoulDuelLogic {
       ctx.arc(0, 0, 28, 0, Math.PI * 2);
       ctx.fill();
 
-      // Rune Disc
       ctx.fillStyle = '#1e1b4b';
       ctx.strokeStyle = drop.info.color;
       ctx.lineWidth = 2.5;
@@ -1036,7 +1124,6 @@ export class GhoulDuelLogic {
       ctx.fill();
       ctx.stroke();
 
-      // Icon
       ctx.font = '16px sans-serif';
       ctx.textAlign = 'center';
       ctx.textBaseline = 'middle';
@@ -1060,13 +1147,11 @@ export class GhoulDuelLogic {
       const scale = Math.max(0.45, 1 - i * 0.025);
       const rad = 11 * scale;
 
-      // Glow halo
       ctx.fillStyle = glowColor;
       ctx.beginPath();
       ctx.arc(node.x, node.y, rad * 2, 0, Math.PI * 2);
       ctx.fill();
 
-      // Core flame bead
       ctx.fillStyle = node.isMega ? '#fef08a' : color;
       ctx.beginPath();
       ctx.arc(node.x, node.y, rad, 0, Math.PI * 2);
@@ -1079,14 +1164,12 @@ export class GhoulDuelLogic {
   renderGhostBody(ctx, ghost) {
     ctx.save();
 
-    // Invulnerability Flashing
     if (ghost.invulnerableTimer > 0 && Math.floor(Date.now() / 80) % 2 === 0) {
       ctx.globalAlpha = 0.4;
     }
 
     ctx.translate(ghost.x, ghost.y);
 
-    // Speed / Powerup Aura Trail
     if (ghost.activePowerup) {
       const pColor = POWERUP_TYPES[ghost.activePowerup.type]?.color || '#ffffff';
       ctx.strokeStyle = pColor;
@@ -1096,79 +1179,68 @@ export class GhoulDuelLogic {
       ctx.stroke();
     }
 
-    // Ghost Body Shadow
     ctx.fillStyle = 'rgba(0, 0, 0, 0.3)';
     ctx.beginPath();
     ctx.ellipse(0, ghost.radius + 4, ghost.radius * 0.8, 6, 0, 0, Math.PI * 2);
     ctx.fill();
 
-    // Floating Ghost Body (Cute teardrop dome with wavy hem)
     const floatWobble = Math.sin(Date.now() * 0.006 + ghost.wobbleOffset) * 3;
     ctx.translate(0, floatWobble);
 
-    // Ghost Gradient
     const grad = ctx.createRadialGradient(-4, -6, 2, 0, 0, ghost.radius);
     grad.addColorStop(0, '#ffffff');
     grad.addColorStop(0.35, ghost.color);
     grad.addColorStop(1, ghost.glow);
     ctx.fillStyle = grad;
 
-    // Body Path
     ctx.beginPath();
     ctx.arc(0, -4, ghost.radius, Math.PI, 0, false);
-    // Wavy skirt hem
     ctx.lineTo(ghost.radius, ghost.radius);
     ctx.quadraticCurveTo(ghost.radius * 0.5, ghost.radius + 6, 0, ghost.radius);
     ctx.quadraticCurveTo(-ghost.radius * 0.5, ghost.radius + 6, -ghost.radius, ghost.radius);
     ctx.closePath();
     ctx.fill();
 
-    // Glowing outline
     ctx.strokeStyle = ghost.glow;
     ctx.lineWidth = 2;
     ctx.stroke();
 
-    // Expressive Eyes (Looking in direction of movement)
     const eyeOffsetX = Math.cos(ghost.angle) * 4;
     const eyeOffsetY = Math.sin(ghost.angle) * 3;
 
     ctx.fillStyle = '#0f172a';
-    // Left Eye
     ctx.beginPath();
     ctx.ellipse(-6 + eyeOffsetX, -4 + eyeOffsetY, 3.5, 5, 0, 0, Math.PI * 2);
     ctx.fill();
-    // Right Eye
     ctx.beginPath();
     ctx.ellipse(6 + eyeOffsetX, -4 + eyeOffsetY, 3.5, 5, 0, 0, Math.PI * 2);
     ctx.fill();
 
-    // Eye Sparkle
     ctx.fillStyle = '#ffffff';
     ctx.beginPath();
     ctx.arc(-7 + eyeOffsetX, -6 + eyeOffsetY, 1.2, 0, Math.PI * 2);
     ctx.arc(5 + eyeOffsetX, -6 + eyeOffsetY, 1.2, 0, Math.PI * 2);
     ctx.fill();
 
-    // Cute Cheeks
     ctx.fillStyle = 'rgba(244, 114, 182, 0.6)';
     ctx.beginPath();
     ctx.arc(-11, 2, 3, 0, Math.PI * 2);
     ctx.arc(11, 2, 3, 0, Math.PI * 2);
     ctx.fill();
 
-    // Hat / Accessory
     this.renderGhostHat(ctx, ghost.hat);
 
-    // Name & Tail Counter Badge
     ctx.restore();
 
+    // Name & Tail Counter Badge
     ctx.save();
     ctx.translate(ghost.x, ghost.y - 36);
 
-    // Badge Background with FSM State Icon
     let stateIcon = '';
     if (ghost.isPlayer) {
       stateIcon = '👑 ';
+    } else if (ghost.isRemoteHuman) {
+      stateIcon = '🌐 ';
     } else if (ghost.fsmState === 'FLEE') {
       stateIcon = '😱 ';
     } else if (ghost.fsmState === 'HUNT_STEAL') {
@@ -1189,7 +1261,6 @@ export class GhoulDuelLogic {
     ctx.fill();
     ctx.stroke();
 
-    // Badge Text
     ctx.fillStyle = '#ffffff';
     ctx.textAlign = 'center';
     ctx.textBaseline = 'middle';
@@ -1203,7 +1274,6 @@ export class GhoulDuelLogic {
     ctx.translate(0, -22);
 
     if (hatType === 'crown') {
-      // Golden King Crown
       ctx.fillStyle = '#fbbf24';
       ctx.strokeStyle = '#d97706';
       ctx.lineWidth = 1.5;
@@ -1219,13 +1289,11 @@ export class GhoulDuelLogic {
       ctx.fill();
       ctx.stroke();
 
-      // Crown Ruby
       ctx.fillStyle = '#ef4444';
       ctx.beginPath();
       ctx.arc(0, 2, 2.5, 0, Math.PI * 2);
       ctx.fill();
     } else if (hatType === 'witch') {
-      // Witch Pointed Hat
       ctx.fillStyle = '#312e81';
       ctx.beginPath();
       ctx.ellipse(0, 6, 16, 4, 0, 0, Math.PI * 2);
@@ -1236,11 +1304,9 @@ export class GhoulDuelLogic {
       ctx.lineTo(10, 6);
       ctx.closePath();
       ctx.fill();
-      // Hat Belt
       ctx.fillStyle = '#f59e0b';
       ctx.fillRect(-6, 3, 12, 3);
     } else if (hatType === 'cat_ears') {
-      // Pink Cat Ears
       ctx.fillStyle = '#f472b6';
       ctx.beginPath();
       ctx.moveTo(-10, 6);
@@ -1253,7 +1319,6 @@ export class GhoulDuelLogic {
       ctx.lineTo(10, 6);
       ctx.fill();
     } else if (hatType === 'horns') {
-      // Little Devil Horns
       ctx.fillStyle = '#ef4444';
       ctx.beginPath();
       ctx.moveTo(-8, 6);
@@ -1264,7 +1329,6 @@ export class GhoulDuelLogic {
       ctx.quadraticCurveTo(12, -6, 4, 4);
       ctx.fill();
     } else if (hatType === 'pumpkin') {
-      // Tiny Halloween Pumpkin
       ctx.fillStyle = '#f97316';
       ctx.beginPath();
       ctx.ellipse(0, 2, 8, 6, 0, 0, Math.PI * 2);
@@ -1332,7 +1396,6 @@ export class GhoulDuelLogic {
 
     ctx.save();
 
-    // Map Container
     ctx.fillStyle = 'rgba(15, 23, 42, 0.85)';
     ctx.strokeStyle = '#475569';
     ctx.lineWidth = 2;
@@ -1341,7 +1404,6 @@ export class GhoulDuelLogic {
     ctx.fill();
     ctx.stroke();
 
-    // Team Bases
     ctx.fillStyle = 'rgba(16, 185, 129, 0.5)';
     ctx.fillRect(
       posX + TEAMS.GREEN.baseX * scaleX,
@@ -1358,13 +1420,11 @@ export class GhoulDuelLogic {
       TEAMS.PURPLE.baseHeight * scaleY
     );
 
-    // Wall Outlines
     ctx.fillStyle = 'rgba(100, 116, 139, 0.6)';
     MANSION_WALLS.forEach((w) => {
       ctx.fillRect(posX + w.x * scaleX, posY + w.y * scaleY, Math.max(1, w.w * scaleX), Math.max(1, w.h * scaleY));
     });
 
-    // Ghosts
     this.ghosts.forEach((g) => {
       const gx = posX + g.x * scaleX;
       const gy = posY + g.y * scaleY;

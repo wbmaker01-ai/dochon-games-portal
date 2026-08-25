@@ -3,11 +3,35 @@
 
 export const CHANGELOG_DATA = [
   {
+    version: 'v1.44.2',
+    date: '2026-08-25',
+    title: '🫓 [파니 푸리 마스터] 상단 아케이드 HUD 툴바 UI/UX 전면 리디자인',
+    badge: 'LATEST',
+    badgeColor: 'emerald',
+    items: [
+      {
+        tag: 'HUD REDESIGN',
+        tagColor: 'amber',
+        text: '[상단 툴바 UI 전면 개편] 3구역 프리미엄 아케이드 HUD(브랜드 엠블럼·네온 타이머·3D 골든 피버 게이지·황금 스코어보드) 적용으로 시각적 완성도 대폭 향상'
+      },
+      {
+        tag: 'ANIMATION & GLOW',
+        tagColor: 'purple',
+        text: '[생동감 넘치는 반응형 연출] 10초 이하 긴박한 타이머 펄스, 골든 피버 100% 쉬머 애니메이션 및 버튼 호버 라이트 효과 추가'
+      },
+      {
+        tag: 'RESPONSIVE',
+        tagColor: 'blue',
+        text: '[모바일/태블릿 반응형 최적화] 화면 크기에 따라 컴팩트하게 재배치되는 스마트 HUD 그리드 적용'
+      }
+    ]
+  },
+  {
     version: 'v1.44.1',
     date: '2026-08-23',
     title: '🫓 [파니 푸리 마스터] 서빙 판정 엔진 및 실시간 점수 누적 동기화 전면 개선',
-    badge: 'LATEST',
-    badgeColor: 'emerald',
+    badge: 'UPDATE',
+    badgeColor: 'blue',
     items: [
       {
         tag: 'ENGINE FIX',

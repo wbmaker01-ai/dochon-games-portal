@@ -221,82 +221,105 @@ export default function PaniPuriGame({ onScoreSubmitted }) {
 
   return (
     <div className="panipuri-container">
-      {/* 1. Header Toolbar Bar */}
+      {/* 1. Header Toolbar Bar - High-End Arcade HUD */}
       <div className="panipuri-toolbar">
-        <div className="flex items-center gap-3">
-          <div className="panipuri-badge-title">
-            <span className="text-xl">🫓</span>
-            <div>
-              <h1 className="text-sm font-black text-amber-400">파니 푸리 마스터</h1>
-              <p className="text-[10px] text-slate-400">Celebrating Pani Puri</p>
+        {/* Left: Brand / Title Badge */}
+        <div className="panipuri-brand-block">
+          <div className="panipuri-logo-icon-box">
+            <span className="panipuri-logo-emoji">🫓</span>
+            <span className="panipuri-logo-sparkle">✨</span>
+          </div>
+          <div className="panipuri-brand-text">
+            <div className="flex items-center gap-1.5">
+              <h1 className="panipuri-brand-title">파니 푸리 마스터</h1>
+              <span className="panipuri-badge-tag">TYCOON</span>
             </div>
+            <p className="panipuri-brand-subtitle">Celebrating Pani Puri · 도촌 아케이드</p>
           </div>
+        </div>
 
-          {/* Time Display */}
-          <div className={`panipuri-stat-pill ${gameState.timeLeft <= 10 ? 'animate-pulse border-red-500 bg-red-950/80 text-red-300' : 'text-cyan-300'}`}>
-            <Clock className="w-4 h-4" />
-            <span className="font-mono text-base font-bold">{Math.ceil(gameState.timeLeft)}s</span>
-          </div>
-
-          {/* Fever Bar */}
-          <div className="panipuri-fever-bar-container" title="100% 달성 시 골든 피버 발동!">
-            <div className="flex items-center justify-between text-[10px] text-amber-200 px-1 mb-0.5">
-              <span className="flex items-center gap-1 font-bold">
-                <Flame className="w-3 h-3 text-amber-400" />
-                {gameState.isFever ? '✨ FEVER 2X ✨' : 'FEVER'}
+        {/* Center: Live HUD (Time Counter & Golden Fever Gauge) */}
+        <div className="panipuri-hud-center">
+          {/* Time Counter Pill */}
+          <div className={`panipuri-hud-time ${gameState.timeLeft <= 10 ? 'urgent-pulse' : ''}`} title="남은 영업 시간">
+            <div className="panipuri-hud-icon-circle">
+              <Clock className="w-3.5 h-3.5" />
+            </div>
+            <div className="panipuri-hud-time-val">
+              <span className="panipuri-hud-label">TIME</span>
+              <span className="panipuri-hud-number">
+                {Math.ceil(gameState.timeLeft)}
+                <span className="text-[10px] opacity-70">s</span>
               </span>
-              <span>{gameState.isFever ? 'ON!' : `${gameState.feverGauge}%`}</span>
             </div>
-            <div className="panipuri-fever-track">
+          </div>
+
+          {/* Golden Fever Gauge Card */}
+          <div className={`panipuri-hud-fever ${gameState.isFever ? 'fever-active' : ''}`} title="100% 달성 시 8초간 2배 점수 골든 피버 발동!">
+            <div className="panipuri-fever-header">
+              <span className="flex items-center gap-1">
+                <Flame className={`w-3.5 h-3.5 ${gameState.isFever ? 'text-amber-300 animate-bounce' : 'text-amber-400'}`} />
+                <span className="panipuri-fever-title">{gameState.isFever ? 'FEVER 2X' : 'FEVER'}</span>
+              </span>
+              <span className="panipuri-fever-pct">{gameState.isFever ? 'ACTIVE!' : `${gameState.feverGauge}%`}</span>
+            </div>
+            <div className="panipuri-fever-bar-track">
               <div
-                className={`panipuri-fever-fill ${gameState.isFever ? 'bg-gradient-to-r from-amber-300 via-yellow-200 to-amber-400 animate-pulse' : 'bg-gradient-to-r from-amber-500 to-yellow-400'}`}
+                className={`panipuri-fever-bar-fill ${gameState.isFever ? 'fever-shimmer' : ''}`}
                 style={{ width: gameState.isFever ? '100%' : `${gameState.feverGauge}%` }}
               />
             </div>
           </div>
         </div>
 
-        {/* Score & Combo */}
-        <div className="flex items-center gap-2">
+        {/* Right: Scoreboard & Action Controls */}
+        <div className="panipuri-hud-right">
+          {/* Combo Multiplier Pill (When Active) */}
           {gameState.combo >= 2 && (
-            <div className="panipuri-combo-badge animate-bounce">
-              <Sparkles className="w-3 h-3 text-amber-300" />
+            <div className="panipuri-combo-pill animate-bounce">
+              <Sparkles className="w-3.5 h-3.5 text-amber-200" />
               <span>{gameState.combo} COMBO</span>
             </div>
           )}
 
-          <div className="panipuri-stat-pill text-amber-300">
-            <Trophy className="w-4 h-4 text-amber-400" />
-            <span className="font-mono text-base font-black">{gameState.score.toLocaleString()}</span>
-            <span className="text-[11px] text-slate-400">점</span>
+          {/* Score Counter Card */}
+          <div className="panipuri-score-card">
+            <div className="panipuri-score-label-row">
+              <Trophy className="w-3 h-3 text-amber-400" />
+              <span>SCORE</span>
+            </div>
+            <div className="panipuri-score-val-row">
+              <span className="panipuri-score-number">{gameState.score.toLocaleString()}</span>
+              <span className="panipuri-score-unit">점</span>
+            </div>
           </div>
 
-          {/* Audio Button */}
-          <button
-            onClick={toggleMute}
-            className="panipuri-tool-btn"
-            title={isMuted ? '음소거 해제' : '음소거'}
-          >
-            {isMuted ? <VolumeX className="w-4 h-4 text-rose-400" /> : <Volume2 className="w-4 h-4 text-emerald-400" />}
-          </button>
+          {/* Control Action Buttons */}
+          <div className="panipuri-btn-group">
+            <button
+              onClick={toggleMute}
+              className="panipuri-tool-btn"
+              title={isMuted ? '음소거 해제' : '음소거'}
+            >
+              {isMuted ? <VolumeX className="w-4 h-4 text-rose-400" /> : <Volume2 className="w-4 h-4 text-emerald-400" />}
+            </button>
 
-          {/* How to Play Guide Button */}
-          <button
-            onClick={() => setIsHowToPlayOpen(true)}
-            className="panipuri-tool-btn text-cyan-300"
-            title="게임 방법"
-          >
-            <HelpCircle className="w-4 h-4" />
-          </button>
+            <button
+              onClick={() => setIsHowToPlayOpen(true)}
+              className="panipuri-tool-btn"
+              title="게임 방법 및 레시피 가이드"
+            >
+              <HelpCircle className="w-4 h-4 text-cyan-300" />
+            </button>
 
-          {/* Restart Button */}
-          <button
-            onClick={handleStartGame}
-            className="panipuri-tool-btn text-amber-300"
-            title="다시 시작"
-          >
-            <RotateCcw className="w-4 h-4" />
-          </button>
+            <button
+              onClick={handleStartGame}
+              className="panipuri-tool-btn"
+              title="처음부터 다시 시작"
+            >
+              <RotateCcw className="w-4 h-4 text-amber-400" />
+            </button>
+          </div>
         </div>
       </div>
 
