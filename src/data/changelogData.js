@@ -47,6 +47,11 @@ export const CHANGELOG_DATA = [
         tag: 'HOST-AUTHORITATIVE',
         tagColor: 'amber',
         text: '[호스트 권한형 동기화] 방장 브라우저의 30Hz 정밀 물리 판정 및 클라이언트 60fps 부드러운 위치 보간(Interpolation) 렌더링 구현'
+      },
+      {
+        tag: 'UI POLISH',
+        tagColor: 'emerald',
+        text: '[닉네임 힌트 & 안전 언어 안내] 닉네임 입력란 기본값 초기화 및 힌트 텍스트("이름을 입력해 주세요") 적용, "※ 바른말 고운말을 사용합시다." 권장 안내 문구 배치'
       }
     ]
   },

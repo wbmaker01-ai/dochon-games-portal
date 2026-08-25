@@ -32,7 +32,7 @@ export default function GhoulDuelGame({ onScoreSubmitted }) {
 
   // P2P State
   const [p2pCode, setP2pCode] = useState(() => GhoulDuelNetworkManager.generateRandomCode());
-  const [p2pName, setP2pName] = useState('도촌 영웅');
+  const [p2pName, setP2pName] = useState('');
   const [p2pIsHost, setP2pIsHost] = useState(false);
   const [p2pPlayers, setP2pPlayers] = useState([]);
   const [p2pConnecting, setP2pConnecting] = useState(false);
@@ -110,7 +110,8 @@ export default function GhoulDuelGame({ onScoreSubmitted }) {
     setP2pError('');
     setP2pConnecting(true);
     try {
-      const code = await ghoulNet.createRoom(p2pCode, p2pName, 'green');
+      const hostName = p2pName.trim() || '방장';
+      const code = await ghoulNet.createRoom(p2pCode, hostName, 'green');
       setP2pIsHost(true);
       setP2pPlayers(ghoulNet.lobbyPlayers);
       setGameState('LOBBY');
@@ -126,7 +127,8 @@ export default function GhoulDuelGame({ onScoreSubmitted }) {
     setP2pError('');
     setP2pConnecting(true);
     try {
-      const code = await ghoulNet.joinRoom(p2pCode, p2pName, 'purple');
+      const guestName = p2pName.trim() || '도촌 학생';
+      const code = await ghoulNet.joinRoom(p2pCode, guestName, 'purple');
       setP2pIsHost(false);
       setP2pPlayers(ghoulNet.lobbyPlayers);
       setGameState('LOBBY');
@@ -521,24 +523,27 @@ export default function GhoulDuelGame({ onScoreSubmitted }) {
               {playMode === 'P2P' && (
                 <div className="p2p-entry-box">
                   <div className="p2p-input-row">
-                    <label className="p2p-label">내 닉네임</label>
+                    <div className="p2p-input-header">
+                      <label className="p2p-label">내 닉네임</label>
+                      <span className="p2p-input-hint">※ 바른말 고운말을 사용합시다.</span>
+                    </div>
                     <input
                       type="text"
                       value={p2pName}
                       onChange={(e) => setP2pName(e.target.value)}
                       maxLength={8}
-                      placeholder="예: 홍길동"
+                      placeholder="이름을 입력해 주세요"
                       className="p2p-text-input"
                     />
                   </div>
 
                   <div className="p2p-input-row">
-                    <div className="flex justify-between items-center">
+                    <div className="p2p-input-header">
                       <label className="p2p-label">4자리 숫자 룸코드</label>
                       <button
                         type="button"
                         onClick={() => setP2pCode(GhoulDuelNetworkManager.generateRandomCode())}
-                        className="text-xs text-purple-300 hover:text-white flex items-center gap-1"
+                        className="p2p-random-btn"
                       >
                         <Dices size={13} />
                         <span>랜덤 번호</span>
