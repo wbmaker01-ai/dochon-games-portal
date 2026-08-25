@@ -52,6 +52,11 @@ export const CHANGELOG_DATA = [
         tag: 'UI POLISH',
         tagColor: 'emerald',
         text: '[닉네임 힌트 & 안전 언어 안내] 닉네임 입력란 기본값 초기화 및 힌트 텍스트("이름을 입력해 주세요") 적용, "※ 바른말 고운말을 사용합시다." 권장 안내 문구 배치'
+      },
+      {
+        tag: 'CATEGORY',
+        tagColor: 'blue',
+        text: '[포털 카테고리 재분류] 메인 랜딩페이지 상단 카테고리 탭 중 "👥 멀티" 게임 분류로 신규 등록 및 이동 배치'
       }
     ]
   },

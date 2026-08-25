@@ -259,7 +259,7 @@ export const PLAYABLE_GAMES = [
   {
     id: 'ghoulduel',
     title: '도촌 영혼 대결',
-    category: '액션',
+    category: '멀티',
     imageSrc: getThumb('ghoulduel.jpg'),
     isPlayable: true,
     badgeText: '👻 NEW 30위',
@@ -321,7 +321,7 @@ export const CATEGORY_DEFINITIONS = [
   { id: '카드', label: '카드', icon: '🃏' },
   { id: '스포츠', label: '스포츠', icon: '⚽' },
   { id: '어드벤처', label: '어드벤처', icon: '🗺️' },
-  { id: '멀티플레이어', label: '멀티', icon: '👥' }
+  { id: '멀티', label: '멀티', icon: '👥' }
 ];
 
 export const CATEGORIES = CATEGORY_DEFINITIONS.map(c => c.id);
