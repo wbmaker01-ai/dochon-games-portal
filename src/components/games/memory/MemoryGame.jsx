@@ -753,7 +753,7 @@ export default function MemoryGame({ onScoreSubmitted }) {
                 }
                 haptics.medium();
               }}
-              className="memory-submit-btn flex-1"
+              className="memory-action-btn primary"
             >
               <RotateCcw className="w-4 h-4" />
               <span>다시 도전하기</span>
@@ -766,9 +766,10 @@ export default function MemoryGame({ onScoreSubmitted }) {
                 setGameWon(false);
                 haptics.light();
               }}
-              className="memory-secondary-btn"
+              className="memory-action-btn secondary"
             >
-              모드 선택 메뉴
+              <Layers className="w-4 h-4" />
+              <span>모드 선택 메뉴</span>
             </button>
           </div>
         </div>

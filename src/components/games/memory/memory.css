@@ -595,10 +595,11 @@
 
 .memory-submit-btn {
   width: 100% !important;
-  padding: 11px 16px !important;
+  height: 44px !important;
+  padding: 0 16px !important;
   border-radius: 12px !important;
   background: linear-gradient(135deg, #F59E0B, #D97706) !important;
-  border: none !important;
+  border: 1.5px solid #FCD34D !important;
   color: #0F172A !important;
   font-size: 14px !important;
   font-weight: 900 !important;
@@ -608,6 +609,7 @@
   align-items: center !important;
   justify-content: center !important;
   gap: 6px !important;
+  box-sizing: border-box !important;
 }
 
 .memory-submit-btn:hover:not(:disabled) {
@@ -616,24 +618,53 @@
 }
 
 .memory-btn-row {
-  display: flex !important;
+  display: grid !important;
+  grid-template-columns: 1fr 1fr !important;
   gap: 10px !important;
   width: 100% !important;
   margin-top: 14px !important;
+  box-sizing: border-box !important;
 }
 
-.memory-secondary-btn {
-  flex: 1 !important;
-  padding: 10px !important;
+.memory-action-btn {
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  gap: 8px !important;
+  width: 100% !important;
+  height: 44px !important;
+  padding: 0 14px !important;
   border-radius: 12px !important;
-  background: rgba(30, 41, 59, 0.9) !important;
-  border: 1px solid rgba(255, 255, 255, 0.15) !important;
-  color: #E2E8F0 !important;
-  font-size: 13px !important;
-  font-weight: 700 !important;
+  font-size: 13.5px !important;
+  font-weight: 800 !important;
   cursor: pointer !important;
+  transition: all 0.15s ease !important;
+  box-sizing: border-box !important;
+  white-space: nowrap !important;
 }
 
-.memory-secondary-btn:hover {
-  background: rgba(51, 65, 85, 0.9) !important;
+.memory-action-btn.primary {
+  background: linear-gradient(135deg, #F59E0B, #D97706) !important;
+  border: 1.5px solid #FCD34D !important;
+  color: #0F172A !important;
+  box-shadow: 0 4px 12px rgba(245, 158, 11, 0.35) !important;
+}
+
+.memory-action-btn.primary:hover {
+  background: linear-gradient(135deg, #FBBF24, #F59E0B) !important;
+  transform: translateY(-2px) scale(1.02) !important;
+}
+
+.memory-action-btn.secondary {
+  background: rgba(30, 41, 59, 0.9) !important;
+  border: 1.5px solid rgba(255, 255, 255, 0.2) !important;
+  color: #F1F5F9 !important;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3) !important;
+}
+
+.memory-action-btn.secondary:hover {
+  background: rgba(51, 65, 85, 0.95) !important;
+  border-color: #A5B4FC !important;
+  color: #FFFFFF !important;
+  transform: translateY(-2px) scale(1.02) !important;
 }
