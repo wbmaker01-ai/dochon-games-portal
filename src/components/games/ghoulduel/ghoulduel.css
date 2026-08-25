@@ -59,6 +59,12 @@
   border-radius: 12px;
 }
 
+.ghoulduel-badge.p2p {
+  background: rgba(168, 85, 247, 0.25);
+  border-color: #a855f7;
+  color: #c084fc;
+}
+
 .ghoulduel-controls {
   display: flex;
   align-items: center;
@@ -250,18 +256,19 @@
   border-color: rgba(253, 224, 71, 0.4);
 }
 
-/* 3. Screens & Overlays (Start, Pause, GameOver) */
+/* 3. Screens & Overlays */
 .ghoulduel-screen-overlay {
   position: absolute;
   inset: 0;
-  background: rgba(9, 13, 22, 0.9);
+  background: rgba(9, 13, 22, 0.92);
   backdrop-filter: blur(8px);
   display: flex;
   flex-direction: column;
   align-items: center;
   justify-content: center;
-  padding: 24px;
+  padding: 20px;
   z-index: 10;
+  overflow-y: auto;
 }
 
 .ghoulduel-card-box {
@@ -269,28 +276,28 @@
   flex-direction: column;
   align-items: center;
   text-align: center;
-  max-width: 480px;
+  max-width: 520px;
   width: 100%;
-  background: rgba(30, 41, 59, 0.7);
+  background: rgba(30, 41, 59, 0.85);
   border: 1px solid rgba(255, 255, 255, 0.15);
   border-radius: 24px;
-  padding: 28px 24px;
+  padding: 24px;
   box-shadow: 0 20px 50px rgba(0, 0, 0, 0.7);
 }
 
 .screen-ghost-hero {
-  font-size: 3.5rem;
-  margin-bottom: 8px;
+  font-size: 3.2rem;
+  margin-bottom: 4px;
   animation: ghostFloat 2s infinite ease-in-out;
 }
 
 @keyframes ghostFloat {
   0%, 100% { transform: translateY(0); }
-  50% { transform: translateY(-10px); }
+  50% { transform: translateY(-8px); }
 }
 
 .screen-main-title {
-  font-size: 1.8rem;
+  font-size: 1.7rem;
   font-weight: 900;
   margin: 0 0 6px 0;
   background: linear-gradient(135deg, #34d399 0%, #c084fc 100%);
@@ -299,10 +306,236 @@
 }
 
 .screen-description {
-  font-size: 0.95rem;
+  font-size: 0.9rem;
   color: #94a3b8;
-  margin: 0 0 20px 0;
+  margin: 0 0 16px 0;
   line-height: 1.4;
+}
+
+/* Mode Selection Tabs */
+.mode-tabs {
+  display: flex;
+  gap: 8px;
+  width: 100%;
+  margin-bottom: 16px;
+}
+
+.mode-tab-btn {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  padding: 10px 0;
+  background: rgba(15, 23, 42, 0.7);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 12px;
+  color: #94a3b8;
+  font-size: 0.88rem;
+  font-weight: 700;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.mode-tab-btn.active {
+  background: rgba(16, 185, 129, 0.2);
+  border-color: #10b981;
+  color: #34d399;
+  box-shadow: 0 0 15px rgba(16, 185, 129, 0.25);
+}
+
+.mode-tab-btn.active.p2p {
+  background: rgba(168, 85, 247, 0.2);
+  border-color: #a855f7;
+  color: #c084fc;
+  box-shadow: 0 0 15px rgba(168, 85, 247, 0.25);
+}
+
+/* P2P Multiplayer Room Input Box */
+.p2p-entry-box {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  width: 100%;
+  margin-bottom: 16px;
+  background: rgba(15, 23, 42, 0.6);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 16px;
+  padding: 16px;
+}
+
+.p2p-input-row {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  text-align: left;
+}
+
+.p2p-label {
+  font-size: 0.8rem;
+  font-weight: 700;
+  color: #cbd5e1;
+}
+
+.p2p-text-input {
+  background: rgba(15, 23, 42, 0.9);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  border-radius: 10px;
+  padding: 10px 14px;
+  color: #ffffff;
+  font-size: 1rem;
+  font-weight: 700;
+  outline: none;
+  text-align: center;
+  letter-spacing: 2px;
+}
+
+.p2p-text-input:focus {
+  border-color: #a855f7;
+  box-shadow: 0 0 10px rgba(168, 85, 247, 0.3);
+}
+
+.p2p-button-row {
+  display: flex;
+  gap: 8px;
+  width: 100%;
+}
+
+.btn-p2p-create {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  background: linear-gradient(135deg, #a855f7 0%, #7e22ce 100%);
+  border: none;
+  border-radius: 12px;
+  color: #ffffff;
+  font-size: 0.95rem;
+  font-weight: 800;
+  padding: 12px;
+  cursor: pointer;
+  box-shadow: 0 4px 15px rgba(168, 85, 247, 0.35);
+  transition: all 0.2s;
+}
+
+.btn-p2p-create:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 20px rgba(168, 85, 247, 0.5);
+}
+
+.btn-p2p-join {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  background: linear-gradient(135deg, #3b82f6 0%, #1d4ed8 100%);
+  border: none;
+  border-radius: 12px;
+  color: #ffffff;
+  font-size: 0.95rem;
+  font-weight: 800;
+  padding: 12px;
+  cursor: pointer;
+  box-shadow: 0 4px 15px rgba(59, 130, 246, 0.35);
+  transition: all 0.2s;
+}
+
+.btn-p2p-join:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 20px rgba(59, 130, 246, 0.5);
+}
+
+/* 4. P2P Lobby Waiting Room Screen */
+.lobby-room-code-badge {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  background: rgba(168, 85, 247, 0.2);
+  border: 2px solid #a855f7;
+  border-radius: 16px;
+  padding: 8px 16px;
+  margin-bottom: 14px;
+}
+
+.lobby-code-num {
+  font-size: 1.6rem;
+  font-weight: 900;
+  color: #fde047;
+  letter-spacing: 4px;
+}
+
+.lobby-slots-container {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 12px;
+  width: 100%;
+  margin-bottom: 16px;
+}
+
+.lobby-team-col {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  background: rgba(15, 23, 42, 0.7);
+  border-radius: 14px;
+  padding: 10px;
+}
+
+.lobby-team-col.green {
+  border: 1px solid rgba(16, 185, 129, 0.4);
+}
+
+.lobby-team-col.purple {
+  border: 1px solid rgba(168, 85, 247, 0.4);
+}
+
+.lobby-team-title {
+  font-size: 0.85rem;
+  font-weight: 800;
+  margin-bottom: 4px;
+}
+
+.lobby-team-col.green .lobby-team-title {
+  color: #34d399;
+}
+
+.lobby-team-col.purple .lobby-team-title {
+  color: #c084fc;
+}
+
+.slot-item {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  background: rgba(30, 41, 59, 0.6);
+  border-radius: 8px;
+  padding: 6px 10px;
+  font-size: 0.8rem;
+  font-weight: 600;
+}
+
+.slot-item.human {
+  border: 1px solid rgba(255, 255, 255, 0.3);
+  color: #ffffff;
+}
+
+.slot-item.ai {
+  color: #94a3b8;
+  opacity: 0.75;
+}
+
+.slot-item.me {
+  background: rgba(16, 185, 129, 0.2);
+  border-color: #10b981;
+  color: #34d399;
+}
+
+.lobby-actions {
+  display: flex;
+  gap: 10px;
+  width: 100%;
 }
 
 /* Difficulty Selector */
@@ -385,7 +618,21 @@
   color: #ffffff;
 }
 
-/* 4. Game Over Victory / Defeat Dashboard */
+/* Error Toast Banner */
+.p2p-error-banner {
+  background: rgba(239, 68, 68, 0.2);
+  border: 1px solid #ef4444;
+  color: #f87171;
+  font-size: 0.85rem;
+  font-weight: 700;
+  border-radius: 10px;
+  padding: 8px 12px;
+  width: 100%;
+  margin-bottom: 12px;
+  text-align: center;
+}
+
+/* 5. Game Over Victory / Defeat Dashboard */
 .gameover-result-badge {
   font-size: 1.1rem;
   font-weight: 800;
@@ -453,7 +700,7 @@
   color: #cbd5e1;
 }
 
-/* 5. Leaderboard Score Submission Form (Memory Rules) */
+/* 6. Leaderboard Score Submission Form (Memory Rules) */
 .leaderboard-submit-form {
   display: flex;
   flex-direction: column;
@@ -522,7 +769,7 @@
   padding: 8px;
 }
 
-/* 6. Virtual Joystick for Touch / Mobile */
+/* 7. Virtual Joystick for Touch / Mobile */
 .virtual-joystick-container {
   display: flex;
   justify-content: center;
@@ -554,7 +801,7 @@
   box-shadow: 0 0 12px rgba(16, 185, 129, 0.6);
 }
 
-/* 7. How-To-Play Modal Overlay & Card */
+/* 8. How-To-Play Modal Overlay & Card */
 .ghoulduel-modal-overlay {
   position: fixed;
   inset: 0;
@@ -751,5 +998,8 @@
   }
   .screen-card-box {
     padding: 20px 16px;
+  }
+  .lobby-slots-container {
+    grid-template-columns: 1fr;
   }
 }

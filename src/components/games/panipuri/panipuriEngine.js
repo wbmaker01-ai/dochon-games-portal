@@ -792,15 +792,25 @@ export class PaniPuriEngine {
     ctx.fill();
 
     const wobble = Math.sin(this.animTime * 4 + x) * 2;
-    ctx.fillStyle = isFever ? PANI_FLAVORS.GOLDEN.liquidColor : flavor.liquidColor;
+    // Always preserve the authentic distinctive spice color for each flavor
+    ctx.fillStyle = flavor.liquidColor;
     ctx.beginPath();
     ctx.ellipse(x, y - 20 + wobble, 32, 11, 0, 0, Math.PI * 2);
     ctx.fill();
 
-    ctx.fillStyle = isFever ? PANI_FLAVORS.GOLDEN.surfaceColor : flavor.surfaceColor;
+    ctx.fillStyle = flavor.surfaceColor;
     ctx.beginPath();
     ctx.ellipse(x - 8, y - 22 + wobble, 12, 4, -0.2, 0, Math.PI * 2);
     ctx.fill();
+
+    // Golden aura rim effect only during Fever time (preserving liquid color)
+    if (isFever) {
+      ctx.strokeStyle = '#FDE047';
+      ctx.lineWidth = 2.5;
+      ctx.beginPath();
+      ctx.ellipse(x, y - 20 + wobble, 33, 12, 0, 0, Math.PI * 2);
+      ctx.stroke();
+    }
 
     ctx.fillStyle = '#FFFFFF';
     ctx.font = 'bold 12px sans-serif';
@@ -891,17 +901,25 @@ export class PaniPuriEngine {
     ctx.ellipse(x, y - 3, 12, 9, 0, 0, Math.PI * 2);
     ctx.fill();
 
-    const liquidColor = isFever ? PANI_FLAVORS.GOLDEN.liquidColor : flavor.liquidColor;
-    ctx.fillStyle = liquidColor;
+    // Inside sauce: Always preserve the distinct spice flavor color
+    ctx.fillStyle = flavor.liquidColor;
     ctx.beginPath();
     ctx.ellipse(x, y - 2, 10, 7.5, 0, 0, Math.PI * 2);
     ctx.fill();
 
-    const surfaceColor = isFever ? PANI_FLAVORS.GOLDEN.surfaceColor : flavor.surfaceColor;
-    ctx.fillStyle = surfaceColor;
+    ctx.fillStyle = flavor.surfaceColor;
     ctx.beginPath();
     ctx.ellipse(x - 3, y - 4, 4, 2, -0.3, 0, Math.PI * 2);
     ctx.fill();
+
+    // Fever shine ring around puri ball
+    if (isFever) {
+      ctx.strokeStyle = 'rgba(254, 240, 138, 0.7)';
+      ctx.lineWidth = 2;
+      ctx.beginPath();
+      ctx.arc(x, y, puriR + 2, 0, Math.PI * 2);
+      ctx.stroke();
+    }
 
     ctx.restore();
   }

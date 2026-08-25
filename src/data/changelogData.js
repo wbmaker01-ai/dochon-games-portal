@@ -3,11 +3,59 @@
 
 export const CHANGELOG_DATA = [
   {
+    version: 'v1.45.1',
+    date: '2026-08-25',
+    title: '🫓 [파니 푸리 마스터] 피버 타임 중 향신료 단지 고유 색상 보존 및 비주얼 개선',
+    badge: 'LATEST',
+    badgeColor: 'emerald',
+    items: [
+      {
+        tag: 'VISUAL PRESERVATION',
+        tagColor: 'emerald',
+        text: '[향신료 고유 색상 유지] 골든 피버 타임 발동 시에도 민트(초록)·타마린드(갈색)·칠리(빨강)·망고(노랑) 단지의 시그니처 소스 색상이 동일한 색으로 바뀌지 않고 100% 선명하게 유지되도록 개선'
+      },
+      {
+        tag: 'FEVER EFFECT',
+        tagColor: 'amber',
+        text: '[골든 림 & 스파클 연출] 피버 타임의 시각적 몰입감을 위해 소스 색상 대신 단지 테두리 골든 아우라 림 및 푸리 황금 스파클 링 연출로 분리 적용'
+      }
+    ]
+  },
+  {
+    version: 'v1.45.0',
+    date: '2026-08-25',
+    title: '🌐 [도촌 영혼 대결] 4자리 숫자 룸코드 실시간 P2P WebRTC 멀티플레이어 모드 전격 오픈',
+    badge: 'UPDATE',
+    badgeColor: 'blue',
+    items: [
+      {
+        tag: 'P2P WEBRTC',
+        tagColor: 'purple',
+        text: '[서버 비용 0원 실시간 P2P 멀티플레이] 별도의 외부 서버 없이 브라우저 간 WebRTC DataChannel 직접 연결로 0ms 핑의 초고속 4 vs 4 실시간 온라인 팀 대항전 개장'
+      },
+      {
+        tag: '4-DIGIT CODE',
+        tagColor: 'emerald',
+        text: '[4자리 숫자 룸코드 간편 매칭] 복잡한 링크 없이 1234, 7788 같은 4자리 숫자만으로 친구들과 즉시 방을 만들고 참가할 수 있는 대기실 로비 시스템 탑재'
+      },
+      {
+        tag: 'AI HYBRID SLOTS',
+        tagColor: 'blue',
+        text: '[스마트 AI 자동 충원] 8명이 다 모이지 않아도 방장이 시작하면 빈자리를 7마리 스마트 AI 봇이 자동으로 채워 항상 박진감 넘치는 8인 배틀 지원'
+      },
+      {
+        tag: 'HOST-AUTHORITATIVE',
+        tagColor: 'amber',
+        text: '[호스트 권한형 동기화] 방장 브라우저의 30Hz 정밀 물리 판정 및 클라이언트 60fps 부드러운 위치 보간(Interpolation) 렌더링 구현'
+      }
+    ]
+  },
+  {
     version: 'v1.44.2',
     date: '2026-08-25',
     title: '🫓 [파니 푸리 마스터] 상단 아케이드 HUD 툴바 UI/UX 전면 리디자인',
-    badge: 'LATEST',
-    badgeColor: 'emerald',
+    badge: 'UPDATE',
+    badgeColor: 'blue',
     items: [
       {
         tag: 'HUD REDESIGN',

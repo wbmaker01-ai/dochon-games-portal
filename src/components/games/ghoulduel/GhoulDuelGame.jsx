@@ -1,13 +1,15 @@
 import React, { useRef, useState, useEffect, useCallback } from 'react';
 import { GhoulDuelLogic } from './ghoulDuelLogic';
 import { ghoulAudio } from './ghoulDuelAudio';
+import { ghoulNet, GhoulDuelNetworkManager } from './ghoulDuelNetwork';
 import { CANVAS_WIDTH, CANVAS_HEIGHT, DIFFICULTY_PRESETS } from './ghoulDuelConstants';
 import GhoulDuelHowToPlayModal from './GhoulDuelHowToPlayModal';
 import { submitScoreToDB } from '../../../utils/leaderboardApi';
 import { haptics } from '../../../utils/haptics';
 import {
   Trophy, RotateCcw, Volume2, VolumeX, HelpCircle,
-  Sparkles, Flame, Zap, Award, CheckCircle2, User, Send, Play
+  Sparkles, Flame, Zap, Award, CheckCircle2, User, Send, Play,
+  Users, Globe, Copy, Check, LogOut, Dices, Shield, ArrowRightLeft
 } from 'lucide-react';
 import './ghoulduel.css';
 
@@ -17,7 +19,9 @@ export default function GhoulDuelGame({ onScoreSubmitted }) {
   const reqAnimRef = useRef(null);
   const lastTimeRef = useRef(0);
 
-  const [gameState, setGameState] = useState('START'); // 'START' | 'PLAYING' | 'GAME_OVER'
+  // Top Game State
+  const [gameState, setGameState] = useState('START'); // 'START' | 'LOBBY' | 'PLAYING' | 'GAME_OVER'
+  const [playMode, setPlayMode] = useState('SINGLE');  // 'SINGLE' | 'P2P'
   const [difficulty, setDifficulty] = useState('normal');
   const [teamScores, setTeamScores] = useState({ green: 0, purple: 0 });
   const [matchTime, setMatchTime] = useState(90);
@@ -25,6 +29,15 @@ export default function GhoulDuelGame({ onScoreSubmitted }) {
   const [playerDeposited, setPlayerDeposited] = useState(0);
   const [isMuted, setIsMuted] = useState(false);
   const [showHowToPlay, setShowHowToPlay] = useState(false);
+
+  // P2P State
+  const [p2pCode, setP2pCode] = useState(() => GhoulDuelNetworkManager.generateRandomCode());
+  const [p2pName, setP2pName] = useState('도촌 영웅');
+  const [p2pIsHost, setP2pIsHost] = useState(false);
+  const [p2pPlayers, setP2pPlayers] = useState([]);
+  const [p2pConnecting, setP2pConnecting] = useState(false);
+  const [p2pError, setP2pError] = useState('');
+  const [copiedCode, setCopiedCode] = useState(false);
 
   // Final Match Result State
   const [gameResult, setGameResult] = useState(null);
@@ -49,25 +62,159 @@ export default function GhoulDuelGame({ onScoreSubmitted }) {
     haptics.success();
   }, []);
 
-  // Initialize and Start Game
-  const startGame = useCallback((selectedDiff = difficulty) => {
-    ghoulAudio.init();
-    const logic = new GhoulDuelLogic({
-      difficulty: selectedDiff,
-      onGameOver: handleGameOver,
-      onStateChange: (state) => {
-        setTeamScores({ ...state.teamScores });
-        setMatchTime(state.matchTime);
-        setPlayerTail(state.playerTail);
-        setPlayerDeposited(state.playerDeposited);
-      }
-    });
+  // --- Start Game Logic (Single / Host / Guest) ---
+  const launchGameEngine = useCallback(
+    ({ mode = 'local', players = [], myId = 'local', selectedDiff = difficulty }) => {
+      ghoulAudio.init();
 
-    logicRef.current = logic;
-    setGameState('PLAYING');
-    setGameResult(null);
-    lastTimeRef.current = performance.now();
-  }, [difficulty, handleGameOver]);
+      const logic = new GhoulDuelLogic({
+        difficulty: selectedDiff,
+        networkMode: mode,
+        networkPlayers: players,
+        myPeerId: myId,
+        onGameOver: handleGameOver,
+        onStateChange: (state) => {
+          setTeamScores({ ...state.teamScores });
+          setMatchTime(state.matchTime);
+          setPlayerTail(state.playerTail);
+          setPlayerDeposited(state.playerDeposited);
+        },
+        onBroadcastSnapshot: (snapshot) => {
+          if (mode === 'host') {
+            ghoulNet.broadcastSnapshot(snapshot);
+          }
+        },
+        onSendInput: (vector, angle) => {
+          if (mode === 'guest') {
+            ghoulNet.sendInput(vector, angle);
+          }
+        }
+      });
+
+      logicRef.current = logic;
+      setGameState('PLAYING');
+      setGameResult(null);
+      lastTimeRef.current = performance.now();
+    },
+    [difficulty, handleGameOver]
+  );
+
+  // Start Single Player Match
+  const startSingleGame = () => {
+    ghoulNet.disconnect();
+    launchGameEngine({ mode: 'local', selectedDiff: difficulty });
+  };
+
+  // --- P2P Network Handlers ---
+  const handleCreateRoom = async () => {
+    setP2pError('');
+    setP2pConnecting(true);
+    try {
+      const code = await ghoulNet.createRoom(p2pCode, p2pName, 'green');
+      setP2pIsHost(true);
+      setP2pPlayers(ghoulNet.lobbyPlayers);
+      setGameState('LOBBY');
+      haptics.medium();
+    } catch (err) {
+      setP2pError(err.message || '방 생성에 실패했습니다.');
+    } finally {
+      setP2pConnecting(false);
+    }
+  };
+
+  const handleJoinRoom = async () => {
+    setP2pError('');
+    setP2pConnecting(true);
+    try {
+      const code = await ghoulNet.joinRoom(p2pCode, p2pName, 'purple');
+      setP2pIsHost(false);
+      setP2pPlayers(ghoulNet.lobbyPlayers);
+      setGameState('LOBBY');
+      haptics.medium();
+    } catch (err) {
+      setP2pError(err.message || '방 참가에 실패했습니다.');
+    } finally {
+      setP2pConnecting(false);
+    }
+  };
+
+  const handleStartP2PMatch = () => {
+    if (!p2pIsHost) return;
+    const seed = Date.now();
+    ghoulNet.broadcastGameStart(seed);
+    launchGameEngine({
+      mode: 'host',
+      players: ghoulNet.lobbyPlayers,
+      myId: 'host',
+      selectedDiff: difficulty
+    });
+  };
+
+  const handleToggleTeam = () => {
+    ghoulNet.toggleMyTeam();
+    haptics.light();
+  };
+
+  const handleLeaveLobby = () => {
+    ghoulNet.disconnect();
+    setGameState('START');
+    setP2pError('');
+  };
+
+  const handleCopyCode = () => {
+    navigator.clipboard.writeText(p2pCode);
+    setCopiedCode(true);
+    haptics.light();
+    setTimeout(() => setCopiedCode(false), 2000);
+  };
+
+  // Setup P2P Network Event Listeners
+  useEffect(() => {
+    ghoulNet.onLobbyUpdate = (players) => {
+      setP2pPlayers([...players]);
+    };
+
+    ghoulNet.onGameStart = (packet) => {
+      launchGameEngine({
+        mode: 'guest',
+        players: packet.players,
+        myId: ghoulNet.myPeerId,
+        selectedDiff: difficulty
+      });
+    };
+
+    ghoulNet.onSnapshot = (snapshot) => {
+      if (logicRef.current) {
+        logicRef.current.applySnapshot(snapshot);
+      }
+    };
+
+    ghoulNet.onGuestInput = (peerId, vector, angle) => {
+      if (logicRef.current) {
+        logicRef.current.handleGuestInput(peerId, vector, angle);
+      }
+    };
+
+    ghoulNet.onError = (msg) => {
+      setP2pError(msg);
+    };
+
+    ghoulNet.onDisconnect = (msg) => {
+      setP2pError(msg);
+      if (gameState === 'PLAYING' || gameState === 'LOBBY') {
+        setGameState('START');
+      }
+    };
+
+    return () => {
+      ghoulNet.onLobbyUpdate = null;
+      ghoulNet.onGameStart = null;
+      ghoulNet.onSnapshot = null;
+      ghoulNet.onGuestInput = null;
+      ghoulNet.onError = null;
+      ghoulNet.onDisconnect = null;
+    };
+  }, [difficulty, gameState, launchGameEngine]);
 
   // Main Render Animation Loop
   useEffect(() => {
@@ -174,13 +321,13 @@ export default function GhoulDuelGame({ onScoreSubmitted }) {
     }
   };
 
-  // Leaderboard Score Submit Handler
+  // Leaderboard Score Submit Handler (Only if score > 100)
   const handleSubmitScore = async (e) => {
     e.preventDefault();
     if (!playerName.trim() || isSubmitting || isSubmitted) return;
 
     const finalPlayerScore = gameResult ? gameResult.playerScore : playerDeposited;
-    if (finalPlayerScore <= 100) return; // Strict Rule: <= 100 points block
+    if (finalPlayerScore <= 100) return;
 
     setIsSubmitting(true);
     try {
@@ -188,7 +335,6 @@ export default function GhoulDuelGame({ onScoreSubmitted }) {
       setIsSubmitted(true);
       haptics.success();
 
-      // Open Leaderboard Modal and switch to ghoulduel tab
       if (onScoreSubmitted) {
         setTimeout(() => {
           onScoreSubmitted();
@@ -205,6 +351,10 @@ export default function GhoulDuelGame({ onScoreSubmitted }) {
   const totalScore = teamScores.green + teamScores.purple;
   const greenPct = totalScore === 0 ? 50 : Math.max(5, Math.min(95, (teamScores.green / totalScore) * 100));
 
+  // Count green / purple in lobby
+  const greenLobby = p2pPlayers.filter((p) => p.team === 'green');
+  const purpleLobby = p2pPlayers.filter((p) => p.team === 'purple');
+
   return (
     <div className="ghoulduel-container">
       {/* 1. Top Header & Match Dashboard */}
@@ -213,7 +363,9 @@ export default function GhoulDuelGame({ onScoreSubmitted }) {
           <div className="ghoulduel-title-group">
             <span className="text-2xl">👻</span>
             <h2>도촌 영혼 대결</h2>
-            <span className="ghoulduel-badge">4 vs 4 배틀</span>
+            <span className={`ghoulduel-badge ${playMode === 'P2P' ? 'p2p' : ''}`}>
+              {playMode === 'P2P' ? '🌐 P2P 멀티플레이' : '4 vs 4 AI 배틀'}
+            </span>
           </div>
 
           <div className="ghoulduel-controls">
@@ -236,9 +388,15 @@ export default function GhoulDuelGame({ onScoreSubmitted }) {
             {gameState === 'PLAYING' && (
               <button
                 className="ghoulduel-btn-icon"
-                onClick={() => startGame(difficulty)}
-                title="다시 시작"
-                aria-label="다시 시작"
+                onClick={() => {
+                  if (playMode === 'P2P') {
+                    handleLeaveLobby();
+                  } else {
+                    startSingleGame();
+                  }
+                }}
+                title="종료/다시하기"
+                aria-label="종료/다시하기"
               >
                 <RotateCcw size={18} />
               </button>
@@ -251,7 +409,7 @@ export default function GhoulDuelGame({ onScoreSubmitted }) {
           <div className="team-score-card green">
             <span className="team-avatar">👑</span>
             <div className="team-info">
-              <span className="team-name">초록 영혼팀 (나)</span>
+              <span className="team-name">초록 영혼팀</span>
               <span className="team-pts">{teamScores.green}</span>
             </div>
           </div>
@@ -301,46 +459,201 @@ export default function GhoulDuelGame({ onScoreSubmitted }) {
           </div>
         )}
 
-        {/* START SCREEN OVERLAY */}
+        {/* --- SCREEN 1: START SCREEN (SINGLE vs P2P SELECTOR) --- */}
         {gameState === 'START' && (
           <div className="ghoulduel-screen-overlay">
             <div className="ghoulduel-card-box">
               <div className="screen-ghost-hero">👻</div>
               <h1 className="screen-main-title">할로윈 영혼 대결</h1>
               <p className="screen-description">
-                초록팀 vs 보라팀 4:4 실시간 팀 액션!<br />
                 영혼 불꽃을 모아 기지로 가져오고, 상대 꼬리를 가로채세요!
               </p>
 
-              {/* Difficulty Selection */}
-              <div className="difficulty-selector">
-                {Object.keys(DIFFICULTY_PRESETS).map((key) => (
-                  <button
-                    key={key}
-                    className={`diff-btn ${difficulty === key ? 'active' : ''}`}
-                    onClick={() => setDifficulty(key)}
-                  >
-                    {DIFFICULTY_PRESETS[key].name}
-                  </button>
-                ))}
+              {/* Mode Switcher Tabs */}
+              <div className="mode-tabs">
+                <button
+                  className={`mode-tab-btn ${playMode === 'SINGLE' ? 'active' : ''}`}
+                  onClick={() => setPlayMode('SINGLE')}
+                >
+                  <Users size={16} />
+                  <span>싱글 봇 대전 (AI)</span>
+                </button>
+                <button
+                  className={`mode-tab-btn p2p ${playMode === 'P2P' ? 'active' : ''}`}
+                  onClick={() => setPlayMode('P2P')}
+                >
+                  <Globe size={16} />
+                  <span>실시간 친구 대전 (P2P)</span>
+                </button>
               </div>
 
-              {/* Actions */}
-              <div className="screen-actions">
-                <button className="btn-primary" onClick={() => startGame(difficulty)}>
-                  <Play size={18} fill="currentColor" />
-                  <span>대결 시작하기</span>
+              {p2pError && <div className="p2p-error-banner">{p2pError}</div>}
+
+              {/* SINGLE PLAYER MODE VIEW */}
+              {playMode === 'SINGLE' && (
+                <>
+                  <div className="difficulty-selector">
+                    {Object.keys(DIFFICULTY_PRESETS).map((key) => (
+                      <button
+                        key={key}
+                        className={`diff-btn ${difficulty === key ? 'active' : ''}`}
+                        onClick={() => setDifficulty(key)}
+                      >
+                        {DIFFICULTY_PRESETS[key].name}
+                      </button>
+                    ))}
+                  </div>
+
+                  <div className="screen-actions">
+                    <button className="btn-primary" onClick={startSingleGame}>
+                      <Play size={18} fill="currentColor" />
+                      <span>대결 시작하기</span>
+                    </button>
+                    <button className="btn-secondary" onClick={() => setShowHowToPlay(true)}>
+                      <HelpCircle size={18} />
+                      <span>게임 방법</span>
+                    </button>
+                  </div>
+                </>
+              )}
+
+              {/* P2P 4-DIGIT MULTIPLAYER MODE VIEW */}
+              {playMode === 'P2P' && (
+                <div className="p2p-entry-box">
+                  <div className="p2p-input-row">
+                    <label className="p2p-label">내 닉네임</label>
+                    <input
+                      type="text"
+                      value={p2pName}
+                      onChange={(e) => setP2pName(e.target.value)}
+                      maxLength={8}
+                      placeholder="예: 홍길동"
+                      className="p2p-text-input"
+                    />
+                  </div>
+
+                  <div className="p2p-input-row">
+                    <div className="flex justify-between items-center">
+                      <label className="p2p-label">4자리 숫자 룸코드</label>
+                      <button
+                        type="button"
+                        onClick={() => setP2pCode(GhoulDuelNetworkManager.generateRandomCode())}
+                        className="text-xs text-purple-300 hover:text-white flex items-center gap-1"
+                      >
+                        <Dices size={13} />
+                        <span>랜덤 번호</span>
+                      </button>
+                    </div>
+                    <input
+                      type="text"
+                      value={p2pCode}
+                      onChange={(e) => setP2pCode(e.target.value.replace(/[^0-9]/g, '').slice(0, 4))}
+                      maxLength={4}
+                      placeholder="4자리 숫자 (예: 1234)"
+                      className="p2p-text-input"
+                      style={{ fontSize: '1.3rem', letterSpacing: '6px' }}
+                    />
+                  </div>
+
+                  <div className="p2p-button-row">
+                    <button
+                      className="btn-p2p-create"
+                      onClick={handleCreateRoom}
+                      disabled={p2pConnecting || p2pCode.length < 4}
+                    >
+                      <Play size={16} fill="currentColor" />
+                      <span>{p2pConnecting ? '생성 중...' : '방 만들기'}</span>
+                    </button>
+                    <button
+                      className="btn-p2p-join"
+                      onClick={handleJoinRoom}
+                      disabled={p2pConnecting || p2pCode.length < 4}
+                    >
+                      <Users size={16} />
+                      <span>{p2pConnecting ? '접속 중...' : '방 참가하기'}</span>
+                    </button>
+                  </div>
+                </div>
+              )}
+            </div>
+          </div>
+        )}
+
+        {/* --- SCREEN 2: P2P LOBBY WAITING ROOM --- */}
+        {gameState === 'LOBBY' && (
+          <div className="ghoulduel-screen-overlay">
+            <div className="ghoulduel-card-box">
+              <div className="screen-ghost-hero">🏰</div>
+              <h2 className="screen-main-title">P2P 대기실</h2>
+              <p className="screen-description">
+                친구에게 아래 <strong>4자리 룸코드</strong>를 알려주세요!
+              </p>
+
+              {/* 4-Digit Numeric Room Code Badge */}
+              <div className="lobby-room-code-badge cursor-pointer" onClick={handleCopyCode} title="클릭하여 번호 복사">
+                <span className="text-xs text-purple-300 font-bold">방 번호</span>
+                <span className="lobby-code-num">{p2pCode}</span>
+                {copiedCode ? <Check size={18} className="text-emerald-400" /> : <Copy size={18} className="text-purple-300" />}
+              </div>
+
+              {p2pError && <div className="p2p-error-banner">{p2pError}</div>}
+
+              {/* 8 Slots (Green Team vs Purple Team) */}
+              <div className="lobby-slots-container">
+                {/* Green Team Column */}
+                <div className="lobby-team-col green">
+                  <div className="lobby-team-title">초록 영혼팀 ({greenLobby.length}/4)</div>
+                  {[0, 1, 2, 3].map((slotIdx) => {
+                    const player = greenLobby[slotIdx];
+                    return (
+                      <div key={slotIdx} className={`slot-item ${player ? 'human' : 'ai'} ${player && player.name.includes('(나)') ? 'me' : ''}`}>
+                        <span>{player ? `👑 ${player.name}${player.isHost ? ' (방장)' : ''}` : `🤖 AI 봇 (자동배치)`}</span>
+                      </div>
+                    );
+                  })}
+                </div>
+
+                {/* Purple Team Column */}
+                <div className="lobby-team-col purple">
+                  <div className="lobby-team-title">보라 유령팀 ({purpleLobby.length}/4)</div>
+                  {[0, 1, 2, 3].map((slotIdx) => {
+                    const player = purpleLobby[slotIdx];
+                    return (
+                      <div key={slotIdx} className={`slot-item ${player ? 'human' : 'ai'} ${player && player.name.includes('(나)') ? 'me' : ''}`}>
+                        <span>{player ? `😈 ${player.name}${player.isHost ? ' (방장)' : ''}` : `🤖 AI 봇 (자동배치)`}</span>
+                      </div>
+                    );
+                  })}
+                </div>
+              </div>
+
+              {/* Lobby Actions */}
+              <div className="lobby-actions">
+                <button className="btn-secondary" onClick={handleToggleTeam}>
+                  <ArrowRightLeft size={16} />
+                  <span>팀 변경</span>
                 </button>
-                <button className="btn-secondary" onClick={() => setShowHowToPlay(true)}>
-                  <HelpCircle size={18} />
-                  <span>게임 방법</span>
+
+                {p2pIsHost ? (
+                  <button className="btn-primary" onClick={handleStartP2PMatch}>
+                    <Play size={18} fill="currentColor" />
+                    <span>게임 시작하기 (Start)</span>
+                  </button>
+                ) : (
+                  <div className="btn-secondary flex-2 text-center text-purple-300 font-bold">
+                    <span>방장의 시작을 기다리는 중...</span>
+                  </div>
+                )}
+
+                <button className="btn-secondary" onClick={handleLeaveLobby} title="방 나가기">
+                  <LogOut size={16} />
                 </button>
               </div>
             </div>
           </div>
         )}
 
-        {/* GAME OVER RESULT OVERLAY */}
+        {/* --- SCREEN 3: GAME OVER RESULT OVERLAY --- */}
         {gameState === 'GAME_OVER' && gameResult && (
           <div className="ghoulduel-screen-overlay">
             <div className="ghoulduel-card-box">
@@ -349,7 +662,7 @@ export default function GhoulDuelGame({ onScoreSubmitted }) {
                   gameResult.isVictory ? 'victory' : 'defeat'
                 }`}
               >
-                {gameResult.isVictory ? '🎉 초록팀 대승리!' : '💥 보라팀 승리! (패배)'}
+                {gameResult.isVictory ? '🎉 우리 팀 대승리!' : '💥 패배! 다음 판에 설욕하세요!'}
               </div>
 
               <div className="gameover-score-compare">
@@ -410,11 +723,26 @@ export default function GhoulDuelGame({ onScoreSubmitted }) {
                 </div>
               )}
 
-              {/* Restart Button */}
-              <button className="btn-primary" onClick={() => startGame(difficulty)}>
-                <RotateCcw size={18} />
-                <span>한 판 더 대결하기</span>
-              </button>
+              {/* Restart / Return Actions */}
+              <div className="screen-actions">
+                <button
+                  className="btn-primary"
+                  onClick={() => {
+                    if (playMode === 'P2P') {
+                      if (p2pIsHost) {
+                        setGameState('LOBBY');
+                      } else {
+                        setGameState('START');
+                      }
+                    } else {
+                      startSingleGame();
+                    }
+                  }}
+                >
+                  <RotateCcw size={18} />
+                  <span>{playMode === 'P2P' ? '대기실로 돌아가기' : '한 판 더 대결하기'}</span>
+                </button>
+              </div>
             </div>
           </div>
         )}
@@ -445,7 +773,7 @@ export default function GhoulDuelGame({ onScoreSubmitted }) {
         onClose={() => setShowHowToPlay(false)}
         onStartGame={() => {
           if (gameState !== 'PLAYING') {
-            startGame(difficulty);
+            startSingleGame();
           }
         }}
       />

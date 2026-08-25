@@ -5,7 +5,7 @@ import { Peer } from 'peerjs';
 
 const PEER_PREFIX = 'dochon-ghoul-';
 
-class GhoulDuelNetworkManager {
+export class GhoulDuelNetworkManager {
   constructor() {
     this.peer = null;
     this.isHost = false;
