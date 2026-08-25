@@ -392,88 +392,162 @@ export class GhoulDuelLogic {
     }
   }
 
-  // Smart AI Finite State Machine (Search, Return, Steal, Flee)
+  // Smart AI Finite State Machine (SEARCH, RETURN, HUNT_STEAL, FLEE)
   updateAIBehavior(bot, deltaTime) {
     bot.aiTimer -= deltaTime;
     const isGreen = bot.team === 'green';
     const myBase = isGreen ? TEAMS.GREEN : TEAMS.PURPLE;
-    const enemyBase = isGreen ? TEAMS.PURPLE : TEAMS.GREEN;
     const baseCenterX = myBase.baseX + myBase.baseWidth / 2;
     const baseCenterY = myBase.baseY + myBase.baseHeight / 2;
 
     const tailCount = bot.tail.length;
     const distToBase = Math.hypot(baseCenterX - bot.x, baseCenterY - bot.y);
 
-    // Evaluate State Transitions every 0.3~0.8 sec
+    // 1. Evaluate State Transitions every 0.25~0.5 sec
     if (bot.aiTimer <= 0) {
-      bot.aiTimer = 0.35 + Math.random() * 0.45;
+      bot.aiTimer = 0.25 + Math.random() * 0.35;
 
-      // 1. Check if under 15 seconds remaining or tail is huge: Immediate Return to Base
-      if (this.matchTime < 15 || tailCount >= 10 || (tailCount >= 6 && distToBase < 400)) {
-        bot.fsmState = 'RETURN';
-      }
-      // 2. Check for nearby enemies with juicy tails: Steal Opportunity
-      else {
-        let bestTarget = null;
-        let bestDist = 320;
-
-        for (const other of this.ghosts) {
-          if (other.team !== bot.team && other.tail.length >= 3 && other.invulnerableTimer <= 0) {
-            const d = Math.hypot(other.x - bot.x, other.y - bot.y);
-            if (d < bestDist && Math.random() < this.difficulty.aiStealAggressiveness) {
-              bestDist = d;
-              bestTarget = other;
-            }
+      // Find closest threatening enemy (for FLEE check)
+      let threateningEnemy = null;
+      let closestEnemyDist = 9999;
+      for (const enemy of this.ghosts) {
+        if (enemy.team !== bot.team) {
+          const d = Math.hypot(enemy.x - bot.x, enemy.y - bot.y);
+          if (d < closestEnemyDist) {
+            closestEnemyDist = d;
+            threateningEnemy = enemy;
           }
         }
+      }
 
-        if (bestTarget) {
-          bot.fsmState = 'HUNT_STEAL';
-          bot.targetGhost = bestTarget;
-        } else {
-          bot.fsmState = 'SEARCH';
+      // Find best enemy tail target (for HUNT_STEAL check)
+      let stealTarget = null;
+      let bestStealDist = 380;
+      for (const enemy of this.ghosts) {
+        if (enemy.team !== bot.team && enemy.tail.length >= 2 && enemy.invulnerableTimer <= 0) {
+          const d = Math.hypot(enemy.x - bot.x, enemy.y - bot.y);
+          if (d < bestStealDist && Math.random() < this.difficulty.aiStealAggressiveness) {
+            bestStealDist = d;
+            stealTarget = enemy;
+          }
         }
+      }
+
+      // --- FSM PRIORITY EVALUATION ---
+      // A. FLEE (위기 시 긴급 회피): 내 꼬리가 길고(>= 4) 적이 가까이(<= 220px) 접근할 때
+      if (tailCount >= 4 && threateningEnemy && closestEnemyDist < 220) {
+        bot.fsmState = 'FLEE';
+        bot.threatGhost = threateningEnemy;
+      }
+      // B. RETURN (기지 복귀): 꼬리가 충분히 길거나(>= 8) 경기 종료 18초 전일 때
+      else if (this.matchTime < 18 || tailCount >= 8 || (tailCount >= 5 && distToBase < 350)) {
+        bot.fsmState = 'RETURN';
+      }
+      // C. HUNT_STEAL (적 꼬리 기습): 뺏을 만한 상대 꼬리가 포착되었을 때
+      else if (stealTarget) {
+        bot.fsmState = 'HUNT_STEAL';
+        bot.targetGhost = stealTarget;
+      }
+      // D. SEARCH (영혼 탐색): 일반 수집 모드
+      else {
+        bot.fsmState = 'SEARCH';
       }
     }
 
-    // Execute State Action
+    // 2. Execute Target Calculation per State
     let targetX = baseCenterX;
     let targetY = baseCenterY;
 
-    if (bot.fsmState === 'RETURN') {
+    if (bot.fsmState === 'FLEE' && bot.threatGhost) {
+      // Run in the opposite vector of the threat, biased towards own base
+      const awayX = bot.x - bot.threatGhost.x;
+      const awayY = bot.y - bot.threatGhost.y;
+      const awayLen = Math.hypot(awayX, awayY) || 1;
+
+      const toBaseX = baseCenterX - bot.x;
+      const toBaseY = baseCenterY - bot.y;
+      const toBaseLen = Math.hypot(toBaseX, toBaseY) || 1;
+
+      // Blend flee vector (70%) + base vector (30%)
+      targetX = bot.x + (awayX / awayLen) * 300 + (toBaseX / toBaseLen) * 120;
+      targetY = bot.y + (awayY / awayLen) * 300 + (toBaseY / toBaseLen) * 120;
+    } else if (bot.fsmState === 'RETURN') {
       targetX = baseCenterX;
       targetY = baseCenterY;
     } else if (bot.fsmState === 'HUNT_STEAL' && bot.targetGhost) {
-      // Aim for middle of enemy tail if present, otherwise enemy head
+      // Intercept enemy tail mid-section with leading velocity prediction
       const targetTail = bot.targetGhost.tail;
       if (targetTail.length > 0) {
-        const midIdx = Math.floor(targetTail.length / 2);
-        targetX = targetTail[midIdx].x;
-        targetY = targetTail[midIdx].y;
+        const interceptIdx = Math.min(targetTail.length - 1, Math.max(1, Math.floor(targetTail.length * 0.6)));
+        const targetNode = targetTail[interceptIdx];
+        targetX = targetNode.x + (bot.targetGhost.vx || 0) * 8;
+        targetY = targetNode.y + (bot.targetGhost.vy || 0) * 8;
       } else {
         targetX = bot.targetGhost.x;
         targetY = bot.targetGhost.y;
       }
     } else {
-      // SEARCH: Find closest floating spirit or powerup
-      let nearestDist = 9999;
+      // SEARCH: Find highest value / closest floating spirit or powerup
+      let bestScore = -99999;
       for (const spirit of this.spirits) {
         const d = Math.hypot(spirit.x - bot.x, spirit.y - bot.y);
-        if (d < nearestDist) {
-          nearestDist = d;
+        // Value: mega spirit gets 5x priority, minus distance penalty
+        const score = (spirit.value * 200) - d;
+        if (score > bestScore) {
+          bestScore = score;
           targetX = spirit.x;
           targetY = spirit.y;
         }
       }
+
+      // Check powerup drops as high value targets
+      for (const drop of this.powerupDrops) {
+        const d = Math.hypot(drop.x - bot.x, drop.y - bot.y);
+        const score = 800 - d;
+        if (score > bestScore) {
+          bestScore = score;
+          targetX = drop.x;
+          targetY = drop.y;
+        }
+      }
     }
 
-    // Calculate heading vector with slight organic wobble
-    const dx = targetX - bot.x;
-    const dy = targetY - bot.y;
-    const angle = Math.atan2(dy, dx) + Math.sin(Date.now() * 0.003 + bot.wobbleOffset) * 0.25;
+    // 3. Compute Steering Vector with Wall Avoidance
+    let steerX = targetX - bot.x;
+    let steerY = targetY - bot.y;
+    const steerLen = Math.hypot(steerX, steerY) || 1;
+    let dirX = steerX / steerLen;
+    let dirY = steerY / steerLen;
 
-    bot.vx = Math.cos(angle);
-    bot.vy = Math.sin(angle);
+    // Raycast Wall Avoidance: check 50px ahead
+    if (!bot.activePowerup || bot.activePowerup.type !== 'ghost_walk') {
+      const probeDist = 55;
+      const probeX = bot.x + dirX * probeDist;
+      const probeY = bot.y + dirY * probeDist;
+
+      for (const wall of MANSION_WALLS) {
+        if (
+          probeX >= wall.x - 10 &&
+          probeX <= wall.x + wall.w + 10 &&
+          probeY >= wall.y - 10 &&
+          probeY <= wall.y + wall.h + 10
+        ) {
+          // Wall detected ahead: slide along perpendicular vector
+          const slideX = -dirY;
+          const slideY = dirX;
+          dirX = dirX * 0.3 + slideX * 0.7;
+          dirY = dirY * 0.3 + slideY * 0.7;
+          break;
+        }
+      }
+    }
+
+    // Apply gentle organic wobble
+    const wobble = Math.sin(Date.now() * 0.004 + bot.wobbleOffset) * 0.18;
+    const finalAngle = Math.atan2(dirY, dirX) + wobble;
+
+    bot.vx = Math.cos(finalAngle);
+    bot.vy = Math.sin(finalAngle);
   }
 
   // Spirit Flame Pickups
@@ -1091,8 +1165,19 @@ export class GhoulDuelLogic {
     ctx.save();
     ctx.translate(ghost.x, ghost.y - 36);
 
-    // Badge Background
-    const badgeText = `${ghost.name} ${ghost.tail.length > 0 ? `(${ghost.tail.length})` : ''}`;
+    // Badge Background with FSM State Icon
+    let stateIcon = '';
+    if (ghost.isPlayer) {
+      stateIcon = '👑 ';
+    } else if (ghost.fsmState === 'FLEE') {
+      stateIcon = '😱 ';
+    } else if (ghost.fsmState === 'HUNT_STEAL') {
+      stateIcon = '⚡ ';
+    } else if (ghost.fsmState === 'RETURN') {
+      stateIcon = '🏃 ';
+    }
+
+    const badgeText = `${stateIcon}${ghost.name} ${ghost.tail.length > 0 ? `(${ghost.tail.length})` : ''}`;
     ctx.font = ghost.isPlayer ? 'bold 12px sans-serif' : '11px sans-serif';
     const textWidth = ctx.measureText(badgeText).width;
 
