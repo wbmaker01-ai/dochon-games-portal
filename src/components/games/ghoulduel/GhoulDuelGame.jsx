@@ -84,6 +84,11 @@ export default function GhoulDuelGame({ onScoreSubmitted }) {
             ghoulNet.broadcastSnapshot(snapshot);
           }
         },
+        onBroadcastGameOver: (stats) => {
+          if (mode === 'host') {
+            ghoulNet.broadcastGameOver(stats);
+          }
+        },
         onSendInput: (vector, angle) => {
           if (mode === 'guest') {
             ghoulNet.sendInput(vector, angle);
@@ -92,6 +97,7 @@ export default function GhoulDuelGame({ onScoreSubmitted }) {
       });
 
       logicRef.current = logic;
+      if (typeof window !== 'undefined') window.__ghoulLogic = logic;
       setGameState('PLAYING');
       setGameResult(null);
       lastTimeRef.current = performance.now();
@@ -197,6 +203,24 @@ export default function GhoulDuelGame({ onScoreSubmitted }) {
       }
     };
 
+    ghoulNet.onGameOver = (stats) => {
+      // Find my player in roster for Guest
+      const myGhost = stats.roster?.find(
+        (r) => r.id === ghoulNet.myPeerId || r.isPlayer || (r.name && r.name.includes('(나)'))
+      );
+      const isGreen = myGhost ? myGhost.team === 'green' : ghoulNet.myTeam === 'green';
+      const isVictory = isGreen
+        ? stats.teamGreenScore > stats.teamPurpleScore
+        : stats.teamPurpleScore > stats.teamGreenScore;
+
+      handleGameOver({
+        ...stats,
+        isVictory,
+        playerScore: myGhost ? myGhost.deposited : 0,
+        playerStolen: myGhost ? myGhost.stolen : 0
+      });
+    };
+
     ghoulNet.onError = (msg) => {
       setP2pError(msg);
     };
@@ -213,10 +237,11 @@ export default function GhoulDuelGame({ onScoreSubmitted }) {
       ghoulNet.onGameStart = null;
       ghoulNet.onSnapshot = null;
       ghoulNet.onGuestInput = null;
+      ghoulNet.onGameOver = null;
       ghoulNet.onError = null;
       ghoulNet.onDisconnect = null;
     };
-  }, [difficulty, gameState, launchGameEngine]);
+  }, [difficulty, gameState, handleGameOver, launchGameEngine]);
 
   // Main Render Animation Loop
   useEffect(() => {
@@ -323,9 +348,10 @@ export default function GhoulDuelGame({ onScoreSubmitted }) {
     }
   };
 
-  // Leaderboard Score Submit Handler (Only if score > 100)
+  // Leaderboard Score Submit Handler (Only for P2P and score > 100)
   const handleSubmitScore = async (e) => {
     e.preventDefault();
+    if (playMode !== 'P2P') return;
     if (!playerName.trim() || isSubmitting || isSubmitted) return;
 
     const finalPlayerScore = gameResult ? gameResult.playerScore : playerDeposited;
@@ -661,7 +687,8 @@ export default function GhoulDuelGame({ onScoreSubmitted }) {
         {/* --- SCREEN 3: GAME OVER RESULT OVERLAY --- */}
         {gameState === 'GAME_OVER' && gameResult && (
           <div className="ghoulduel-screen-overlay">
-            <div className="ghoulduel-card-box">
+            <div className="ghoulduel-card-box" style={{ maxWidth: '580px', maxHeight: '90vh', overflowY: 'auto' }}>
+              {/* 1. Team Outcome Header */}
               <div
                 className={`gameover-result-badge ${
                   gameResult.isVictory ? 'victory' : 'defeat'
@@ -672,17 +699,92 @@ export default function GhoulDuelGame({ onScoreSubmitted }) {
 
               <div className="gameover-score-compare">
                 <div className="compare-team green">
-                  <span className="team-name">초록팀</span>
+                  <span className="team-name">초록 영혼팀</span>
                   <span className="score-num">{gameResult.teamGreenScore}</span>
+                  {gameResult.teamGreenScore > gameResult.teamPurpleScore && (
+                    <span style={{ fontSize: '11px', fontWeight: 900, color: '#34d399' }}>WINNER 🏆</span>
+                  )}
                 </div>
                 <div className="compare-vs">VS</div>
                 <div className="compare-team purple">
-                  <span className="team-name">보라팀</span>
+                  <span className="team-name">보라 유령팀</span>
                   <span className="score-num">{gameResult.teamPurpleScore}</span>
+                  {gameResult.teamPurpleScore > gameResult.teamGreenScore && (
+                    <span style={{ fontSize: '11px', fontWeight: 900, color: '#c084fc' }}>WINNER 🏆</span>
+                  )}
                 </div>
               </div>
 
-              {/* Player Personal Stats */}
+              {/* 2. MATCH MVP Highlight Card */}
+              {gameResult.mvp && (
+                <div className="mvp-highlight-card">
+                  <div className="mvp-badge-col">
+                    <div className="mvp-crown-icon">👑</div>
+                    <div className="mvp-info">
+                      <span className="mvp-title-tag">★ MATCH MVP (최우수 선수)</span>
+                      <span className="mvp-player-name">
+                        {gameResult.mvp.name}
+                      </span>
+                      <span style={{ fontSize: '11px', color: '#cbd5e1' }}>
+                        {gameResult.mvp.team === 'green' ? '🟢 초록 영혼팀' : '🟣 보라 유령팀'}
+                      </span>
+                    </div>
+                  </div>
+                  <div className="mvp-score-tag">
+                    <span className="mvp-score-num">{gameResult.mvp.deposited}점</span>
+                    <span className="mvp-score-label">스틸 {gameResult.mvp.stolen}회</span>
+                  </div>
+                </div>
+              )}
+
+              {/* 3. 8-Player Roster Scoreboard */}
+              {gameResult.roster && gameResult.roster.length > 0 && (
+                <div className="roster-scoreboard-box">
+                  <div className="roster-header">
+                    <span>순위 / 플레이어</span>
+                    <span>영혼 납품 (꼬리 스틸)</span>
+                  </div>
+                  <div className="roster-list">
+                    {gameResult.roster.map((player, idx) => {
+                      const rank = idx + 1;
+                      let badgeClass = 'other';
+                      if (rank === 1) badgeClass = 'gold';
+                      else if (rank === 2) badgeClass = 'silver';
+                      else if (rank === 3) badgeClass = 'bronze';
+
+                      const isMe = player.isPlayer || player.name.includes('(나)');
+                      const displayName = isMe
+                        ? player.name.includes('(나)')
+                          ? player.name
+                          : `${player.name} (나)`
+                        : player.name;
+
+                      return (
+                        <div
+                          key={player.id || idx}
+                          className={`roster-row ${isMe ? 'me' : ''} ${rank === 1 ? 'mvp-row' : ''}`}
+                        >
+                          <div className="roster-player-identity">
+                            <span className={`roster-rank-badge ${badgeClass}`}>
+                              {rank === 1 ? '👑' : `${rank}등`}
+                            </span>
+                            <span className={`team-dot ${player.team === 'green' ? 'green' : 'purple'}`} />
+                            <span className="roster-name-text">
+                              {displayName}
+                            </span>
+                          </div>
+                          <div className="roster-stats">
+                            <span className="roster-score">{player.deposited}점</span>
+                            <span className="roster-stolen">(스틸 {player.stolen}회)</span>
+                          </div>
+                        </div>
+                      );
+                    })}
+                  </div>
+                </div>
+              )}
+
+              {/* 4. Player Personal Stats */}
               <div className="player-personal-stats">
                 <div>
                   🏆 나의 영혼 납품 점수: <strong className="text-emerald-400">{gameResult.playerScore}점</strong>
@@ -692,43 +794,53 @@ export default function GhoulDuelGame({ onScoreSubmitted }) {
                 </div>
               </div>
 
-              {/* LEADERBOARD SUBMISSION: ONLY IF SCORE > 100 (Project Memory Rule) */}
-              {gameResult.playerScore > 100 && (
-                <div className="leaderboard-submit-form">
-                  <div className="form-label">
-                    <Award size={16} className="text-amber-400" />
-                    <span>도촌초등학교 명예의 전당 점수 등록</span>
-                  </div>
-
-                  {!isSubmitted ? (
-                    <form onSubmit={handleSubmitScore} className="input-submit-row">
-                      <input
-                        type="text"
-                        value={playerName}
-                        onChange={(e) => setPlayerName(e.target.value)}
-                        placeholder="예: 홍길동"
-                        maxLength={10}
-                        required
-                        className="name-input"
-                      />
-                      <button
-                        type="submit"
-                        disabled={isSubmitting || !playerName.trim()}
-                        className="btn-submit-score"
-                      >
-                        {isSubmitting ? '등록 중...' : '등록하기'}
-                      </button>
-                    </form>
-                  ) : (
-                    <div className="score-submitted-badge">
-                      <CheckCircle2 size={16} className="inline mr-1" />
-                      명예의 전당 등록이 완료되었습니다!
+              {/* 5. LEADERBOARD SUBMISSION: ONLY FOR P2P MULTIPLAYER MODE */}
+              {playMode === 'P2P' ? (
+                gameResult.playerScore > 100 ? (
+                  <div className="leaderboard-submit-form">
+                    <div className="form-label">
+                      <Award size={16} className="text-amber-400" />
+                      <span>도촌초등학교 명예의 전당 점수 등록 (실시간 대전 기록)</span>
                     </div>
-                  )}
+
+                    {!isSubmitted ? (
+                      <form onSubmit={handleSubmitScore} className="input-submit-row">
+                        <input
+                          type="text"
+                          value={playerName}
+                          onChange={(e) => setPlayerName(e.target.value)}
+                          placeholder="예: 홍길동"
+                          maxLength={10}
+                          required
+                          className="name-input"
+                        />
+                        <button
+                          type="submit"
+                          disabled={isSubmitting || !playerName.trim()}
+                          className="btn-submit-score"
+                        >
+                          {isSubmitting ? '등록 중...' : '등록하기'}
+                        </button>
+                      </form>
+                    ) : (
+                      <div className="score-submitted-badge">
+                        <CheckCircle2 size={16} className="inline mr-1" />
+                        명예의 전당 등록이 완료되었습니다!
+                      </div>
+                    )}
+                  </div>
+                ) : (
+                  <div style={{ fontSize: '11px', color: '#94a3b8', textAlign: 'center', margin: '8px 0', padding: '8px', background: 'rgba(30, 41, 59, 0.6)', borderRadius: '8px' }}>
+                    ※ 명예의 전당 점수 등록은 100점을 초과하여 달성한 경우에만 가능합니다. (현재 개인 점수: {gameResult.playerScore}점)
+                  </div>
+                )
+              ) : (
+                <div className="p2p-single-notice-box">
+                  💡 <strong>명예의 전당 랭킹 등록</strong>은 친구들과 함께 플레이하는 <strong>'실시간 친구 대전(P2P)'</strong> 모드에서만 가능합니다.
                 </div>
               )}
 
-              {/* Restart / Return Actions */}
+              {/* 6. Restart / Return Actions */}
               <div className="screen-actions">
                 <button
                   className="btn-primary"

@@ -94,6 +94,7 @@ export default function PaniPuriGame({ onScoreSubmitted }) {
       handleGameOverCallback
     );
     engineRef.current = engine;
+    canvas.__panipuriEngine = engine;
 
     // Continuous 60fps Loop using performance.now()
     const loop = (timestamp) => {
@@ -238,13 +239,17 @@ export default function PaniPuriGame({ onScoreSubmitted }) {
 
     try {
       const res = await submitScoreToDB('panipuri', playerName.trim(), gameState.score);
-      if (res && res.success) {
+      if (res) {
         setIsSubmitted(true);
-        if (onScoreSubmitted) {
-          onScoreSubmitted();
-        }
+        panipuriAudio.playServeSuccess();
+        haptics.success();
+        setTimeout(() => {
+          if (onScoreSubmitted) {
+            onScoreSubmitted();
+          }
+        }, 700);
       } else {
-        setSubmitError(res?.message || '등록 중 오류가 발생했습니다.');
+        setSubmitError('100점 이하의 점수는 명예의 전당에 등록할 수 없습니다.');
       }
     } catch (err) {
       setSubmitError('네트워크 오류가 발생했습니다.');
@@ -422,36 +427,37 @@ export default function PaniPuriGame({ onScoreSubmitted }) {
 
               {/* Hall of Fame Score Submission (Strict rule: score > 100 only) */}
               {gameState.score > 100 && (
-                <div className="bg-slate-900/90 border border-amber-500/40 rounded-xl p-3 mb-3 text-left">
-                  <div className="flex items-center gap-1.5 text-xs font-bold text-amber-300 mb-2">
-                    <Crown className="w-3.5 h-3.5 text-amber-400" />
+                <div className="panipuri-rank-card">
+                  <div className="panipuri-rank-title">
+                    <Crown className="w-4 h-4 text-amber-400" />
                     <span>명예의 전당 점수 등록</span>
                   </div>
 
                   {!isSubmitted ? (
-                    <form onSubmit={handleScoreSubmit} className="space-y-2">
+                    <form onSubmit={handleScoreSubmit} className="space-y-3">
                       <input
                         type="text"
                         value={playerName}
                         onChange={(e) => setPlayerName(e.target.value)}
                         placeholder="예: 홍길동"
                         maxLength={10}
-                        className="w-full bg-slate-950 border border-slate-700 focus:border-amber-400 rounded-lg px-3 py-2 text-xs text-white placeholder:text-slate-500 outline-none"
+                        className="panipuri-rank-input"
                       />
                       {submitError && (
-                        <p className="text-[11px] text-rose-400">{submitError}</p>
+                        <p className="text-xs text-rose-400 font-bold">{submitError}</p>
                       )}
                       <button
                         type="submit"
                         disabled={isSubmitting || !playerName.trim()}
-                        className="w-full py-2 bg-gradient-to-r from-amber-400 to-yellow-400 hover:from-amber-300 hover:to-yellow-300 disabled:opacity-50 text-slate-950 font-black rounded-lg text-xs flex items-center justify-center gap-1 shadow-md"
+                        className="panipuri-btn-rank-submit"
                       >
-                        {isSubmitting ? '등록 중...' : '🏆 랭킹 등록하기'}
+                        <Trophy className="w-4 h-4 text-amber-950 fill-amber-950" />
+                        <span>{isSubmitting ? '등록 중...' : '🏆 랭킹 등록하기'}</span>
                       </button>
                     </form>
                   ) : (
-                    <div className="text-center py-2 text-emerald-400 font-bold text-xs flex items-center justify-center gap-1.5">
-                      <CheckCircle2 className="w-4 h-4" />
+                    <div className="panipuri-rank-success">
+                      <CheckCircle2 className="w-5 h-5 text-emerald-400" />
                       <span>명예의 전당에 성공적으로 등록되었습니다!</span>
                     </div>
                   )}
@@ -459,12 +465,12 @@ export default function PaniPuriGame({ onScoreSubmitted }) {
               )}
 
               {/* Action Buttons */}
-              <div className="flex gap-2">
+              <div className="panipuri-action-row">
                 <button
                   onClick={handleStartGame}
-                  className="panipuri-btn-primary flex-1 py-2 rounded-xl font-black text-xs flex items-center justify-center gap-1"
+                  className="panipuri-btn-restart"
                 >
-                  <RotateCcw className="w-3.5 h-3.5" />
+                  <RotateCcw className="w-4 h-4" />
                   <span>다시 도전하기</span>
                 </button>
               </div>

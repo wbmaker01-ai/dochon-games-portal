@@ -22,6 +22,7 @@ export class GhoulDuelNetworkManager {
     this.onLobbyUpdate = null;
     this.onGameStart = null;
     this.onSnapshot = null;
+    this.onGameOver = null;
     this.onError = null;
     this.onDisconnect = null;
   }
@@ -186,6 +187,17 @@ export class GhoulDuelNetworkManager {
     });
   }
 
+  broadcastGameOver(stats) {
+    if (!this.isHost) return;
+    const packet = {
+      type: 'GAME_OVER',
+      stats
+    };
+    this.connections.forEach((conn) => {
+      if (conn.open) conn.send(packet);
+    });
+  }
+
   // --- GUEST: Join a P2P Room ---
   joinRoom(numericCode, playerName, team = 'green') {
     return new Promise((resolve, reject) => {
@@ -262,6 +274,8 @@ export class GhoulDuelNetworkManager {
       if (this.onGameStart) this.onGameStart(data);
     } else if (data.type === 'SNAPSHOT') {
       if (this.onSnapshot) this.onSnapshot(data.snapshot);
+    } else if (data.type === 'GAME_OVER') {
+      if (this.onGameOver) this.onGameOver(data.stats);
     } else if (data.type === 'ERROR') {
       if (this.onError) this.onError(data.message);
     }

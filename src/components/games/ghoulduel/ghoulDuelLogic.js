@@ -26,6 +26,7 @@ export class GhoulDuelLogic {
     this.networkPlayers = options.networkPlayers || []; // [{ id, name, team, isHost, slotIndex }]
     this.myPeerId = options.myPeerId || 'local';
     this.onBroadcastSnapshot = options.onBroadcastSnapshot || null;
+    this.onBroadcastGameOver = options.onBroadcastGameOver || null;
     this.onSendInput = options.onSendInput || null;
 
     this.lastBroadcastTime = 0;
@@ -823,21 +824,34 @@ export class GhoulDuelLogic {
       }
     }, 400);
 
+    // Build and sort 8-player roster by deposited score descending (tie-breaker: stolen)
+    const sortedRoster = this.ghosts
+      .map((g) => ({
+        id: g.id,
+        name: g.name,
+        team: g.team,
+        isPlayer: g.isPlayer,
+        isRemoteHuman: g.isRemoteHuman,
+        deposited: g.depositedCount || 0,
+        stolen: g.stolenCount || 0
+      }))
+      .sort((a, b) => b.deposited - a.deposited || b.stolen - a.stolen);
+
+    const mvpPlayer = sortedRoster[0] || null;
+
     const stats = {
       teamGreenScore: greenTotal,
       teamPurpleScore: purpleTotal,
       isVictory,
       playerScore: this.player ? this.player.depositedCount : 0,
       playerStolen: this.player ? this.player.stolenCount : 0,
-      roster: this.ghosts.map((g) => ({
-        id: g.id,
-        name: g.name,
-        team: g.team,
-        isPlayer: g.isPlayer,
-        deposited: g.depositedCount,
-        stolen: g.stolenCount
-      }))
+      roster: sortedRoster,
+      mvp: mvpPlayer
     };
+
+    if (this.networkMode === 'host' && this.onBroadcastGameOver) {
+      this.onBroadcastGameOver(stats);
+    }
 
     this.onGameOver(stats);
   }

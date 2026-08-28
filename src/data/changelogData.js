@@ -3,11 +3,59 @@
 
 export const CHANGELOG_DATA = [
   {
+    version: 'v1.45.4',
+    date: '2026-08-28',
+    title: '🫓 [파니 푸리 마스터] 명예의 전당 점수 등록 오류 수정 & 결과 화면 디자인 버튼 리뉴얼',
+    badge: 'LATEST',
+    badgeColor: 'emerald',
+    items: [
+      {
+        tag: 'BUG FIX',
+        tagColor: 'emerald',
+        text: '[점수 등록 오류 수정] 점수 등록 API의 불리언 반환값 검증 로직을 바로잡아 "등록 중 오류가 발생했습니다" 현상을 완벽 해결하고, 학교 실시간 랭킹 DB에 즉각 안전 등록되도록 개선'
+      },
+      {
+        tag: 'UI REDESIGN',
+        tagColor: 'amber',
+        text: '[디자인 버튼 전면 리뉴얼] 결과 화면의 "🏆 랭킹 등록하기" 및 "🔄 다시 도전하기" 버튼을 입체감 넘치는 황금빛 골드 및 네온 블루 스타일의 프리미엄 디자인 버튼으로 업그레이드'
+      }
+    ]
+  },
+  {
+    version: 'v1.45.3',
+    date: '2026-08-28',
+    title: '👻 [도촌 영혼 대결] 경기 결과 대시보드 리뉴얼 & 실시간 P2P 명예의 전당 등록 알고리즘 탑재',
+    badge: 'UPDATE',
+    badgeColor: 'blue',
+    items: [
+      {
+        tag: 'P2P EXCLUSIVE RANKING',
+        tagColor: 'purple',
+        text: '[명예의 전당 P2P 대전 전용 등록] 싱글 봇 연습전의 점수 오등록을 방지하고, 공정한 경쟁을 위해 오직 친구와 함께 플레이하는 "실시간 친구 대전(P2P)" 경기에서만 100점 초과 시 명예의 전당에 등록할 수 있도록 알고리즘 개편'
+      },
+      {
+        tag: 'TEAM RESULT & SCORES',
+        tagColor: 'emerald',
+        text: '[팀별 승패 & 전원 점수판 표출] 경기 종료 시 초록 영혼팀 vs 보라 유령팀의 최종 점수 및 승패 뱃지와 함께, 8인 전체 플레이어의 순위·소속팀·영혼 납품 점수·꼬리 스틸 횟수를 투명하게 공개'
+      },
+      {
+        tag: 'MATCH MVP HIGHLIGHT',
+        tagColor: 'amber',
+        text: '[1등 MATCH MVP 황금 카드] 전장에서 가장 뛰어난 활약을 펼친 1등 플레이어를 황금 왕관(👑)과 눈부신 골든 샤인 아우라로 강조 표출'
+      },
+      {
+        tag: 'RESULT CONFIRMATION FLOW',
+        tagColor: 'blue',
+        text: '[결과 확인 후 개인 점수 등록] 팀 승패 및 1등 MVP, 개인별 납품 기록을 충분히 확인한 후 각자의 브라우저에서 자신의 점수를 학교 명예의 전당에 안전하게 기록'
+      }
+    ]
+  },
+  {
     version: 'v1.45.2',
     date: '2026-08-28',
     title: '🫓 [파니 푸리 마스터] 서빙완료 키보드 엔터(Enter) 단축키 및 전용 조작계 탑재',
-    badge: 'LATEST',
-    badgeColor: 'emerald',
+    badge: 'UPDATE',
+    badgeColor: 'blue',
     items: [
       {
         tag: 'KEYBOARD CONTROLS',

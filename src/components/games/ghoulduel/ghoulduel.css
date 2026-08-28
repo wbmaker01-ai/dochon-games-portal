@@ -726,9 +726,272 @@
   display: flex;
   justify-content: space-around;
   width: 100%;
-  margin-bottom: 16px;
-  font-size: 0.9rem;
+  margin-bottom: 12px;
+  padding: 8px 12px;
+  background: rgba(15, 23, 42, 0.5);
+  border-radius: 12px;
+  font-size: 0.88rem;
   color: #cbd5e1;
+}
+
+/* MVP Highlight Card */
+.mvp-highlight-card {
+  width: 100%;
+  background: linear-gradient(135deg, rgba(245, 158, 11, 0.2) 0%, rgba(217, 119, 6, 0.1) 100%);
+  border: 2px solid #f59e0b;
+  border-radius: 16px;
+  padding: 12px 16px;
+  margin-bottom: 14px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  box-shadow: 0 0 20px rgba(245, 158, 11, 0.35);
+  position: relative;
+  overflow: hidden;
+}
+
+.mvp-highlight-card::before {
+  content: '';
+  position: absolute;
+  top: -50%;
+  left: -50%;
+  width: 200%;
+  height: 200%;
+  background: radial-gradient(circle, rgba(254, 240, 138, 0.15) 0%, transparent 60%);
+  animation: mvpShine 3s infinite linear;
+  pointer-events: none;
+}
+
+@keyframes mvpShine {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
+}
+
+.mvp-badge-col {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  z-index: 1;
+}
+
+.mvp-crown-icon {
+  width: 38px;
+  height: 38px;
+  background: #f59e0b;
+  border-radius: 10px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1.3rem;
+  box-shadow: 0 0 12px rgba(245, 158, 11, 0.6);
+}
+
+.mvp-info {
+  display: flex;
+  flex-direction: column;
+  text-align: left;
+}
+
+.mvp-title-tag {
+  font-size: 0.72rem;
+  font-weight: 900;
+  color: #fbbf24;
+  letter-spacing: 1px;
+}
+
+.mvp-player-name {
+  font-size: 1.1rem;
+  font-weight: 900;
+  color: #ffffff;
+}
+
+.mvp-score-tag {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  z-index: 1;
+}
+
+.mvp-score-num {
+  font-size: 1.35rem;
+  font-weight: 900;
+  color: #fde047;
+}
+
+.mvp-score-label {
+  font-size: 0.72rem;
+  color: #fbbf24;
+  font-weight: 700;
+}
+
+/* 8-Player Roster Scoreboard */
+.roster-scoreboard-box {
+  width: 100%;
+  background: rgba(15, 23, 42, 0.7);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 16px;
+  padding: 10px 12px;
+  margin-bottom: 14px;
+}
+
+.roster-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding-bottom: 6px;
+  margin-bottom: 6px;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+  font-size: 0.75rem;
+  font-weight: 800;
+  color: #94a3b8;
+}
+
+.roster-list {
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+  max-height: 135px;
+  overflow-y: auto;
+  padding-right: 4px;
+}
+
+.roster-list::-webkit-scrollbar,
+.ghoulduel-card-box::-webkit-scrollbar {
+  width: 5px;
+}
+
+.roster-list::-webkit-scrollbar-thumb,
+.ghoulduel-card-box::-webkit-scrollbar-thumb {
+  background: rgba(148, 163, 184, 0.4);
+  border-radius: 4px;
+}
+
+.roster-list::-webkit-scrollbar-track,
+.ghoulduel-card-box::-webkit-scrollbar-track {
+  background: rgba(15, 23, 42, 0.4);
+}
+
+.roster-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 6px 8px;
+  background: rgba(30, 41, 59, 0.5);
+  border-radius: 8px;
+  font-size: 0.8rem;
+  transition: all 0.2s;
+}
+
+.roster-row.me {
+  background: rgba(16, 185, 129, 0.2);
+  border: 1px solid #10b981;
+}
+
+.roster-row.mvp-row {
+  border: 1px solid #f59e0b;
+  background: rgba(245, 158, 11, 0.15);
+}
+
+.roster-rank-badge {
+  width: 22px;
+  height: 22px;
+  border-radius: 6px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 0.75rem;
+  font-weight: 900;
+  margin-right: 8px;
+  flex-shrink: 0;
+}
+
+.roster-rank-badge.gold {
+  background: #f59e0b;
+  color: #ffffff;
+}
+
+.roster-rank-badge.silver {
+  background: #94a3b8;
+  color: #ffffff;
+}
+
+.roster-rank-badge.bronze {
+  background: #d97706;
+  color: #ffffff;
+}
+
+.roster-rank-badge.other {
+  background: #334155;
+  color: #cbd5e1;
+}
+
+.roster-player-identity {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  flex: 1;
+  text-align: left;
+  min-width: 0;
+}
+
+.roster-name-text {
+  font-weight: 700;
+  color: #f1f5f9;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.team-dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  flex-shrink: 0;
+}
+
+.team-dot.green {
+  background: #34d399;
+  box-shadow: 0 0 6px #10b981;
+}
+
+.team-dot.purple {
+  background: #c084fc;
+  box-shadow: 0 0 6px #a855f7;
+}
+
+.roster-stats {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-weight: 800;
+}
+
+.roster-score {
+  color: #fde047;
+}
+
+.roster-stolen {
+  font-size: 0.72rem;
+  color: #94a3b8;
+  font-weight: 600;
+}
+
+/* P2P Notice Box */
+.p2p-single-notice-box {
+  width: 100%;
+  background: rgba(30, 41, 59, 0.7);
+  border: 1px dashed rgba(255, 255, 255, 0.2);
+  border-radius: 14px;
+  padding: 12px;
+  margin-bottom: 14px;
+  text-align: center;
+  font-size: 0.82rem;
+  color: #cbd5e1;
+  line-height: 1.4;
+}
+
+.p2p-single-notice-box strong {
+  color: #c084fc;
 }
 
 /* 6. Leaderboard Score Submission Form (Memory Rules) */
