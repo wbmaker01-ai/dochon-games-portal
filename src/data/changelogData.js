@@ -3,11 +3,35 @@
 
 export const CHANGELOG_DATA = [
   {
+    version: 'v1.48.3',
+    date: '2026-08-28',
+    title: '🕹️ [도촌 야간 학교 숨바꼭질] 애니메이션 루프 불변 제어 & 한/영 IME 및 화살표 조작 엔진 완전화',
+    badge: 'LATEST',
+    badgeColor: 'blue',
+    items: [
+      {
+        tag: 'LOOP ENGINE',
+        tagColor: 'blue',
+        text: '[애니메이션 프레임 루프 불변 제어] 비동기 React 상태 클로저 의존을 제거하고 뮤터블 Ref(isPlayingRef) 파이프라인으로 전환하여 카운트다운 후 시간 감소 및 게임 엔진 루프가 절대 멈추지 않고 60fps로 매끄럽게 지속 구동되도록 해결'
+      },
+      {
+        tag: 'CONTROLS EXTENSION',
+        tagColor: 'emerald',
+        text: '[화살표키 & 다국어 IME 입력 완전 지원] 상하좌우 화살표키(Arrow Keys), 영문 대소문자 WASD, 한글 타자 상태(한/영 전환 키)의 자음(ㅈ, ㅁ, ㄴ, ㅇ)까지 모두 감지하여 키보드 언어 설정과 무관하게 즉각적인 이동 지원'
+      },
+      {
+        tag: 'TOUCH & CLICK',
+        tagColor: 'amber',
+        text: '[D-패드 마우스/터치 듀얼 이벤트 지원] 모바일 화면의 가상 방향키와 대시/액션 버튼에 마우스 클릭 및 드래그, 모바일 터치를 모두 지원하도록 터치/마우스 이벤트 완벽 통합'
+      }
+    ]
+  },
+  {
     version: 'v1.48.2',
     date: '2026-08-28',
     title: '🔦 [도촌 야간 학교 숨바꼭질] 2D Fog of War 레이캐스팅 조명 엔진 전면 개편 & 손전등 시야 복구 긴급 패치',
-    badge: 'LATEST',
-    badgeColor: 'blue',
+    badge: 'UPDATE',
+    badgeColor: 'slate',
     items: [
       {
         tag: 'LIGHTING FIX',

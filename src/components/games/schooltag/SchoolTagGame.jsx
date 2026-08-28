@@ -79,6 +79,8 @@ export default function SchoolTagGame({ onScoreSubmitted }) {
   const lightCanvasRef = useRef(null);
   const networkRef = useRef(null);
   const animFrameIdRef = useRef(null);
+  const countdownIntervalRef = useRef(null);
+  const isPlayingRef = useRef(false);
   const lastTimeRef = useRef(0);
   const keysDownRef = useRef({});
   const mousePosRef = useRef({ x: 0, y: 0 });
@@ -147,6 +149,8 @@ export default function SchoolTagGame({ onScoreSubmitted }) {
     };
 
     return () => {
+      isPlayingRef.current = false;
+      if (countdownIntervalRef.current) clearInterval(countdownIntervalRef.current);
       if (networkRef.current) networkRef.current.disconnect();
       if (animFrameIdRef.current) cancelAnimationFrame(animFrameIdRef.current);
       schoolTagAudio.stopHeartbeat();
@@ -160,13 +164,17 @@ export default function SchoolTagGame({ onScoreSubmitted }) {
     schoolTagAudio.setMuted(nextMuted);
   };
 
-  // Keyboard Event Handlers
+  // Keyboard Event Handlers (Permanent Mount, Supports WASD, Arrow keys, Korean IME)
   useEffect(() => {
     const handleKeyDown = (e) => {
       keysDownRef.current[e.code] = true;
+      if (e.key) {
+        keysDownRef.current[e.key] = true;
+        keysDownRef.current[e.key.toLowerCase()] = true;
+      }
 
       // Space bar action trigger
-      if (e.code === 'Space') {
+      if (e.code === 'Space' || e.key === ' ' || e.key === 'Spacebar') {
         e.preventDefault();
         handleSpaceAction();
       }
@@ -174,6 +182,10 @@ export default function SchoolTagGame({ onScoreSubmitted }) {
 
     const handleKeyUp = (e) => {
       keysDownRef.current[e.code] = false;
+      if (e.key) {
+        keysDownRef.current[e.key] = false;
+        keysDownRef.current[e.key.toLowerCase()] = false;
+      }
     };
 
     window.addEventListener('keydown', handleKeyDown);
@@ -183,7 +195,7 @@ export default function SchoolTagGame({ onScoreSubmitted }) {
       window.removeEventListener('keydown', handleKeyDown);
       window.removeEventListener('keyup', handleKeyUp);
     };
-  }, [gameState]);
+  }, []);
 
   // Handle Space Bar Action (Hiding in Locker, Picking Key)
   const handleSpaceAction = () => {
@@ -282,16 +294,29 @@ export default function SchoolTagGame({ onScoreSubmitted }) {
 
     taggerAIRef.current = new SmartTaggerAI(taggerRef.current);
 
+    // Cancel previous intervals & frames
+    if (countdownIntervalRef.current) {
+      clearInterval(countdownIntervalRef.current);
+      countdownIntervalRef.current = null;
+    }
+    if (animFrameIdRef.current) {
+      cancelAnimationFrame(animFrameIdRef.current);
+      animFrameIdRef.current = null;
+    }
+    isPlayingRef.current = false;
+
     // Begin Countdown State
     setGameState(GAME_STATES.COUNTDOWN);
     setCountdownNum(SCHOOL_TAG_CONSTANTS.COUNTDOWN_SEC);
 
     let count = SCHOOL_TAG_CONSTANTS.COUNTDOWN_SEC;
-    const interval = setInterval(() => {
+    countdownIntervalRef.current = setInterval(() => {
       count -= 1;
       setCountdownNum(count);
       if (count <= 0) {
-        clearInterval(interval);
+        clearInterval(countdownIntervalRef.current);
+        countdownIntervalRef.current = null;
+        isPlayingRef.current = true;
         setGameState(GAME_STATES.PLAYING);
         lastTimeRef.current = performance.now();
         animFrameIdRef.current = requestAnimationFrame(gameLoop);
@@ -356,13 +381,15 @@ export default function SchoolTagGame({ onScoreSubmitted }) {
 
   // --- Main Animation & Simulation Loop ---
   const gameLoop = (timestamp) => {
+    if (!isPlayingRef.current) return;
+
     const dt = Math.min(0.1, (timestamp - lastTimeRef.current) / 1000);
     lastTimeRef.current = timestamp;
 
     updateGame(dt);
     renderGame();
 
-    if (gameState === GAME_STATES.PLAYING) {
+    if (isPlayingRef.current) {
       animFrameIdRef.current = requestAnimationFrame(gameLoop);
     }
   };
@@ -389,12 +416,18 @@ export default function SchoolTagGame({ onScoreSubmitted }) {
       let moveX = 0;
       let moveY = 0;
 
-      if (keysDownRef.current['KeyW'] || keysDownRef.current['ArrowUp']) moveY -= 1;
-      if (keysDownRef.current['KeyS'] || keysDownRef.current['ArrowDown']) moveY += 1;
-      if (keysDownRef.current['KeyA'] || keysDownRef.current['ArrowLeft']) moveX -= 1;
-      if (keysDownRef.current['KeyD'] || keysDownRef.current['ArrowRight']) moveX += 1;
+      const keys = keysDownRef.current;
+      const isUp = keys['KeyW'] || keys['ArrowUp'] || keys['w'] || keys['W'] || keys['ㅈ'];
+      const isDown = keys['KeyS'] || keys['ArrowDown'] || keys['s'] || keys['S'] || keys['ㄴ'];
+      const isLeft = keys['KeyA'] || keys['ArrowLeft'] || keys['a'] || keys['A'] || keys['ㅁ'];
+      const isRight = keys['KeyD'] || keys['ArrowRight'] || keys['d'] || keys['D'] || keys['ㅇ'];
 
-      const isSprinting = (keysDownRef.current['ShiftLeft'] || keysDownRef.current['ShiftRight']) && p.stamina > 10;
+      if (isUp) moveY -= 1;
+      if (isDown) moveY += 1;
+      if (isLeft) moveX -= 1;
+      if (isRight) moveX += 1;
+
+      const isSprinting = (keys['ShiftLeft'] || keys['ShiftRight'] || keys['Shift']) && p.stamina > 10;
 
       // Calculate speed & stamina
       let speed = isSprinting ? SCHOOL_TAG_CONSTANTS.RUNNER_RUN_SPEED : SCHOOL_TAG_CONSTANTS.RUNNER_WALK_SPEED;
@@ -573,14 +606,19 @@ export default function SchoolTagGame({ onScoreSubmitted }) {
 
   // End Match & Calculate Final Score
   const endMatch = (result) => {
-    setGameState(GAME_STATES.GAMEOVER);
-    setGameResult(result);
-    schoolTagAudio.stopHeartbeat();
-
+    isPlayingRef.current = false;
+    if (countdownIntervalRef.current) {
+      clearInterval(countdownIntervalRef.current);
+      countdownIntervalRef.current = null;
+    }
     if (animFrameIdRef.current) {
       cancelAnimationFrame(animFrameIdRef.current);
       animFrameIdRef.current = null;
     }
+
+    setGameState(GAME_STATES.GAMEOVER);
+    setGameResult(result);
+    schoolTagAudio.stopHeartbeat();
 
     const collected = keysRef.current ? keysRef.current.filter((k) => k.isCollected).length : 0;
     const score = calculateSchoolTagScore({
@@ -600,6 +638,20 @@ export default function SchoolTagGame({ onScoreSubmitted }) {
     } else {
       schoolTagAudio.playGameOver();
     }
+  };
+
+  const handleReturnToMenu = () => {
+    isPlayingRef.current = false;
+    if (countdownIntervalRef.current) {
+      clearInterval(countdownIntervalRef.current);
+      countdownIntervalRef.current = null;
+    }
+    if (animFrameIdRef.current) {
+      cancelAnimationFrame(animFrameIdRef.current);
+      animFrameIdRef.current = null;
+    }
+    schoolTagAudio.stopHeartbeat();
+    setGameState(GAME_STATES.MENU);
   };
 
   // Handle Score Submission to Cloud DB (Strict Rule Enforcement)
@@ -1025,7 +1077,7 @@ export default function SchoolTagGame({ onScoreSubmitted }) {
           </button>
           {gameState === GAME_STATES.PLAYING && (
             <button
-              onClick={() => setGameState(GAME_STATES.MENU)}
+              onClick={handleReturnToMenu}
               className="schooltag-btn-icon"
               title="게임 나가기"
             >
@@ -1384,7 +1436,7 @@ export default function SchoolTagGame({ onScoreSubmitted }) {
                 다시 플레이하기
               </button>
               <button
-                onClick={() => setGameState(GAME_STATES.MENU)}
+                onClick={handleReturnToMenu}
                 className="schooltag-btn-secondary"
               >
                 메인 메뉴로
@@ -1394,7 +1446,7 @@ export default function SchoolTagGame({ onScoreSubmitted }) {
         )}
       </div>
 
-      {/* 6. Mobile Touch Controls (D-Pad & Buttons) */}
+      {/* 6. Mobile Touch Controls (D-Pad & Buttons - Works with Touch & Mouse) */}
       <div className="schooltag-mobile-controls">
         <div className="schooltag-dpad">
           <div />
@@ -1402,6 +1454,9 @@ export default function SchoolTagGame({ onScoreSubmitted }) {
             className="schooltag-dpad-btn"
             onTouchStart={() => (keysDownRef.current['ArrowUp'] = true)}
             onTouchEnd={() => (keysDownRef.current['ArrowUp'] = false)}
+            onMouseDown={() => (keysDownRef.current['ArrowUp'] = true)}
+            onMouseUp={() => (keysDownRef.current['ArrowUp'] = false)}
+            onMouseLeave={() => (keysDownRef.current['ArrowUp'] = false)}
           >
             <ArrowUp size={20} />
           </button>
@@ -1410,6 +1465,9 @@ export default function SchoolTagGame({ onScoreSubmitted }) {
             className="schooltag-dpad-btn"
             onTouchStart={() => (keysDownRef.current['ArrowLeft'] = true)}
             onTouchEnd={() => (keysDownRef.current['ArrowLeft'] = false)}
+            onMouseDown={() => (keysDownRef.current['ArrowLeft'] = true)}
+            onMouseUp={() => (keysDownRef.current['ArrowLeft'] = false)}
+            onMouseLeave={() => (keysDownRef.current['ArrowLeft'] = false)}
           >
             <ArrowLeft size={20} />
           </button>
@@ -1418,6 +1476,9 @@ export default function SchoolTagGame({ onScoreSubmitted }) {
             className="schooltag-dpad-btn"
             onTouchStart={() => (keysDownRef.current['ArrowRight'] = true)}
             onTouchEnd={() => (keysDownRef.current['ArrowRight'] = false)}
+            onMouseDown={() => (keysDownRef.current['ArrowRight'] = true)}
+            onMouseUp={() => (keysDownRef.current['ArrowRight'] = false)}
+            onMouseLeave={() => (keysDownRef.current['ArrowRight'] = false)}
           >
             <ArrowRight size={20} />
           </button>
@@ -1426,6 +1487,9 @@ export default function SchoolTagGame({ onScoreSubmitted }) {
             className="schooltag-dpad-btn"
             onTouchStart={() => (keysDownRef.current['ArrowDown'] = true)}
             onTouchEnd={() => (keysDownRef.current['ArrowDown'] = false)}
+            onMouseDown={() => (keysDownRef.current['ArrowDown'] = true)}
+            onMouseUp={() => (keysDownRef.current['ArrowDown'] = false)}
+            onMouseLeave={() => (keysDownRef.current['ArrowDown'] = false)}
           >
             <ArrowDown size={20} />
           </button>
@@ -1437,12 +1501,16 @@ export default function SchoolTagGame({ onScoreSubmitted }) {
             className="schooltag-action-btn sprint"
             onTouchStart={() => (keysDownRef.current['ShiftLeft'] = true)}
             onTouchEnd={() => (keysDownRef.current['ShiftLeft'] = false)}
+            onMouseDown={() => (keysDownRef.current['ShiftLeft'] = true)}
+            onMouseUp={() => (keysDownRef.current['ShiftLeft'] = false)}
+            onMouseLeave={() => (keysDownRef.current['ShiftLeft'] = false)}
           >
             ⚡ 대시
           </button>
           <button
             className="schooltag-action-btn interact"
             onTouchStart={handleSpaceAction}
+            onClick={handleSpaceAction}
           >
             ✋ 액션
           </button>
