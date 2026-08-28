@@ -170,6 +170,7 @@ export const CUSTOMER_PROFILES = [
 // Game Balance & Scoring Constants
 export const INITIAL_TIME_LIMIT = 45; // 45초 콤팩트 스피드런 아케이드 타임어택
 export const MAX_TIME_LIMIT = 50; // 최대 시간 상한 (게임이 무한히 늘어나지 않도록 제어)
+export const TIME_BONUS_ON_SUCCESS = 1.5; // 서빙 성공 시 기본 시간 보너스
 export const TIME_PENALTY_ON_WRONG = 3.0; // 오답 또는 인내심 소진 시 -3.0초 감점
 
 /**
