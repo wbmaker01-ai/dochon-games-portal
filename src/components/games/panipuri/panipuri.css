@@ -562,6 +562,50 @@
   transform: none;
 }
 
+.panipuri-kbd-hint {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 1px 5px;
+  font-size: 10px;
+  font-family: ui-monospace, SFMono-Regular, monospace;
+  font-weight: 800;
+  border-radius: 6px;
+  background: rgba(0, 0, 0, 0.3);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  color: #e2e8f0;
+  margin-left: 4px;
+  line-height: 1.2;
+}
+
+.panipuri-kbd-hint.enter {
+  background: rgba(0, 0, 0, 0.4);
+  border-color: rgba(255, 255, 255, 0.3);
+  color: #fef08a;
+  font-weight: 900;
+}
+
+.panipuri-btn-serve.active-ready .panipuri-kbd-hint.enter {
+  background: #064e3b;
+  border-color: #6ee7b7;
+  color: #a7f3d0;
+}
+
+.panipuri-kbd-num {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 16px;
+  height: 16px;
+  font-size: 9px;
+  font-family: ui-monospace, SFMono-Regular, monospace;
+  font-weight: 900;
+  border-radius: 4px;
+  background: rgba(15, 23, 42, 0.8);
+  border: 1px solid rgba(255, 255, 255, 0.18);
+  color: #94a3b8;
+}
+
 /* 5. Guide Modal Backdrop */
 .panipuri-modal-backdrop {
   position: fixed;

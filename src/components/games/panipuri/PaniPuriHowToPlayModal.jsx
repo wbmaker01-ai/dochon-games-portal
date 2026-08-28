@@ -46,11 +46,17 @@ export default function PaniPuriHowToPlayModal({ isOpen, onClose }) {
               <span className="w-6 h-6 rounded-full bg-amber-500/20 text-amber-400 flex items-center justify-center text-xs font-black">1</span>
               주문 확인 및 서빙 방법
             </h3>
-            <p className="text-xs text-slate-300 leading-relaxed">
+            <p className="text-xs text-slate-300 leading-relaxed mb-2">
               손님 머리 위의 말풍선에서 <strong className="text-amber-200">원하는 맛과 수량</strong>을 확인하세요.
               하단의 <strong className="text-emerald-300">파니 단지(Matka)</strong>를 클릭하여 푸리에 소스를 채우고,
               주문과 일치하면 <strong className="text-amber-300">[서빙하기]</strong> 버튼을 누릅니다!
             </p>
+            <div className="bg-slate-950/70 border border-amber-400/30 rounded-lg p-2 text-[11px] text-amber-200 flex items-center gap-2">
+              <span>⌨️</span>
+              <div>
+                <strong>키보드 조작 지원:</strong> <kbd className="bg-slate-800 px-1 py-0.5 rounded border border-slate-600 font-mono text-amber-300">Enter</kbd> 키로 즉시 서빙 완료, <kbd className="bg-slate-800 px-1 py-0.5 rounded border border-slate-600 font-mono text-cyan-300">1~4</kbd> 키로 향신료 담기, <kbd className="bg-slate-800 px-1 py-0.5 rounded border border-slate-600 font-mono text-rose-300">C</kbd> 키로 비우기 가능!
+              </div>
+            </div>
           </div>
 
           {/* Step 2: 4 Flavors Guide */}

@@ -147,6 +147,40 @@ export default function PaniPuriGame({ onScoreSubmitted }) {
     }
   };
 
+  // Keyboard shortcut listener: Enter for Serve, 1-4 for Flavors, C/Delete for Clear
+  useEffect(() => {
+    const handleKeyDown = (e) => {
+      // Ignore if typing inside text input or textarea (e.g. Leaderboard form)
+      if (['INPUT', 'TEXTAREA'].includes(e.target.tagName)) return;
+
+      // Only active during live gameplay and when modals are closed
+      if (!gameState.isPlaying || gameState.isGameOver || isHowToPlayOpen) return;
+
+      if (e.key === 'Enter' || e.code === 'Enter' || e.code === 'NumpadEnter') {
+        e.preventDefault();
+        handleServe();
+      } else if (e.key === '1') {
+        e.preventDefault();
+        handlePotClick(FLAVOR_LIST[0]);
+      } else if (e.key === '2') {
+        e.preventDefault();
+        handlePotClick(FLAVOR_LIST[1]);
+      } else if (e.key === '3') {
+        e.preventDefault();
+        handlePotClick(FLAVOR_LIST[2]);
+      } else if (e.key === '4') {
+        e.preventDefault();
+        handlePotClick(FLAVOR_LIST[3]);
+      } else if (e.key === 'c' || e.key === 'C' || e.key === 'Delete' || e.key === 'Backspace') {
+        e.preventDefault();
+        handleClearTray();
+      }
+    };
+
+    window.addEventListener('keydown', handleKeyDown);
+    return () => window.removeEventListener('keydown', handleKeyDown);
+  }, [gameState.isPlaying, gameState.isGameOver, isHowToPlayOpen]);
+
   const handleCanvasClick = (e) => {
     if (!canvasRef.current || !engineRef.current) return;
     const rect = canvasRef.current.getBoundingClientRect();
@@ -443,12 +477,13 @@ export default function PaniPuriGame({ onScoreSubmitted }) {
       <div className="panipuri-control-dock">
         {/* Flavor Selection Buttons (Pani Pots) */}
         <div className="panipuri-flavor-grid">
-          {FLAVOR_LIST.map(flavor => (
+          {FLAVOR_LIST.map((flavor, idx) => (
             <button
               key={flavor.id}
               onClick={() => handlePotClick(flavor)}
               disabled={!gameState.isPlaying || gameState.isGameOver}
               className="panipuri-flavor-btn group"
+              title={`${flavor.name} (단축키: ${idx + 1})`}
               style={{
                 borderColor: flavor.color,
                 background: `linear-gradient(180deg, rgba(30, 41, 59, 0.95), ${flavor.deepColor}40)`
@@ -457,8 +492,11 @@ export default function PaniPuriGame({ onScoreSubmitted }) {
               <span className="text-2xl group-hover:scale-110 transition-transform">
                 {flavor.icon}
               </span>
-              <div className="text-left">
-                <p className="text-xs font-black text-white">{flavor.shortName}</p>
+              <div className="text-left flex-1">
+                <div className="flex items-center justify-between">
+                  <p className="text-xs font-black text-white">{flavor.shortName}</p>
+                  <kbd className="panipuri-kbd-num">{idx + 1}</kbd>
+                </div>
                 <p className="text-[10px] text-slate-300">{flavor.tag}</p>
               </div>
             </button>
@@ -492,20 +530,22 @@ export default function PaniPuriGame({ onScoreSubmitted }) {
             onClick={handleClearTray}
             disabled={!gameState.isPlaying || gameState.isGameOver || gameState.preparedPuris.length === 0}
             className="panipuri-btn-clear"
-            title="접시 비우기"
+            title="접시 비우기 (단축키: C 또는 Delete)"
           >
             <Trash2 className="w-3.5 h-3.5" />
             <span>비우기</span>
+            <kbd className="panipuri-kbd-hint">C</kbd>
           </button>
 
           <button
             onClick={handleServe}
             disabled={!gameState.isPlaying || gameState.isGameOver || gameState.preparedPuris.length === 0}
             className={`panipuri-btn-serve ${isOrderMatching ? 'active-ready animate-pulse' : ''}`}
-            title="손님에게 서빙하기"
+            title="손님에게 서빙하기 (단축키: Enter ↵)"
           >
             <Send className="w-4 h-4" />
             <span>{isOrderMatching ? '✨ 서빙 완료!' : '서빙하기!'}</span>
+            <kbd className="panipuri-kbd-hint enter">Enter ↵</kbd>
           </button>
         </div>
       </div>

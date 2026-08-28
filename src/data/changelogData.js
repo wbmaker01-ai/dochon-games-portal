@@ -3,11 +3,35 @@
 
 export const CHANGELOG_DATA = [
   {
+    version: 'v1.45.2',
+    date: '2026-08-28',
+    title: '🫓 [파니 푸리 마스터] 서빙완료 키보드 엔터(Enter) 단축키 및 전용 조작계 탑재',
+    badge: 'LATEST',
+    badgeColor: 'emerald',
+    items: [
+      {
+        tag: 'KEYBOARD CONTROLS',
+        tagColor: 'emerald',
+        text: '[엔터키 서빙 지원] 마우스 클릭 외에도 키보드 [Enter] (또는 숫자패드 Enter) 키를 눌러 손님에게 즉시 조리된 파니 푸리를 완벽 서빙할 수 있도록 편의성 개선'
+      },
+      {
+        tag: 'FULL KEYBOARD SUPPORT',
+        tagColor: 'blue',
+        text: '[단축키 연계 플레이] 숫자키 1~4번으로 각 향신료(민트, 타마린드, 칠리, 망고)를 빠르게 담고, C / Delete 키로 접시를 즉시 비우는 완벽한 양손 키보드 조작계 지원'
+      },
+      {
+        tag: 'UI HINTS',
+        tagColor: 'amber',
+        text: '[단축키 시각 뱃지 추가] 서빙하기 버튼 및 향신료 버튼에 [Enter ↵], [1~4], [C] 단축키 뱃지 표시 및 게임 방법 가이드 연동'
+      }
+    ]
+  },
+  {
     version: 'v1.45.1',
     date: '2026-08-25',
     title: '🫓 [파니 푸리 마스터] 피버 타임 중 향신료 단지 고유 색상 보존 및 비주얼 개선',
-    badge: 'LATEST',
-    badgeColor: 'emerald',
+    badge: 'UPDATE',
+    badgeColor: 'blue',
     items: [
       {
         tag: 'VISUAL PRESERVATION',
