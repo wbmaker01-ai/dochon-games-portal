@@ -1,0 +1,828 @@
+/* Dochon Games Portal - Snowball Survival Stylesheet */
+
+.snowball-game-container {
+  width: 100%;
+  max-width: 1060px;
+  margin: 0 auto;
+  min-height: 720px;
+  background: radial-gradient(circle at 50% 20%, #1E293B, #0F172A 85%);
+  border: 2px solid rgba(56, 189, 248, 0.35);
+  border-radius: 24px;
+  padding: 16px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  position: relative;
+  overflow: hidden;
+  box-shadow: 0 12px 36px rgba(15, 23, 42, 0.8), 0 0 24px rgba(56, 189, 248, 0.15);
+  color: #F8FAFC;
+  font-family: 'Pretendard', -apple-system, BlinkMacSystemFont, system-ui, Roboto, sans-serif;
+  user-select: none;
+}
+
+/* Header Bar */
+.snowball-header {
+  width: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 8px 16px 14px 16px;
+  border-bottom: 1px solid rgba(56, 189, 248, 0.2);
+}
+
+.snowball-header-title {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.snowball-header-title h1 {
+  margin: 0;
+  font-size: 20px;
+  font-weight: 800;
+  background: linear-gradient(135deg, #BAE6FD, #38BDF8, #60A5FA);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  text-shadow: 0 2px 10px rgba(56, 189, 248, 0.3);
+}
+
+.snowball-header-controls {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.snowball-icon-btn {
+  background: rgba(30, 41, 59, 0.8);
+  border: 1px solid rgba(56, 189, 248, 0.3);
+  color: #BAE6FD;
+  width: 38px;
+  height: 38px;
+  border-radius: 12px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.snowball-icon-btn:hover {
+  background: rgba(56, 189, 248, 0.25);
+  border-color: #38BDF8;
+  transform: translateY(-1px);
+}
+
+/* =========================================
+   LOBBY SCREEN
+   ========================================= */
+.snowball-lobby {
+  width: 100%;
+  max-width: 820px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 20px;
+  padding: 24px 12px;
+}
+
+.snowball-hero-banner {
+  text-align: center;
+}
+
+.snowball-hero-banner h2 {
+  font-size: 28px;
+  font-weight: 900;
+  margin: 0 0 8px 0;
+  background: linear-gradient(135deg, #FFFFFF, #BAE6FD, #38BDF8);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+}
+
+.snowball-hero-banner p {
+  margin: 0;
+  font-size: 14px;
+  color: #94A3B8;
+}
+
+/* Mode Selection Tabs */
+.snowball-mode-tabs {
+  display: flex;
+  gap: 12px;
+  background: rgba(15, 23, 42, 0.6);
+  padding: 6px;
+  border-radius: 16px;
+  border: 1px solid rgba(56, 189, 248, 0.25);
+}
+
+.snowball-mode-tab {
+  padding: 10px 24px;
+  border-radius: 12px;
+  border: none;
+  background: transparent;
+  color: #94A3B8;
+  font-size: 14px;
+  font-weight: 700;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  transition: all 0.2s ease;
+}
+
+.snowball-mode-tab.active {
+  background: linear-gradient(135deg, #0284C7, #0369A1);
+  color: #FFFFFF;
+  box-shadow: 0 4px 12px rgba(2, 132, 199, 0.4);
+}
+
+/* Skin Selection Carousel */
+.snowball-skin-selector {
+  width: 100%;
+  background: rgba(30, 41, 59, 0.6);
+  border: 1px solid rgba(56, 189, 248, 0.2);
+  border-radius: 18px;
+  padding: 16px;
+}
+
+.snowball-skin-selector h3 {
+  margin: 0 0 12px 0;
+  font-size: 15px;
+  font-weight: 800;
+  color: #BAE6FD;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.snowball-skins-grid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 12px;
+}
+
+.snowball-skin-card {
+  background: rgba(15, 23, 42, 0.7);
+  border: 2px solid rgba(56, 189, 248, 0.2);
+  border-radius: 14px;
+  padding: 12px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.snowball-skin-card:hover {
+  border-color: #38BDF8;
+  transform: translateY(-2px);
+}
+
+.snowball-skin-card.selected {
+  border-color: #FBBF24;
+  background: rgba(2, 132, 199, 0.2);
+  box-shadow: 0 0 16px rgba(251, 191, 36, 0.3);
+}
+
+.snowball-skin-emoji {
+  font-size: 32px;
+  margin-bottom: 6px;
+}
+
+.snowball-skin-name {
+  font-size: 13px;
+  font-weight: 700;
+  color: #FFFFFF;
+}
+
+.snowball-skin-role {
+  font-size: 11px;
+  color: #38BDF8;
+  margin-top: 2px;
+}
+
+/* Solo / P2P Configuration Boxes */
+.snowball-config-card {
+  width: 100%;
+  background: rgba(30, 41, 59, 0.6);
+  border: 1px solid rgba(56, 189, 248, 0.2);
+  border-radius: 18px;
+  padding: 20px;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.snowball-diff-buttons {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 10px;
+}
+
+.snowball-diff-btn {
+  padding: 10px;
+  border-radius: 10px;
+  border: 1px solid rgba(56, 189, 248, 0.2);
+  background: rgba(15, 23, 42, 0.6);
+  color: #94A3B8;
+  font-size: 13px;
+  font-weight: 700;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.snowball-diff-btn.selected {
+  background: linear-gradient(135deg, #0284C7, #0EA5E9);
+  color: #FFFFFF;
+  border-color: #38BDF8;
+}
+
+/* P2P Multiplayer Box */
+.snowball-p2p-panel {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.snowball-p2p-subtabs {
+  display: flex;
+  gap: 8px;
+}
+
+.snowball-p2p-subtab {
+  flex: 1;
+  padding: 10px;
+  border-radius: 10px;
+  border: 1px solid rgba(56, 189, 248, 0.3);
+  background: rgba(15, 23, 42, 0.6);
+  color: #94A3B8;
+  font-weight: 700;
+  font-size: 13px;
+  cursor: pointer;
+}
+
+.snowball-p2p-subtab.active {
+  background: rgba(56, 189, 248, 0.25);
+  color: #38BDF8;
+  border-color: #38BDF8;
+}
+
+.snowball-code-box {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 12px;
+  background: rgba(15, 23, 42, 0.8);
+  padding: 14px;
+  border-radius: 14px;
+  border: 1px dashed rgba(56, 189, 248, 0.4);
+}
+
+.snowball-code-value {
+  font-size: 28px;
+  font-weight: 900;
+  letter-spacing: 6px;
+  color: #FDE047;
+}
+
+.snowball-input-row {
+  display: flex;
+  gap: 10px;
+}
+
+.snowball-text-input {
+  flex: 1;
+  background: rgba(15, 23, 42, 0.8);
+  border: 1px solid rgba(56, 189, 248, 0.3);
+  border-radius: 10px;
+  padding: 10px 14px;
+  color: #FFFFFF;
+  font-size: 14px;
+  font-weight: 600;
+  outline: none;
+}
+
+.snowball-text-input:focus {
+  border-color: #38BDF8;
+  box-shadow: 0 0 10px rgba(56, 189, 248, 0.3);
+}
+
+.snowball-p2p-players-list {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-top: 8px;
+}
+
+.snowball-p2p-player-chip {
+  background: rgba(15, 23, 42, 0.8);
+  border: 1px solid rgba(56, 189, 248, 0.3);
+  border-radius: 9999px;
+  padding: 6px 14px;
+  font-size: 12px;
+  font-weight: 700;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.snowball-start-btn {
+  width: 100%;
+  padding: 16px;
+  border-radius: 16px;
+  border: none;
+  background: linear-gradient(135deg, #0284C7, #0EA5E9, #38BDF8);
+  color: #FFFFFF;
+  font-size: 18px;
+  font-weight: 900;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  box-shadow: 0 6px 20px rgba(2, 132, 199, 0.5);
+  transition: all 0.2s ease;
+}
+
+.snowball-start-btn:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 8px 24px rgba(56, 189, 248, 0.6);
+}
+
+/* =========================================
+   INGAME CANVAS & HUD
+   ========================================= */
+.snowball-canvas-wrap {
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  position: relative;
+}
+
+.snowball-hud-bar {
+  width: 100%;
+  max-width: 1000px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 10px 16px;
+  background: rgba(15, 23, 42, 0.85);
+  border: 1px solid rgba(56, 189, 248, 0.25);
+  border-radius: 16px 16px 0 0;
+  font-size: 13px;
+  font-weight: 700;
+}
+
+.snowball-hud-stat {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.snowball-warning-pill {
+  background: rgba(239, 68, 68, 0.2);
+  color: #F87171;
+  border: 1px solid #EF4444;
+  padding: 4px 10px;
+  border-radius: 9999px;
+  font-size: 11px;
+  font-weight: 800;
+  animation: pulseWarning 0.8s infinite alternate;
+}
+
+@keyframes pulseWarning {
+  from { opacity: 0.6; transform: scale(0.98); }
+  to { opacity: 1.0; transform: scale(1.02); }
+}
+
+.snowball-canvas {
+  width: 100%;
+  max-width: 1000px;
+  height: auto;
+  max-height: 640px;
+  aspect-ratio: 1000 / 700;
+  border-radius: 0 0 16px 16px;
+  border: 1px solid rgba(56, 189, 248, 0.25);
+  border-top: none;
+  background: #0F172A;
+  cursor: crosshair;
+}
+
+/* Virtual Joystick for Mobile */
+.snowball-mobile-controls {
+  position: absolute;
+  bottom: 24px;
+  left: 20px;
+  right: 20px;
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-end;
+  pointer-events: none;
+}
+
+.snowball-joystick-base {
+  width: 110px;
+  height: 110px;
+  border-radius: 50%;
+  background: rgba(15, 23, 42, 0.6);
+  border: 2px solid rgba(56, 189, 248, 0.4);
+  position: relative;
+  pointer-events: auto;
+  touch-action: none;
+}
+
+.snowball-joystick-thumb {
+  width: 44px;
+  height: 44px;
+  border-radius: 50%;
+  background: linear-gradient(135deg, #0284C7, #38BDF8);
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  pointer-events: none;
+  box-shadow: 0 0 12px rgba(56, 189, 248, 0.6);
+}
+
+.snowball-shoot-btn {
+  width: 76px;
+  height: 76px;
+  border-radius: 50%;
+  background: linear-gradient(135deg, #EF4444, #F43F5E);
+  border: 3px solid #FFFFFF;
+  color: #FFFFFF;
+  font-size: 14px;
+  font-weight: 900;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  pointer-events: auto;
+  box-shadow: 0 6px 18px rgba(239, 68, 68, 0.5);
+  user-select: none;
+}
+
+/* =========================================
+   GAME OVER MODAL SCREEN
+   ========================================= */
+.snowball-gameover-overlay {
+  position: absolute;
+  inset: 0;
+  background: rgba(15, 23, 42, 0.88);
+  backdrop-filter: blur(8px);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 20px;
+  z-index: 50;
+}
+
+.snowball-gameover-card {
+  width: 100%;
+  max-width: 480px;
+  background: #1E293B;
+  border: 2px solid rgba(56, 189, 248, 0.4);
+  border-radius: 24px;
+  padding: 28px 24px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+  box-shadow: 0 16px 48px rgba(0, 0, 0, 0.6), 0 0 24px rgba(56, 189, 248, 0.2);
+}
+
+.snowball-gameover-badge {
+  font-size: 48px;
+  margin-bottom: 4px;
+}
+
+.snowball-gameover-title {
+  font-size: 26px;
+  font-weight: 900;
+  margin: 0;
+  color: #FFFFFF;
+}
+
+.snowball-gameover-title.win {
+  background: linear-gradient(135deg, #FDE047, #F59E0B);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+}
+
+.snowball-gameover-score-box {
+  width: 100%;
+  background: rgba(15, 23, 42, 0.7);
+  border-radius: 16px;
+  padding: 16px;
+  margin: 16px 0;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.snowball-score-row {
+  display: flex;
+  justify-content: space-between;
+  font-size: 13px;
+  color: #94A3B8;
+}
+
+.snowball-score-total {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding-top: 8px;
+  border-top: 1px solid rgba(56, 189, 248, 0.2);
+  font-size: 16px;
+  font-weight: 800;
+  color: #FFFFFF;
+}
+
+.snowball-score-number {
+  font-size: 26px;
+  font-weight: 900;
+  color: #38BDF8;
+}
+
+/* Hall of Fame Submission Form */
+.snowball-halloffame-box {
+  width: 100%;
+  margin-bottom: 16px;
+  background: rgba(2, 132, 199, 0.12);
+  border: 1px solid rgba(56, 189, 248, 0.35);
+  border-radius: 14px;
+  padding: 12px 14px;
+}
+
+.snowball-halloffame-title {
+  font-size: 12px;
+  font-weight: 800;
+  color: #BAE6FD;
+  margin-bottom: 8px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+}
+
+.snowball-submit-form {
+  display: flex;
+  gap: 8px;
+}
+
+.snowball-submit-input {
+  flex: 1;
+  background: #0F172A;
+  border: 1px solid rgba(56, 189, 248, 0.3);
+  border-radius: 10px;
+  padding: 8px 12px;
+  color: #FFFFFF;
+  font-size: 13px;
+  outline: none;
+}
+
+.snowball-submit-input:focus {
+  border-color: #38BDF8;
+}
+
+.snowball-submit-btn {
+  background: linear-gradient(135deg, #10B981, #059669);
+  color: #FFFFFF;
+  border: none;
+  border-radius: 10px;
+  padding: 8px 14px;
+  font-size: 13px;
+  font-weight: 800;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  transition: all 0.2s ease;
+}
+
+.snowball-submit-btn:hover {
+  background: #059669;
+}
+
+.snowball-gameover-actions {
+  width: 100%;
+  display: flex;
+  gap: 10px;
+}
+
+.snowball-btn-secondary {
+  flex: 1;
+  padding: 12px;
+  border-radius: 12px;
+  border: 1px solid rgba(56, 189, 248, 0.3);
+  background: rgba(15, 23, 42, 0.8);
+  color: #BAE6FD;
+  font-size: 14px;
+  font-weight: 700;
+  cursor: pointer;
+}
+
+.snowball-btn-primary {
+  flex: 1;
+  padding: 12px;
+  border-radius: 12px;
+  border: none;
+  background: linear-gradient(135deg, #0284C7, #0EA5E9);
+  color: #FFFFFF;
+  font-size: 14px;
+  font-weight: 800;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+}
+
+/* =========================================
+   HOW TO PLAY MODAL
+   ========================================= */
+.snowball-modal-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(15, 23, 42, 0.85);
+  backdrop-filter: blur(6px);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 9999;
+  padding: 16px;
+}
+
+.snowball-modal-card {
+  width: 100%;
+  max-width: 600px;
+  background: #1E293B;
+  border: 2px solid rgba(56, 189, 248, 0.4);
+  border-radius: 20px;
+  overflow: hidden;
+  box-shadow: 0 20px 50px rgba(0, 0, 0, 0.7);
+}
+
+.snowball-modal-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 16px 20px;
+  background: rgba(15, 23, 42, 0.7);
+  border-bottom: 1px solid rgba(56, 189, 248, 0.2);
+}
+
+.snowball-modal-title {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.snowball-modal-title h2 {
+  font-size: 17px;
+  font-weight: 800;
+  margin: 0;
+  color: #FFFFFF;
+}
+
+.snowball-modal-close-btn {
+  background: transparent;
+  border: none;
+  color: #94A3B8;
+  cursor: pointer;
+}
+
+.snowball-modal-body {
+  padding: 20px;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  max-height: 70vh;
+  overflow-y: auto;
+}
+
+.snowball-guide-banner {
+  display: flex;
+  gap: 12px;
+  background: rgba(2, 132, 199, 0.18);
+  border: 1px solid rgba(56, 189, 248, 0.35);
+  border-radius: 12px;
+  padding: 12px 16px;
+  align-items: center;
+}
+
+.snowball-guide-banner h3 {
+  margin: 0 0 4px 0;
+  font-size: 14px;
+  font-weight: 800;
+  color: #FFFFFF;
+}
+
+.snowball-guide-banner p {
+  margin: 0;
+  font-size: 12px;
+  color: #BAE6FD;
+}
+
+.snowball-guide-section h4 {
+  margin: 0 0 10px 0;
+  font-size: 14px;
+  font-weight: 800;
+  color: #38BDF8;
+}
+
+.snowball-controls-grid {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 8px;
+}
+
+.control-item {
+  background: rgba(15, 23, 42, 0.6);
+  border-radius: 10px;
+  padding: 8px 12px;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  font-size: 12px;
+}
+
+.control-badge {
+  background: #0284C7;
+  color: #FFFFFF;
+  padding: 2px 8px;
+  border-radius: 6px;
+  font-weight: 800;
+  font-size: 11px;
+  white-space: nowrap;
+}
+
+.control-item kbd {
+  background: #334155;
+  border: 1px solid #64748B;
+  border-radius: 4px;
+  padding: 1px 5px;
+  margin: 0 2px;
+  font-size: 11px;
+}
+
+.snowball-tips-list {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.tip-card {
+  display: flex;
+  gap: 10px;
+  background: rgba(15, 23, 42, 0.6);
+  border-radius: 10px;
+  padding: 10px 12px;
+  font-size: 12px;
+}
+
+.tip-icon {
+  font-size: 20px;
+}
+
+.tip-content strong {
+  display: block;
+  margin-bottom: 2px;
+  color: #F8FAFC;
+}
+
+.tip-content p {
+  margin: 0;
+  color: #94A3B8;
+}
+
+.snowball-guide-rule {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  background: rgba(245, 158, 11, 0.12);
+  border: 1px solid rgba(245, 158, 11, 0.35);
+  border-radius: 10px;
+  padding: 10px 14px;
+  font-size: 12px;
+  color: #FDE047;
+}
+
+.snowball-modal-footer {
+  padding: 14px 20px;
+  background: rgba(15, 23, 42, 0.7);
+  display: flex;
+  justify-content: flex-end;
+}
+
+/* Responsive */
+@media (max-width: 680px) {
+  .snowball-skins-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+  .snowball-header-title h1 {
+    font-size: 17px;
+  }
+}

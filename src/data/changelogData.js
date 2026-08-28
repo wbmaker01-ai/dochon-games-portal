@@ -3,10 +3,44 @@
 
 export const CHANGELOG_DATA = [
   {
+    version: 'v1.47.0',
+    date: '2026-08-28',
+    title: '☃️ [도촌 눈싸움 서바이벌] 정식 개장 (Snowball.io / 팽이 스모 모티브)',
+    badge: 'LATEST',
+    badgeColor: 'blue',
+    items: [
+      {
+        tag: 'NEW MULTIPLAYER',
+        tagColor: 'blue',
+        text: '[도촌 눈싸움 서바이벌 정식 개장] 눈덩이를 굴려 거대하게 키운 뒤 팽이처럼 상대를 밀쳐내고, 얼음이 깨지는 링 밖으로 날려버리는 캐주얼 배틀로얄 게임 오픈 (포털 31번째 게임)'
+      },
+      {
+        tag: 'P2P MULTIPLAYER',
+        tagColor: 'emerald',
+        text: '[WebRTC 초경량 동기화 대난투] 4자리 숫자 방 코드 기반의 P2P 멀티플레이 지원으로 학교 Wi-Fi나 가정에서도 렉 없이 최대 8인이 동시에 실시간 눈싸움 대결 가능'
+      },
+      {
+        tag: 'SMART AI BOTS',
+        tagColor: 'amber',
+        text: '[1인 솔로 서바이벌 완벽 지원] 친구가 없어도 즉시 즐길 수 있도록 3단계 난이도(초급/중급/상급)의 스마트 AI 봇 7인이 참가하는 박진감 넘치는 8인 배틀로얄 모드 탑재'
+      },
+      {
+        tag: 'ZERO ASSET TECH',
+        tagColor: 'purple',
+        text: '[초고속 로딩 & 사운드 신디사이저] 외부 이미지/오디오 다운로드 없는 100% Canvas 2D 절차적 벡터 그래픽(캐릭터 4종)과 브라우저 내장 Web Audio API 사운드 엔진 탑재'
+      },
+      {
+        tag: 'SHRINKING ARENA',
+        tagColor: 'rose',
+        text: '[배틀로얄 빙판 붕괴 시스템] 시간 경과에 따라 외곽 빙판에 금이 가고 바다 밑으로 가라앉는 3단계 축소 메커니즘과 통쾌한 링아웃 물리 연출 구현'
+      }
+    ]
+  },
+  {
     version: 'v1.46.1',
     date: '2026-08-28',
     title: '🫓 [파니 푸리 마스터] 콤팩트 스피드런 타임어택 & 단계별 점진 난이도(Easy to Hard) 밸런스 패치',
-    badge: 'LATEST',
+    badge: 'UPDATE',
     badgeColor: 'emerald',
     items: [
       {

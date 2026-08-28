@@ -292,6 +292,14 @@ export default function LeaderboardModal({ isOpen, onClose, activeTab = 'pacman'
             if (game.id === 'pizza') iconEmoji = '🍕';
             if (game.id === 'earthbee') iconEmoji = '🐝';
             if (game.id === 'olympics') iconEmoji = '🏅';
+            if (game.id === 'pangolin') iconEmoji = '🦔';
+            if (game.id === 'roswell') iconEmoji = '🛸';
+            if (game.id === 'petanque') iconEmoji = '⚪';
+            if (game.id === 'halfmoon') iconEmoji = '🌓';
+            if (game.id === 'panipuri') iconEmoji = '🫓';
+            if (game.id === 'memory') iconEmoji = '🧠';
+            if (game.id === 'ghoulduel') iconEmoji = '👻';
+            if (game.id === 'snowball') iconEmoji = '☃️';
 
             // Remove '도촌 ' prefix for compact and clean layout
             const shortTitle = game.title.replace(/^도촌\s*/, '');
@@ -321,6 +329,8 @@ export default function LeaderboardModal({ isOpen, onClose, activeTab = 'pacman'
               else if (game.id === 'pizza') activeCustomStyle = { background: 'linear-gradient(135deg, #F59E0B, #EF4444)', color: '#FFFFFF' };
               else if (game.id === 'earthbee') activeCustomStyle = { background: 'linear-gradient(135deg, #FBBF24, #10B981)', color: '#064E3B' };
               else if (game.id === 'olympics') activeCustomStyle = { background: 'linear-gradient(135deg, #F59E0B, #D97706)', color: '#FFFFFF' };
+              else if (game.id === 'ghoulduel') activeCustomStyle = { background: 'linear-gradient(135deg, #10B981, #8B5CF6)', color: '#FFFFFF' };
+              else if (game.id === 'snowball') activeCustomStyle = { background: 'linear-gradient(135deg, #0284C7, #38BDF8)', color: '#FFFFFF' };
             }
 
             return (

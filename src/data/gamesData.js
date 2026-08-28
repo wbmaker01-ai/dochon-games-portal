@@ -262,19 +262,21 @@ export const PLAYABLE_GAMES = [
     category: '멀티',
     imageSrc: getThumb('ghoulduel.jpg'),
     isPlayable: true,
-    badgeText: '👻 NEW 30위',
+    badgeText: '👻 30위',
     description: '초록팀 vs 보라팀 4:4 실시간 대결! 영혼 불꽃을 모아 기지에 반납하고 상대 꼬리를 가로채세요!'
-  }
-];
-
-export const COMING_SOON_GAMES = [
+  },
   {
     id: 'snowball',
     title: '도촌 눈싸움 서바이벌',
     category: '멀티',
     imageSrc: getThumb('snowball.jpg'),
-    isPlayable: false
-  },
+    isPlayable: true,
+    badgeText: '☃️ NEW 31위',
+    description: '거대 눈덩이를 굴려 팽이처럼 상대를 밀쳐내고, 얼음이 깨지는 링 밖으로 날려버리는 실시간 서바이벌 배틀로얄!'
+  }
+];
+
+export const COMING_SOON_GAMES = [
   {
     id: 'schooltag',
     title: '도촌 야간 학교 숨바꼭질',
