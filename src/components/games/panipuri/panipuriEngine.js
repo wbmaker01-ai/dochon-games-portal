@@ -9,8 +9,8 @@ import {
   CUSTOMER_PROFILES,
   INITIAL_TIME_LIMIT,
   MAX_TIME_LIMIT,
-  TIME_BONUS_ON_SUCCESS,
   TIME_PENALTY_ON_WRONG,
+  getTimeBonusForServedCount,
   BASE_SCORE_PER_PURI,
   PERFECT_ORDER_BONUS,
   SPEED_BONUS_MAX,
@@ -107,31 +107,74 @@ export class PaniPuriEngine {
     this.notifyState();
   }
 
-  // Generate a new customer with balanced recipe demand
+  // Generate a new customer with progressive difficulty (Easy -> Hard)
   spawnNewCustomer() {
     const profile = CUSTOMER_PROFILES[Math.floor(Math.random() * CUSTOMER_PROFILES.length)];
     
-    let distinctCount = 1;
-    if (this.servedCount >= 3) distinctCount = 2;
-    if (this.servedCount >= 8) distinctCount = Math.random() > 0.4 ? 3 : 2;
-
+    // Progressive Order Recipe Complexity based on servedCount
+    // Stage 1 (0~1 served): 1 flavor x1 (Super easy tutorial warmup)
+    // Stage 2 (2~3 served): 1 flavor x2 (e.g. x2 Tamarind)
+    // Stage 3 (4~6 served): 2 flavors x1 each (Total 2 puris, e.g. x1 Mint, x1 Chili)
+    // Stage 4 (7~10 served): 2 flavors, total 3 puris
+    // Stage 5 (11~14 served): 2~3 flavors, total 4 puris
+    // Stage 6 (15+ served): 3~4 flavors, total 4~5 puris (Intense Master rush)
     const shuffled = [...FLAVOR_LIST].sort(() => Math.random() - 0.5);
     const orderItems = [];
 
-    for (let i = 0; i < distinctCount; i++) {
-      const flavor = shuffled[i];
-      const maxCount = distinctCount === 1 ? (this.servedCount > 5 ? 3 : 2) : (Math.random() > 0.5 ? 2 : 1);
-      orderItems.push({
-        flavorKey: flavor.id,
-        count: maxCount
-      });
+    if (this.servedCount < 2) {
+      orderItems.push({ flavorKey: shuffled[0].id, count: 1 });
+    } else if (this.servedCount < 4) {
+      orderItems.push({ flavorKey: shuffled[0].id, count: 2 });
+    } else if (this.servedCount < 7) {
+      orderItems.push({ flavorKey: shuffled[0].id, count: 1 });
+      orderItems.push({ flavorKey: shuffled[1].id, count: 1 });
+    } else if (this.servedCount < 11) {
+      orderItems.push({ flavorKey: shuffled[0].id, count: 2 });
+      orderItems.push({ flavorKey: shuffled[1].id, count: 1 });
+    } else if (this.servedCount < 15) {
+      if (Math.random() > 0.5) {
+        orderItems.push({ flavorKey: shuffled[0].id, count: 2 });
+        orderItems.push({ flavorKey: shuffled[1].id, count: 2 });
+      } else {
+        orderItems.push({ flavorKey: shuffled[0].id, count: 2 });
+        orderItems.push({ flavorKey: shuffled[1].id, count: 1 });
+        orderItems.push({ flavorKey: shuffled[2].id, count: 1 });
+      }
+    } else {
+      const countPuri = Math.random() > 0.4 ? 5 : 4;
+      if (countPuri === 5) {
+        orderItems.push({ flavorKey: shuffled[0].id, count: 2 });
+        orderItems.push({ flavorKey: shuffled[1].id, count: 2 });
+        orderItems.push({ flavorKey: shuffled[2].id, count: 1 });
+      } else {
+        orderItems.push({ flavorKey: shuffled[0].id, count: 1 });
+        orderItems.push({ flavorKey: shuffled[1].id, count: 1 });
+        orderItems.push({ flavorKey: shuffled[2].id, count: 1 });
+        orderItems.push({ flavorKey: shuffled[3].id, count: 1 });
+      }
+    }
+
+    // Dynamic Patience Time based on progression
+    // Early: 22s (warm and welcoming)
+    // Mid: 16s (standard rush)
+    // Late: 12s (challenging)
+    // Master: 9s (intense peak)
+    let dynamicPatience = 22;
+    if (this.servedCount < 3) {
+      dynamicPatience = 22;
+    } else if (this.servedCount < 7) {
+      dynamicPatience = 16;
+    } else if (this.servedCount < 12) {
+      dynamicPatience = 12;
+    } else {
+      dynamicPatience = 9;
     }
 
     this.currentCustomer = {
       ...profile,
       order: orderItems,
-      maxPatience: profile.patienceTime,
-      patience: profile.patienceTime
+      maxPatience: dynamicPatience,
+      patience: dynamicPatience
     };
     this.customerPatience = 1.0;
   }
@@ -234,8 +277,9 @@ export class PaniPuriEngine {
       const earnedScore = Math.floor((basePoints + PERFECT_ORDER_BONUS + speedBonus) * comboMult * feverMult);
       this.score += earnedScore;
 
-      // Time Bonus
-      this.timeLeft = Math.min(MAX_TIME_LIMIT, this.timeLeft + TIME_BONUS_ON_SUCCESS);
+      // Dynamic Time Bonus (Diminishes as orders progress to conclude in ~1 min)
+      const timeBonus = getTimeBonusForServedCount(this.servedCount);
+      this.timeLeft = Math.min(MAX_TIME_LIMIT, this.timeLeft + timeBonus);
 
       // Audio, Haptics, Effects
       panipuriAudio.playServeSuccess();

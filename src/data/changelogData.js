@@ -3,11 +3,35 @@
 
 export const CHANGELOG_DATA = [
   {
+    version: 'v1.46.1',
+    date: '2026-08-28',
+    title: '🫓 [파니 푸리 마스터] 콤팩트 스피드런 타임어택 & 단계별 점진 난이도(Easy to Hard) 밸런스 패치',
+    badge: 'LATEST',
+    badgeColor: 'emerald',
+    items: [
+      {
+        tag: 'DYNAMIC DIFFICULTY',
+        tagColor: 'emerald',
+        text: '[단계별 점진 난이도 시스템] 첫 시작 시 단 1개의 파니 푸리 주문으로 가볍게 워밍업하고, 서빙 횟수에 따라 2개 ➔ 2가지 맛 ➔ 3~4가지 맛 복합 주문(최대 5개)으로 손맛과 몰입감이 점진적으로 고조되도록 레시피 알고리즘 개편'
+      },
+      {
+        tag: 'SPEEDRUN PACE',
+        tagColor: 'amber',
+        text: '[신속하고 쫄깃한 게임 시간 제어] 기본 제한시간을 45초로 단축하고 최대 상한을 50초로 캡핑하며, 후반으로 갈수록 시간 보너스가 점진 감소하여 약 1분 내외에 최고조의 스릴 속에서 게임이 신속 종료되도록 밸런스 조정'
+      },
+      {
+        tag: 'PATIENCE SCALING',
+        tagColor: 'rose',
+        text: '[손님 인내심 가속화] 초반 손님은 넉넉하게 기다리지만(22초), 후반 손님은 갈수록 인내심이 빨라져(9초) 빠른 키보드 연타와 집중력을 발휘해야 하는 아케이드 러시 연출 구현'
+      }
+    ]
+  },
+  {
     version: 'v1.46.0',
     date: '2026-08-28',
     title: '신규 순차 개장 준비(Coming Soon) P2P 멀티플레이어 라인업 4종 등록 & 고화질 3D 썸네일 탑재',
-    badge: 'LATEST',
-    badgeColor: 'emerald',
+    badge: 'UPDATE',
+    badgeColor: 'blue',
     items: [
       {
         tag: 'P2P MULTIPLAYER',

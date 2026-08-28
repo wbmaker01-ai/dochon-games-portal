@@ -114,7 +114,7 @@ export default function PaniPuriHowToPlayModal({ isOpen, onClose }) {
                 피버 게이지 100% 달성 시 <strong className="text-yellow-300">골든 피버 발동</strong>! 8초 동안 모든 점수 2배!
               </li>
               <li>
-                손님의 인내심이 바닥나기 전에 서빙하면 <strong className="text-cyan-300">+2.5초 시간 추가</strong> 보너스!
+                빠르게 서빙할수록 <strong className="text-cyan-300">시간 추가 보너스</strong> 획득! (손님이 늘어날수록 주문이 다양해지고 속도가 빨라집니다)
               </li>
             </ul>
           </div>
