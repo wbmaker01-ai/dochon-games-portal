@@ -3,10 +3,39 @@
 
 export const CHANGELOG_DATA = [
   {
+    version: 'v1.48.2',
+    date: '2026-08-28',
+    title: '🔦 [도촌 야간 학교 숨바꼭질] 2D Fog of War 레이캐스팅 조명 엔진 전면 개편 & 손전등 시야 복구 긴급 패치',
+    badge: 'LATEST',
+    badgeColor: 'blue',
+    items: [
+      {
+        tag: 'LIGHTING FIX',
+        tagColor: 'blue',
+        text: '[오프스크린 라이팅 버퍼 아키텍처 도입] 독립된 조명 마스크 버퍼를 생성하여 어둠을 깎아낸 뒤 맵 위에 얹는 합성 파이프라인으로 전면 개편하여, 맵이 검게 지워지던 버그를 완벽 해결하고 선명하고 시원한 손전등 시야 구현'
+      },
+      {
+        tag: 'RAYCAST MATH',
+        tagColor: 'purple',
+        text: '[레이캐스팅 분모 0 결함 수정] 광선이 수직/수평으로 투사될 때 발생하는 분모 0 및 NaN 좌표 결함을 수학적으로 보정하여 60fps 모든 프레임에서 완벽한 부채꼴 광원 생성 보장'
+      },
+      {
+        tag: 'MOBILE & PC CONTROLS',
+        tagColor: 'emerald',
+        text: '[이동 방향 시야각 자동 연동] 마우스가 없는 모바일 터치 환경이나 키보드 단독 플레이 시에도 이동하는 방향으로 손전등이 자연스럽게 회전하도록 편의성 대폭 개선'
+      },
+      {
+        tag: 'SAFE SPAWN',
+        tagColor: 'amber',
+        text: '[안전 스폰 좌표 보정] 게임 시작 시 플레이어가 책상 모서리 벽에 끼이지 않고 교실 한가운데에서 안전하게 시작하도록 타일 중앙 좌표로 보정'
+      }
+    ]
+  },
+  {
     version: 'v1.48.1',
     date: '2026-08-28',
     title: '☃️ [도촌 눈싸움 서바이벌] 실시간 P2P 전용 명예의 전당 등록 & 전체 참가자 성적표 및 1등 MVP 특별 연출 시스템',
-    badge: 'LATEST',
+    badge: 'UPDATE',
     badgeColor: 'emerald',
     items: [
       {

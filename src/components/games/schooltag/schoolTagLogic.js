@@ -6,8 +6,6 @@ import { SCHOOL_TAG_CONSTANTS, ROLE_TYPES } from './schoolTagConstants';
 // --- 1. Fast Raycasting Light Geometry ---
 
 export function getRayIntersection(ray, segment) {
-  // ray: { x, y, dx, dy }
-  // segment: { a: { x, y }, b: { x, y } }
   const r_px = ray.x;
   const r_py = ray.y;
   const r_dx = ray.dx;
@@ -18,19 +16,20 @@ export function getRayIntersection(ray, segment) {
   const s_dx = segment.b.x - segment.a.x;
   const s_dy = segment.b.y - segment.a.y;
 
-  const r_mag = Math.hypot(r_dx, r_dy);
-  const s_mag = Math.hypot(s_dx, s_dy);
-  if (r_mag === 0 || s_mag === 0) return null;
+  const denom = s_dx * r_dy - s_dy * r_dx;
+  if (Math.abs(denom) < 1e-9) return null; // Parallel or collinear
 
-  if (r_dx / r_mag === s_dx / s_mag && r_dy / r_mag === s_dy / s_mag) {
-    return null; // Parallel
+  const T2 = (r_dx * (s_py - r_py) + r_dy * (r_px - s_px)) / denom;
+  if (isNaN(T2) || T2 < 0 || T2 > 1) return null; // Not on segment
+
+  let T1;
+  if (Math.abs(r_dx) > Math.abs(r_dy)) {
+    T1 = (s_px + s_dx * T2 - r_px) / r_dx;
+  } else {
+    T1 = (s_py + s_dy * T2 - r_py) / r_dy;
   }
 
-  const T2 = (r_dx * (s_py - r_py) + r_dy * (r_px - s_px)) / (s_dx * r_dy - s_dy * r_dx);
-  const T1 = (s_px + s_dx * T2 - r_px) / r_dx;
-
-  if (T1 < 0) return null; // Behind ray
-  if (T2 < 0 || T2 > 1) return null; // Not on segment
+  if (isNaN(T1) || T1 <= 0.05) return null; // Behind ray or self-collision
 
   return {
     x: r_px + r_dx * T1,
@@ -41,7 +40,7 @@ export function getRayIntersection(ray, segment) {
 
 export function computeFlashlightPolygon(originX, originY, facingAngle, fovAngle, maxDistance, segments) {
   const halfFov = fovAngle / 2;
-  const numConeRays = 40;
+  const numConeRays = 48;
   const rayAngles = [];
 
   // 1. Cone Boundary and Intermediate Rays
@@ -51,22 +50,24 @@ export function computeFlashlightPolygon(originX, originY, facingAngle, fovAngle
   }
 
   // 2. Add rays towards segment vertices that lie within cone
-  segments.forEach((seg) => {
-    [seg.a, seg.b].forEach((pt) => {
-      const dx = pt.x - originX;
-      const dy = pt.y - originY;
-      const angle = Math.atan2(dy, dx);
-      let diff = angle - facingAngle;
-      while (diff < -Math.PI) diff += Math.PI * 2;
-      while (diff > Math.PI) diff -= Math.PI * 2;
+  if (Array.isArray(segments)) {
+    segments.forEach((seg) => {
+      [seg.a, seg.b].forEach((pt) => {
+        const dx = pt.x - originX;
+        const dy = pt.y - originY;
+        const angle = Math.atan2(dy, dx);
+        let diff = angle - facingAngle;
+        while (diff < -Math.PI) diff += Math.PI * 2;
+        while (diff > Math.PI) diff -= Math.PI * 2;
 
-      if (Math.abs(diff) <= halfFov + 0.1) {
-        rayAngles.push(angle - 0.0002);
-        rayAngles.push(angle);
-        rayAngles.push(angle + 0.0002);
-      }
+        if (Math.abs(diff) <= halfFov + 0.05) {
+          rayAngles.push(angle - 0.0003);
+          rayAngles.push(angle);
+          rayAngles.push(angle + 0.0003);
+        }
+      });
     });
-  });
+  }
 
   // Sort ray angles from start to end of cone
   rayAngles.sort((a, b) => {
@@ -91,15 +92,17 @@ export function computeFlashlightPolygon(originX, originY, facingAngle, fovAngle
     let closest = null;
     let minT = maxDistance;
 
-    for (let i = 0; i < segments.length; i++) {
-      const hit = getRayIntersection(ray, segments[i]);
-      if (hit && hit.dist < minT) {
-        minT = hit.dist;
-        closest = hit;
+    if (Array.isArray(segments)) {
+      for (let i = 0; i < segments.length; i++) {
+        const hit = getRayIntersection(ray, segments[i]);
+        if (hit && hit.dist < minT) {
+          minT = hit.dist;
+          closest = hit;
+        }
       }
     }
 
-    if (closest) {
+    if (closest && Number.isFinite(closest.x) && Number.isFinite(closest.y)) {
       points.push({ x: closest.x, y: closest.y });
     } else {
       points.push({

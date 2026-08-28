@@ -76,11 +76,13 @@ export default function SchoolTagGame({ onScoreSubmitted }) {
 
   // Refs for Animation Loop & Persistent Game Entities
   const canvasRef = useRef(null);
+  const lightCanvasRef = useRef(null);
   const networkRef = useRef(null);
   const animFrameIdRef = useRef(null);
   const lastTimeRef = useRef(0);
   const keysDownRef = useRef({});
   const mousePosRef = useRef({ x: 0, y: 0 });
+  const hasMovedMouseRef = useRef(false);
 
   // Map & Game State Mutable Storage
   const mapDataRef = useRef(null);
@@ -252,11 +254,12 @@ export default function SchoolTagGame({ onScoreSubmitted }) {
     setStaminaPercent(100);
     setGameResult(null);
     setIsScoreSubmitted(false);
+    hasMovedMouseRef.current = false;
 
-    // Spawn Player (Runner)
+    // Spawn Player (Runner) at center of clean floor tile in Classroom 1
     playerRef.current = {
-      x: 3 * SCHOOL_TAG_CONSTANTS.TILE_SIZE,
-      y: 2 * SCHOOL_TAG_CONSTANTS.TILE_SIZE,
+      x: 4.5 * SCHOOL_TAG_CONSTANTS.TILE_SIZE,
+      y: 2.5 * SCHOOL_TAG_CONSTANTS.TILE_SIZE,
       facingAngle: 0,
       radius: SCHOOL_TAG_CONSTANTS.RUNNER_RADIUS,
       stamina: SCHOOL_TAG_CONSTANTS.RUNNER_STAMINA_MAX,
@@ -267,11 +270,11 @@ export default function SchoolTagGame({ onScoreSubmitted }) {
       skinId: selectedSkin,
     };
 
-    // Spawn Tagger
+    // Spawn Tagger in Hallway
     taggerRef.current = {
-      x: 13 * SCHOOL_TAG_CONSTANTS.TILE_SIZE,
-      y: 6 * SCHOOL_TAG_CONSTANTS.TILE_SIZE,
-      facingAngle: Math.PI / 2,
+      x: 13.5 * SCHOOL_TAG_CONSTANTS.TILE_SIZE,
+      y: 5.5 * SCHOOL_TAG_CONSTANTS.TILE_SIZE,
+      facingAngle: Math.PI,
       radius: SCHOOL_TAG_CONSTANTS.TAGGER_RADIUS,
       isStunned: false,
       stunTimer: 0,
@@ -338,6 +341,7 @@ export default function SchoolTagGame({ onScoreSubmitted }) {
 
   // Mouse Move for Flashlight Aiming
   const handleMouseMove = (e) => {
+    hasMovedMouseRef.current = true;
     const canvas = canvasRef.current;
     if (!canvas) return;
     const rect = canvas.getBoundingClientRect();
@@ -402,6 +406,11 @@ export default function SchoolTagGame({ onScoreSubmitted }) {
 
         moveEntityWithSliding(p, moveX, moveY, dt, map.walls, map.width, map.height);
 
+        // Turn towards movement direction when moving (keyboard & mobile touch)
+        if (!hasMovedMouseRef.current) {
+          p.facingAngle = Math.atan2(moveY, moveX);
+        }
+
         // Footstep Audio & Noise Wave Generation
         noiseSpawnTimerRef.current += dt;
         const interval = isSprinting
@@ -439,12 +448,14 @@ export default function SchoolTagGame({ onScoreSubmitted }) {
 
       setStaminaPercent(Math.floor((p.stamina / SCHOOL_TAG_CONSTANTS.RUNNER_STAMINA_MAX) * 100));
 
-      // Calculate Facing Angle toward Mouse Position (Relative to Camera)
-      const cameraX = p.x - SCHOOL_TAG_CONSTANTS.CANVAS_WIDTH / 2;
-      const cameraY = p.y - SCHOOL_TAG_CONSTANTS.CANVAS_HEIGHT / 2;
-      const worldMouseX = mousePosRef.current.x + cameraX;
-      const worldMouseY = mousePosRef.current.y + cameraY;
-      p.facingAngle = Math.atan2(worldMouseY - p.y, worldMouseX - p.x);
+      // Calculate Facing Angle toward Mouse Position if mouse was moved
+      if (hasMovedMouseRef.current) {
+        const cameraX = p.x - SCHOOL_TAG_CONSTANTS.CANVAS_WIDTH / 2;
+        const cameraY = p.y - SCHOOL_TAG_CONSTANTS.CANVAS_HEIGHT / 2;
+        const worldMouseX = mousePosRef.current.x + cameraX;
+        const worldMouseY = mousePosRef.current.y + cameraY;
+        p.facingAngle = Math.atan2(worldMouseY - p.y, worldMouseX - p.x);
+      }
     }
 
     // 3. Update Noise Waves
@@ -785,21 +796,33 @@ export default function SchoolTagGame({ onScoreSubmitted }) {
     ctx.restore(); // Restore Camera Transform
 
     // ==========================================
-    // LAYER 2: 2D FOG OF WAR & LIGHT MASKING
+    // LAYER 2: 2D FOG OF WAR & DYNAMIC LIGHTING
     // ==========================================
-    // Render darkness mask over entire canvas, then carve out flashlight cone
-    ctx.save();
+    // Use an offscreen canvas buffer to create a dark mask and carve out light cones
+    if (!lightCanvasRef.current) {
+      lightCanvasRef.current = document.createElement('canvas');
+    }
+    const lightCanvas = lightCanvasRef.current;
+    if (lightCanvas.width !== cw || lightCanvas.height !== ch) {
+      lightCanvas.width = cw;
+      lightCanvas.height = ch;
+    }
+    const lctx = lightCanvas.getContext('2d');
 
-    // 1. Draw pitch-black darkness overlay
-    ctx.fillStyle = 'rgba(2, 6, 23, 0.96)';
-    ctx.fillRect(0, 0, cw, ch);
+    // 1. Fill light buffer with dark night fog (0.93 opacity: deep darkness, but soft silhouettes)
+    lctx.clearRect(0, 0, cw, ch);
+    lctx.fillStyle = 'rgba(2, 6, 23, 0.93)';
+    lctx.fillRect(0, 0, cw, ch);
 
-    // 2. Carve out Player Flashlight Cone (Destination-Out)
+    const pScreenX = p.x - camX;
+    const pScreenY = p.y - camY;
+    const tScreenX = t.x - camX;
+    const tScreenY = t.y - camY;
+
+    // 2. Carve out Player Flashlight Cone & Ambient Body Glow on OFFSCREEN buffer
+    let lightPolygon = [];
     if (!p.isHiding) {
-      const pScreenX = p.x - camX;
-      const pScreenY = p.y - camY;
-
-      const lightPolygon = computeFlashlightPolygon(
+      lightPolygon = computeFlashlightPolygon(
         p.x,
         p.y,
         p.facingAngle,
@@ -808,50 +831,53 @@ export default function SchoolTagGame({ onScoreSubmitted }) {
         map.segments
       );
 
-      ctx.globalCompositeOperation = 'destination-out';
+      lctx.save();
+      lctx.globalCompositeOperation = 'destination-out';
 
-      // Radial gradient for flashlight beam
-      const grad = ctx.createRadialGradient(
+      // A. Flashlight cone cutout with smooth falloff
+      if (lightPolygon.length > 0) {
+        const grad = lctx.createRadialGradient(
+          pScreenX,
+          pScreenY,
+          10,
+          pScreenX,
+          pScreenY,
+          SCHOOL_TAG_CONSTANTS.RUNNER_LIGHT_DISTANCE
+        );
+        grad.addColorStop(0, 'rgba(0, 0, 0, 1.0)');
+        grad.addColorStop(0.7, 'rgba(0, 0, 0, 0.9)');
+        grad.addColorStop(1, 'rgba(0, 0, 0, 0.0)');
+        lctx.fillStyle = grad;
+        lctx.beginPath();
+        lctx.moveTo(pScreenX, pScreenY);
+        lightPolygon.forEach((pt) => {
+          lctx.lineTo(pt.x - camX, pt.y - camY);
+        });
+        lctx.closePath();
+        lctx.fill();
+      }
+
+      // B. Ambient circular light around player feet (always clearly see self and immediate surroundings)
+      const ambientGrad = lctx.createRadialGradient(
         pScreenX,
         pScreenY,
-        15,
+        0,
         pScreenX,
         pScreenY,
-        SCHOOL_TAG_CONSTANTS.RUNNER_LIGHT_DISTANCE
+        70
       );
-      grad.addColorStop(0, 'rgba(0, 0, 0, 1.0)');
-      grad.addColorStop(0.75, 'rgba(0, 0, 0, 0.85)');
-      grad.addColorStop(1, 'rgba(0, 0, 0, 0.0)');
-
-      ctx.fillStyle = grad;
-      ctx.beginPath();
-      ctx.moveTo(pScreenX, pScreenY);
-      lightPolygon.forEach((pt) => {
-        ctx.lineTo(pt.x - camX, pt.y - camY);
-      });
-      ctx.closePath();
-      ctx.fill();
-
-      // Ambient Player Glow around feet
-      const ambientGrad = ctx.createRadialGradient(
-        pScreenX,
-        pScreenY,
-        5,
-        pScreenX,
-        pScreenY,
-        SCHOOL_TAG_CONSTANTS.RUNNER_AMBIENT_LIGHT_RADIUS
-      );
-      ambientGrad.addColorStop(0, 'rgba(0, 0, 0, 0.9)');
+      ambientGrad.addColorStop(0, 'rgba(0, 0, 0, 1.0)');
+      ambientGrad.addColorStop(0.75, 'rgba(0, 0, 0, 0.8)');
       ambientGrad.addColorStop(1, 'rgba(0, 0, 0, 0.0)');
-      ctx.fillStyle = ambientGrad;
-      ctx.beginPath();
-      ctx.arc(pScreenX, pScreenY, SCHOOL_TAG_CONSTANTS.RUNNER_AMBIENT_LIGHT_RADIUS, 0, Math.PI * 2);
-      ctx.fill();
+      lctx.fillStyle = ambientGrad;
+      lctx.beginPath();
+      lctx.arc(pScreenX, pScreenY, 70, 0, Math.PI * 2);
+      lctx.fill();
+
+      lctx.restore();
     }
 
-    // 3. Tagger Red Flashlight / Glow
-    const tScreenX = t.x - camX;
-    const tScreenY = t.y - camY;
+    // 3. Carve out Tagger's Red Lantern Light Cone & Evil Aura on OFFSCREEN buffer
     const taggerPoly = computeFlashlightPolygon(
       t.x,
       t.y,
@@ -861,45 +887,115 @@ export default function SchoolTagGame({ onScoreSubmitted }) {
       map.segments
     );
 
-    // Carve out tagger's red light so it's visible in the dark
-    ctx.globalCompositeOperation = 'destination-out';
-    const taggerGrad = ctx.createRadialGradient(
-      tScreenX,
-      tScreenY,
-      10,
-      tScreenX,
-      tScreenY,
-      SCHOOL_TAG_CONSTANTS.TAGGER_LIGHT_DISTANCE
-    );
-    taggerGrad.addColorStop(0, 'rgba(0, 0, 0, 0.85)');
-    taggerGrad.addColorStop(1, 'rgba(0, 0, 0, 0.0)');
-    ctx.fillStyle = taggerGrad;
-    ctx.beginPath();
-    ctx.moveTo(tScreenX, tScreenY);
-    taggerPoly.forEach((pt) => {
-      ctx.lineTo(pt.x - camX, pt.y - camY);
-    });
-    ctx.closePath();
-    ctx.fill();
+    lctx.save();
+    lctx.globalCompositeOperation = 'destination-out';
+    if (taggerPoly.length > 0) {
+      const taggerGrad = lctx.createRadialGradient(
+        tScreenX,
+        tScreenY,
+        10,
+        tScreenX,
+        tScreenY,
+        SCHOOL_TAG_CONSTANTS.TAGGER_LIGHT_DISTANCE
+      );
+      taggerGrad.addColorStop(0, 'rgba(0, 0, 0, 0.95)');
+      taggerGrad.addColorStop(0.75, 'rgba(0, 0, 0, 0.7)');
+      taggerGrad.addColorStop(1, 'rgba(0, 0, 0, 0.0)');
+      lctx.fillStyle = taggerGrad;
+      lctx.beginPath();
+      lctx.moveTo(tScreenX, tScreenY);
+      taggerPoly.forEach((pt) => {
+        lctx.lineTo(pt.x - camX, pt.y - camY);
+      });
+      lctx.closePath();
+      lctx.fill();
+    }
 
-    ctx.restore();
-
-    // 4. Add Sinister Red Tint around Tagger (Source-Over)
-    ctx.save();
-    const redAuraGrad = ctx.createRadialGradient(
+    // Tagger ambient aura cutout
+    const taggerAmbGrad = lctx.createRadialGradient(
       tScreenX,
       tScreenY,
-      10,
+      0,
       tScreenX,
       tScreenY,
       SCHOOL_TAG_CONSTANTS.TAGGER_RED_AURA_RADIUS
     );
-    redAuraGrad.addColorStop(0, 'rgba(239, 68, 68, 0.45)');
+    taggerAmbGrad.addColorStop(0, 'rgba(0, 0, 0, 0.9)');
+    taggerAmbGrad.addColorStop(1, 'rgba(0, 0, 0, 0.0)');
+    lctx.fillStyle = taggerAmbGrad;
+    lctx.beginPath();
+    lctx.arc(tScreenX, tScreenY, SCHOOL_TAG_CONSTANTS.TAGGER_RED_AURA_RADIUS, 0, Math.PI * 2);
+    lctx.fill();
+    lctx.restore();
+
+    // 4. Carve out Golden Key Gleams (Glimmer through the darkness)
+    keysRef.current.forEach((k) => {
+      if (!k.isCollected) {
+        const kScreenX = k.x - camX;
+        const kScreenY = k.y - camY;
+        lctx.save();
+        lctx.globalCompositeOperation = 'destination-out';
+        const keyGleam = lctx.createRadialGradient(kScreenX, kScreenY, 0, kScreenX, kScreenY, 55);
+        keyGleam.addColorStop(0, 'rgba(0, 0, 0, 0.85)');
+        keyGleam.addColorStop(1, 'rgba(0, 0, 0, 0.0)');
+        lctx.fillStyle = keyGleam;
+        lctx.beginPath();
+        lctx.arc(kScreenX, kScreenY, 55, 0, Math.PI * 2);
+        lctx.fill();
+        lctx.restore();
+      }
+    });
+
+    // 5. Draw the Darkness Mask onto the Main Canvas
+    ctx.save();
+    ctx.globalCompositeOperation = 'source-over';
+    ctx.drawImage(lightCanvas, 0, 0);
+    ctx.restore();
+
+    // 6. Draw Atmospheric Light Beam & Sinister Tagger Glow
+    ctx.save();
+    ctx.globalCompositeOperation = 'screen';
+
+    // Warm flashlight beam glow
+    if (!p.isHiding && lightPolygon.length > 0) {
+      const beamGrad = ctx.createRadialGradient(
+        pScreenX,
+        pScreenY,
+        10,
+        pScreenX,
+        pScreenY,
+        SCHOOL_TAG_CONSTANTS.RUNNER_LIGHT_DISTANCE
+      );
+      beamGrad.addColorStop(0, 'rgba(254, 240, 138, 0.32)');
+      beamGrad.addColorStop(0.7, 'rgba(254, 240, 138, 0.12)');
+      beamGrad.addColorStop(1, 'rgba(254, 240, 138, 0.0)');
+      ctx.fillStyle = beamGrad;
+      ctx.beginPath();
+      ctx.moveTo(pScreenX, pScreenY);
+      lightPolygon.forEach((pt) => {
+        ctx.lineTo(pt.x - camX, pt.y - camY);
+      });
+      ctx.closePath();
+      ctx.fill();
+    }
+
+    // Sinister red aura around tagger
+    const redAuraGrad = ctx.createRadialGradient(
+      tScreenX,
+      tScreenY,
+      0,
+      tScreenX,
+      tScreenY,
+      SCHOOL_TAG_CONSTANTS.TAGGER_RED_AURA_RADIUS
+    );
+    redAuraGrad.addColorStop(0, 'rgba(239, 68, 68, 0.6)');
+    redAuraGrad.addColorStop(0.7, 'rgba(239, 68, 68, 0.2)');
     redAuraGrad.addColorStop(1, 'rgba(239, 68, 68, 0.0)');
     ctx.fillStyle = redAuraGrad;
     ctx.beginPath();
     ctx.arc(tScreenX, tScreenY, SCHOOL_TAG_CONSTANTS.TAGGER_RED_AURA_RADIUS, 0, Math.PI * 2);
     ctx.fill();
+
     ctx.restore();
   };
 
