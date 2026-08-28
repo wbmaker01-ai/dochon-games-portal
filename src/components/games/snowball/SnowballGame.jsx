@@ -73,11 +73,11 @@ export default function SnowballGame({ onScoreSubmitted }) {
   const handleGameOver = useCallback((stats) => {
     setGameResult(stats);
     setGameState('GAME_OVER');
-    setPlayerName('');
+    setPlayerName(p2pName || '');
     setIsSubmitted(false);
     setIsSubmitting(false);
     haptics.success();
-  }, []);
+  }, [p2pName]);
 
   // Launch Game Engine (Solo or P2P)
   const launchGameEngine = useCallback(
@@ -323,9 +323,11 @@ export default function SnowballGame({ onScoreSubmitted }) {
     setIsMuted(nextMuted);
   };
 
-  // Submit Score to Hall of Fame (Dochon Rule: score > 100, placeholder: '예: 홍길동')
+  // Submit Score to Hall of Fame (P2P Mode ONLY, score > 100, placeholder: '예: 홍길동')
   const handleSubmitScore = async (e) => {
     e.preventDefault();
+    // STRICT RULE: Only P2P matches are eligible for Hall of Fame
+    if (playMode !== 'P2P') return;
     if (!gameResult || gameResult.totalScore <= 100) return;
     if (!playerName.trim() || isSubmitting || isSubmitted) return;
 
@@ -674,80 +676,124 @@ export default function SnowballGame({ onScoreSubmitted }) {
       {gameState === 'GAME_OVER' && gameResult && (
         <div className="snowball-gameover-overlay">
           <div className="snowball-gameover-card">
-            <div className="snowball-gameover-badge">
-              {gameResult.isVictory ? '👑' : (gameResult.rank <= 3 ? '🥈' : '🌊')}
-            </div>
-
-            <h2 className={`snowball-gameover-title ${gameResult.isVictory ? 'win' : ''}`}>
-              {gameResult.isVictory ? '최후의 생존자! 승리!' : `${gameResult.rank}위로 탈락했습니다`}
-            </h2>
-
-            <div className="snowball-gameover-score-box">
-              <div className="snowball-score-row">
-                <span>생존 순위</span>
-                <span>{gameResult.rank}위 / {gameResult.totalPlayers}명</span>
+            {/* 1. Golden MVP Showcase Card */}
+            <div className="snowball-mvp-showcase">
+              <div className="snowball-mvp-crown">👑</div>
+              <div className="snowball-mvp-badge">
+                <Sparkles size={14} /> MVP 1위 챔피언 <Sparkles size={14} />
               </div>
-              <div className="snowball-score-row">
-                <span>처치한 상대</span>
-                <span>{gameResult.kills}명 (+{gameResult.kills * 150}점)</span>
-              </div>
-              <div className="snowball-score-row">
-                <span>생존 시간</span>
-                <span>{gameResult.survivalSeconds}초 (+{gameResult.survivalSeconds * 8}점)</span>
-              </div>
-              <div className="snowball-score-total">
-                <span>최종 획득 점수</span>
-                <span className="snowball-score-number">{gameResult.totalScore}점</span>
-              </div>
-            </div>
-
-            {/* Hall of Fame Form: STRICT DOCHON RULE
-                1. score > 100 ONLY (score <= 100 hides form completely)
-                2. placeholder must be '예: 홍길동'
-            */}
-            {gameResult.totalScore > 100 ? (
-              <div className="snowball-halloffame-box">
-                <div className="snowball-halloffame-title">
-                  <Trophy size={14} color="#FBBF24" />
-                  <span>도촌초 명예의 전당 점수 등록</span>
-                </div>
-                {isSubmitted ? (
-                  <div style={{ color: '#34D399', fontSize: '13px', fontWeight: 800, padding: '4px' }}>
-                    ✅ 명예의 전당에 점수가 등록되었습니다!
-                  </div>
-                ) : (
-                  <form onSubmit={handleSubmitScore} className="snowball-submit-form">
-                    <input
-                      type="text"
-                      className="snowball-submit-input"
-                      placeholder="예: 홍길동"
-                      value={playerName}
-                      onChange={(e) => setPlayerName(e.target.value)}
-                      maxLength={10}
-                      disabled={isSubmitting}
-                    />
-                    <button
-                      type="submit"
-                      className="snowball-submit-btn"
-                      disabled={isSubmitting || !playerName.trim()}
-                    >
-                      <Send size={14} /> {isSubmitting ? '등록 중' : '등록'}
-                    </button>
-                  </form>
+              <div className="snowball-mvp-name-row">
+                <span className="snowball-mvp-avatar">{gameResult.mvp?.avatarEmoji || '⛄'}</span>
+                <span className="snowball-mvp-title">{gameResult.mvp?.name || '챔피언'}</span>
+                {gameResult.mvp?.id === (playMode === 'P2P' ? snowballNet.myPeerId : 'local') && (
+                  <span className="snowball-my-tag">⭐ 나</span>
                 )}
               </div>
+              <div className="snowball-mvp-details">
+                <span className="mvp-stat-item">⚔️ 처치: <strong>{gameResult.mvp?.kills || 0}명</strong></span>
+                <span className="mvp-stat-divider">|</span>
+                <span className="mvp-stat-item">⏱️ 생존: <strong>{gameResult.mvp?.survivalSeconds || 0}초</strong></span>
+                <span className="mvp-stat-divider">|</span>
+                <span className="mvp-stat-score">✨ {gameResult.mvp?.totalScore || 0}점</span>
+              </div>
+            </div>
+
+            {/* 2. All Players Scoreboard Table */}
+            <div className="snowball-scoreboard-section">
+              <div className="snowball-scoreboard-header">
+                <span>🏅 전체 참가자 경기 성적표</span>
+                <span style={{ fontSize: '11px', color: '#94A3B8' }}>총 {gameResult.allPlayers?.length || 0}명 참가</span>
+              </div>
+              <div className="snowball-scoreboard-list">
+                {gameResult.allPlayers?.map((item) => {
+                  const isMe = item.id === (playMode === 'P2P' ? snowballNet.myPeerId : 'local');
+                  let rankEmoji = `${item.rank}위`;
+                  if (item.rank === 1) rankEmoji = '🥇 1위';
+                  else if (item.rank === 2) rankEmoji = '🥈 2위';
+                  else if (item.rank === 3) rankEmoji = '🥉 3위';
+
+                  return (
+                    <div
+                      key={item.id}
+                      className={`snowball-scoreboard-row ${item.rank === 1 ? 'rank-1' : ''} ${isMe ? 'my-row' : ''}`}
+                    >
+                      <div className="scoreboard-col-rank">
+                        <span className="rank-text">{rankEmoji}</span>
+                      </div>
+                      <div className="scoreboard-col-player">
+                        <span className="player-avatar">{item.avatarEmoji || '⛄'}</span>
+                        <span className="player-name">{item.name}</span>
+                        {isMe && <span className="snowball-my-tag mini">나</span>}
+                      </div>
+                      <div className="scoreboard-col-stats">
+                        <span className="stat-kill">⚔️ {item.kills}</span>
+                        <span className="stat-time">⏱️ {item.survivalSeconds}s</span>
+                      </div>
+                      <div className="scoreboard-col-score">
+                        <strong>{item.totalScore}점</strong>
+                      </div>
+                    </div>
+                  );
+                })}
+              </div>
+            </div>
+
+            {/* 3. Hall of Fame Registration Section (P2P Mode ONLY) */}
+            {playMode === 'P2P' ? (
+              gameResult.totalScore > 100 ? (
+                <div className="snowball-halloffame-box p2p-active">
+                  <div className="snowball-halloffame-title">
+                    <Trophy size={14} color="#FBBF24" />
+                    <span>도촌초 명예의 전당 점수 등록 (실시간 P2P 멀티플레이 기록)</span>
+                  </div>
+                  {isSubmitted ? (
+                    <div style={{ color: '#34D399', fontSize: '13px', fontWeight: 800, padding: '6px' }}>
+                      ✅ 명예의 전당에 점수({gameResult.totalScore}점)가 등록되었습니다!
+                    </div>
+                  ) : (
+                    <form onSubmit={handleSubmitScore} className="snowball-submit-form">
+                      <input
+                        type="text"
+                        className="snowball-submit-input"
+                        placeholder="예: 홍길동"
+                        value={playerName}
+                        onChange={(e) => setPlayerName(e.target.value)}
+                        maxLength={10}
+                        disabled={isSubmitting}
+                      />
+                      <button
+                        type="submit"
+                        className="snowball-submit-btn"
+                        disabled={isSubmitting || !playerName.trim()}
+                      >
+                        <Send size={14} /> {isSubmitting ? '등록 중' : '내 점수 등록'}
+                      </button>
+                    </form>
+                  )}
+                </div>
+              ) : (
+                <div className="snowball-score-notice">
+                  * 100점을 초과 달성해야 도촌초 명예의 전당에 점수를 등록할 수 있습니다. (현재 {gameResult.totalScore}점)
+                </div>
+              )
             ) : (
-              <div style={{ fontSize: '11px', color: '#64748B', marginBottom: '12px' }}>
-                * 100점을 초과 달성해야 도촌초 명예의 전당에 점수를 등록할 수 있습니다.
+              <div className="snowball-solo-p2p-notice">
+                <Globe size={16} color="#38BDF8" style={{ flexShrink: 0 }} />
+                <span>
+                  도촌초 명예의 전당 점수 등록은 <strong>'실시간 P2P 멀티플레이'</strong> 대결에서만 가능합니다! 친구와 4자리 코드로 함께 대결해보세요 🌐
+                </span>
               </div>
             )}
 
             <div className="snowball-gameover-actions">
               <button className="snowball-btn-secondary" onClick={handleBackToLobby}>
-                <LogOut size={16} /> 로비로
+                <LogOut size={16} /> 로비로 나가기
               </button>
-              <button className="snowball-btn-primary" onClick={handleStartSolo}>
-                <RotateCcw size={16} /> 다시 도전
+              <button
+                className="snowball-btn-primary"
+                onClick={playMode === 'P2P' ? handleBackToLobby : handleStartSolo}
+              >
+                <RotateCcw size={16} /> {playMode === 'P2P' ? '새 방 만들기' : '다시 도전'}
               </button>
             </div>
           </div>

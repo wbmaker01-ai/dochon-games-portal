@@ -785,12 +785,13 @@ export class SnowballLogic {
       if (distFromCenter > this.currentRadius + 18) {
         p.isAlive = false;
         p.rank = alivePlayers.length; // E.g. 8th, 7th...
+        p.survivalSeconds = Math.floor(this.matchTime); // Save exact survival time
 
         // Audio & Splash
         snowballAudio.playRingOut();
         this.addWaterSplash(p.x, p.y);
 
-        // Attribute kill if knocked out within 4 seconds
+        // Attribute kill if knocked out within 4.5 seconds
         if (p.lastHitBy && Date.now() - p.lastHitTime < 4500) {
           const killer = this.players.find(k => k.id === p.lastHitBy);
           if (killer) {
@@ -806,37 +807,61 @@ export class SnowballLogic {
     });
   }
 
-  // --- Match End Check ---
+  // --- Match End Check & Full Scoreboard Calculation ---
   checkMatchConditions() {
     const alivePlayers = this.players.filter(p => p.isAlive);
 
     if (alivePlayers.length <= 1) {
       if (alivePlayers.length === 1) {
         alivePlayers[0].rank = 1;
+        alivePlayers[0].survivalSeconds = Math.floor(this.matchTime);
       }
 
-      const me = this.getLocalPlayer();
-      const myRank = me ? (me.rank || 1) : 8;
-      const myKills = me ? me.kills : 0;
-      const survivalSeconds = Math.floor(this.matchTime);
+      // Calculate detailed scoreboard for ALL players
+      const allPlayersSummary = this.players.map(p => {
+        const pRank = p.rank || 1;
+        const pKills = p.kills || 0;
+        const pSurvival = p.survivalSeconds != null ? p.survivalSeconds : Math.floor(this.matchTime);
+        const rankBonus = SCORING.RANK_BONUS[pRank - 1] || 10;
+        const killBonus = pKills * SCORING.KILL_BONUS;
+        const survivalBonus = pSurvival * SCORING.SURVIVAL_PER_SEC;
+        const totalScore = rankBonus + killBonus + survivalBonus;
 
-      // Score Formula
-      const rankBonus = SCORING.RANK_BONUS[myRank - 1] || 10;
-      const killBonus = myKills * SCORING.KILL_BONUS;
-      const survivalBonus = survivalSeconds * SCORING.SURVIVAL_PER_SEC;
-      const totalScore = rankBonus + killBonus + survivalBonus;
+        return {
+          id: p.id,
+          name: p.name,
+          skinId: p.skinId || 'penguin',
+          avatarEmoji: p.skin ? p.skin.avatarEmoji : '⛄',
+          isBot: !!p.isBot,
+          rank: pRank,
+          kills: pKills,
+          survivalSeconds: pSurvival,
+          totalScore,
+          isMVP: pRank === 1
+        };
+      });
+
+      // Sort: 1st rank to last rank
+      allPlayersSummary.sort((a, b) => a.rank - b.rank);
+
+      const me = this.getLocalPlayer();
+      const mySummary = allPlayersSummary.find(p => p.id === this.myPeerId) || allPlayersSummary[0];
+      const mvp = allPlayersSummary[0];
 
       const matchStats = {
-        isVictory: myRank === 1,
-        rank: myRank,
+        isVictory: mySummary.rank === 1,
+        rank: mySummary.rank,
         totalPlayers: this.players.length,
-        kills: myKills,
-        survivalSeconds,
-        totalScore,
-        winnerName: alivePlayers[0] ? alivePlayers[0].name : '생존자 없음'
+        kills: mySummary.kills,
+        survivalSeconds: mySummary.survivalSeconds,
+        totalScore: mySummary.totalScore,
+        winnerName: mvp ? mvp.name : '생존자 없음',
+        mvp,
+        allPlayers: allPlayersSummary,
+        playMode: this.networkMode === 'local' ? 'SOLO' : 'P2P'
       };
 
-      if (myRank === 1) {
+      if (mySummary.rank === 1) {
         snowballAudio.playWin();
         this.addVictoryConfetti();
       }

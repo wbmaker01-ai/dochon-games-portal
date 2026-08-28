@@ -3,10 +3,39 @@
 
 export const CHANGELOG_DATA = [
   {
+    version: 'v1.48.1',
+    date: '2026-08-28',
+    title: '☃️ [도촌 눈싸움 서바이벌] 실시간 P2P 전용 명예의 전당 등록 & 전체 참가자 성적표 및 1등 MVP 특별 연출 시스템',
+    badge: 'LATEST',
+    badgeColor: 'emerald',
+    items: [
+      {
+        tag: 'P2P LEADERBOARD',
+        tagColor: 'blue',
+        text: '[실시간 P2P 멀티플레이 전용 점수 등록] 도촌초 명예의 전당의 공정성과 경쟁의 묘미를 위해, 명예의 전당 점수 등록을 친구들과 직접 대결하는 실시간 P2P 경기에서만 가능하도록 규칙 개편'
+      },
+      {
+        tag: 'GOLDEN MVP',
+        tagColor: 'amber',
+        text: '[최후의 생존자 MVP 특별 하이라이트] 경기 1등(최후의 생존자)에게 황금 왕관, 빛나는 골드 배너, 처치 수와 생존 시간을 돋보이게 하는 MVP 챔피언 특별 연출 적용'
+      },
+      {
+        tag: 'FULL SCOREBOARD',
+        tagColor: 'purple',
+        text: '[전체 참가 플레이어 경기 성적표] 경기가 종료되면 1위부터 8위까지 모든 참가자(플레이어 및 봇)의 순위, 아바타, 처치 수, 생존 시간, 획득 점수를 한눈에 비교 확인 가능한 통합 리절트 보드 제공'
+      },
+      {
+        tag: 'INDIVIDUAL SUBMISSION',
+        tagColor: 'emerald',
+        text: '[개인별 점수 확인 후 제출 플로우] 전체 플레이어 성적표에서 자신의 활약과 점수를 확인한 뒤, P2P 모드 플레이어가 자신의 닉네임으로 도촌초 명예의 전당에 직접 점수를 등록할 수 있는 직관적인 알고리즘 구축'
+      }
+    ]
+  },
+  {
     version: 'v1.48.0',
     date: '2026-08-28',
     title: '🔦 [도촌 야간 학교 숨바꼭질] 정식 오픈 (Fog of War 비대칭 서바이벌)',
-    badge: 'LATEST',
+    badge: 'UPDATE',
     badgeColor: 'blue',
     items: [
       {

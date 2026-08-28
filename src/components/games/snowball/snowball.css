@@ -470,90 +470,272 @@
 .snowball-gameover-overlay {
   position: absolute;
   inset: 0;
-  background: rgba(15, 23, 42, 0.88);
-  backdrop-filter: blur(8px);
+  background: rgba(15, 23, 42, 0.92);
+  backdrop-filter: blur(10px);
   display: flex;
   align-items: center;
   justify-content: center;
-  padding: 20px;
+  padding: 16px;
   z-index: 50;
+  overflow-y: auto;
 }
 
 .snowball-gameover-card {
   width: 100%;
-  max-width: 480px;
+  max-width: 540px;
   background: #1E293B;
   border: 2px solid rgba(56, 189, 248, 0.4);
   border-radius: 24px;
-  padding: 28px 24px;
+  padding: 24px 20px;
   display: flex;
   flex-direction: column;
   align-items: center;
   text-align: center;
-  box-shadow: 0 16px 48px rgba(0, 0, 0, 0.6), 0 0 24px rgba(56, 189, 248, 0.2);
+  box-shadow: 0 16px 48px rgba(0, 0, 0, 0.7), 0 0 28px rgba(56, 189, 248, 0.2);
 }
 
-.snowball-gameover-badge {
-  font-size: 48px;
-  margin-bottom: 4px;
+/* 1. Golden MVP Showcase Card */
+.snowball-mvp-showcase {
+  width: 100%;
+  background: linear-gradient(135deg, rgba(245, 158, 11, 0.22), rgba(251, 191, 36, 0.1), rgba(15, 23, 42, 0.8));
+  border: 2px solid #F59E0B;
+  border-radius: 18px;
+  padding: 14px 16px;
+  margin-bottom: 14px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  box-shadow: 0 0 20px rgba(245, 158, 11, 0.35);
+  animation: mvpPulse 2s infinite alternate ease-in-out;
 }
 
-.snowball-gameover-title {
-  font-size: 26px;
+@keyframes mvpPulse {
+  from { box-shadow: 0 0 16px rgba(245, 158, 11, 0.25); transform: scale(0.995); }
+  to { box-shadow: 0 0 26px rgba(251, 191, 36, 0.5); transform: scale(1.005); }
+}
+
+.snowball-mvp-crown {
+  font-size: 36px;
+  line-height: 1;
+  margin-bottom: -4px;
+  filter: drop-shadow(0 4px 8px rgba(245, 158, 11, 0.6));
+}
+
+.snowball-mvp-badge {
+  background: linear-gradient(135deg, #F59E0B, #D97706);
+  color: #FFFFFF;
+  font-size: 11px;
   font-weight: 900;
-  margin: 0;
+  padding: 3px 12px;
+  border-radius: 9999px;
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  margin-bottom: 8px;
+  letter-spacing: 0.5px;
+  box-shadow: 0 2px 8px rgba(245, 158, 11, 0.4);
+}
+
+.snowball-mvp-name-row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 8px;
+}
+
+.snowball-mvp-avatar {
+  font-size: 26px;
+}
+
+.snowball-mvp-title {
+  font-size: 20px;
+  font-weight: 900;
+  color: #FFFFFF;
+  text-shadow: 0 2px 8px rgba(0, 0, 0, 0.5);
+}
+
+.snowball-my-tag {
+  background: #0284C7;
+  color: #FFFFFF;
+  font-size: 11px;
+  font-weight: 800;
+  padding: 2px 8px;
+  border-radius: 6px;
+}
+
+.snowball-my-tag.mini {
+  font-size: 9px;
+  padding: 1px 5px;
+}
+
+.snowball-mvp-details {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 12px;
+  color: #BAE6FD;
+}
+
+.mvp-stat-item strong {
   color: #FFFFFF;
 }
 
-.snowball-gameover-title.win {
-  background: linear-gradient(135deg, #FDE047, #F59E0B);
-  -webkit-background-clip: text;
-  -webkit-text-fill-color: transparent;
+.mvp-stat-divider {
+  color: rgba(56, 189, 248, 0.4);
 }
 
-.snowball-gameover-score-box {
+.mvp-stat-score {
+  font-size: 16px;
+  font-weight: 900;
+  color: #FDE047;
+  text-shadow: 0 0 10px rgba(251, 191, 36, 0.6);
+}
+
+/* 2. All Players Scoreboard */
+.snowball-scoreboard-section {
   width: 100%;
   background: rgba(15, 23, 42, 0.7);
+  border: 1px solid rgba(56, 189, 248, 0.25);
   border-radius: 16px;
-  padding: 16px;
-  margin: 16px 0;
-  display: flex;
-  flex-direction: column;
-  gap: 8px;
+  padding: 12px;
+  margin-bottom: 14px;
 }
 
-.snowball-score-row {
-  display: flex;
-  justify-content: space-between;
-  font-size: 13px;
-  color: #94A3B8;
-}
-
-.snowball-score-total {
+.snowball-scoreboard-header {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  padding-top: 8px;
-  border-top: 1px solid rgba(56, 189, 248, 0.2);
-  font-size: 16px;
+  font-size: 13px;
   font-weight: 800;
-  color: #FFFFFF;
+  color: #BAE6FD;
+  padding-bottom: 8px;
+  border-bottom: 1px solid rgba(56, 189, 248, 0.2);
+  margin-bottom: 8px;
 }
 
-.snowball-score-number {
-  font-size: 26px;
-  font-weight: 900;
+.snowball-scoreboard-list {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  max-height: 175px;
+  overflow-y: auto;
+  padding-right: 4px;
+}
+
+.snowball-scoreboard-list::-webkit-scrollbar {
+  width: 4px;
+}
+.snowball-scoreboard-list::-webkit-scrollbar-thumb {
+  background: rgba(56, 189, 248, 0.3);
+  border-radius: 4px;
+}
+
+.snowball-scoreboard-row {
+  display: grid;
+  grid-template-columns: 60px 1fr 110px 75px;
+  align-items: center;
+  background: rgba(30, 41, 59, 0.6);
+  border: 1px solid rgba(56, 189, 248, 0.15);
+  border-radius: 10px;
+  padding: 6px 10px;
+  font-size: 12px;
+  transition: all 0.2s ease;
+}
+
+.snowball-scoreboard-row.rank-1 {
+  background: rgba(245, 158, 11, 0.15);
+  border-color: rgba(245, 158, 11, 0.4);
+}
+
+.snowball-scoreboard-row.my-row {
+  border-color: #38BDF8;
+  background: rgba(2, 132, 199, 0.22);
+  box-shadow: 0 0 10px rgba(56, 189, 248, 0.25);
+}
+
+.scoreboard-col-rank {
+  font-weight: 800;
+  text-align: left;
+  color: #94A3B8;
+}
+
+.snowball-scoreboard-row.rank-1 .scoreboard-col-rank {
+  color: #FBBF24;
+}
+
+.scoreboard-col-player {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-weight: 700;
+  color: #F8FAFC;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.player-avatar {
+  font-size: 16px;
+}
+
+.scoreboard-col-stats {
+  display: flex;
+  gap: 8px;
+  color: #94A3B8;
+  font-size: 11px;
+}
+
+.stat-kill {
+  color: #EF4444;
+  font-weight: 700;
+}
+
+.stat-time {
   color: #38BDF8;
 }
 
-/* Hall of Fame Submission Form */
-.snowball-halloffame-box {
+.scoreboard-col-score {
+  text-align: right;
+  font-weight: 900;
+  color: #38BDF8;
+  font-size: 13px;
+}
+
+.snowball-scoreboard-row.rank-1 .scoreboard-col-score {
+  color: #FBBF24;
+}
+
+/* 3. Hall of Fame Form & Solo Notice */
+.snowball-halloffame-box.p2p-active {
   width: 100%;
-  margin-bottom: 16px;
-  background: rgba(2, 132, 199, 0.12);
-  border: 1px solid rgba(56, 189, 248, 0.35);
+  margin-bottom: 14px;
+  background: rgba(2, 132, 199, 0.18);
+  border: 2px solid rgba(56, 189, 248, 0.5);
   border-radius: 14px;
   padding: 12px 14px;
+  box-shadow: 0 0 16px rgba(2, 132, 199, 0.3);
+}
+
+.snowball-score-notice {
+  font-size: 11px;
+  color: #64748B;
+  margin-bottom: 12px;
+}
+
+.snowball-solo-p2p-notice {
+  width: 100%;
+  background: rgba(15, 23, 42, 0.6);
+  border: 1px dashed rgba(56, 189, 248, 0.35);
+  border-radius: 12px;
+  padding: 10px 14px;
+  margin-bottom: 14px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 11.5px;
+  color: #BAE6FD;
+  text-align: left;
+  line-height: 1.4;
 }
 
 .snowball-halloffame-title {
