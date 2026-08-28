@@ -1,0 +1,406 @@
+/* Dochon Games Portal - School Tag (도촌 야간 학교 숨바꼭질) Stylesheet */
+/* Dark Atmospheric Horror-Arcade Aesthetics & Responsive Canvas Layout */
+
+.schooltag-container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+  max-width: 1020px;
+  margin: 0 auto;
+  user-select: none;
+  font-family: 'Pretendard', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+  color: #f8fafc;
+  position: relative;
+}
+
+/* Header & Control Bar */
+.schooltag-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  width: 100%;
+  padding: 10px 16px;
+  background: rgba(15, 23, 42, 0.85);
+  border: 1px solid rgba(56, 189, 248, 0.2);
+  border-radius: 14px 14px 0 0;
+  backdrop-filter: blur(10px);
+}
+
+.schooltag-title {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 1.15rem;
+  font-weight: 800;
+  color: #38bdf8;
+  text-shadow: 0 0 12px rgba(56, 189, 248, 0.4);
+}
+
+.schooltag-header-actions {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.schooltag-btn-icon {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 38px;
+  height: 38px;
+  border-radius: 10px;
+  background: rgba(30, 41, 59, 0.8);
+  border: 1px solid rgba(148, 163, 184, 0.25);
+  color: #e2e8f0;
+  cursor: pointer;
+  transition: all 0.15s ease;
+}
+
+.schooltag-btn-icon:hover {
+  background: rgba(51, 65, 85, 0.9);
+  border-color: rgba(56, 189, 248, 0.5);
+  transform: translateY(-1px);
+}
+
+/* Canvas Viewport */
+.schooltag-viewport {
+  position: relative;
+  width: 100%;
+  background: #030712;
+  border: 1px solid rgba(56, 189, 248, 0.2);
+  border-top: none;
+  overflow: hidden;
+  box-shadow: 0 16px 36px rgba(0, 0, 0, 0.8);
+}
+
+.schooltag-canvas {
+  display: block;
+  width: 100%;
+  height: auto;
+  aspect-ratio: 16 / 10;
+  cursor: crosshair;
+}
+
+/* Red Heartbeat Vignette Pulse Overlay */
+.schooltag-vignette {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  box-shadow: inset 0 0 60px rgba(239, 68, 68, 0.5), inset 0 0 120px rgba(220, 38, 38, 0.3);
+  opacity: 0;
+  transition: opacity 0.25s ease;
+}
+
+.schooltag-vignette.active {
+  animation: heartbeatVignette 0.8s infinite ease-in-out;
+}
+
+@keyframes heartbeatVignette {
+  0% { opacity: 0.2; }
+  50% { opacity: 0.85; }
+  100% { opacity: 0.2; }
+}
+
+/* In-Game HUD Overlay */
+.schooltag-hud {
+  position: absolute;
+  top: 14px;
+  left: 16px;
+  right: 16px;
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  pointer-events: none;
+}
+
+.schooltag-hud-left {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.schooltag-key-tracker {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  background: rgba(15, 23, 42, 0.85);
+  border: 1px solid rgba(251, 191, 36, 0.4);
+  border-radius: 20px;
+  padding: 6px 14px;
+  backdrop-filter: blur(8px);
+}
+
+.schooltag-key-slot {
+  font-size: 1.25rem;
+  opacity: 0.25;
+  filter: grayscale(1);
+  transition: all 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+
+.schooltag-key-slot.collected {
+  opacity: 1;
+  filter: drop-shadow(0 0 8px #f59e0b);
+  transform: scale(1.15);
+}
+
+.schooltag-stamina-bar-container {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  background: rgba(15, 23, 42, 0.85);
+  border: 1px solid rgba(56, 189, 248, 0.3);
+  border-radius: 12px;
+  padding: 6px 12px;
+  backdrop-filter: blur(8px);
+}
+
+.schooltag-stamina-bar {
+  width: 110px;
+  height: 8px;
+  background: rgba(30, 41, 59, 0.8);
+  border-radius: 4px;
+  overflow: hidden;
+}
+
+.schooltag-stamina-fill {
+  height: 100%;
+  background: linear-gradient(90deg, #38bdf8, #818cf8);
+  transition: width 0.1s linear;
+}
+
+.schooltag-stamina-fill.low {
+  background: linear-gradient(90deg, #f87171, #ef4444);
+}
+
+.schooltag-hud-right {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 8px;
+}
+
+.schooltag-timer-badge {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  background: rgba(15, 23, 42, 0.85);
+  border: 1px solid rgba(239, 68, 68, 0.4);
+  border-radius: 14px;
+  padding: 6px 14px;
+  font-size: 1.1rem;
+  font-weight: 800;
+  font-family: monospace;
+  color: #f87171;
+  backdrop-filter: blur(8px);
+}
+
+.schooltag-gate-status {
+  background: rgba(15, 23, 42, 0.85);
+  border: 1px solid rgba(34, 197, 94, 0.4);
+  border-radius: 10px;
+  padding: 4px 10px;
+  font-size: 0.82rem;
+  font-weight: 700;
+  color: #4ade80;
+  animation: pulseGreen 1.5s infinite ease-in-out;
+}
+
+@keyframes pulseGreen {
+  0% { transform: scale(0.98); opacity: 0.8; }
+  50% { transform: scale(1.02); opacity: 1; text-shadow: 0 0 10px rgba(74, 222, 128, 0.6); }
+  100% { transform: scale(0.98); opacity: 0.8; }
+}
+
+/* Prompt Banner (Interact, Hiding, Gate) */
+.schooltag-prompt {
+  position: absolute;
+  bottom: 24px;
+  left: 50%;
+  transform: translateX(-50%);
+  background: rgba(15, 23, 42, 0.92);
+  border: 1px solid #38bdf8;
+  box-shadow: 0 0 20px rgba(56, 189, 248, 0.35);
+  border-radius: 24px;
+  padding: 8px 20px;
+  font-size: 0.95rem;
+  font-weight: 700;
+  color: #e0f2fe;
+  pointer-events: none;
+  backdrop-filter: blur(8px);
+  animation: bouncePrompt 1.2s infinite ease-in-out;
+}
+
+@keyframes bouncePrompt {
+  0%, 100% { transform: translate(-50%, 0); }
+  50% { transform: translate(-50%, -4px); }
+}
+
+/* Mobile Virtual Controls */
+.schooltag-mobile-controls {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  width: 100%;
+  padding: 14px 20px;
+  background: rgba(15, 23, 42, 0.9);
+  border: 1px solid rgba(56, 189, 248, 0.2);
+  border-top: none;
+  border-radius: 0 0 14px 14px;
+}
+
+.schooltag-dpad {
+  display: grid;
+  grid-template-columns: repeat(3, 44px);
+  grid-template-rows: repeat(3, 44px);
+  gap: 4px;
+}
+
+.schooltag-dpad-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: rgba(30, 41, 59, 0.9);
+  border: 1px solid rgba(148, 163, 184, 0.3);
+  border-radius: 8px;
+  color: #94a3b8;
+  font-size: 1.2rem;
+  touch-action: manipulation;
+}
+
+.schooltag-dpad-btn:active {
+  background: #38bdf8;
+  color: #0f172a;
+}
+
+.schooltag-mobile-actions {
+  display: flex;
+  gap: 12px;
+}
+
+.schooltag-action-btn {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  width: 68px;
+  height: 68px;
+  border-radius: 50%;
+  background: rgba(30, 41, 59, 0.9);
+  border: 2px solid rgba(56, 189, 248, 0.5);
+  color: #e2e8f0;
+  font-size: 0.85rem;
+  font-weight: 800;
+  touch-action: manipulation;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.4);
+}
+
+.schooltag-action-btn.sprint {
+  border-color: #38bdf8;
+}
+
+.schooltag-action-btn.interact {
+  border-color: #fbbf24;
+}
+
+.schooltag-action-btn:active {
+  transform: scale(0.92);
+  background: #38bdf8;
+  color: #0f172a;
+}
+
+/* Modal Overlay & Card Styling */
+.schooltag-modal-overlay {
+  position: absolute;
+  inset: 0;
+  background: rgba(3, 7, 18, 0.88);
+  backdrop-filter: blur(8px);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 50;
+  padding: 20px;
+}
+
+.schooltag-card {
+  background: #0f172a;
+  border: 1px solid rgba(56, 189, 248, 0.3);
+  border-radius: 20px;
+  padding: 28px;
+  max-width: 460px;
+  width: 100%;
+  box-shadow: 0 20px 40px rgba(0, 0, 0, 0.8), 0 0 30px rgba(56, 189, 248, 0.15);
+  text-align: center;
+}
+
+.schooltag-card-title {
+  font-size: 1.5rem;
+  font-weight: 800;
+  color: #38bdf8;
+  margin-bottom: 8px;
+}
+
+.schooltag-card-desc {
+  font-size: 0.92rem;
+  color: #94a3b8;
+  line-height: 1.5;
+  margin-bottom: 20px;
+}
+
+.schooltag-btn-primary {
+  width: 100%;
+  padding: 13px 20px;
+  background: linear-gradient(135deg, #0284c7, #2563eb);
+  border: none;
+  border-radius: 12px;
+  font-size: 1rem;
+  font-weight: 700;
+  color: #ffffff;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  box-shadow: 0 4px 14px rgba(2, 132, 199, 0.4);
+}
+
+.schooltag-btn-primary:hover {
+  background: linear-gradient(135deg, #0369a1, #1d4ed8);
+  transform: translateY(-1px);
+}
+
+.schooltag-btn-secondary {
+  width: 100%;
+  padding: 11px 20px;
+  background: rgba(30, 41, 59, 0.8);
+  border: 1px solid rgba(148, 163, 184, 0.2);
+  border-radius: 12px;
+  font-size: 0.95rem;
+  font-weight: 600;
+  color: #cbd5e1;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  margin-top: 8px;
+}
+
+.schooltag-btn-secondary:hover {
+  background: rgba(51, 65, 85, 0.9);
+}
+
+/* Result Modal Score Form */
+.schooltag-score-display {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  margin: 16px 0 20px;
+  padding: 14px;
+  background: rgba(30, 41, 59, 0.5);
+  border-radius: 14px;
+  border: 1px solid rgba(56, 189, 248, 0.2);
+}
+
+.schooltag-score-value {
+  font-size: 2.5rem;
+  font-weight: 900;
+  color: #fbbf24;
+  text-shadow: 0 0 16px rgba(251, 191, 36, 0.4);
+  font-family: monospace;
+}

@@ -30,6 +30,7 @@ import PaniPuriGame from './components/games/panipuri/PaniPuriGame';
 import MemoryGame from './components/games/memory/MemoryGame';
 import GhoulDuelGame from './components/games/ghoulduel/GhoulDuelGame';
 import SnowballGame from './components/games/snowball/SnowballGame';
+import SchoolTagGame from './components/games/schooltag/SchoolTagGame';
 import GameCard from './components/GameCard';
 import LeaderboardModal from './components/LeaderboardModal';
 import ChangelogModal from './components/ChangelogModal';
@@ -474,6 +475,13 @@ export default function App() {
                   {activeGame === 'olympics' && '🏅 도촌 미니 올림픽 (DOCHON MINI OLYMPICS)'}
                   {activeGame === 'pangolin' && '🦔 도촌 천산갑의 모험 (PANGOLIN ADVENTURE)'}
                   {activeGame === 'roswell' && '🛸 도촌 UFO 탈출작전 (DOCHON ROSWELL)'}
+                  {activeGame === 'petanque' && '🎯 도촌 페탕크 (DOCHON PETANQUE)'}
+                  {activeGame === 'halfmoon' && '🌙 도촌 달맞이 (DOCHON HALF MOON)'}
+                  {activeGame === 'panipuri' && '🫓 도촌 파니 푸리 (DOCHON PANI PURI)'}
+                  {activeGame === 'memory' && '🧠 도촌 기억력 마스터 (DOCHON MEMORY MASTER)'}
+                  {activeGame === 'ghoulduel' && '👻 도촌 영혼 대결 (DOCHON GHOUL DUEL)'}
+                  {activeGame === 'snowball' && '☃️ 도촌 눈싸움 서바이벌 (DOCHON SNOWBALL)'}
+                  {activeGame === 'schooltag' && '🔦 도촌 야간 학교 숨바꼭질 (DOCHON SCHOOL TAG)'}
                 </span>
                 <span style={{
                   backgroundColor: 'rgba(251, 191, 36, 0.2)',
@@ -616,6 +624,9 @@ export default function App() {
               )}
               {activeGame === 'snowball' && (
                 <SnowballGame onScoreSubmitted={() => openInPageLeaderboardModal('snowball')} />
+              )}
+              {activeGame === 'schooltag' && (
+                <SchoolTagGame onScoreSubmitted={() => openInPageLeaderboardModal('schooltag')} />
               )}
             </div>
           </div>
