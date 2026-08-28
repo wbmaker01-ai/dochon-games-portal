@@ -271,19 +271,21 @@ export const PLAYABLE_GAMES = [
     category: '멀티',
     imageSrc: getThumb('snowball.jpg'),
     isPlayable: true,
-    badgeText: '☃️ NEW 31위',
+    badgeText: '☃️ 31위',
     description: '거대 눈덩이를 굴려 팽이처럼 상대를 밀쳐내고, 얼음이 깨지는 링 밖으로 날려버리는 실시간 서바이벌 배틀로얄!'
-  }
-];
-
-export const COMING_SOON_GAMES = [
+  },
   {
     id: 'schooltag',
     title: '도촌 야간 학교 숨바꼭질',
     category: '멀티',
     imageSrc: getThumb('schooltag.jpg'),
-    isPlayable: false
-  },
+    isPlayable: true,
+    badgeText: '🔦 NEW 32위',
+    description: '불 꺼진 학교에서 손전등 빛과 발자국 소리만 감지하며 황금 열쇠 3개를 모아 비상구로 탈출하는 실시간 숨바꼭질!'
+  }
+];
+
+export const COMING_SOON_GAMES = [
   {
     id: 'microkart',
     title: '도촌 마이크로 카트 레이싱',

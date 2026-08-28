@@ -165,9 +165,11 @@ export class SnowballLogic {
           spinAngle: 0,
           isSpinning: false,
           skinId: botSkin.id,
-          // Bot AI Timers
-          botTimer: Math.random() * 2,
-          botState: 'CHARGE', // 'CHARGE' | 'AIM' | 'EVADE'
+          // Bot AI Timers & Tactical States
+          botTimer: Math.random() * 1.5,
+          botState: 'CHARGE',
+          orbitDir: Math.random() < 0.5 ? 1 : -1,
+          repositionTimer: 0,
           targetPlayerId: null,
           shootDelay: 0
         });
@@ -227,6 +229,9 @@ export class SnowballLogic {
       me.inputAngle = Math.atan2(dy, dx);
     } else if (!this.input.isAiming) {
       me.isMoving = false;
+      // Gentle active braking when keys released to prevent uncontrollable sliding
+      me.vx *= 0.86;
+      me.vy *= 0.86;
     }
 
     if (keys[' '] && !this.input.shootRequested) {
@@ -442,37 +447,54 @@ export class SnowballLogic {
     return timeUntil > 0 && timeUntil <= stage.warningTime;
   }
 
-  // --- AI Behavior Tree ---
+  // --- Advanced Multi-Layer Tactical AI Engine ---
   updateAI(dt) {
     const alivePlayers = this.players.filter(p => p.isAlive);
     const aliveBots = this.players.filter(p => p.isAlive && p.isBot);
 
     aliveBots.forEach(bot => {
       bot.botTimer -= dt;
+      if (bot.repositionTimer > 0) bot.repositionTimer -= dt;
 
-      // 1. Danger Detection: Ice Arena Boundary Check
       const distFromCenter = Math.hypot(bot.x - this.centerX, bot.y - this.centerY);
-      const safeRadius = this.currentRadius * 0.72;
+      const safeRadius = this.currentRadius * 0.62;
+      const dangerRadius = this.currentRadius * 0.80;
 
+      // 1. [CRITICAL] Ring-Out Absolute Defense & Smooth Tangential Orbit
       if (distFromCenter > safeRadius) {
-        // Move urgently back towards center
-        const angleToCenter = Math.atan2(this.centerY - bot.y, this.centerX - bot.x);
-        bot.inputAngle = angleToCenter;
-        bot.isMoving = true;
-        return;
+        const toCenterAngle = Math.atan2(this.centerY - bot.y, this.centerX - bot.x);
+
+        if (distFromCenter > dangerRadius) {
+          // Emergency Recovery: Full reverse thrust towards center
+          bot.inputAngle = toCenterAngle;
+          bot.isMoving = true;
+
+          // Strongly brake outward velocity
+          const outwardDot = (bot.x - this.centerX) * bot.vx + (bot.y - this.centerY) * bot.vy;
+          if (outwardDot > 0) {
+            bot.vx *= 0.75;
+            bot.vy *= 0.75;
+          }
+          return;
+        } else {
+          // Boundary Patrol: Steer diagonally inwards along arena perimeter
+          const orbitAngle = toCenterAngle + (bot.orbitDir || 1) * (Math.PI / 2.8);
+          bot.inputAngle = orbitAngle;
+          bot.isMoving = true;
+          return;
+        }
       }
 
-      // 2. Evade incoming projectiles
+      // 2. [EVASION] Active Sidestep against incoming high-speed snowballs
       let incomingThreat = null;
       for (const proj of this.projectiles) {
         if (proj.ownerId === bot.id) continue;
         const d = Math.hypot(proj.x - bot.x, proj.y - bot.y);
-        if (d < 160) {
-          // Check if projectile is moving towards bot
+        if (d < 170) {
           const projToBotAngle = Math.atan2(bot.y - proj.y, bot.x - proj.x);
           const projDirAngle = Math.atan2(proj.vy, proj.vx);
           const angleDiff = Math.abs(projToBotAngle - projDirAngle);
-          if (angleDiff < 0.6) {
+          if (angleDiff < 0.65) {
             incomingThreat = proj;
             break;
           }
@@ -480,68 +502,112 @@ export class SnowballLogic {
       }
 
       if (incomingThreat) {
-        // Dodge perpendicular to threat
         const threatAngle = Math.atan2(incomingThreat.vy, incomingThreat.vx);
-        bot.inputAngle = threatAngle + Math.PI / 2;
+        bot.inputAngle = threatAngle + (Math.random() < 0.5 ? Math.PI / 2 : -Math.PI / 2);
         bot.isMoving = true;
         return;
       }
 
-      // 3. Normal Behavior Cycle (Grow snowball then aim & fire)
+      // 3. [REPOSITION] Temporary retreat after launching a snowball
+      if (bot.repositionTimer > 0) {
+        const toCenter = Math.atan2(this.centerY - bot.y, this.centerX - bot.x);
+        bot.inputAngle = toCenter + (bot.orbitDir || 1) * 0.4;
+        bot.isMoving = true;
+        return;
+      }
+
+      // 4. [TARGET ACQUISITION & SMART KITING]
+      let closestTarget = null;
+      let closestDist = Infinity;
+      for (const other of alivePlayers) {
+        if (other.id === bot.id) continue;
+        const dist = Math.hypot(other.x - bot.x, other.y - bot.y);
+        if (dist < closestDist) {
+          closestDist = dist;
+          closestTarget = other;
+        }
+      }
+
+      if (!closestTarget) {
+        bot.isMoving = false;
+        return;
+      }
+
+      const angleToTarget = Math.atan2(closestTarget.y - bot.y, closestTarget.x - bot.x);
+      const chargeRatio = (bot.snowballRadius - PLAYER_CONFIG.SNOWBALL_MIN_RADIUS) /
+        (PLAYER_CONFIG.SNOWBALL_MAX_RADIUS - PLAYER_CONFIG.SNOWBALL_MIN_RADIUS);
+
+      // (A) Still charging snowball: Maintain safe distance and cruise
+      if (chargeRatio < 0.50) {
+        if (closestDist < 140) {
+          // Too close! Back off gently
+          bot.inputAngle = angleToTarget + Math.PI;
+        } else {
+          // Circle around target while rolling snow
+          bot.inputAngle = angleToTarget + (bot.orbitDir || 1) * (Math.PI / 2.3);
+        }
+        bot.isMoving = true;
+        return;
+      }
+
+      // (B) Snowball is large & dangerous: Aim with Lead Shot Prediction
       if (bot.botTimer <= 0) {
-        bot.botTimer = 1.2 + Math.random() * 1.5;
+        bot.botTimer = 1.1 + Math.random() * 1.4;
 
-        // Find closest target player
-        let closestDist = Infinity;
-        let target = null;
-        for (const other of alivePlayers) {
-          if (other.id === bot.id) continue;
-          const dist = Math.hypot(other.x - bot.x, other.y - bot.y);
-          if (dist < closestDist) {
-            closestDist = dist;
-            target = other;
-          }
-        }
+        // Lead Target Prediction based on target velocity
+        const bulletSpeed = PLAYER_CONFIG.SNOWBALL_MAX_SPEED - chargeRatio * 3.0;
+        const timeToHit = closestDist / Math.max(bulletSpeed, 4);
+        const predictedX = closestTarget.x + (closestTarget.vx || 0) * timeToHit * 0.85;
+        const predictedY = closestTarget.y + (closestTarget.vy || 0) * timeToHit * 0.85;
 
-        if (target) {
-          bot.targetPlayerId = target.id;
-          const aimAngle = Math.atan2(target.y - bot.y, target.x - bot.x);
-          // Add minor difficulty-based inaccuracy
-          const spread = (1 - this.diffConfig.botAimAccuracy) * (Math.random() - 0.5) * 0.8;
-          bot.inputAngle = aimAngle + spread;
+        const leadAngle = Math.atan2(predictedY - bot.y, predictedX - bot.x);
+        const spread = (1 - this.diffConfig.botAimAccuracy) * (Math.random() - 0.5) * 0.4;
+        bot.inputAngle = leadAngle + spread;
 
-          // Decide whether to shoot
-          const maxAllowedSize = PLAYER_CONFIG.SNOWBALL_MAX_RADIUS * this.diffConfig.botMaxChargeRatio;
-          if (bot.snowballRadius >= Math.min(30, maxAllowedSize) && Math.random() < 0.75) {
+        // Fire when aligned within range
+        if (closestDist >= 110 && closestDist <= 390) {
+          const currentAngleDiff = Math.abs(bot.angle - leadAngle);
+          if (currentAngleDiff < 0.40) {
             this.shootSnowball(bot);
-          } else {
-            bot.isMoving = true;
+            bot.repositionTimer = 1.3;
+            bot.orbitDir = -bot.orbitDir; // Change circling direction
+            return;
           }
         }
+        bot.isMoving = true;
       }
     });
   }
 
-  // --- Players Physics & Growth ---
+  // --- Players Physics & Growth (Gentle acceleration, controllable braking) ---
   updatePlayersPhysics(dt) {
     this.players.forEach(p => {
       if (!p.isAlive) return;
 
-      // Smooth Angle Interpolation
+      // Smooth Angle Interpolation (gentle turning, non-twitchy)
       let diff = p.inputAngle - p.angle;
       while (diff < -Math.PI) diff += Math.PI * 2;
       while (diff > Math.PI) diff -= Math.PI * 2;
-      p.angle += diff * PLAYER_CONFIG.TURN_SPEED;
+      p.angle += diff * (p.isBot ? 0.12 : PLAYER_CONFIG.TURN_SPEED);
 
-      // Speed penalty based on snowball size
+      // Speed penalty based on snowball size (heavier as ball grows)
       const sizeRatio = (p.snowballRadius - PLAYER_CONFIG.SNOWBALL_MIN_RADIUS) /
         (PLAYER_CONFIG.SNOWBALL_MAX_RADIUS - PLAYER_CONFIG.SNOWBALL_MIN_RADIUS);
-      const speedModifier = (1.0 - sizeRatio * 0.28) * (p.isBot ? this.diffConfig.speedMultiplier : 1.0);
-      const currentSpeed = PLAYER_CONFIG.BASE_SPEED * speedModifier;
+      const speedModifier = (1.0 - sizeRatio * 0.35) * (p.isBot ? this.diffConfig.speedMultiplier : 1.0);
+      const maxAllowedSpeed = PLAYER_CONFIG.BASE_SPEED * speedModifier;
 
       if (p.isMoving) {
-        p.vx += Math.cos(p.angle) * (currentSpeed * 0.2);
-        p.vy += Math.sin(p.angle) * (currentSpeed * 0.2);
+        // Smooth progressive acceleration (no instant jerk)
+        const accel = maxAllowedSpeed * 0.12;
+        p.vx += Math.cos(p.angle) * accel;
+        p.vy += Math.sin(p.angle) * accel;
+
+        // Clamp speed to prevent uncontrollable sliding
+        const currentSpeed = Math.hypot(p.vx, p.vy);
+        if (currentSpeed > maxAllowedSpeed) {
+          p.vx = (p.vx / currentSpeed) * maxAllowedSpeed;
+          p.vy = (p.vy / currentSpeed) * maxAllowedSpeed;
+        }
 
         // Grow snowball
         if (p.snowballRadius < PLAYER_CONFIG.SNOWBALL_MAX_RADIUS) {
@@ -558,12 +624,12 @@ export class SnowballLogic {
         }
 
         // Add snow trail
-        if (Math.random() < 0.3) {
+        if (Math.random() < 0.25) {
           this.snowTracks.push({
             x: p.x,
             y: p.y,
-            alpha: 0.45,
-            radius: 8 + sizeRatio * 10
+            alpha: 0.4,
+            radius: 7 + sizeRatio * 9
           });
         }
       }

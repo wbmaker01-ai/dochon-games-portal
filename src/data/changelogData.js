@@ -3,10 +3,68 @@
 
 export const CHANGELOG_DATA = [
   {
+    version: 'v1.48.0',
+    date: '2026-08-28',
+    title: '🔦 [도촌 야간 학교 숨바꼭질] 정식 오픈 (Fog of War 비대칭 서바이벌)',
+    badge: 'LATEST',
+    badgeColor: 'blue',
+    items: [
+      {
+        tag: 'NEW GAME',
+        tagColor: 'blue',
+        text: '[도촌 야간 학교 숨바꼭질 정식 오픈] 불 꺼진 도촌초등학교 교실과 복도를 무대로, 손전등 시야와 발자국 소리만 감지하며 황금 열쇠 3개를 찾아 탈출하는 2D 탑다운 비대칭 술래잡기 게임 출시 (포털 32번째 정식 게임)'
+      },
+      {
+        tag: '2D FOG OF WAR',
+        tagColor: 'purple',
+        text: '[실시간 레이캐스팅 조명 시스템] 플레이어의 손전등 부채꼴 각도(75도)와 벽 그림자(Shadow Casting)를 실시간 계산하여 암흑 속 심리전과 코너 깜짝 스릴을 극대화'
+      },
+      {
+        tag: 'PROCEDURAL AUDIO',
+        tagColor: 'emerald',
+        text: '[Web Audio 신디사이저 엔진] 외부 음원 다운로드 없이 브라우저 내장에서 술래 거리에 따라 빨라지는 두근두근 심장 박동음, 발자국 소리, 황금 열쇠 챠임, 비상구 사이렌 100% 실시간 합성'
+      },
+      {
+        tag: 'STEALTH & ESCAPE',
+        tagColor: 'amber',
+        text: '[은신 및 탈출 메커니즘] 달리기 시 발생하는 발자국 파동(소음) 주의, 위기 시 복도 사물함 숨기, 황금 열쇠 3개 수집 후 1층 중앙현관 비상구 도달 시 탈출 승리'
+      },
+      {
+        tag: 'P2P & SMART AI',
+        tagColor: 'rose',
+        text: '[1인 싱글 & WebRTC 멀티플레이] 순찰 및 추격 상태머신을 갖춘 스마트 AI 당직선생님과의 1:1 대결 및 4자리 숫자 방 코드 기반 무설치 P2P 멀티플레이 완벽 지원'
+      }
+    ]
+  },
+  {
+    version: 'v1.47.1',
+    date: '2026-08-28',
+    title: '☃️ [도촌 눈싸움 서바이벌] 이동 속도·키보드 조작 민감도 완화 및 다층 전술 AI 고도화 밸런스 패치',
+    badge: 'UPDATE',
+    badgeColor: 'emerald',
+    items: [
+      {
+        tag: 'CONTROL SMOOTHING',
+        tagColor: 'emerald',
+        text: '[이동 속도 및 조작감 대폭 개선] 캐릭터 기본 속도를 43% 감속(4.2 ➔ 2.4)하고 회전 곡선(Turn Speed)과 제동 마찰력을 최적화하여 키보드 방향 전환 시 급발진이나 어지러움 없이 차분하고 묵직한 핸들링 구현'
+      },
+      {
+        tag: 'TACTICAL AI UPGRADE',
+        tagColor: 'blue',
+        text: '[스마트 다층 전술 AI 탑재] AI 봇들의 바다 링아웃 자멸을 방지하는 외곽 안전 제어 알고리즘, 빙판 둘레를 도는 접선 선회, 적의 이동을 내다보는 예측 사격(Lead Shot), 발사 후 안전지대 후퇴 기동 등 고도화된 인공지능 탑재'
+      },
+      {
+        tag: 'SURVIVAL PACING',
+        tagColor: 'purple',
+        text: '[배틀로얄 서바이벌 텐션 강화] 봇들이 쉽게 탈락하지 않고 묵직한 거대 눈덩이를 굴리며 오래 생존하여, 얼음판이 좁아질 때까지 긴장감 넘치는 팽이 스모 난투가 펼쳐지도록 템포 밸런스 조정'
+      }
+    ]
+  },
+  {
     version: 'v1.47.0',
     date: '2026-08-28',
     title: '☃️ [도촌 눈싸움 서바이벌] 정식 개장 (Snowball.io / 팽이 스모 모티브)',
-    badge: 'LATEST',
+    badge: 'UPDATE',
     badgeColor: 'blue',
     items: [
       {

@@ -7,27 +7,27 @@ export const CANVAS_HEIGHT = 700;
 export const ARENA_CONFIG = {
   INITIAL_RADIUS: 460,
   SHRINK_STAGES: [
-    { targetRadius: 360, shrinkStartTime: 25, duration: 8, warningTime: 5 },
-    { targetRadius: 260, shrinkStartTime: 55, duration: 8, warningTime: 5 },
-    { targetRadius: 160, shrinkStartTime: 85, duration: 8, warningTime: 5 },
-    { targetRadius: 100, shrinkStartTime: 115, duration: 8, warningTime: 5 }
+    { targetRadius: 360, shrinkStartTime: 30, duration: 9, warningTime: 6 },
+    { targetRadius: 260, shrinkStartTime: 65, duration: 9, warningTime: 6 },
+    { targetRadius: 160, shrinkStartTime: 100, duration: 9, warningTime: 6 },
+    { targetRadius: 100, shrinkStartTime: 135, duration: 9, warningTime: 6 }
   ],
-  FRICTION: 0.965, // Ice surface low-friction slide
-  KNOCKBACK_FRICTION: 0.93
+  FRICTION: 0.925, // Optimized ice friction for controllable steering & braking
+  KNOCKBACK_FRICTION: 0.915
 };
 
-// Player Movement & Snowball Physics
+// Player Movement & Snowball Physics (Calm, stable & responsive handling)
 export const PLAYER_CONFIG = {
-  BASE_SPEED: 4.2,
+  BASE_SPEED: 2.4, // Reduced from 4.2 to 2.4 for comfortable pacing
   RADIUS: 22,
-  TURN_SPEED: 0.15,
-  SNOWBALL_GROWTH_RATE: 16, // px radius per second
+  TURN_SPEED: 0.09, // Smoother rotation curve, eliminates twitchy behavior
+  SNOWBALL_GROWTH_RATE: 13, // Balanced growth rate
   SNOWBALL_MIN_RADIUS: 10,
   SNOWBALL_MAX_RADIUS: 62,
-  SNOWBALL_MIN_SPEED: 9.0,
-  SNOWBALL_MAX_SPEED: 13.5,
-  SNOWBALL_LIFETIME: 3.5, // seconds before melting
-  COLLISION_BOUNCE: 0.7
+  SNOWBALL_MIN_SPEED: 7.5,
+  SNOWBALL_MAX_SPEED: 11.0,
+  SNOWBALL_LIFETIME: 3.8, // seconds before melting
+  COLLISION_BOUNCE: 0.6
 };
 
 // 4 Cute Procedural Characters
@@ -83,26 +83,26 @@ export const DIFFICULTY_PRESETS = {
   easy: {
     name: '초급 (쉬움)',
     aiCount: 5,
-    botAimAccuracy: 0.55,
-    botReactionDelay: 0.45,
+    botAimAccuracy: 0.65,
+    botReactionDelay: 0.5,
     botMaxChargeRatio: 0.65,
     speedMultiplier: 0.85
   },
   normal: {
     name: '중급 (보통)',
     aiCount: 7,
-    botAimAccuracy: 0.78,
+    botAimAccuracy: 0.85,
     botReactionDelay: 0.25,
     botMaxChargeRatio: 0.85,
-    speedMultiplier: 1.0
+    speedMultiplier: 0.95
   },
   hard: {
     name: '상급 (익스트림)',
     aiCount: 7,
-    botAimAccuracy: 0.92,
+    botAimAccuracy: 0.95,
     botReactionDelay: 0.12,
-    botMaxChargeRatio: 1.0,
-    speedMultiplier: 1.15
+    botMaxChargeRatio: 0.98,
+    speedMultiplier: 1.05
   }
 };
 
