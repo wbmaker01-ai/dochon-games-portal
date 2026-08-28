@@ -3,11 +3,40 @@
 
 export const CHANGELOG_DATA = [
   {
+    version: 'v1.46.0',
+    date: '2026-08-28',
+    title: '신규 순차 개장 준비(Coming Soon) P2P 멀티플레이어 라인업 4종 등록 & 고화질 3D 썸네일 탑재',
+    badge: 'LATEST',
+    badgeColor: 'emerald',
+    items: [
+      {
+        tag: 'P2P MULTIPLAYER',
+        tagColor: 'amber',
+        text: '[도촌 눈싸움 서바이벌 (Snowball.io 모티브)] 거대 눈덩이를 굴려 팽이처럼 상대를 튕겨내고 얼음 링 밖으로 날려버리는 실시간 P2P 스모 서바이벌 개장 준비 라인업 등록 및 3D 썸네일 탑재'
+      },
+      {
+        tag: 'P2P MULTIPLAYER',
+        tagColor: 'purple',
+        text: '[도촌 야간 학교 숨바꼭질 (Fog of War 모티브)] 불 꺼진 학교 복도에서 손전등 시야만 의지해 열쇠를 찾아 탈출하거나 친구들을 잡는 P2P 야간 술래잡기 개장 준비 라인업 등록 및 3D 썸네일 탑재'
+      },
+      {
+        tag: 'P2P MULTIPLAYER',
+        tagColor: 'blue',
+        text: '[도촌 마이크로 카트 레이싱 (탑뷰 카트 모티브)] 학용품과 책상 트랙에서 바나나와 물풍선 아이템을 쏘며 치열하게 순위를 다투는 P2P 데스크탑 카트 배틀 개장 준비 라인업 등록 및 3D 썸네일 탑재'
+      },
+      {
+        tag: 'P2P MULTIPLAYER',
+        tagColor: 'emerald',
+        text: '[도촌 해적선 코인 쟁탈전 (코인 쟁탈 배틀 모티브)] 쏟아지는 금화를 몸에 가득 달고 자기 해적선으로 나르며 상대를 들이받아 코인을 털어내는 P2P 보물선 쟁탈전 개장 준비 라인업 등록 및 3D 썸네일 탑재'
+      }
+    ]
+  },
+  {
     version: 'v1.45.4',
     date: '2026-08-28',
     title: '🫓 [파니 푸리 마스터] 명예의 전당 점수 등록 오류 수정 & 결과 화면 디자인 버튼 리뉴얼',
-    badge: 'LATEST',
-    badgeColor: 'emerald',
+    badge: 'UPDATE',
+    badgeColor: 'blue',
     items: [
       {
         tag: 'BUG FIX',

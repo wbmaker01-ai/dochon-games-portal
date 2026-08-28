@@ -269,6 +269,34 @@ export const PLAYABLE_GAMES = [
 
 export const COMING_SOON_GAMES = [
   {
+    id: 'snowball',
+    title: '도촌 눈싸움 서바이벌',
+    category: '멀티',
+    imageSrc: getThumb('snowball.jpg'),
+    isPlayable: false
+  },
+  {
+    id: 'schooltag',
+    title: '도촌 야간 학교 숨바꼭질',
+    category: '멀티',
+    imageSrc: getThumb('schooltag.jpg'),
+    isPlayable: false
+  },
+  {
+    id: 'microkart',
+    title: '도촌 마이크로 카트 레이싱',
+    category: '멀티',
+    imageSrc: getThumb('microkart.jpg'),
+    isPlayable: false
+  },
+  {
+    id: 'piratecoin',
+    title: '도촌 해적선 코인 쟁탈전',
+    category: '멀티',
+    imageSrc: getThumb('piratecoin.jpg'),
+    isPlayable: false
+  },
+  {
     id: 'bachai',
     title: '도촌 바흐 AI 작곡기',
     category: '퍼즐',

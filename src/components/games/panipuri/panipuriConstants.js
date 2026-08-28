@@ -168,10 +168,19 @@ export const CUSTOMER_PROFILES = [
 ];
 
 // Game Balance & Scoring Constants
-export const INITIAL_TIME_LIMIT = 60; // 60 seconds for Time Attack
-export const MAX_TIME_LIMIT = 90;
-export const TIME_BONUS_ON_SUCCESS = 3.5; // +3.5s per success
-export const TIME_PENALTY_ON_WRONG = 2.5; // -2.5s on wrong serve
+export const INITIAL_TIME_LIMIT = 45; // 45초 콤팩트 스피드런 아케이드 타임어택
+export const MAX_TIME_LIMIT = 50; // 최대 시간 상한 (게임이 무한히 늘어나지 않도록 제어)
+export const TIME_PENALTY_ON_WRONG = 3.0; // 오답 또는 인내심 소진 시 -3.0초 감점
+
+/**
+ * 서빙 성공 시 시간 보너스 (진행될수록 점진적으로 감소하여 스릴 넘치는 마감 유도)
+ */
+export function getTimeBonusForServedCount(servedCount) {
+  if (servedCount < 4) return 2.0;  // 초반 (1~3명): +2.0초
+  if (servedCount < 8) return 1.5;  // 중반 (4~7명): +1.5초
+  if (servedCount < 13) return 1.0; // 후반 (8~12명): +1.0초
+  return 0.6;                       // 달인 (13명 이상): +0.6초
+}
 
 export const BASE_SCORE_PER_PURI = 100;
 export const PERFECT_ORDER_BONUS = 150;
