@@ -54,12 +54,17 @@ export default function SchoolTagHowToPlayModal({ isOpen, onClose }) {
 
           {/* Controls */}
           <div style={{ background: 'rgba(15, 23, 42, 0.8)', padding: '12px', borderRadius: '10px', border: '1px solid rgba(148, 163, 184, 0.2)' }}>
-            <div style={{ fontWeight: '700', color: '#e2e8f0', marginBottom: '6px' }}>🎮 조작 키 안내</div>
+            <div style={{ fontWeight: '700', color: '#e2e8f0', marginBottom: '6px' }}>🎮 조작 키 안내 (손전등 스티어링)</div>
             <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '6px', fontSize: '0.84rem' }}>
-              <div>• <strong>WASD / 방향키</strong>: 이동</div>
-              <div>• <strong>마우스 커서</strong>: 손전등 조준</div>
-              <div>• <strong>Shift</strong>: 전력 질주 (스태미너)</div>
-              <div>• <strong>Space</strong>: 사물함 숨기/열쇠 줍기</div>
+              <div>• <strong>↑ / W</strong>: 전진 (손전등 방향)</div>
+              <div>• <strong>↓ / S</strong>: 후진</div>
+              <div>• <strong>← / A</strong>: 왼쪽 회전 (시야 회전)</div>
+              <div>• <strong>→ / D</strong>: 오른쪽 회전 (시야 회전)</div>
+              <div>• <strong>Shift</strong>: 전력 질주 (대시)</div>
+              <div>• <strong>Space</strong>: 사물함 숨기 / 열쇠 줍기</div>
+              <div style={{ gridColumn: 'span 2', color: '#94a3b8', fontSize: '0.78rem', marginTop: '2px' }}>
+                * PC 마우스 이동 시 손전등 자유 조준도 함께 지원됩니다.
+              </div>
             </div>
           </div>
         </div>

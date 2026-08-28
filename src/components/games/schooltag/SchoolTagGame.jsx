@@ -412,37 +412,54 @@ export default function SchoolTagGame({ onScoreSubmitted }) {
     }
 
     // 2. Player Input & Movement
+    // 2. Player Input & Steering Controls
+    // [User Request]: Left/Right rotates view & flashlight, Up/Down moves forward/backward
     if (!p.isHiding && !p.isJailed && !p.isEscaped) {
-      let moveX = 0;
-      let moveY = 0;
-
       const keys = keysDownRef.current;
       const isUp = keys['KeyW'] || keys['ArrowUp'] || keys['w'] || keys['W'] || keys['ㅈ'];
       const isDown = keys['KeyS'] || keys['ArrowDown'] || keys['s'] || keys['S'] || keys['ㄴ'];
       const isLeft = keys['KeyA'] || keys['ArrowLeft'] || keys['a'] || keys['A'] || keys['ㅁ'];
       const isRight = keys['KeyD'] || keys['ArrowRight'] || keys['d'] || keys['D'] || keys['ㅇ'];
 
-      if (isUp) moveY -= 1;
-      if (isDown) moveY += 1;
-      if (isLeft) moveX -= 1;
-      if (isRight) moveX += 1;
+      // A. Smooth View & Flashlight Rotation (3.6 rad/s ≈ 206 deg/sec)
+      const ROTATION_SPEED = 3.6;
+      if (isLeft) {
+        hasMovedMouseRef.current = false;
+        p.facingAngle -= ROTATION_SPEED * dt;
+      }
+      if (isRight) {
+        hasMovedMouseRef.current = false;
+        p.facingAngle += ROTATION_SPEED * dt;
+      }
+
+      // Normalize facing angle to [-PI, PI]
+      while (p.facingAngle < -Math.PI) p.facingAngle += Math.PI * 2;
+      while (p.facingAngle > Math.PI) p.facingAngle -= Math.PI * 2;
+
+      // Optional Mouse Aiming Override (Active only when mouse is moved and no keyboard rotation is held)
+      if (hasMovedMouseRef.current && !isLeft && !isRight) {
+        const cameraX = p.x - SCHOOL_TAG_CONSTANTS.CANVAS_WIDTH / 2;
+        const cameraY = p.y - SCHOOL_TAG_CONSTANTS.CANVAS_HEIGHT / 2;
+        const worldMouseX = mousePosRef.current.x + cameraX;
+        const worldMouseY = mousePosRef.current.y + cameraY;
+        p.facingAngle = Math.atan2(worldMouseY - p.y, worldMouseX - p.x);
+      }
+
+      // B. Forward & Backward Movement along Flashlight Direction
+      let moveDir = 0; // +1 = Forward (facing direction), -1 = Backward
+      if (isUp) moveDir += 1;
+      if (isDown) moveDir -= 1;
 
       const isSprinting = (keys['ShiftLeft'] || keys['ShiftRight'] || keys['Shift']) && p.stamina > 10;
+      const baseSpeed = isSprinting ? SCHOOL_TAG_CONSTANTS.RUNNER_RUN_SPEED : SCHOOL_TAG_CONSTANTS.RUNNER_WALK_SPEED;
+      // Backward movement is 75% speed for survival horror realism
+      const currentSpeed = moveDir < 0 ? baseSpeed * 0.75 : baseSpeed;
 
-      // Calculate speed & stamina
-      let speed = isSprinting ? SCHOOL_TAG_CONSTANTS.RUNNER_RUN_SPEED : SCHOOL_TAG_CONSTANTS.RUNNER_WALK_SPEED;
-
-      if (moveX !== 0 || moveY !== 0) {
-        const len = Math.hypot(moveX, moveY);
-        moveX = (moveX / len) * speed;
-        moveY = (moveY / len) * speed;
+      if (moveDir !== 0) {
+        const moveX = Math.cos(p.facingAngle) * currentSpeed * moveDir;
+        const moveY = Math.sin(p.facingAngle) * currentSpeed * moveDir;
 
         moveEntityWithSliding(p, moveX, moveY, dt, map.walls, map.width, map.height);
-
-        // Turn towards movement direction when moving (keyboard & mobile touch)
-        if (!hasMovedMouseRef.current) {
-          p.facingAngle = Math.atan2(moveY, moveX);
-        }
 
         // Footstep Audio & Noise Wave Generation
         noiseSpawnTimerRef.current += dt;
@@ -454,7 +471,7 @@ export default function SchoolTagGame({ onScoreSubmitted }) {
           noiseSpawnTimerRef.current = 0;
           schoolTagAudio.playFootstep(isSprinting);
 
-          if (isSprinting) {
+          if (isSprinting && moveDir > 0) {
             noiseWavesRef.current.push({
               x: p.x,
               y: p.y,
@@ -467,12 +484,12 @@ export default function SchoolTagGame({ onScoreSubmitted }) {
           }
         }
 
-        // Stamina consumption while running
-        if (isSprinting) {
+        // Stamina consumption while sprinting forward
+        if (isSprinting && moveDir > 0) {
           p.stamina = Math.max(0, p.stamina - SCHOOL_TAG_CONSTANTS.RUNNER_STAMINA_DRAIN_RATE * dt);
         }
       } else {
-        // Recover stamina when idle
+        // Recover stamina when not moving
         p.stamina = Math.min(
           SCHOOL_TAG_CONSTANTS.RUNNER_STAMINA_MAX,
           p.stamina + SCHOOL_TAG_CONSTANTS.RUNNER_STAMINA_RECOVERY_RATE * dt
@@ -480,15 +497,6 @@ export default function SchoolTagGame({ onScoreSubmitted }) {
       }
 
       setStaminaPercent(Math.floor((p.stamina / SCHOOL_TAG_CONSTANTS.RUNNER_STAMINA_MAX) * 100));
-
-      // Calculate Facing Angle toward Mouse Position if mouse was moved
-      if (hasMovedMouseRef.current) {
-        const cameraX = p.x - SCHOOL_TAG_CONSTANTS.CANVAS_WIDTH / 2;
-        const cameraY = p.y - SCHOOL_TAG_CONSTANTS.CANVAS_HEIGHT / 2;
-        const worldMouseX = mousePosRef.current.x + cameraX;
-        const worldMouseY = mousePosRef.current.y + cameraY;
-        p.facingAngle = Math.atan2(worldMouseY - p.y, worldMouseX - p.x);
-      }
     }
 
     // 3. Update Noise Waves
@@ -1452,6 +1460,8 @@ export default function SchoolTagGame({ onScoreSubmitted }) {
           <div />
           <button
             className="schooltag-dpad-btn"
+            title="전진 (손전등 방향)"
+            aria-label="전진"
             onTouchStart={() => (keysDownRef.current['ArrowUp'] = true)}
             onTouchEnd={() => (keysDownRef.current['ArrowUp'] = false)}
             onMouseDown={() => (keysDownRef.current['ArrowUp'] = true)}
@@ -1463,6 +1473,8 @@ export default function SchoolTagGame({ onScoreSubmitted }) {
           <div />
           <button
             className="schooltag-dpad-btn"
+            title="왼쪽 회전 (손전등 시야 회전)"
+            aria-label="왼쪽 회전"
             onTouchStart={() => (keysDownRef.current['ArrowLeft'] = true)}
             onTouchEnd={() => (keysDownRef.current['ArrowLeft'] = false)}
             onMouseDown={() => (keysDownRef.current['ArrowLeft'] = true)}
@@ -1474,6 +1486,8 @@ export default function SchoolTagGame({ onScoreSubmitted }) {
           <div />
           <button
             className="schooltag-dpad-btn"
+            title="오른쪽 회전 (손전등 시야 회전)"
+            aria-label="오른쪽 회전"
             onTouchStart={() => (keysDownRef.current['ArrowRight'] = true)}
             onTouchEnd={() => (keysDownRef.current['ArrowRight'] = false)}
             onMouseDown={() => (keysDownRef.current['ArrowRight'] = true)}
@@ -1485,6 +1499,8 @@ export default function SchoolTagGame({ onScoreSubmitted }) {
           <div />
           <button
             className="schooltag-dpad-btn"
+            title="후진"
+            aria-label="후진"
             onTouchStart={() => (keysDownRef.current['ArrowDown'] = true)}
             onTouchEnd={() => (keysDownRef.current['ArrowDown'] = false)}
             onMouseDown={() => (keysDownRef.current['ArrowDown'] = true)}

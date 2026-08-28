@@ -3,11 +3,35 @@
 
 export const CHANGELOG_DATA = [
   {
+    version: 'v1.48.4',
+    date: '2026-08-28',
+    title: '🔦 [도촌 야간 학교 숨바꼭질] 손전등 지향형 스티어링(전진/후진 및 좌우 회전) 조작 엔진 도입',
+    badge: 'LATEST',
+    badgeColor: 'blue',
+    items: [
+      {
+        tag: 'STEERING CONTROLS',
+        tagColor: 'blue',
+        text: '[손전등 지향형 조작계 도입] 상하 키는 손전등 방향 전진/후진, 좌우 키는 시야 및 손전등 좌우 회전으로 개편하여 어두운 학교를 손전등으로 직접 탐색하는 서바이벌 호러 특유의 몰입감 넘치는 조작감 구현'
+      },
+      {
+        tag: 'FLASHLIGHT ROTATION',
+        tagColor: 'amber',
+        text: '[손전등 각도 고정 버그 원천 해결] 좌우 방향키 및 A/D 키 조작 시 마우스 간섭 없이 손전등 불빛이 즉각 부드럽게 360도 회전하도록 제어 파이프라인 최적화'
+      },
+      {
+        tag: 'CONTROLS GUIDE',
+        tagColor: 'emerald',
+        text: '[조작 안내 및 UI 개선] 게임 방법(생존 수칙) 모달 및 하단 D-패드 툴팁에 전진(↑), 후진(↓), 좌회전(←), 우회전(→) 안내를 명확하게 반영'
+      }
+    ]
+  },
+  {
     version: 'v1.48.3',
     date: '2026-08-28',
     title: '🕹️ [도촌 야간 학교 숨바꼭질] 애니메이션 루프 불변 제어 & 한/영 IME 및 화살표 조작 엔진 완전화',
-    badge: 'LATEST',
-    badgeColor: 'blue',
+    badge: 'UPDATE',
+    badgeColor: 'slate',
     items: [
       {
         tag: 'LOOP ENGINE',
