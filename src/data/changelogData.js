@@ -3,11 +3,40 @@
 
 export const CHANGELOG_DATA = [
   {
+    version: 'v1.48.14',
+    date: '2026-08-31',
+    title: '📈 [4대 게임 난이도 전면 개편] 야구·크리켓·하늘점퍼·스네이크 무제한 가속 & 5단계 테마 시스템 구축',
+    badge: 'LATEST',
+    badgeColor: 'emerald',
+    items: [
+      {
+        tag: 'BASEBALL OVERHAUL',
+        tagColor: 'amber',
+        text: '[도촌 홈런왕 야구] 800ms 도달 시간 하한선 해제 및 최대 320ms 광속 피칭 가속화, 폭포수 포크볼·너클볼·하이퍼 광속구 등 신규 마구 추가, 5단계 스타디움 테마(낮/노을/나이트/스톰/챔피언) 적용'
+      },
+      {
+        tag: 'CRICKET ACCELERATION',
+        tagColor: 'blue',
+        text: '[도촌 크리켓] 1.55배 구속 상한 해제 및 점수 비례 연속 가속, 너클 지그재그·슈퍼바운서·하이퍼 썬더 요커 신규 투구 추가, 배팅 스위트스팟 정밀화 및 5단계 경기장 테마 연동'
+      },
+      {
+        tag: 'SKY JUMPER COSMIC',
+        tagColor: 'purple',
+        text: '[도촌 하늘 점퍼] 고도 상승에 따른 발판 가로폭 축소(76px ➔ 44px) 및 수직 간격 확장, 고고도 유성우(Meteor) 장애물 패턴 추가, 파워업 지속시간 튜닝 및 5단계 우주 고도 테마 개편'
+      },
+      {
+        tag: 'SNAKE HYPER DRIVE',
+        tagColor: 'emerald',
+        text: '[도촌 스네이크 마스터] 65ms 속도 캡을 28ms 하이퍼 드라이브(초당 35칸+)로 대폭 확장, 사과 7개 단위로 피해야 하는 암석 장애물(Rock) 실시간 스폰, 5단계 네온 사이버 테마 렌더링 적용'
+      }
+    ]
+  },
+  {
     version: 'v1.48.13',
     date: '2026-08-31',
     title: '⚡ [전체 게임 성능 개선] 크롬북 및 저사양 기기 대상 델타 타임 물리 정규화 & 렌더링 최적화 종합 패치',
-    badge: 'LATEST',
-    badgeColor: 'emerald',
+    badge: 'UPDATE',
+    badgeColor: 'blue',
     items: [
       {
         tag: 'DELTA TIME PHYSICS',

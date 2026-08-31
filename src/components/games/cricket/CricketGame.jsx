@@ -9,7 +9,8 @@ import {
   PITCH_BOUNCE_Y,
   PITCH_TYPES,
   HIT_RESULTS,
-  SPEED_LEVELS
+  SPEED_LEVELS,
+  CRICKET_THEMES
 } from './cricketConstants';
 import {
   createTransparentSprite,
@@ -219,7 +220,7 @@ export default function CricketGame({ onScoreSubmitted }) {
 
     hasSwungRef.current = true;
     const diff = now - expectedContactTimeRef.current;
-    const judgment = judgeSwing(diff);
+    const judgment = judgeSwing(diff, currentSpeedLevelRef.current);
 
     if (judgment.result) {
       // HIT SUCCESS! (SIX, FOUR, 2 RUNS, 1 RUN)
@@ -372,7 +373,7 @@ export default function CricketGame({ onScoreSubmitted }) {
               scoreRef.current,
               pitch
             );
-            pitchTotalDurationRef.current = Math.max(720, actualDuration);
+            pitchTotalDurationRef.current = Math.max(340, actualDuration);
             currentSpeedLevelRef.current = speedLevel;
             setSpeedTier(speedLevel);
 
@@ -446,15 +447,79 @@ export default function CricketGame({ onScoreSubmitted }) {
       }
 
       // =====================================================================
-      // Canvas Drawing & Visual Rendering
+      // Canvas 2D Procedural Rendering with 5 Stadium Themes
       // =====================================================================
+      ctx.clearRect(0, 0, CANVAS_WIDTH, CANVAS_HEIGHT);
+
+      // Get Current Theme
+      const curScore = scoreRef.current || 0;
+      let curTheme = CRICKET_THEMES[0];
+      for (let i = CRICKET_THEMES.length - 1; i >= 0; i--) {
+        if (curScore >= CRICKET_THEMES[i].minScore) {
+          curTheme = CRICKET_THEMES[i];
+          break;
+        }
+      }
 
       // 1. Background Stadium
       if (bgImgRef.current && bgImgRef.current.complete) {
         ctx.drawImage(bgImgRef.current, 0, 0, CANVAS_WIDTH, CANVAS_HEIGHT);
+
+        // Theme Atmosphere Overlay
+        if (curTheme.id !== 'DAY') {
+          ctx.save();
+          if (curTheme.id === 'SUNSET') {
+            const grad = ctx.createLinearGradient(0, 0, 0, CANVAS_HEIGHT);
+            grad.addColorStop(0, 'rgba(249, 115, 22, 0.35)');
+            grad.addColorStop(0.5, 'rgba(180, 83, 9, 0.2)');
+            grad.addColorStop(1, 'rgba(0, 0, 0, 0.15)');
+            ctx.fillStyle = grad;
+          } else if (curTheme.id === 'NIGHT') {
+            const grad = ctx.createLinearGradient(0, 0, 0, CANVAS_HEIGHT);
+            grad.addColorStop(0, 'rgba(15, 23, 42, 0.65)');
+            grad.addColorStop(0.6, 'rgba(30, 27, 75, 0.4)');
+            grad.addColorStop(1, 'rgba(0, 0, 0, 0.25)');
+            ctx.fillStyle = grad;
+          } else if (curTheme.id === 'STORM') {
+            const grad = ctx.createLinearGradient(0, 0, 0, CANVAS_HEIGHT);
+            grad.addColorStop(0, 'rgba(39, 39, 42, 0.7)');
+            grad.addColorStop(0.5, 'rgba(24, 24, 27, 0.5)');
+            grad.addColorStop(1, 'rgba(15, 118, 110, 0.2)');
+            ctx.fillStyle = grad;
+          } else if (curTheme.id === 'CHAMPION') {
+            const grad = ctx.createLinearGradient(0, 0, 0, CANVAS_HEIGHT);
+            grad.addColorStop(0, 'rgba(88, 28, 135, 0.5)');
+            grad.addColorStop(0.5, 'rgba(131, 24, 67, 0.3)');
+            grad.addColorStop(1, 'rgba(234, 179, 8, 0.15)');
+            ctx.fillStyle = grad;
+          }
+          ctx.fillRect(0, 0, CANVAS_WIDTH, CANVAS_HEIGHT);
+          ctx.restore();
+        }
       } else {
-        ctx.fillStyle = '#22C55E';
+        // Procedural Pitch Field
+        ctx.fillStyle = curTheme.pitchGrass;
         ctx.fillRect(0, 0, CANVAS_WIDTH, CANVAS_HEIGHT);
+      }
+
+      // Lighting Pillars in Night/Storm/Champion
+      if (curTheme.id === 'NIGHT' || curTheme.id === 'STORM' || curTheme.id === 'CHAMPION') {
+        ctx.save();
+        ctx.fillStyle = 'rgba(255, 255, 255, 0.08)';
+        ctx.beginPath();
+        ctx.moveTo(80, 20);
+        ctx.lineTo(0, CANVAS_HEIGHT);
+        ctx.lineTo(350, CANVAS_HEIGHT);
+        ctx.closePath();
+        ctx.fill();
+
+        ctx.beginPath();
+        ctx.moveTo(CANVAS_WIDTH - 80, 20);
+        ctx.lineTo(CANVAS_WIDTH, CANVAS_HEIGHT);
+        ctx.lineTo(CANVAS_WIDTH - 350, CANVAS_HEIGHT);
+        ctx.closePath();
+        ctx.fill();
+        ctx.restore();
       }
 
       // 2. Pitch Strip Shadows & Crease Lines
@@ -631,6 +696,27 @@ export default function CricketGame({ onScoreSubmitted }) {
               {highScore}
             </span>
           </div>
+
+          {/* Theme Stage Badge */}
+          {(() => {
+            let curTheme = CRICKET_THEMES[0];
+            for (let i = CRICKET_THEMES.length - 1; i >= 0; i--) {
+              if (score >= CRICKET_THEMES[i].minScore) {
+                curTheme = CRICKET_THEMES[i];
+                break;
+              }
+            }
+            return (
+              <div
+                className="cricket-level-badge"
+                style={{ background: curTheme.accent, color: '#0F172A', fontWeight: 800 }}
+                title={`경기장: ${curTheme.name}`}
+              >
+                <Sparkles style={{ width: '13px', height: '13px' }} />
+                <span>{curTheme.name.split(' ')[0]}</span>
+              </div>
+            );
+          })()}
 
           {/* Speed Tier Badge */}
           <div

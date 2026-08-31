@@ -29,7 +29,8 @@ import {
   INITIAL_SNAKE,
   INITIAL_DIRECTION,
   GAME_SPEEDS,
-  ITEM_TYPES
+  ITEM_TYPES,
+  SNAKE_THEMES
 } from './snakeConstants';
 
 export default function SnakeGame({ onScoreSubmitted }) {
@@ -52,6 +53,7 @@ export default function SnakeGame({ onScoreSubmitted }) {
     nextDir: INITIAL_DIRECTION,
     food: { x: 15, y: 8, type: ITEM_TYPES.APPLE },
     specialItem: null, // { x, y, type: 'acorn' | 'grape', timer: 120, maxTimer: 120 }
+    obstacles: [], // Danger stone blocks: [{ x, y }]
     particles: [],
     speed: GAME_SPEEDS.INITIAL,
     lastTick: 0,
@@ -67,8 +69,9 @@ export default function SnakeGame({ onScoreSubmitted }) {
   }, []);
 
   // Spawn random regular food or special bonus
-  const spawnFood = useCallback((snakeBody) => {
+  const spawnFood = useCallback((snakeBody, obstacles = []) => {
     const occupied = new Set(snakeBody.map(s => `${s.x},${s.y}`));
+    obstacles.forEach(ob => occupied.add(`${ob.x},${ob.y}`));
     const emptyCells = [];
 
     for (let x = 0; x < GRID_COLS; x++) {
@@ -84,9 +87,36 @@ export default function SnakeGame({ onScoreSubmitted }) {
     return { ...randCell, type: ITEM_TYPES.APPLE };
   }, []);
 
-  const spawnSpecialItem = useCallback((snakeBody, currentFood) => {
+  const spawnObstacle = useCallback((snakeBody, currentFood, obstacles = []) => {
     const occupied = new Set(snakeBody.map(s => `${s.x},${s.y}`));
     if (currentFood) occupied.add(`${currentFood.x},${currentFood.y}`);
+    obstacles.forEach(ob => occupied.add(`${ob.x},${ob.y}`));
+
+    // Don't spawn adjacent to snake head
+    const head = snakeBody[0];
+    for (let dx = -1; dx <= 1; dx++) {
+      for (let dy = -1; dy <= 1; dy++) {
+        occupied.add(`${head.x + dx},${head.y + dy}`);
+      }
+    }
+
+    const emptyCells = [];
+    for (let x = 1; x < GRID_COLS - 1; x++) {
+      for (let y = 1; y < GRID_ROWS - 1; y++) {
+        if (!occupied.has(`${x},${y}`)) {
+          emptyCells.push({ x, y });
+        }
+      }
+    }
+
+    if (emptyCells.length === 0) return null;
+    return emptyCells[Math.floor(Math.random() * emptyCells.length)];
+  }, []);
+
+  const spawnSpecialItem = useCallback((snakeBody, currentFood, obstacles = []) => {
+    const occupied = new Set(snakeBody.map(s => `${s.x},${s.y}`));
+    if (currentFood) occupied.add(`${currentFood.x},${currentFood.y}`);
+    obstacles.forEach(ob => occupied.add(`${ob.x},${ob.y}`));
 
     const emptyCells = [];
     for (let x = 1; x < GRID_COLS - 1; x++) {
@@ -127,7 +157,8 @@ export default function SnakeGame({ onScoreSubmitted }) {
     ];
     s.dir = DIRECTIONS.RIGHT;
     s.nextDir = DIRECTIONS.RIGHT;
-    s.food = spawnFood(s.snake);
+    s.obstacles = [];
+    s.food = spawnFood(s.snake, s.obstacles);
     s.specialItem = null;
     s.particles = [];
     s.speed = GAME_SPEEDS.INITIAL;
@@ -239,7 +270,21 @@ export default function SnakeGame({ onScoreSubmitted }) {
         return;
       }
 
-      // 2. Check Self Collision (Snake Body)
+      // 2. Check Obstacle (Rock Block) Collision
+      for (let ob of s.obstacles) {
+        if (ob.x === newHead.x && ob.y === newHead.y) {
+          soundFx.playGameOver();
+          setGameOverReason('단단한 암석 장애물에 충돌했습니다!');
+          setGameState('GAMEOVER');
+          if (s.scoreVal > highScore) {
+            setHighScore(s.scoreVal);
+            saveScore('snake', s.scoreVal);
+          }
+          return;
+        }
+      }
+
+      // 3. Check Self Collision (Snake Body)
       for (let i = 0; i < s.snake.length - 1; i++) {
         if (s.snake[i].x === newHead.x && s.snake[i].y === newHead.y) {
           soundFx.playGameOver();
@@ -258,7 +303,7 @@ export default function SnakeGame({ onScoreSubmitted }) {
 
       let grew = false;
 
-      // 3. Check Food Collision (Regular Apple)
+      // 4. Check Food Collision (Regular Apple)
       if (newHead.x === s.food.x && newHead.y === s.food.y) {
         grew = true;
         s.applesCount += 1;
@@ -276,8 +321,18 @@ export default function SnakeGame({ onScoreSubmitted }) {
           14
         );
 
-        // Gradually speed up
+        // Gradually speed up (No hard ceiling down to 28ms)
         s.speed = Math.max(GAME_SPEEDS.MIN, GAME_SPEEDS.INITIAL - s.applesCount * GAME_SPEEDS.ACCEL_STEP);
+
+        // Spawn Danger Obstacle every 7 apples (up to 12 obstacles)
+        if (s.applesCount % 7 === 0 && s.obstacles.length < 12) {
+          const newOb = spawnObstacle(s.snake, s.food, s.obstacles);
+          if (newOb) {
+            s.obstacles.push(newOb);
+            triggerBadge('⚠️ 새로운 암석 장애물 출현!');
+            haptics.warning();
+          }
+        }
 
         // Milestone Alerts
         if (s.applesCount % 5 === 0) {
@@ -293,11 +348,11 @@ export default function SnakeGame({ onScoreSubmitted }) {
         }
 
         // Spawn new Food
-        s.food = spawnFood(s.snake);
+        s.food = spawnFood(s.snake, s.obstacles);
 
         // Random chance or count threshold to spawn special bonus
         if (!s.specialItem && Math.random() < 0.45) {
-          s.specialItem = spawnSpecialItem(s.snake, s.food);
+          s.specialItem = spawnSpecialItem(s.snake, s.food, s.obstacles);
         }
       }
 
@@ -347,18 +402,27 @@ export default function SnakeGame({ onScoreSubmitted }) {
       }
     };
 
-    const drawGrid = () => {
-      // Crisp 2-tone checkered grassland pattern
+    const getCurrentTheme = (applesCount) => {
+      for (let i = SNAKE_THEMES.length - 1; i >= 0; i--) {
+        if (applesCount >= SNAKE_THEMES[i].minApples) {
+          return SNAKE_THEMES[i];
+        }
+      }
+      return SNAKE_THEMES[0];
+    };
+
+    const drawGrid = (curTheme) => {
+      // Dynamic Theme Checkered Board
       for (let c = 0; c < GRID_COLS; c++) {
         for (let r = 0; r < GRID_ROWS; r++) {
           const isEven = (c + r) % 2 === 0;
-          ctx.fillStyle = isEven ? '#1E293B' : '#172234';
+          ctx.fillStyle = isEven ? curTheme.boardBg : '#0B1120';
           ctx.fillRect(c * CELL_SIZE, r * CELL_SIZE, CELL_SIZE, CELL_SIZE);
         }
       }
 
       // Soft grid line accents
-      ctx.strokeStyle = 'rgba(255, 255, 255, 0.03)';
+      ctx.strokeStyle = curTheme.gridColor;
       ctx.lineWidth = 1;
       for (let c = 0; c <= GRID_COLS; c++) {
         ctx.beginPath();
@@ -371,6 +435,37 @@ export default function SnakeGame({ onScoreSubmitted }) {
         ctx.moveTo(0, r * CELL_SIZE);
         ctx.lineTo(CANVAS_WIDTH, r * CELL_SIZE);
         ctx.stroke();
+      }
+    };
+
+    const drawObstacles = (obstacles) => {
+      for (let ob of obstacles) {
+        const ox = ob.x * CELL_SIZE + CELL_SIZE / 2;
+        const oy = ob.y * CELL_SIZE + CELL_SIZE / 2;
+
+        ctx.save();
+        ctx.translate(ox, oy);
+
+        // Stone Block Base
+        ctx.fillStyle = '#334155';
+        ctx.strokeStyle = '#64748B';
+        ctx.lineWidth = 2;
+        ctx.beginPath();
+        ctx.roundRect(-CELL_SIZE * 0.42, -CELL_SIZE * 0.42, CELL_SIZE * 0.84, CELL_SIZE * 0.84, 4);
+        ctx.fill();
+        ctx.stroke();
+
+        // 3D Bevel Highlight
+        ctx.fillStyle = 'rgba(255, 255, 255, 0.2)';
+        ctx.fillRect(-CELL_SIZE * 0.38, -CELL_SIZE * 0.38, CELL_SIZE * 0.76, 3);
+
+        // Danger Warning Sign
+        ctx.font = '13px sans-serif';
+        ctx.textAlign = 'center';
+        ctx.textBaseline = 'middle';
+        ctx.fillText('🪨', 0, 1);
+
+        ctx.restore();
       }
     };
 
@@ -487,7 +582,7 @@ export default function SnakeGame({ onScoreSubmitted }) {
       ctx.restore();
     };
 
-    const drawSnake = (snake, dir, frameCount) => {
+    const drawSnake = (snake, dir, frameCount, curTheme) => {
       if (snake.length === 0) return;
 
       const head = snake[0];
@@ -502,7 +597,7 @@ export default function SnakeGame({ onScoreSubmitted }) {
         const progress = 1 - i / snake.length; // 1 at neck, 0 at tail
         const segRadius = isTail ? CELL_SIZE * 0.32 : CELL_SIZE * (0.38 + progress * 0.08);
 
-        // Body Gradient
+        // Body Gradient with Theme Colors
         const grad = ctx.createRadialGradient(
           segX - 2,
           segY - 2,
@@ -511,22 +606,14 @@ export default function SnakeGame({ onScoreSubmitted }) {
           segY,
           segRadius
         );
-        grad.addColorStop(0, '#34D399');
-        grad.addColorStop(0.7, '#10B981');
-        grad.addColorStop(1, '#059669');
+        grad.addColorStop(0, curTheme.snakeHead);
+        grad.addColorStop(0.7, curTheme.snakeBody);
+        grad.addColorStop(1, curTheme.borderColor);
 
         ctx.fillStyle = grad;
         ctx.beginPath();
         ctx.arc(segX, segY, segRadius, 0, Math.PI * 2);
         ctx.fill();
-
-        // Cute Body Scales / Dot Pattern
-        if (i % 2 === 0) {
-          ctx.fillStyle = 'rgba(255, 255, 255, 0.4)';
-          ctx.beginPath();
-          ctx.arc(segX, segY, 2.5, 0, Math.PI * 2);
-          ctx.fill();
-        }
       }
 
       // Draw Head
@@ -544,34 +631,38 @@ export default function SnakeGame({ onScoreSubmitted }) {
 
       ctx.rotate(angle);
 
-      // Head Shape
-      const headGrad = ctx.createRadialGradient(-3, -3, 2, 0, 0, CELL_SIZE * 0.48);
-      headGrad.addColorStop(0, '#6EE7B7');
-      headGrad.addColorStop(0.6, '#10B981');
-      headGrad.addColorStop(1, '#047857');
+      // Head Base Shape with Glowing Aura
+      ctx.shadowColor = curTheme.accent;
+      ctx.shadowBlur = 10;
+      const headGrad = ctx.createRadialGradient(-2, -2, 2, 0, 0, CELL_SIZE * 0.48);
+      headGrad.addColorStop(0, curTheme.snakeHead);
+      headGrad.addColorStop(0.7, curTheme.snakeBody);
+      headGrad.addColorStop(1, curTheme.borderColor);
 
       ctx.fillStyle = headGrad;
       ctx.beginPath();
-      ctx.roundRect(
-        -CELL_SIZE * 0.45,
-        -CELL_SIZE * 0.45,
-        CELL_SIZE * 0.9,
-        CELL_SIZE * 0.9,
-        [10, 14, 14, 10]
-      );
+      ctx.arc(0, 0, CELL_SIZE * 0.44, 0, Math.PI * 2);
+      ctx.fill();
+      ctx.shadowBlur = 0;
+
+      // Cute Snout Nose
+      ctx.fillStyle = curTheme.snakeHead;
+      ctx.beginPath();
+      ctx.ellipse(CELL_SIZE * 0.35, 0, 4, 6, 0, 0, Math.PI * 2);
       ctx.fill();
 
-      // Tongue Animation
-      const tongueCycle = Math.floor(frameCount / 12) % 3 === 0;
-      if (tongueCycle && gameState === 'PLAYING') {
+      // Cute Animated Flicking Tongue
+      const isTongueFlicking = (frameCount % 30) < 14;
+      if (isTongueFlicking) {
         ctx.strokeStyle = '#EF4444';
         ctx.lineWidth = 2;
         ctx.beginPath();
-        ctx.moveTo(CELL_SIZE * 0.45, 0);
-        ctx.lineTo(CELL_SIZE * 0.45 + 7, 0);
-        ctx.lineTo(CELL_SIZE * 0.45 + 10, -3);
-        ctx.moveTo(CELL_SIZE * 0.45 + 7, 0);
-        ctx.lineTo(CELL_SIZE * 0.45 + 10, 3);
+        ctx.moveTo(CELL_SIZE * 0.44, 0);
+        ctx.lineTo(CELL_SIZE * 0.44 + 9, 0);
+        // Forked Tip
+        ctx.lineTo(CELL_SIZE * 0.44 + 13, -3);
+        ctx.moveTo(CELL_SIZE * 0.44 + 9, 0);
+        ctx.lineTo(CELL_SIZE * 0.44 + 13, 3);
         ctx.stroke();
       }
 
@@ -600,13 +691,6 @@ export default function SnakeGame({ onScoreSubmitted }) {
         ctx.arc(pos.x + 1.8, pos.y - 1, 1, 0, Math.PI * 2);
         ctx.fill();
       });
-
-      // Cute Pink Cheeks
-      ctx.fillStyle = 'rgba(244, 114, 182, 0.45)';
-      ctx.beginPath();
-      ctx.arc(-2, -7, 2.5, 0, Math.PI * 2);
-      ctx.arc(-2, 7, 2.5, 0, Math.PI * 2);
-      ctx.fill();
 
       ctx.restore();
     };
@@ -651,9 +735,12 @@ export default function SnakeGame({ onScoreSubmitted }) {
         }
       }
 
+      const curTheme = getCurrentTheme(s.applesCount);
+
       // Draw Everything
       ctx.clearRect(0, 0, CANVAS_WIDTH, CANVAS_HEIGHT);
-      drawGrid();
+      drawGrid(curTheme);
+      drawObstacles(s.obstacles);
       drawParticles();
 
       if (s.food) {
@@ -664,14 +751,14 @@ export default function SnakeGame({ onScoreSubmitted }) {
         drawSpecialItem(s.specialItem, frameCount);
       }
 
-      drawSnake(s.snake, s.dir, frameCount);
+      drawSnake(s.snake, s.dir, frameCount, curTheme);
 
       animationFrameId = requestAnimationFrame(gameLoop);
     };
 
     animationFrameId = requestAnimationFrame(gameLoop);
     return () => cancelAnimationFrame(animationFrameId);
-  }, [gameState, highScore, spawnFood, spawnSpecialItem, triggerBadge]);
+  }, [gameState, highScore, spawnFood, spawnSpecialItem, spawnObstacle, triggerBadge]);
 
   return (
     <div className="snake-container">
@@ -682,6 +769,20 @@ export default function SnakeGame({ onScoreSubmitted }) {
           <span className="snake-badge">도촌초 꿈나무 스네이크</span>
         </div>
         <div className="snake-score-wrap">
+          {(() => {
+            let curTheme = SNAKE_THEMES[0];
+            for (let i = SNAKE_THEMES.length - 1; i >= 0; i--) {
+              if (applesEaten >= SNAKE_THEMES[i].minApples) {
+                curTheme = SNAKE_THEMES[i];
+                break;
+              }
+            }
+            return (
+              <div style={{ color: curTheme.accent, fontWeight: 800 }}>
+                테마: <span>{curTheme.name.split(' ')[0]}</span>
+              </div>
+            );
+          })()}
           <div>
             현재 점수: <span className="snake-score-val">{score}점</span>
           </div>

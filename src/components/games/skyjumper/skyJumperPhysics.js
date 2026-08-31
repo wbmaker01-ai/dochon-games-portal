@@ -53,6 +53,7 @@ export class SkyJumperPhysics {
     this.items = [];
     this.monsters = [];
     this.blackHoles = [];
+    this.meteors = [];
     this.bullets = [];
     this.particles = [];
     this.floatingTexts = [];
@@ -61,6 +62,7 @@ export class SkyJumperPhysics {
     this.clouds = this.initClouds();
     this.stars = this.initStars();
     this.shootingStars = [];
+    this.lastMeteorSpawn = 0;
 
     // Controls
     this.keys = { left: false, right: false };
@@ -139,41 +141,51 @@ export class SkyJumperPhysics {
 
   spawnPlatformAt(y) {
     const alt = this.maxAltitude;
-    const x = Math.max(10, Math.min(CANVAS_WIDTH - PLATFORM_CONFIG.WIDTH - 10, Math.random() * (CANVAS_WIDTH - PLATFORM_CONFIG.WIDTH)));
+    
+    // Dynamic Platform Width based on altitude (Narrow platforms in high space: 76px -> 46px)
+    const widthShrink = Math.min(32, Math.floor(alt / 450));
+    const platWidth = Math.max(44, PLATFORM_CONFIG.WIDTH - widthShrink);
+    const x = Math.max(10, Math.min(CANVAS_WIDTH - platWidth - 10, Math.random() * (CANVAS_WIDTH - platWidth)));
 
     // Choose Platform Type according to altitude
     let type = 'regular';
     const rand = Math.random();
 
-    if (alt > 8000) {
+    if (alt > 14000) {
+      // Cosmic Wormhole Blitz (No safe regular platforms!)
+      if (rand < 0.35) type = 'moving';
+      else if (rand < 0.65) type = 'disappearing';
+      else if (rand < 0.85) type = 'broken';
+      else type = 'cloud';
+    } else if (alt > 8000) {
       if (rand < 0.28) type = 'moving';
-      else if (rand < 0.48) type = 'disappearing';
-      else if (rand < 0.65) type = 'broken';
-      else if (rand < 0.80) type = 'vertical';
-      else if (rand < 0.90) type = 'cloud';
+      else if (rand < 0.50) type = 'disappearing';
+      else if (rand < 0.70) type = 'broken';
+      else if (rand < 0.85) type = 'vertical';
+      else if (rand < 0.94) type = 'cloud';
     } else if (alt > 4000) {
-      if (rand < 0.32) type = 'moving';
+      if (rand < 0.30) type = 'moving';
       else if (rand < 0.50) type = 'broken';
       else if (rand < 0.68) type = 'disappearing';
       else if (rand < 0.82) type = 'vertical';
     } else if (alt > 1500) {
-      if (rand < 0.30) type = 'moving';
-      else if (rand < 0.48) type = 'broken';
-      else if (rand < 0.62) type = 'cloud';
+      if (rand < 0.28) type = 'moving';
+      else if (rand < 0.45) type = 'broken';
+      else if (rand < 0.60) type = 'cloud';
     } else if (alt > 500) {
-      if (rand < 0.22) type = 'moving';
-      else if (rand < 0.35) type = 'broken';
+      if (rand < 0.20) type = 'moving';
+      else if (rand < 0.32) type = 'broken';
     }
 
     const platform = {
       id: this.nextEntityId++,
       x,
       y,
-      width: PLATFORM_CONFIG.WIDTH,
+      width: platWidth,
       height: PLATFORM_CONFIG.HEIGHT,
       type,
-      vx: type === 'moving' ? (Math.random() > 0.5 ? 2.2 : -2.2) : 0,
-      vy: type === 'vertical' ? 1.5 : 0,
+      vx: type === 'moving' ? (Math.random() > 0.5 ? (2.2 + Math.min(alt / 4000, 1.8)) : -(2.2 + Math.min(alt / 4000, 1.8))) : 0,
+      vy: type === 'vertical' ? (1.5 + Math.min(alt / 5000, 1.2)) : 0,
       initialY: y,
       verticalDir: 1,
       isBroken: false,
@@ -182,12 +194,15 @@ export class SkyJumperPhysics {
       item: null
     };
 
-    // Item Spawning (Only on solid non-broken platforms)
+    // Item Spawning (Item probability scales down at high altitudes)
     if (type !== 'broken' && type !== 'disappearing') {
       const itemRand = Math.random();
-      if (itemRand < 0.04) {
+      const rocketChance = alt > 9000 ? 0.015 : 0.04;
+      const propellerChance = alt > 9000 ? 0.035 : 0.09;
+
+      if (itemRand < rocketChance) {
         platform.item = { type: 'rocket', id: this.nextEntityId++ };
-      } else if (itemRand < 0.09) {
+      } else if (itemRand < propellerChance) {
         platform.item = { type: 'propeller', id: this.nextEntityId++ };
       } else if (itemRand < 0.16) {
         platform.item = { type: 'trampoline', id: this.nextEntityId++ };
@@ -203,8 +218,8 @@ export class SkyJumperPhysics {
     this.platforms.push(platform);
 
     // Monster / Obstacle Spawning
-    if (alt > 1200 && Math.random() < 0.12 && this.monsters.length < 3) {
-      const monsterType = alt > 3500 && Math.random() < 0.35 ? 'black_hole' : 'flying';
+    if (alt > 1200 && Math.random() < (alt > 8000 ? 0.20 : 0.12) && this.monsters.length < 4) {
+      const monsterType = alt > 3500 && Math.random() < 0.45 ? 'black_hole' : 'flying';
       if (monsterType === 'flying') {
         this.monsters.push({
           id: this.nextEntityId++,
@@ -213,7 +228,7 @@ export class SkyJumperPhysics {
           y: y - 55 - Math.random() * 40,
           width: MONSTER_TYPES.FLYING.width,
           height: MONSTER_TYPES.FLYING.height,
-          vx: Math.random() > 0.5 ? 1.4 : -1.4,
+          vx: (Math.random() > 0.5 ? 1.4 : -1.4) * (1 + Math.min(alt / 8000, 1.2)),
           baseY: y - 55,
           flyTimer: Math.random() * Math.PI * 2,
           isDead: false
@@ -224,7 +239,7 @@ export class SkyJumperPhysics {
           x: Math.random() * (CANVAS_WIDTH - 100) + 50,
           y: y - 70,
           radius: MONSTER_TYPES.BLACK_HOLE.radius,
-          pullRadius: MONSTER_TYPES.BLACK_HOLE.pullRadius,
+          pullRadius: MONSTER_TYPES.BLACK_HOLE.pullRadius * (1 + Math.min(alt / 10000, 0.4)),
           angle: 0
         });
       }
@@ -315,13 +330,16 @@ export class SkyJumperPhysics {
     // 6. Black Hole Updates & Collisions
     this.updateBlackHoles(timeScale);
 
-    // 7. Bullets Updates
+    // 7. Meteors Updates & Collisions (High Space Hazard)
+    this.updateMeteors(timeScale, timestamp);
+
+    // 8. Bullets Updates
     this.updateBullets(timeScale);
 
-    // 8. Particles & Visual Effects
+    // 9. Particles & Visual Effects
     this.updateParticles(timeScale);
 
-    // 9. Camera Scrolling & Altitude Tracking
+    // 10. Camera Scrolling & Altitude Tracking
     this.handleCameraScroll();
 
     // 10. Check Milestone Alerts
@@ -614,6 +632,66 @@ export class SkyJumperPhysics {
     }
   }
 
+  updateMeteors(timeScale = 1, timestamp = 0) {
+    const p = this.player;
+    const alt = this.maxAltitude;
+
+    // Spawn Meteor Hazard in High Space (alt > 5000)
+    if (alt > 5000 && timestamp - this.lastMeteorSpawn > Math.max(3500, 10000 - (alt / 3))) {
+      this.lastMeteorSpawn = timestamp;
+      this.meteors.push({
+        id: this.nextEntityId++,
+        x: Math.random() * (CANVAS_WIDTH - 60) + 30,
+        y: -40,
+        vx: (Math.random() - 0.5) * 2.5,
+        vy: 4.8 + Math.min(alt / 3500, 4.0),
+        radius: MONSTER_TYPES.METEOR.radius,
+        trailTimer: 0
+      });
+      skyJumperAudio.playWhoosh();
+    }
+
+    // Update Meteors Movement & Collision
+    for (let i = this.meteors.length - 1; i >= 0; i--) {
+      const met = this.meteors[i];
+      met.x += met.vx * timeScale;
+      met.y += met.vy * timeScale;
+
+      // Spawn Fire Trail Particles
+      met.trailTimer += 1 * timeScale;
+      if (met.trailTimer >= 2) {
+        met.trailTimer = 0;
+        this.spawnJumpParticles(met.x, met.y, Math.random() > 0.5 ? '#EF4444' : '#F59E0B', 3);
+      }
+
+      // Check Collision with Player
+      const pCenterX = p.x + p.width / 2;
+      const pCenterY = p.y + p.height / 2;
+      const dx = met.x - pCenterX;
+      const dy = met.y - pCenterY;
+      const dist = Math.sqrt(dx * dx + dy * dy);
+
+      if (dist < met.radius + p.width * 0.4) {
+        if (p.powerup?.type === 'rocket') {
+          this.meteors.splice(i, 1);
+          skyJumperAudio.playMonsterDefeat();
+          this.spawnMonsterExplosion(met.x, met.y, '#EF4444');
+          this.addFloatingText('☄️ METEOR SHATTERED!', met.x, met.y, '#FBBF24');
+        } else if (p.hasShield) {
+          p.hasShield = false;
+          this.meteors.splice(i, 1);
+          skyJumperAudio.playShieldBlock();
+          this.addFloatingText('🛡️ SHIELD SAVED!', p.x, p.y - 20, '#38BDF8');
+        } else {
+          this.triggerGameOver('유성우 충돌');
+          return;
+        }
+      } else if (met.y > CANVAS_HEIGHT + 60) {
+        this.meteors.splice(i, 1);
+      }
+    }
+  }
+
   handleCameraScroll() {
     const p = this.player;
     const scrollTargetY = 320;
@@ -640,6 +718,9 @@ export class SkyJumperPhysics {
       }
       for (let bh of this.blackHoles) {
         bh.y += deltaY;
+      }
+      for (let met of this.meteors) {
+        met.y += deltaY;
       }
       for (let part of this.particles) {
         part.y += deltaY;
@@ -855,8 +936,9 @@ export class SkyJumperPhysics {
     // 2. Draw Platforms & Items
     this.renderPlatforms(ctx);
 
-    // 3. Draw Monsters & Black Holes
+    // 3. Draw Monsters, Meteors & Black Holes
     this.renderBlackHoles(ctx);
+    this.renderMeteors(ctx);
     this.renderMonsters(ctx);
 
     // 4. Draw Bullets
@@ -1190,6 +1272,34 @@ export class SkyJumperPhysics {
       ctx.beginPath();
       ctx.arc(0, 0, bh.radius, 0, Math.PI * 2);
       ctx.fill();
+      ctx.stroke();
+
+      ctx.restore();
+    }
+  }
+
+  renderMeteors(ctx) {
+    for (let met of this.meteors) {
+      ctx.save();
+      ctx.translate(met.x, met.y);
+
+      // Fiery Meteor Core
+      const grad = ctx.createRadialGradient(0, 0, met.radius * 0.2, 0, 0, met.radius);
+      grad.addColorStop(0, '#FFFFFF');
+      grad.addColorStop(0.3, '#FDE047');
+      grad.addColorStop(0.7, '#EF4444');
+      grad.addColorStop(1, 'rgba(185, 28, 28, 0.8)');
+
+      ctx.fillStyle = grad;
+      ctx.beginPath();
+      ctx.arc(0, 0, met.radius, 0, Math.PI * 2);
+      ctx.fill();
+
+      // Flame Corona
+      ctx.strokeStyle = '#F97316';
+      ctx.lineWidth = 3;
+      ctx.beginPath();
+      ctx.arc(0, 0, met.radius + 2, 0, Math.PI * 2);
       ctx.stroke();
 
       ctx.restore();

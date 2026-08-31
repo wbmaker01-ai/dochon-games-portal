@@ -7,7 +7,8 @@ import {
   HOME_PLATE_POS,
   PITCH_TYPES,
   HIT_RESULTS,
-  SPEED_LEVELS
+  SPEED_LEVELS,
+  BASEBALL_THEMES
 } from './baseballConstants';
 import {
   createTransparentSprite,
@@ -474,21 +475,68 @@ export default function BaseballGame({ onScoreSubmitted }) {
       try {
         ctx.clearRect(0, 0, CANVAS_WIDTH, CANVAS_HEIGHT);
 
+        // Get Current Theme based on Score
+        const curScore = scoreRef.current || 0;
+        let curTheme = BASEBALL_THEMES[0];
+        for (let i = BASEBALL_THEMES.length - 1; i >= 0; i--) {
+          if (curScore >= BASEBALL_THEMES[i].minScore) {
+            curTheme = BASEBALL_THEMES[i];
+            break;
+          }
+        }
+
         // =========================================================================
-        // A. Draw 3D Perspective Stadium Background & Field
+        // A. Draw 3D Perspective Stadium Background & Field with 5 Themes
         // =========================================================================
         if (bgImgRef.current) {
           ctx.drawImage(bgImgRef.current, 0, 0, CANVAS_WIDTH, CANVAS_HEIGHT);
+
+          // Atmospheric Theme Color Overlay
+          if (curTheme.id !== 'DAY') {
+            ctx.save();
+            if (curTheme.id === 'SUNSET') {
+              const grad = ctx.createLinearGradient(0, 0, 0, CANVAS_HEIGHT);
+              grad.addColorStop(0, 'rgba(249, 115, 22, 0.35)');
+              grad.addColorStop(0.5, 'rgba(180, 83, 9, 0.2)');
+              grad.addColorStop(1, 'rgba(0, 0, 0, 0.15)');
+              ctx.fillStyle = grad;
+            } else if (curTheme.id === 'NIGHT') {
+              const grad = ctx.createLinearGradient(0, 0, 0, CANVAS_HEIGHT);
+              grad.addColorStop(0, 'rgba(15, 23, 42, 0.65)');
+              grad.addColorStop(0.6, 'rgba(30, 27, 75, 0.4)');
+              grad.addColorStop(1, 'rgba(0, 0, 0, 0.25)');
+              ctx.fillStyle = grad;
+            } else if (curTheme.id === 'STORM') {
+              const grad = ctx.createLinearGradient(0, 0, 0, CANVAS_HEIGHT);
+              grad.addColorStop(0, 'rgba(39, 39, 42, 0.7)');
+              grad.addColorStop(0.5, 'rgba(24, 24, 27, 0.5)');
+              grad.addColorStop(1, 'rgba(15, 118, 110, 0.2)');
+              ctx.fillStyle = grad;
+            } else if (curTheme.id === 'CHAMPION') {
+              const grad = ctx.createLinearGradient(0, 0, 0, CANVAS_HEIGHT);
+              grad.addColorStop(0, 'rgba(88, 28, 135, 0.5)');
+              grad.addColorStop(0.5, 'rgba(131, 24, 67, 0.3)');
+              grad.addColorStop(1, 'rgba(234, 179, 8, 0.15)');
+              ctx.fillStyle = grad;
+            }
+            ctx.fillRect(0, 0, CANVAS_WIDTH, CANVAS_HEIGHT);
+            ctx.restore();
+          }
         } else {
-          // Fallback Sky & Bleachers
-          ctx.fillStyle = '#38BDF8';
-          ctx.fillRect(0, 0, CANVAS_WIDTH, 140);
-          ctx.fillStyle = '#22C55E';
-          ctx.fillRect(0, 140, CANVAS_WIDTH, CANVAS_HEIGHT - 140);
+          // Dynamic Theme Procedural Sky & Field
+          const skyGrad = ctx.createLinearGradient(0, 0, 0, 180);
+          skyGrad.addColorStop(0, curTheme.skyTop);
+          skyGrad.addColorStop(1, curTheme.skyBottom);
+          ctx.fillStyle = skyGrad;
+          ctx.fillRect(0, 0, CANVAS_WIDTH, 180);
+
+          // Grass Field
+          ctx.fillStyle = curTheme.grassLight;
+          ctx.fillRect(0, 180, CANVAS_WIDTH, CANVAS_HEIGHT - 180);
 
           // Infield Dirt Area
           ctx.save();
-          ctx.fillStyle = '#E2B184';
+          ctx.fillStyle = curTheme.dirt;
           ctx.beginPath();
           ctx.moveTo(PITCHER_POS.x, PITCHER_POS.y - 10);
           ctx.lineTo(820, CANVAS_HEIGHT);
@@ -505,6 +553,27 @@ export default function BaseballGame({ onScoreSubmitted }) {
           ctx.moveTo(HOME_PLATE_POS.x, HOME_PLATE_POS.y);
           ctx.lineTo(880, 240);
           ctx.stroke();
+          ctx.restore();
+        }
+
+        // Stadium Lighting Pillars at Night / Storm / Champion
+        if (curTheme.id === 'NIGHT' || curTheme.id === 'STORM' || curTheme.id === 'CHAMPION') {
+          ctx.save();
+          ctx.fillStyle = 'rgba(255, 255, 255, 0.08)';
+          // Left Floodlight Cone
+          ctx.beginPath();
+          ctx.moveTo(60, 40);
+          ctx.lineTo(0, CANVAS_HEIGHT);
+          ctx.lineTo(400, CANVAS_HEIGHT);
+          ctx.closePath();
+          ctx.fill();
+          // Right Floodlight Cone
+          ctx.beginPath();
+          ctx.moveTo(CANVAS_WIDTH - 60, 40);
+          ctx.lineTo(CANVAS_WIDTH, CANVAS_HEIGHT);
+          ctx.lineTo(CANVAS_WIDTH - 400, CANVAS_HEIGHT);
+          ctx.closePath();
+          ctx.fill();
           ctx.restore();
         }
 
@@ -811,6 +880,29 @@ export default function BaseballGame({ onScoreSubmitted }) {
 
         {/* Right: Stats & Game Controls */}
         <div className="scoreboard-right">
+          {/* Dynamic Theme Badge */}
+          {(() => {
+            let curTheme = BASEBALL_THEMES[0];
+            for (let i = BASEBALL_THEMES.length - 1; i >= 0; i--) {
+              if (score >= BASEBALL_THEMES[i].minScore) {
+                curTheme = BASEBALL_THEMES[i];
+                break;
+              }
+            }
+            return (
+              <div
+                className="hud-stat-pill"
+                title={`경기장 테마: ${curTheme.name}`}
+                style={{ borderLeft: `3px solid ${curTheme.accentColor}` }}
+              >
+                <span className="scoreboard-label" style={{ color: curTheme.accentColor }}>STAGE</span>
+                <span className="hud-stat-num" style={{ color: '#F8FAFC', fontSize: '11px', fontWeight: 800 }}>
+                  {curTheme.name.split(' ')[0]}
+                </span>
+              </div>
+            );
+          })()}
+
           {/* Dynamic Speed Level Tier Badge */}
           <div
             className="hud-stat-pill speed-level-pill"

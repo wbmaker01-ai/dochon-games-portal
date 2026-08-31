@@ -11,6 +11,60 @@ export const HIT_ZONE_POS = { x: 475, y: 420 }; // Contact point between bat & b
 export const BOWLER_WICKET_POS = { x: 480, y: 135 };
 export const PITCH_BOUNCE_Y = 310;
 
+// 5-Stage Dynamic Cricket Stadium Themes
+export const CRICKET_THEMES = [
+  {
+    id: 'DAY',
+    name: '도촌 그린 파크 ☀️',
+    minScore: 0,
+    skyTop: '#38BDF8',
+    skyBottom: '#BAE6FD',
+    pitchGrass: '#15803D',
+    pitchStrip: '#D97706',
+    accent: '#10B981'
+  },
+  {
+    id: 'SUNSET',
+    name: '선셋 오벌 🌅',
+    minScore: 50,
+    skyTop: '#7C2D12',
+    skyBottom: '#FB923C',
+    pitchGrass: '#14532D',
+    pitchStrip: '#B45309',
+    accent: '#F97316'
+  },
+  {
+    id: 'NIGHT',
+    name: '나이트 아레나 🌌',
+    minScore: 120,
+    skyTop: '#090D16',
+    skyBottom: '#1E1B4B',
+    pitchGrass: '#064E3B',
+    pitchStrip: '#92400E',
+    accent: '#38BDF8'
+  },
+  {
+    id: 'STORM',
+    name: '스톰 챔피언십 ⚡',
+    minScore: 220,
+    skyTop: '#18181B',
+    skyBottom: '#3F3F46',
+    pitchGrass: '#0F766E',
+    pitchStrip: '#78350F',
+    accent: '#EAB308'
+  },
+  {
+    id: 'CHAMPION',
+    name: '월드 블리츠 돔 👑',
+    minScore: 350,
+    skyTop: '#4C1D95',
+    skyBottom: '#831843',
+    pitchGrass: '#312E81',
+    pitchStrip: '#A16207',
+    accent: '#FDE047'
+  }
+];
+
 // Pitch Types & Characteristics
 export const PITCH_TYPES = {
   FASTBALL: {
@@ -80,6 +134,40 @@ export const PITCH_TYPES = {
     trailColor: 'rgba(239, 68, 68, 0.9)',
     isFire: true,
     desc: '위켓 바닥을 노리고 불꽃을 뿜으며 꽂히는 최고속 요커!'
+  },
+  SUPER_BOUNCER: {
+    id: 'super_bouncer',
+    name: '급상승 슈퍼바운서 💥',
+    nameEn: 'SUPER BOUNCER',
+    color: '#06B6D4',
+    baseSpeed: 1200,
+    bounceHeight: 88,
+    curveAmount: 25,
+    trailColor: 'rgba(6, 182, 212, 0.8)',
+    desc: '바닥 충돌 후 머리 위까지 치솟아 오르는 초고난도 바운서'
+  },
+  KNUCKLE_SPIN: {
+    id: 'knuckle_spin',
+    name: '너클 지그재그 🌀',
+    nameEn: 'KNUCKLE SPIN',
+    color: '#C084FC',
+    baseSpeed: 1100,
+    bounceHeight: 28,
+    curveAmount: -80,
+    trailColor: 'rgba(192, 132, 252, 0.85)',
+    desc: '기류를 타고 좌우로 심하게 요동치는 너클 스핀볼'
+  },
+  HYPER_YORKER: {
+    id: 'hyper_yorker',
+    name: '하이퍼 썬더 요커 ⚡',
+    nameEn: 'HYPER YORKER',
+    color: '#FDE047',
+    baseSpeed: 850,
+    bounceHeight: 14,
+    curveAmount: 0,
+    trailColor: 'rgba(253, 224, 71, 0.95)',
+    isFire: true,
+    desc: '눈으로 보고 반응하기 불가능한 익스트림 광속 요커'
   }
 };
 
@@ -137,20 +225,23 @@ export const HIT_RESULTS = {
   }
 };
 
-// Bat Swing Timing Thresholds (Milliseconds from ideal contact point)
+// Bat Swing Timing Thresholds (Base ms)
 export const TIMING_THRESHOLDS = {
-  PERFECT: 50, // |diff| <= 50ms -> 6 Runs (Home Run)
-  GREAT: 110,   // |diff| <= 110ms -> 4 Runs (Boundary)
-  GOOD: 170,    // |diff| <= 170ms -> 2 Runs
-  OK: 240       // |diff| <= 240ms -> 1 Run
+  PERFECT: 45, // |diff| <= 45ms -> 6 Runs (Home Run)
+  GREAT: 100,   // |diff| <= 100ms -> 4 Runs (Boundary)
+  GOOD: 160,    // |diff| <= 160ms -> 2 Runs
+  OK: 220       // |diff| <= 220ms -> 1 Run
 };
 
-// Speed & Difficulty Scaling Tiers
+// Speed & Difficulty Scaling Tiers (No Speed Limit)
 export const SPEED_LEVELS = [
-  { minScore: 0, name: '초심자 타자', level: 1, color: '#10B981', badge: 'LV.1 초급' },
-  { minScore: 30, name: '유망주 타자', level: 2, color: '#3B82F6', badge: 'LV.2 중급' },
-  { minScore: 80, name: '에이스 타자', level: 3, color: '#8B5CF6', badge: 'LV.3 상급' },
-  { minScore: 150, name: '크리켓 마스터', level: 4, color: '#F59E0B', badge: 'LV.4 달인' },
-  { minScore: 250, name: '전설의 타자', level: 5, color: '#EF4444', badge: 'LV.5 전설' },
-  { minScore: 400, name: '도촌 신화', level: 6, color: '#EC4899', badge: 'LV.MAX 신화' }
+  { minScore: 0, name: '초심자 (Lv.1)', level: 1, color: '#10B981', badge: 'Lv.1 루키', speedMultiplier: 1.0, timingScale: 1.0 },
+  { minScore: 25, name: '유망주 (Lv.2)', level: 2, color: '#38BDF8', badge: 'Lv.2 주니어', speedMultiplier: 1.2, timingScale: 0.90 },
+  { minScore: 60, name: '에이스 (Lv.3)', level: 3, color: '#60A5FA', badge: 'Lv.3 에이스', speedMultiplier: 1.45, timingScale: 0.80 },
+  { minScore: 110, name: '마스터 (Lv.4)', level: 4, color: '#FBBF24', badge: 'Lv.4 마스터', speedMultiplier: 1.75, timingScale: 0.70 },
+  { minScore: 170, name: '챔피언 (Lv.5)', level: 5, color: '#FB923C', badge: 'Lv.5 챔피언', speedMultiplier: 2.10, timingScale: 0.60 },
+  { minScore: 240, name: '레전드 (Lv.6)', level: 6, color: '#F43F5E', badge: 'Lv.6 레전드', speedMultiplier: 2.50, timingScale: 0.50 },
+  { minScore: 320, name: '도촌 신화 (Lv.7)', level: 7, color: '#C084FC', badge: 'Lv.7 신화', speedMultiplier: 2.95, timingScale: 0.42 },
+  { minScore: 420, name: '익스트림 (Lv.8)', level: 8, color: '#E879F9', badge: 'Lv.8 익스트림', speedMultiplier: 3.45, timingScale: 0.35 },
+  { minScore: 540, name: '초신성 블리츠 (Lv.9+)', level: 9, color: '#FDE047', badge: 'Lv.9+ 블리츠', speedMultiplier: 4.00, timingScale: 0.28 }
 ];

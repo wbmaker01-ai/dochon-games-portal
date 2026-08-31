@@ -141,19 +141,27 @@ export const MONSTER_TYPES = {
     id: 'black_hole',
     name: '시공간 블랙홀',
     icon: '🕳️',
-    radius: 26,
-    pullRadius: 90,
-    pullForce: 0.28,
+    radius: 28,
+    pullRadius: 105,
+    pullForce: 0.35,
     description: '플레이어를 빨아들이는 위험 지대입니다. 반드시 멀리 피해가야 합니다.'
+  },
+  METEOR: {
+    id: 'meteor',
+    name: '하강 유성우 ☄️',
+    icon: '☄️',
+    radius: 20,
+    speed: 4.8,
+    description: '고고도 우주 공간에서 맹렬한 속도로 떨어지는 운석입니다.'
   }
 };
 
-// Altitude Milestones & Themes
+// 5-Stage Altitude Milestones & Dynamic Cosmic Themes
 export const ALTITUDE_THEMES = [
   {
     minAlt: 0,
     maxAlt: 2000,
-    name: '푸른 하늘 (Sky)',
+    name: '푸른 하늘 ☀️',
     topColor: '#38BDF8',
     bottomColor: '#BAE6FD',
     accentColor: '#0284C7',
@@ -163,7 +171,7 @@ export const ALTITUDE_THEMES = [
   {
     minAlt: 2000,
     maxAlt: 5000,
-    name: '황혼 노을 (Sunset)',
+    name: '황혼 노을 🌅',
     topColor: '#6366F1',
     bottomColor: '#F43F5E',
     accentColor: '#FB7185',
@@ -172,22 +180,32 @@ export const ALTITUDE_THEMES = [
   },
   {
     minAlt: 5000,
-    maxAlt: 10000,
-    name: '신비의 밤하늘 (Night Aurora)',
+    maxAlt: 9000,
+    name: '오로라 성층권 🌌',
     topColor: '#090D24',
     bottomColor: '#1E1B4B',
     accentColor: '#818CF8',
     cloudCount: 2,
-    starCount: 40
+    starCount: 45
   },
   {
-    minAlt: 10000,
-    maxAlt: Infinity,
-    name: '심우주 은하수 (Deep Space)',
+    minAlt: 9000,
+    maxAlt: 15000,
+    name: '심우주 은하수 🌠',
     topColor: '#030712',
     bottomColor: '#0F172A',
     accentColor: '#38BDF8',
     cloudCount: 0,
-    starCount: 70
+    starCount: 75
+  },
+  {
+    minAlt: 15000,
+    maxAlt: Infinity,
+    name: '웜홀 코어 블리츠 👑',
+    topColor: '#3B0764',
+    bottomColor: '#581C87',
+    accentColor: '#FDE047',
+    cloudCount: 0,
+    starCount: 100
   }
 ];

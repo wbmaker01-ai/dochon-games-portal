@@ -14,7 +14,7 @@ import {
 
 /**
  * Calculate dynamic pitch speed and speed tier level based on score progression
- * Uses an Asymptotic Exponential decay model ensuring min reaction duration (>= 800ms)
+ * Uses an Unlimited Hybrid Acceleration model (Speed increases continuously with no ceiling)
  * @param {number} score Current game score
  * @param {Object} pitchConfig Pitch configuration object
  * @returns {{ actualDuration: number, speedLevel: Object, speedMultiplier: number }}
@@ -31,14 +31,16 @@ export function calculatePitchSpeed(score = 0, pitchConfig = PITCH_TYPES.FASTBAL
     }
   }
 
-  // 2. Continuous Asymptotic Exponential Acceleration Formula:
-  // SpeedScale = 1.0 + 0.55 * (1 - e^(-Score / 2500))
-  const expFactor = 1 - Math.exp(-safeScore / 2500);
-  const continuousMultiplier = 1.0 + 0.55 * expFactor;
+  // 2. Unlimited Continuous Acceleration Formula:
+  // Base acceleration + per-score acceleration with no hard clamp
+  // e.g. Score 0 -> 1.0x, Score 1000 -> 1.55x, Score 3000 -> 2.55x, Score 6000 -> 4.1x+
+  const baseFactor = 1.0 + (safeScore / 1800) * 0.95;
+  const continuousMultiplier = Math.max(1.0, baseFactor);
 
-  // 3. Bound actual duration with human reaction limit (min 800ms)
+  // 3. Bound actual duration with true human limit (min 320ms for extreme lightning pitch)
   const baseSpeed = pitchConfig?.baseSpeed || 2000;
-  const actualDuration = Math.max(800, Math.round(baseSpeed / continuousMultiplier));
+  const calculatedDuration = Math.round(baseSpeed / continuousMultiplier);
+  const actualDuration = Math.max(320, calculatedDuration);
 
   return {
     actualDuration,
@@ -153,8 +155,9 @@ export function createTransparentSprite(img, threshold = 225) {
 export function selectNextPitch(score, combo) {
   const roll = Math.random();
 
-  // Idea 5: Deceptive Bad Ball (15% ~ 22% chance after score >= 400)
-  if (score >= 400 && Math.random() < (score >= 2000 ? 0.22 : 0.15)) {
+  // Deceptive Bad Ball (15% ~ 28% chance after score >= 400)
+  const badBallChance = score >= 3500 ? 0.28 : (score >= 1500 ? 0.22 : 0.15);
+  if (score >= 400 && Math.random() < badBallChance) {
     const badRoll = Math.random();
     if (badRoll < 0.35) return PITCH_TYPES.BAD_BALL_HIGH;
     if (badRoll < 0.7) return PITCH_TYPES.BAD_BALL_LOW;
@@ -173,24 +176,32 @@ export function selectNextPitch(score, combo) {
     return PITCH_TYPES.SLOWBALL;
   } else if (score < 2000) {
     // Advanced: Fastball, Changeup, Curve, Sinker, Zigzag
-    if (roll < 0.25) return PITCH_TYPES.FASTBALL;
-    if (roll < 0.5) return PITCH_TYPES.CHANGEUP;
-    if (roll < 0.7) return PITCH_TYPES.CURVE;
-    if (roll < 0.88) return PITCH_TYPES.SINKER;
+    if (roll < 0.22) return PITCH_TYPES.FASTBALL;
+    if (roll < 0.45) return PITCH_TYPES.CHANGEUP;
+    if (roll < 0.65) return PITCH_TYPES.CURVE;
+    if (roll < 0.82) return PITCH_TYPES.SINKER;
     return PITCH_TYPES.ZIGZAG;
   } else if (score < 3500) {
-    // Master: Zigzag, Ghost, Sinker, Fireball
-    if (roll < 0.25) return PITCH_TYPES.ZIGZAG;
-    if (roll < 0.5) return PITCH_TYPES.GHOST;
-    if (roll < 0.7) return PITCH_TYPES.SINKER;
-    if (roll < 0.85) return PITCH_TYPES.CHANGEUP;
+    // Master: Zigzag, Ghost, Sinker, Fireball, Fork
+    if (roll < 0.20) return PITCH_TYPES.ZIGZAG;
+    if (roll < 0.40) return PITCH_TYPES.GHOST;
+    if (roll < 0.60) return PITCH_TYPES.SINKER;
+    if (roll < 0.80) return PITCH_TYPES.FORK;
+    return PITCH_TYPES.FIREBALL;
+  } else if (score < 5000) {
+    // Grandmaster: Fast Fireball, Ghost, Knuckle, Fork, Zigzag
+    if (roll < 0.25) return PITCH_TYPES.HYPER_FASTBALL;
+    if (roll < 0.45) return PITCH_TYPES.KNUCKLE;
+    if (roll < 0.65) return PITCH_TYPES.FORK;
+    if (roll < 0.85) return PITCH_TYPES.GHOST;
     return PITCH_TYPES.FIREBALL;
   } else {
-    // Grandmaster: Fast Fireball, Ghost, Zigzag, Sinker
-    if (roll < 0.35) return PITCH_TYPES.FIREBALL;
-    if (roll < 0.6) return PITCH_TYPES.GHOST;
-    if (roll < 0.8) return PITCH_TYPES.ZIGZAG;
-    return PITCH_TYPES.SINKER;
+    // Blitz Legend (5000+): Hyper Fastball, Knuckle, Fork, Fireball, Ghost
+    if (roll < 0.30) return PITCH_TYPES.HYPER_FASTBALL;
+    if (roll < 0.55) return PITCH_TYPES.KNUCKLE;
+    if (roll < 0.75) return PITCH_TYPES.FORK;
+    if (roll < 0.90) return PITCH_TYPES.FIREBALL;
+    return PITCH_TYPES.GHOST;
   }
 }
 

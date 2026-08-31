@@ -23,14 +23,82 @@ export const HOME_PLATE_POS = {
   y: 460
 };
 
-// Progressive Speed Level Tiers & Dynamic Timing Scales
+// 5-Stage Dynamic Stadium Themes (Score based)
+export const BASEBALL_THEMES = [
+  {
+    id: 'DAY',
+    name: '데이 스타디움 ☀️',
+    minScore: 0,
+    skyTop: '#38BDF8',
+    skyBottom: '#BAE6FD',
+    grassDark: '#15803D',
+    grassLight: '#16A34A',
+    dirt: '#D97706',
+    wallColor: '#1E293B',
+    accentColor: '#F59E0B'
+  },
+  {
+    id: 'SUNSET',
+    name: '선셋 아레나 🌅',
+    minScore: 600,
+    skyTop: '#7C2D12',
+    skyBottom: '#FB923C',
+    grassDark: '#14532D',
+    grassLight: '#15803D',
+    dirt: '#B45309',
+    wallColor: '#431407',
+    accentColor: '#F97316'
+  },
+  {
+    id: 'NIGHT',
+    name: '나이트 스타디움 🌌',
+    minScore: 1500,
+    skyTop: '#090D16',
+    skyBottom: '#1E1B4B',
+    grassDark: '#064E3B',
+    grassLight: '#047857',
+    dirt: '#92400E',
+    wallColor: '#0F172A',
+    accentColor: '#38BDF8'
+  },
+  {
+    id: 'STORM',
+    name: '썬더 돔 ⚡',
+    minScore: 2800,
+    skyTop: '#18181B',
+    skyBottom: '#3F3F46',
+    grassDark: '#064E3B',
+    grassLight: '#0F766E',
+    dirt: '#78350F',
+    wallColor: '#27272A',
+    accentColor: '#EAB308'
+  },
+  {
+    id: 'CHAMPION',
+    name: '챔피언 블리츠 돔 👑',
+    minScore: 4500,
+    skyTop: '#4C1D95',
+    skyBottom: '#831843',
+    grassDark: '#1E1B4B',
+    grassLight: '#312E81',
+    dirt: '#A16207',
+    wallColor: '#581C87',
+    accentColor: '#FDE047'
+  }
+];
+
+// Progressive Speed Level Tiers & Dynamic Timing Scales (No Speed Limit)
 export const SPEED_LEVELS = [
-  { level: 1, name: '루키 (Rookie)', minScore: 0, speedMultiplier: 1.0, color: '#10B981', bgBadge: '#064E3B', timingScale: 1.0 },
-  { level: 2, name: '주니어 (Junior)', minScore: 400, speedMultiplier: 1.15, color: '#38BDF8', bgBadge: '#0C4A6E', timingScale: 0.88 },
-  { level: 3, name: '에이스 (Ace)', minScore: 1000, speedMultiplier: 1.30, color: '#FBBF24', bgBadge: '#78350F', timingScale: 0.75 },
-  { level: 4, name: '마스터 (Master)', minScore: 2000, speedMultiplier: 1.48, color: '#FB923C', bgBadge: '#7C2D12', timingScale: 0.62 },
-  { level: 5, name: '올스타 (All-Star)', minScore: 3500, speedMultiplier: 1.65, color: '#F43F5E', bgBadge: '#881337', timingScale: 0.52 },
-  { level: 6, name: '레전드 (Legend)', minScore: 5000, speedMultiplier: 1.85, color: '#C084FC', bgBadge: '#581C87', timingScale: 0.42 }
+  { level: 1, name: '루키 (Lv.1)', minScore: 0, speedMultiplier: 1.0, color: '#10B981', bgBadge: '#064E3B', timingScale: 1.0 },
+  { level: 2, name: '주니어 (Lv.2)', minScore: 300, speedMultiplier: 1.20, color: '#38BDF8', bgBadge: '#0C4A6E', timingScale: 0.90 },
+  { level: 3, name: '에이스 (Lv.3)', minScore: 700, speedMultiplier: 1.45, color: '#60A5FA', bgBadge: '#1E3A8A', timingScale: 0.80 },
+  { level: 4, name: '올스타 (Lv.4)', minScore: 1200, speedMultiplier: 1.70, color: '#FBBF24', bgBadge: '#78350F', timingScale: 0.70 },
+  { level: 5, name: '마스터 (Lv.5)', minScore: 1800, speedMultiplier: 2.00, color: '#FB923C', bgBadge: '#7C2D12', timingScale: 0.60 },
+  { level: 6, name: '슈퍼스타 (Lv.6)', minScore: 2500, speedMultiplier: 2.35, color: '#F43F5E', bgBadge: '#881337', timingScale: 0.52 },
+  { level: 7, name: '레전드 (Lv.7)', minScore: 3300, speedMultiplier: 2.70, color: '#C084FC', bgBadge: '#581C87', timingScale: 0.45 },
+  { level: 8, name: '명예의 전당 (Lv.8)', minScore: 4200, speedMultiplier: 3.10, color: '#E879F9', bgBadge: '#701A75', timingScale: 0.38 },
+  { level: 9, name: '익스트림 (Lv.9)', minScore: 5200, speedMultiplier: 3.55, color: '#F43F5E', bgBadge: '#4C0519', timingScale: 0.32 },
+  { level: 10, name: '초신성 블리츠 (Lv.10+)', minScore: 6500, speedMultiplier: 4.10, color: '#FDE047', bgBadge: '#713F12', timingScale: 0.26 }
 ];
 
 // Pitch Types Definitions
@@ -114,6 +182,37 @@ export const PITCH_TYPES = {
     difficulty: 5,
     hasFlameEffect: true,
     description: '엄청난 속도와 불꽃을 뿜으며 꽂히는 광속구'
+  },
+  HYPER_FASTBALL: {
+    id: 'HYPER_FASTBALL',
+    name: '익스트림 하이퍼 광속구 ⚡',
+    color: '#FDE047',
+    trailColor: 'rgba(253, 224, 71, 0.9)',
+    baseSpeed: 950,
+    difficulty: 6,
+    hasFlameEffect: true,
+    description: '눈 깜짝할 사이에 미트에 꽂히는 궁극의 하이퍼 패스트볼'
+  },
+  FORK: {
+    id: 'FORK',
+    name: '폭포수 포크볼 🌊',
+    color: '#06B6D4',
+    trailColor: 'rgba(6, 182, 212, 0.7)',
+    baseSpeed: 1400,
+    difficulty: 5,
+    verticalDrop: 95,
+    description: '홈플레이트 바로 앞에서 직각으로 떨어지는 마구'
+  },
+  KNUCKLE: {
+    id: 'KNUCKLE',
+    name: '무회전 너클볼 🌀',
+    color: '#C084FC',
+    trailColor: 'rgba(192, 132, 252, 0.8)',
+    baseSpeed: 1300,
+    difficulty: 5,
+    zigzagFreq: 6.5,
+    zigzagAmp: 90,
+    description: '기류를 타고 좌우로 심하게 요동치며 들어오는 너클볼'
   },
   BAD_BALL_HIGH: {
     id: 'BAD_BALL_HIGH',

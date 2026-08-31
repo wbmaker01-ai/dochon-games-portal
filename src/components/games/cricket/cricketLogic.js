@@ -103,6 +103,7 @@ export function createTransparentSprite(img, threshold = 220) {
 
 /**
  * Calculate dynamic pitch speed and speed tier level based on score progression
+ * Unlimited Continuous Acceleration with no cap
  */
 export function calculatePitchSpeed(score = 0, pitchConfig = PITCH_TYPES.FASTBALL) {
   const safeScore = Math.max(0, Number(score) || 0);
@@ -115,12 +116,12 @@ export function calculatePitchSpeed(score = 0, pitchConfig = PITCH_TYPES.FASTBAL
     }
   }
 
-  // Speed multiplier formula: 1.0 -> 1.6x max
-  const expFactor = 1 - Math.exp(-safeScore / 220);
-  const multiplier = 1.0 + 0.55 * expFactor;
+  // Unlimited acceleration: +10% per 30 points, no upper clamp
+  const multiplier = 1.0 + (safeScore / 110) * 0.85;
 
   const baseSpeed = pitchConfig?.baseSpeed || 1700;
-  const actualDuration = Math.max(720, Math.round(baseSpeed / multiplier));
+  const calculatedDuration = Math.round(baseSpeed / multiplier);
+  const actualDuration = Math.max(340, calculatedDuration); // 340ms floor for extreme reflex limit
 
   return {
     actualDuration,
@@ -130,7 +131,7 @@ export function calculatePitchSpeed(score = 0, pitchConfig = PITCH_TYPES.FASTBAL
 }
 
 /**
- * Weighted pitch selection based on score
+ * Weighted pitch selection based on score with hyper pitch variants
  */
 export function selectNextPitch(score = 0) {
   const safeScore = Math.max(0, Number(score) || 0);
@@ -148,12 +149,25 @@ export function selectNextPitch(score = 0) {
     if (roll < 0.55) return PITCH_TYPES.CHANGEUP;
     if (roll < 0.8) return PITCH_TYPES.SLIDER;
     return PITCH_TYPES.GOOGLY;
-  } else {
+  } else if (safeScore < 220) {
     const roll = Math.random();
     if (roll < 0.25) return PITCH_TYPES.FIRE_YORKER;
-    if (roll < 0.5) return PITCH_TYPES.GOOGLY;
-    if (roll < 0.75) return PITCH_TYPES.SLIDER;
-    return PITCH_TYPES.CHANGEUP;
+    if (roll < 0.50) return PITCH_TYPES.SUPER_BOUNCER;
+    if (roll < 0.75) return PITCH_TYPES.GOOGLY;
+    return PITCH_TYPES.SLIDER;
+  } else if (safeScore < 350) {
+    const roll = Math.random();
+    if (roll < 0.30) return PITCH_TYPES.FIRE_YORKER;
+    if (roll < 0.55) return PITCH_TYPES.KNUCKLE_SPIN;
+    if (roll < 0.80) return PITCH_TYPES.SUPER_BOUNCER;
+    return PITCH_TYPES.HYPER_YORKER;
+  } else {
+    // Blitz Legend (350+)
+    const roll = Math.random();
+    if (roll < 0.35) return PITCH_TYPES.HYPER_YORKER;
+    if (roll < 0.65) return PITCH_TYPES.KNUCKLE_SPIN;
+    if (roll < 0.85) return PITCH_TYPES.FIRE_YORKER;
+    return PITCH_TYPES.SUPER_BOUNCER;
   }
 }
 
@@ -214,18 +228,24 @@ export function calculateBallState(progress, pitchConfig) {
 }
 
 /**
- * Judge bat swing timing
+ * Judge bat swing timing with dynamic precision scale
  */
-export function judgeSwing(timeDiffMs) {
+export function judgeSwing(timeDiffMs, speedLevel = null) {
   const absDiff = Math.abs(timeDiffMs);
+  const scale = speedLevel?.timingScale || 1.0;
 
-  if (absDiff <= TIMING_THRESHOLDS.PERFECT) {
+  const thPerfect = Math.round(TIMING_THRESHOLDS.PERFECT * scale);
+  const thGreat = Math.round(TIMING_THRESHOLDS.GREAT * scale);
+  const thGood = Math.round(TIMING_THRESHOLDS.GOOD * scale);
+  const thOk = Math.round(TIMING_THRESHOLDS.OK * scale);
+
+  if (absDiff <= thPerfect) {
     return { result: HIT_RESULTS.SIX, diff: timeDiffMs, rating: 'PERFECT' };
-  } else if (absDiff <= TIMING_THRESHOLDS.GREAT) {
+  } else if (absDiff <= thGreat) {
     return { result: HIT_RESULTS.FOUR, diff: timeDiffMs, rating: 'GREAT' };
-  } else if (absDiff <= TIMING_THRESHOLDS.GOOD) {
+  } else if (absDiff <= thGood) {
     return { result: HIT_RESULTS.TWO_RUNS, diff: timeDiffMs, rating: 'GOOD' };
-  } else if (absDiff <= TIMING_THRESHOLDS.OK) {
+  } else if (absDiff <= thOk) {
     return { result: HIT_RESULTS.ONE_RUN, diff: timeDiffMs, rating: 'OK' };
   } else {
     return { result: null, diff: timeDiffMs, rating: 'MISS' };
