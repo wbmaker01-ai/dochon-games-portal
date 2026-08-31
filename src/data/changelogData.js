@@ -43,7 +43,7 @@ export const CHANGELOG_DATA = [
   {
     version: 'v1.48.10',
     date: '2026-08-31',
-    title: '🌐 [도촌 P2P 멀티플레이] 학내망/방화벽 우회 TURN 릴레이 & WebSocket 하트비트 유지 및 자동 재연결 패치',
+    title: '🌐 [도촌 P2P 멀티플레이] 고가용성 TURN 릴레이 지원 & WebSocket 하트비트 유지 및 자동 재연결 패치',
     badge: 'UPDATE',
     badgeColor: 'emerald',
     items: [
@@ -60,7 +60,7 @@ export const CHANGELOG_DATA = [
       {
         tag: 'TURN RELAY POOL',
         tagColor: 'purple',
-        text: '[학교 네트워크 방화벽 완벽 우회] 학교 컴퓨터실, 학내 Wi-Fi, 모바일 핫스팟 등 대칭형 NAT 환경에서도 100% 터널링이 수립되도록 포트 80/443 전용 고가용성 TURN 릴레이 서버 풀 확충'
+        text: '[네트워크 연결 호환성 대폭 강화] 컴퓨터실, 학내 Wi-Fi, 모바일 핫스팟 등 다양한 네트워크 및 대칭형 NAT 환경에서도 원활한 멀티플레이가 가능하도록 포트 80/443 전용 고가용성 TURN 릴레이 서버 풀 확충'
       }
     ]
   },
@@ -110,14 +110,14 @@ export const CHANGELOG_DATA = [
   {
     version: 'v1.48.7',
     date: '2026-08-31',
-    title: '🔦 [도촌 야간 학교 숨바꼭질] P2P 멀티플레이 학내망/방화벽 우회 TURN 릴레이 탑재 및 3-Way 핸드셰이크 접속 안정화 패치',
+    title: '🔦 [도촌 야간 학교 숨바꼭질] P2P 멀티플레이 TURN 릴레이 탑재 및 3-Way 핸드셰이크 접속 안정화 패치',
     badge: 'UPDATE',
     badgeColor: 'emerald',
     items: [
       {
         tag: 'TURN RELAY',
         tagColor: 'blue',
-        text: '[학교 네트워크 P2P 접속 차단 문제 해결] 학교 방화벽 및 대칭형 NAT(Symmetric NAT) 환경에서도 접속이 막히지 않도록 포트 80/443 전용 고가용성 Metered TURN 릴레이 서버 풀 및 TCP 전송 지원 탑재'
+        text: '[네트워크 연결 호환성 개선] 대칭형 NAT(Symmetric NAT) 네트워크 환경에서도 원활한 P2P 접속이 이루어지도록 포트 80/443 전용 고가용성 Metered TURN 릴레이 서버 풀 및 TCP 전송 지원 탑재'
       },
       {
         tag: 'HANDSHAKE RETRY',
@@ -139,14 +139,14 @@ export const CHANGELOG_DATA = [
   {
     version: 'v1.48.6',
     date: '2026-08-31',
-    title: '☃️ [도촌 눈싸움 서바이벌] P2P 멀티플레이 학내망/방화벽 우회 TURN 릴레이 탑재 및 접속 안정화 패치',
+    title: '☃️ [도촌 눈싸움 서바이벌] P2P 멀티플레이 TURN 릴레이 탑재 및 접속 안정화 패치',
     badge: 'UPDATE',
     badgeColor: 'emerald',
     items: [
       {
         tag: 'TURN RELAY',
         tagColor: 'blue',
-        text: '[학교 네트워크 P2P 접속 차단 문제 해결] 학교 방화벽 및 대칭형 NAT(Symmetric NAT) 환경에서도 접속이 막히지 않도록 포트 80/443 전용 고가용성 TURN 릴레이 서버 풀 탑재'
+        text: '[네트워크 연결 호환성 개선] 대칭형 NAT(Symmetric NAT) 네트워크 환경에서도 원활한 접속이 가능하도록 포트 80/443 전용 고가용성 TURN 릴레이 서버 풀 탑재'
       },
       {
         tag: '3-WAY HANDSHAKE',
@@ -175,7 +175,7 @@ export const CHANGELOG_DATA = [
       {
         tag: 'TURN RELAY',
         tagColor: 'blue',
-        text: '[학교 네트워크 P2P 접속 불가 문제 해결] TURN 릴레이 서버(포트 80/443) 추가로 학교 방화벽·대칭형 NAT 환경에서도 안정적인 P2P 연결 보장'
+        text: '[네트워크 접속 안정성 개선] TURN 릴레이 서버(포트 80/443) 추가로 다양한 공유기 및 대칭형 NAT 환경에서도 안정적인 P2P 연결 보장'
       },
       {
         tag: 'AUTO RETRY',
