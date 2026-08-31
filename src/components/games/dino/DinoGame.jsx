@@ -165,11 +165,16 @@ export default function DinoGame({ onScoreSubmitted }) {
     let lastTime = performance.now();
     let lastRenderedScore = 0;
     let lastScoreUpdateTimestamp = 0;
+    let lastMilestoneLevel = 0;
 
-    const spawnObstacle = () => {
+    const spawnObstacle = (distance, speed) => {
       const g = gameStateRef.current;
       const r = Math.random();
-      if (r < 0.42) {
+
+      // Combo spawn chance increases at higher distances (starts at 450m)
+      const allowCombo = distance > 450 && Math.random() < Math.min(0.5, (distance - 400) / 1200);
+
+      if (r < 0.38) {
         // School Backpack
         g.obstacles.push({
           type: 'backpack',
@@ -180,7 +185,22 @@ export default function DinoGame({ onScoreSubmitted }) {
           height: 48,
           hitboxPad: { top: 6, bottom: 2, left: 7, right: 7 },
         });
-      } else if (r < 0.74) {
+
+        // Combo: Backpack followed by a high flying ghost drone
+        if (allowCombo && distance > 700 && Math.random() < 0.45) {
+          g.obstacles.push({
+            type: 'ghost',
+            label: '시험지 유령 드론',
+            x: CANVAS_WIDTH + 20 + Math.max(90, 140 - Math.floor(speed * 2)),
+            baseY: GROUND_Y - 88,
+            y: GROUND_Y - 88,
+            width: 46,
+            height: 52,
+            hitboxPad: { top: 6, bottom: 6, left: 7, right: 7 },
+            bobOffset: Math.random() * Math.PI * 2,
+          });
+        }
+      } else if (r < 0.70) {
         // PE Sports Cone
         g.obstacles.push({
           type: 'cone',
@@ -191,14 +211,30 @@ export default function DinoGame({ onScoreSubmitted }) {
           height: 50,
           hitboxPad: { top: 7, bottom: 2, left: 6, right: 6 },
         });
+
+        // Combo: Double cone jump
+        if (allowCombo && Math.random() < 0.5) {
+          g.obstacles.push({
+            type: 'cone',
+            label: '체육 꼬깔',
+            x: CANVAS_WIDTH + 20 + Math.max(70, 110 - Math.floor(speed * 2)),
+            y: GROUND_Y - 50,
+            width: 38,
+            height: 50,
+            hitboxPad: { top: 7, bottom: 2, left: 6, right: 6 },
+          });
+        }
       } else {
-        // Flying Homework Ghost Drone (flying obstacle)
+        // Flying Homework Ghost Drone (variable flight altitude)
+        const isLowFly = distance > 500 && Math.random() < 0.35;
+        const ghostAltitude = isLowFly ? GROUND_Y - 56 : GROUND_Y - 88;
+
         g.obstacles.push({
           type: 'ghost',
           label: '시험지 유령 드론',
           x: CANVAS_WIDTH + 20,
-          baseY: GROUND_Y - 88,
-          y: GROUND_Y - 88,
+          baseY: ghostAltitude,
+          y: ghostAltitude,
           width: 46,
           height: 52,
           hitboxPad: { top: 6, bottom: 6, left: 7, right: 7 },
@@ -264,36 +300,47 @@ export default function DinoGame({ onScoreSubmitted }) {
         setScore(currentPts);
       }
 
-      // Speed milestones
-      if (Math.floor(g.score) % 450 < Math.floor(1.2 * dt) && g.score > 200) {
-        g.speed += 0.4;
+      // 2. Progressive Infinite Speed Milestones (every 100m)
+      const currentMilestone = Math.floor(currentPts / 100);
+      if (currentMilestone > lastMilestoneLevel && currentPts > 0) {
+        lastMilestoneLevel = currentMilestone;
+        // Continuous speed increase without hard ceiling
+        g.speed = 7.8 + currentMilestone * 0.52;
+
         soundFx.playMilestone();
-        triggerBadge(`⚡ 스퍼트 가속! (${currentPts}m 돌파)`);
+        triggerBadge(`⚡ 스피드 UP! (${currentPts}m - 속도 Lv.${currentMilestone + 1})`);
         confetti({
-          particleCount: 25,
-          spread: 50,
+          particleCount: 22 + Math.min(currentMilestone * 3, 50),
+          spread: 55,
           origin: { y: 0.65 },
           colors: ['#00F5D4', '#FFD166', '#FF0055']
         });
       }
 
-      if (currentPts > 700) g.bgPhase = 'NIGHT';
-      else if (currentPts > 300) g.bgPhase = 'SUNSET';
+      // Dynamic Atmosphere Phase based on distance
+      if (currentPts > 1600) g.bgPhase = 'CHAMPION';
+      else if (currentPts > 1100) g.bgPhase = 'STORM';
+      else if (currentPts > 650) g.bgPhase = 'NIGHT';
+      else if (currentPts > 250) g.bgPhase = 'SUNSET';
       else g.bgPhase = 'DAY';
 
+      // 3. Dynamic Obstacle Spawn Interval (tighter gaps as distance & speed increase)
       g.nextObstacleTimer -= dt;
       if (g.nextObstacleTimer <= 0) {
-        spawnObstacle();
-        g.nextObstacleTimer = Math.floor(Math.random() * 40) + Math.max(34, 75 - Math.floor(g.speed * 2.5));
+        spawnObstacle(currentPts, g.speed);
+        const baseMinGap = Math.max(16, 42 - Math.floor(currentPts / 55));
+        const randomGap = Math.max(8, 34 - Math.floor(currentPts / 90));
+        g.nextObstacleTimer = baseMinGap + Math.floor(Math.random() * randomGap);
       }
 
       for (let i = g.obstacles.length - 1; i >= 0; i--) {
         const obs = g.obstacles[i];
         obs.x -= g.speed * dt;
 
-        // Flying obstacle bobbing
+        // Flying obstacle bobbing (faster bobbing at higher speeds)
         if (obs.type === 'ghost') {
-          obs.y = obs.baseY + Math.sin(frameCount * 0.08 + obs.bobOffset) * 6;
+          const bobFreq = 0.08 + Math.min(0.06, g.speed * 0.004);
+          obs.y = obs.baseY + Math.sin(frameCount * bobFreq + obs.bobOffset) * 7;
         }
 
         // Precise Hitbox Collision
@@ -353,12 +400,18 @@ export default function DinoGame({ onScoreSubmitted }) {
           ctx.drawImage(bgImg, x, 0, bgWidth, CANVAS_HEIGHT);
         }
 
-        // Atmosphere tint overlay for Sunset / Night
+        // Atmosphere tint overlay for Sunset / Night / Storm / Champion
         if (g.bgPhase === 'SUNSET') {
           ctx.fillStyle = 'rgba(255, 100, 150, 0.28)';
           ctx.fillRect(0, 0, CANVAS_WIDTH, CANVAS_HEIGHT);
         } else if (g.bgPhase === 'NIGHT') {
           ctx.fillStyle = 'rgba(10, 15, 45, 0.65)';
+          ctx.fillRect(0, 0, CANVAS_WIDTH, CANVAS_HEIGHT);
+        } else if (g.bgPhase === 'STORM') {
+          ctx.fillStyle = 'rgba(55, 15, 95, 0.62)';
+          ctx.fillRect(0, 0, CANVAS_WIDTH, CANVAS_HEIGHT);
+        } else if (g.bgPhase === 'CHAMPION') {
+          ctx.fillStyle = 'rgba(120, 20, 40, 0.68)';
           ctx.fillRect(0, 0, CANVAS_WIDTH, CANVAS_HEIGHT);
         }
       } else {
@@ -369,6 +422,7 @@ export default function DinoGame({ onScoreSubmitted }) {
         ctx.fillStyle = bgGrad;
         ctx.fillRect(0, 0, CANVAS_WIDTH, CANVAS_HEIGHT);
       }
+
 
       // 2. Draw Athletic Track & Ground Line
       if (!assets.bgSchool || !assets.bgSchool.complete) {
