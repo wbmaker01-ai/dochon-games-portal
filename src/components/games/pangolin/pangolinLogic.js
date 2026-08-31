@@ -139,13 +139,15 @@ export class PangolinGameLogic {
   }
 
   // Update Game Physics
-  update(keys, isMobileLeft, isMobileRight, isMobileJump, isMobileRoll) {
+  update(keys, isMobileLeft, isMobileRight, isMobileJump, isMobileRoll, dt = 16.66) {
     if (this.isGameOver || this.isStageCleared || this.isGameWon) return;
 
+    const timeScale = Math.min(2.5, Math.max(0.2, dt / 16.666));
+    const dtSeconds = dt / 1000;
     const p = this.player;
 
-    // Time Countdown (60 ticks approx 1 sec)
-    this.timeLeft -= 1 / 60;
+    // Time Countdown based on actual elapsed seconds
+    this.timeLeft -= dtSeconds;
     if (this.timeLeft <= 0) {
       this.timeLeft = 0;
       this.isGameOver = true;
@@ -155,17 +157,17 @@ export class PangolinGameLogic {
 
     // Combo Timer Decay
     if (this.comboTimer > 0) {
-      this.comboTimer -= 1 / 60;
+      this.comboTimer -= dtSeconds;
       if (this.comboTimer <= 0) {
         this.combo = 0;
       }
     }
 
     // Booster / Stun Timers
-    if (p.boosterTimer > 0) p.boosterTimer--;
+    if (p.boosterTimer > 0) p.boosterTimer -= 1 * timeScale;
     if (p.stunTimer > 0) {
-      p.stunTimer--;
-      p.vx *= 0.92;
+      p.stunTimer -= 1 * timeScale;
+      p.vx *= Math.pow(0.92, timeScale);
     }
 
     // Input Handling
@@ -181,13 +183,13 @@ export class PangolinGameLogic {
       if (goLeft) {
         p.facingRight = false;
         const accel = p.isRolling ? PHYSICS.ROLL_ACCEL * 1.5 : PHYSICS.ROLL_ACCEL;
-        p.vx -= accel;
+        p.vx -= accel * timeScale;
       } else if (goRight) {
         p.facingRight = true;
         const accel = p.isRolling ? PHYSICS.ROLL_ACCEL * 1.5 : PHYSICS.ROLL_ACCEL;
-        p.vx += accel;
+        p.vx += accel * timeScale;
       } else {
-        p.vx *= PHYSICS.FRICTION;
+        p.vx *= Math.pow(PHYSICS.FRICTION, timeScale);
       }
     }
 
@@ -198,11 +200,11 @@ export class PangolinGameLogic {
     if (p.isGrounded) {
       // Downhill acceleration & Uphill deceleration
       const slopeForce = Math.sin(slopeAngle) * PHYSICS.SLOPE_BOOST * 9.8;
-      p.vx += slopeForce;
+      p.vx += slopeForce * timeScale;
 
       if (p.isRolling && Math.abs(p.vx) > 3.0) {
         pangolinAudio.playRoll();
-        if (Math.random() < 0.4) {
+        if (Math.random() < 0.4 * timeScale) {
           this.addDustParticle(p.worldX, p.y + p.radius, p.vx > 0 ? -1 : 1);
         }
       }
@@ -212,18 +214,18 @@ export class PangolinGameLogic {
     const maxSpeed = p.boosterTimer > 0 ? PHYSICS.MAX_ROLL_SPEED * 1.4 : PHYSICS.MAX_ROLL_SPEED;
     p.vx = Math.max(-maxSpeed, Math.min(maxSpeed, p.vx));
 
-    // Apply Velocity
-    p.worldX += p.vx;
-    p.y += p.vy;
-    p.vy += PHYSICS.GRAVITY;
+    // Apply Velocity with timeScale
+    p.worldX += p.vx * timeScale;
+    p.y += p.vy * timeScale;
+    p.vy += PHYSICS.GRAVITY * timeScale;
 
     // Angular Velocity for Rolling
     if (p.isRolling || !p.isGrounded) {
       p.angularVel = p.vx * 0.08;
-      p.angle += p.angularVel;
+      p.angle += p.angularVel * timeScale;
     } else {
       p.angle = slopeAngle;
-      p.walkAnimTimer += Math.abs(p.vx) * 0.15;
+      p.walkAnimTimer += Math.abs(p.vx) * 0.15 * timeScale;
     }
 
     // Ground Collision
@@ -639,10 +641,10 @@ export class PangolinGameLogic {
       ctx.save();
       ctx.translate(sx, floatY);
 
-      // Glow outline for special items
+      // Outline glow for special items
       if (item.type === 'heart' || item.type === 'booster') {
-        ctx.shadowColor = def.color;
-        ctx.shadowBlur = 12;
+        ctx.strokeStyle = def.color;
+        ctx.lineWidth = 2;
       }
 
       ctx.fillStyle = def.color;
@@ -703,10 +705,8 @@ export class PangolinGameLogic {
       return;
     }
 
-    // Booster Super Aura
+    // Booster Super Aura (Lightweight outline)
     if (p.boosterTimer > 0) {
-      ctx.shadowColor = '#a855f7';
-      ctx.shadowBlur = 18;
       ctx.strokeStyle = '#c084fc';
       ctx.lineWidth = 3;
       ctx.beginPath();

@@ -524,11 +524,8 @@ export class PhysicsEngine {
 
     if (isDanger) {
       ctx.strokeStyle = `rgba(239, 68, 68, ${0.6 + pulse * 0.4})`;
-      ctx.shadowColor = '#EF4444';
-      ctx.shadowBlur = 10;
     } else {
       ctx.strokeStyle = 'rgba(251, 191, 36, 0.35)';
-      ctx.shadowBlur = 0;
     }
 
     ctx.beginPath();
@@ -602,13 +599,7 @@ export function drawFruitEntity(ctx, fruit, opacity = 1.0) {
   ctx.rotate(fruit.rotation || 0);
   ctx.scale(fruit.squashX || 1.0, fruit.squashY || 1.0);
 
-  // 1. Soft Shadow
-  ctx.save();
-  ctx.shadowColor = 'rgba(0, 0, 0, 0.35)';
-  ctx.shadowBlur = Math.max(4, r * 0.25);
-  ctx.shadowOffsetY = Math.max(2, r * 0.12);
-
-  // 2. Fruit Base Gradient Sphere
+  // 1. Fruit Base Gradient Sphere
   const sphereGrad = ctx.createRadialGradient(-r * 0.35, -r * 0.35, r * 0.1, 0, 0, r);
   sphereGrad.addColorStop(0, data.highlightColor || '#FFFFFF');
   sphereGrad.addColorStop(0.35, data.color);

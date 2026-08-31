@@ -139,21 +139,29 @@ export default function BrickBreakerGame({ onScoreSubmitted }) {
     setGameState('READY');
   }, []);
 
-  // Main 60FPS Game Loop
+  // Main 60FPS Game Loop with Delta-Time Normalization
   useEffect(() => {
     const canvas = canvasRef.current;
     if (!canvas) return;
     const ctx = canvas.getContext('2d');
     const engine = engineRef.current;
+    let lastTime = performance.now();
 
-    const render = () => {
+    const render = (timestamp) => {
+      const elapsed = timestamp ? (timestamp - lastTime) : 16.666;
+      lastTime = timestamp || performance.now();
+      // Bound dt to prevent huge jumps on tab switch while ensuring smooth 30~60 FPS
+      const dt = Math.min(48, Math.max(1, elapsed));
+      const timeScale = dt / 16.666;
+
       if (engine && ctx) {
         if (gameState === 'PLAYING') {
           engine.update(
             handleScoreAdd,
             handleExtraLife,
             handleLifeLost,
-            handleStageClear
+            handleStageClear,
+            timeScale
           );
         }
         engine.draw(ctx);

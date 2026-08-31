@@ -3,10 +3,34 @@
 
 export const CHANGELOG_DATA = [
   {
+    version: 'v1.48.13',
+    date: '2026-08-31',
+    title: '⚡ [전체 게임 성능 개선] 크롬북 및 저사양 기기 대상 델타 타임 물리 정규화 & 렌더링 최적화 종합 패치',
+    badge: 'LATEST',
+    badgeColor: 'emerald',
+    items: [
+      {
+        tag: 'DELTA TIME PHYSICS',
+        tagColor: 'emerald',
+        text: '[프레임 독립적 델타 타임 물리 연산] 크롬북 등 저사양 기기(30~45 FPS)에서 발생하는 슬로우 모션 현상을 해결하기 위해 벽돌깨기, 하늘 점퍼, 천산갑의 모험, 포니 익스프레스, 노움 날리기, 마법 고양이 등 주요 액션/물리 게임 전체에 델타 타임(dt / timeScale) 기반 물리 엔진 구축'
+      },
+      {
+        tag: 'REACT THROTTLING',
+        tagColor: 'blue',
+        text: '[HUD React 상태 갱신 스로틀링] 매 60fps 프레임마다 발생하던 가상 돔 diff 연산 및 불필요한 리렌더링 병목을 75ms 단위 스로틀링 및 값 변경 감지 방식으로 전환하여 크롬북 CPU 부하 대폭 절감'
+      },
+      {
+        tag: 'CANVAS GPU OPTIMIZATION',
+        tagColor: 'purple',
+        text: '[고비용 캔버스 블러 제거 & 렌더링 경량화] 저사양 GPU에 큰 부담을 주던 고비용 가우시안 블러(ctx.shadowBlur) 효과를 모두 제거하고 최적화된 벡터 렌더링 파이프라인으로 전환하여 끊김 없는 부드러운 플레이 환경 제공'
+      }
+    ]
+  },
+  {
     version: 'v1.48.12',
     date: '2026-08-31',
     title: '☃️ [도촌 눈싸움 서바이벌] P2P 대기실 초대 방 번호 52px 대형 골든 히어로 카드 UI 개편',
-    badge: 'LATEST',
+    badge: 'UPDATE',
     badgeColor: 'emerald',
     items: [
       {

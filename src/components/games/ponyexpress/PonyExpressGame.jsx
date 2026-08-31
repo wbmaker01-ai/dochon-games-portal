@@ -97,6 +97,7 @@ export default function PonyExpressGame({ onScoreSubmitted }) {
   };
 
   // Main 60FPS Game Loop
+  // Main 60FPS Game Loop with Delta Time Normalization & React Throttling
   useEffect(() => {
     if (gameState !== 'PLAYING') {
       if (reqIdRef.current) cancelAnimationFrame(reqIdRef.current);
@@ -109,21 +110,31 @@ export default function PonyExpressGame({ onScoreSubmitted }) {
     const logic = logicRef.current;
 
     let isRunning = true;
+    let lastTime = performance.now();
+    let lastHudUpdate = 0;
 
-    const loop = () => {
+    const loop = (timestamp) => {
       if (!isRunning) return;
 
-      logic.update();
+      const elapsed = timestamp ? (timestamp - lastTime) : 16.666;
+      lastTime = timestamp || performance.now();
+      const dt = Math.min(48, Math.max(1, elapsed));
+
+      logic.update(dt);
       logic.draw(ctx);
 
-      // Update HUD State
-      setHudData({
-        score: logic.score,
-        letters: logic.collectedLetters,
-        combo: logic.combo,
-        stage: logic.stageIndex + 1,
-        stageName: logic.currentStage.name
-      });
+      // Update HUD State (Throttled to 75ms)
+      const now = performance.now();
+      if (now - lastHudUpdate > 75) {
+        lastHudUpdate = now;
+        setHudData({
+          score: logic.score,
+          letters: logic.collectedLetters,
+          combo: logic.combo,
+          stage: logic.stageIndex + 1,
+          stageName: logic.currentStage.name
+        });
+      }
 
       // Check if Game Completed (Arrived at Town Goal)
       if (logic.isGoalReached && logic.goalTimer > 120) {

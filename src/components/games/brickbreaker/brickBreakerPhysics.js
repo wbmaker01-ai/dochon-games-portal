@@ -18,12 +18,12 @@ export class Particle {
     this.gravity = 0.12;
   }
 
-  update() {
-    this.x += this.vx;
-    this.y += this.vy;
-    this.vy += this.gravity;
-    this.vx *= 0.98;
-    this.life -= this.decay;
+  update(timeScale = 1) {
+    this.x += this.vx * timeScale;
+    this.y += this.vy * timeScale;
+    this.vy += this.gravity * timeScale;
+    this.vx *= Math.pow(0.98, timeScale);
+    this.life -= this.decay * timeScale;
   }
 
   draw(ctx) {
@@ -31,8 +31,6 @@ export class Particle {
     ctx.save();
     ctx.globalAlpha = Math.max(0, this.life);
     ctx.fillStyle = this.color;
-    ctx.shadowBlur = 6;
-    ctx.shadowColor = this.color;
     ctx.beginPath();
     ctx.arc(this.x, this.y, this.size * this.life, 0, Math.PI * 2);
     ctx.fill();
@@ -51,9 +49,9 @@ export class FloatingText {
     this.vy = -1.5;
   }
 
-  update() {
-    this.y += this.vy;
-    this.life -= 0.025;
+  update(timeScale = 1) {
+    this.y += this.vy * timeScale;
+    this.life -= 0.025 * timeScale;
   }
 
   draw(ctx) {
@@ -63,8 +61,10 @@ export class FloatingText {
     ctx.fillStyle = this.color;
     ctx.font = 'bold 13px -apple-system, BlinkMacSystemFont, "Pretendard", sans-serif';
     ctx.textAlign = 'center';
-    ctx.shadowColor = 'rgba(0, 0, 0, 0.8)';
-    ctx.shadowBlur = 4;
+    // Lightweight outline instead of heavy shadowBlur
+    ctx.strokeStyle = 'rgba(0, 0, 0, 0.7)';
+    ctx.lineWidth = 2.5;
+    ctx.strokeText(this.text, this.x, this.y);
     ctx.fillText(this.text, this.x, this.y);
     ctx.restore();
   }
@@ -81,8 +81,8 @@ export class LaserBullet {
     this.isDead = false;
   }
 
-  update() {
-    this.y += this.vy;
+  update(timeScale = 1) {
+    this.y += this.vy * timeScale;
     if (this.y < -20) {
       this.isDead = true;
     }
@@ -91,8 +91,6 @@ export class LaserBullet {
   draw(ctx) {
     ctx.save();
     ctx.fillStyle = '#FDE047';
-    ctx.shadowColor = '#EAB308';
-    ctx.shadowBlur = 10;
     ctx.fillRect(this.x - this.width / 2, this.y, this.width, this.height);
 
     ctx.fillStyle = '#FFFFFF';
@@ -115,9 +113,9 @@ export class PowerUpCapsule {
     this.glowTimer = Math.random() * Math.PI * 2;
   }
 
-  update() {
-    this.y += this.vy;
-    this.glowTimer += 0.08;
+  update(timeScale = 1) {
+    this.y += this.vy * timeScale;
+    this.glowTimer += 0.08 * timeScale;
     if (this.y > CANVAS_HEIGHT + 30) {
       this.isDead = true;
     }
@@ -125,10 +123,6 @@ export class PowerUpCapsule {
 
   draw(ctx) {
     ctx.save();
-    const pulse = Math.sin(this.glowTimer) * 4 + 8;
-    ctx.shadowColor = this.type.color;
-    ctx.shadowBlur = pulse;
-
     // Capsule pill body
     const r = this.height / 2;
     const x = this.x - this.width / 2;
@@ -142,11 +136,7 @@ export class PowerUpCapsule {
     ctx.arc(x + r, y + r, r, Math.PI / 2, -Math.PI / 2);
     ctx.closePath();
 
-    const grad = ctx.createLinearGradient(x, y, x, y + this.height);
-    grad.addColorStop(0, '#FFFFFF');
-    grad.addColorStop(0.3, this.type.color);
-    grad.addColorStop(1, '#0F172A');
-    ctx.fillStyle = grad;
+    ctx.fillStyle = this.type.color;
     ctx.fill();
 
     ctx.strokeStyle = '#FFFFFF';
@@ -154,7 +144,6 @@ export class PowerUpCapsule {
     ctx.stroke();
 
     // Icon Emoji
-    ctx.shadowBlur = 0;
     ctx.font = '11px sans-serif';
     ctx.textAlign = 'center';
     ctx.textBaseline = 'middle';
@@ -198,7 +187,7 @@ export class Paddle {
     this.laserTimer = Date.now() + durationMs;
   }
 
-  update(keys) {
+  update(keys, timeScale = 1) {
     const now = Date.now();
 
     // Check Wide Buff expiration
@@ -214,10 +203,10 @@ export class Paddle {
 
     // Keyboard Smooth Movement
     if (keys['ArrowLeft'] || keys['KeyA']) {
-      this.targetX -= this.speed;
+      this.targetX -= this.speed * timeScale;
     }
     if (keys['ArrowRight'] || keys['KeyD']) {
-      this.targetX += this.speed;
+      this.targetX += this.speed * timeScale;
     }
 
     // Clamp target
@@ -226,8 +215,8 @@ export class Paddle {
       this.targetX = CANVAS_WIDTH - 4 - this.width;
     }
 
-    // Smooth Lerp to target
-    this.x += (this.targetX - this.x) * 0.45;
+    // Smooth Lerp to target with dt normalization
+    this.x += (this.targetX - this.x) * Math.min(1, 0.45 * timeScale);
   }
 
   shootLaser(bullets) {
@@ -249,10 +238,6 @@ export class Paddle {
     const w = this.width;
     const h = this.height;
     const r = h / 2;
-
-    // Paddle Outer Glow
-    ctx.shadowColor = this.isLaserActive ? '#FBBF24' : (this.isWide ? '#38BDF8' : '#0284C7');
-    ctx.shadowBlur = 12;
 
     // Rounded Paddle Bar
     ctx.beginPath();
@@ -342,7 +327,7 @@ export class Ball {
     this.vy = Math.sin(angle) * this.currentSpeed;
   }
 
-  update(paddle, hasSafetyBarrier, onBarrierBreak) {
+  update(paddle, hasSafetyBarrier, onBarrierBreak, timeScale = 1) {
     const now = Date.now();
 
     // Check Fireball expiration
@@ -359,12 +344,12 @@ export class Ball {
 
     // Trail updates
     this.trail.push({ x: this.x, y: this.y, isFire: this.isFireball });
-    if (this.trail.length > (this.isFireball ? 9 : 5)) {
+    if (this.trail.length > (this.isFireball ? 8 : 4)) {
       this.trail.shift();
     }
 
-    this.x += this.vx;
-    this.y += this.vy;
+    this.x += this.vx * timeScale;
+    this.y += this.vy * timeScale;
 
     // Left Wall
     if (this.x - this.radius < 0) {
@@ -404,7 +389,7 @@ export class Ball {
     // Draw Motion Trail
     for (let i = 0; i < this.trail.length; i++) {
       const pt = this.trail[i];
-      const alpha = (i + 1) / this.trail.length * (this.isFireball ? 0.6 : 0.3);
+      const alpha = (i + 1) / this.trail.length * (this.isFireball ? 0.5 : 0.25);
       ctx.globalAlpha = alpha;
       ctx.fillStyle = pt.isFire ? '#F97316' : '#38BDF8';
       ctx.beginPath();
@@ -413,8 +398,6 @@ export class Ball {
     }
 
     ctx.globalAlpha = 1.0;
-    ctx.shadowColor = this.isFireball ? '#EF4444' : '#38BDF8';
-    ctx.shadowBlur = this.isFireball ? 16 : 8;
 
     // Main Ball
     ctx.beginPath();
@@ -706,7 +689,7 @@ export class PhysicsEngine {
     });
   }
 
-  update(onScoreAdd, onExtraLife, onLifeLost, onStageClear) {
+  update(onScoreAdd, onExtraLife, onLifeLost, onStageClear, timeScale = 1) {
     const now = Date.now();
 
     // Check Safety Barrier Expiration
@@ -715,12 +698,12 @@ export class PhysicsEngine {
     }
 
     // 1. Update Paddle
-    this.paddle.update(this.keys);
+    this.paddle.update(this.keys, timeScale);
 
     // 2. Update Laser Bullets
     for (let i = this.laserBullets.length - 1; i >= 0; i--) {
       const bullet = this.laserBullets[i];
-      bullet.update();
+      bullet.update(timeScale);
       if (bullet.isDead) {
         this.laserBullets.splice(i, 1);
         continue;
@@ -742,7 +725,7 @@ export class PhysicsEngine {
                 this.explodeBomb(brick, onScoreAdd);
               } else {
                 brickAudio.playBrickHit(true, brick.type.id);
-                this.spawnParticles(brick.x + brick.width / 2, brick.y + brick.height / 2, brick.type.color, 10);
+                this.spawnParticles(brick.x + brick.width / 2, brick.y + brick.height / 2, brick.type.color, 8);
                 this.maybeDropPowerUp(brick.x + brick.width / 2, brick.y + brick.height / 2);
               }
               if (onScoreAdd) onScoreAdd(brick.type.score);
@@ -758,7 +741,7 @@ export class PhysicsEngine {
     // 3. Update Power-Up Capsules
     for (let i = this.capsules.length - 1; i >= 0; i--) {
       const cap = this.capsules[i];
-      cap.update();
+      cap.update(timeScale);
       if (cap.isDead) {
         this.capsules.splice(i, 1);
         continue;
@@ -781,7 +764,7 @@ export class PhysicsEngine {
       const ball = this.balls[i];
       ball.update(this.paddle, this.hasSafetyBarrier, () => {
         this.hasSafetyBarrier = false;
-      });
+      }, timeScale);
 
       if (ball.isDead) {
         this.balls.splice(i, 1);
@@ -810,7 +793,7 @@ export class PhysicsEngine {
         ball.vy = Math.sin(bounceAngle) * ball.currentSpeed;
 
         brickAudio.playPaddleBounce();
-        this.spawnParticles(ball.x, ball.y, '#38BDF8', 5);
+        this.spawnParticles(ball.x, ball.y, '#38BDF8', 4);
       }
 
       // Ball vs Brick Collision (AABB Box with Circle)
@@ -833,13 +816,13 @@ export class PhysicsEngine {
               this.explodeBomb(brick, onScoreAdd);
             } else {
               brickAudio.playBrickHit(true, brick.type.id);
-              this.spawnParticles(brick.x + brick.width / 2, brick.y + brick.height / 2, brick.type.color, 12);
+              this.spawnParticles(brick.x + brick.width / 2, brick.y + brick.height / 2, brick.type.color, 10);
               this.maybeDropPowerUp(brick.x + brick.width / 2, brick.y + brick.height / 2);
             }
             if (onScoreAdd) onScoreAdd(brick.type.score);
           } else {
             brickAudio.playBrickHit(false, brick.type.id);
-            this.spawnParticles(closestX, closestY, brick.type.borderColor, 4);
+            this.spawnParticles(closestX, closestY, brick.type.borderColor, 3);
           }
 
           // If not fireball, reflect ball velocity
@@ -874,14 +857,14 @@ export class PhysicsEngine {
 
     // 7. Update Particles & Floating Text
     for (let i = this.particles.length - 1; i >= 0; i--) {
-      this.particles[i].update();
+      this.particles[i].update(timeScale);
       if (this.particles[i].life <= 0) {
         this.particles.splice(i, 1);
       }
     }
 
     for (let i = this.floatingTexts.length - 1; i >= 0; i--) {
-      this.floatingTexts[i].update();
+      this.floatingTexts[i].update(timeScale);
       if (this.floatingTexts[i].life <= 0) {
         this.floatingTexts.splice(i, 1);
       }
@@ -923,8 +906,6 @@ export class PhysicsEngine {
       ctx.save();
       ctx.strokeStyle = '#10B981';
       ctx.lineWidth = 3;
-      ctx.shadowColor = '#34D399';
-      ctx.shadowBlur = 12;
       ctx.beginPath();
       ctx.moveTo(0, CANVAS_HEIGHT - 6);
       ctx.lineTo(CANVAS_WIDTH, CANVAS_HEIGHT - 6);

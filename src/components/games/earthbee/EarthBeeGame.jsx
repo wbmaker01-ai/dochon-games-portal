@@ -216,8 +216,13 @@ export default function EarthBeeGame({ onScoreSubmitted }) {
           engineRef.current.setKeyboardInput(dx, dy);
           engineRef.current.update(dt);
           engineRef.current.render();
-          setPollenPct(engineRef.current.bee.pollenCount);
-          setCombo(engineRef.current.combo);
+
+          const currentPollen = engineRef.current.bee.pollenCount;
+          const currentCombo = engineRef.current.combo;
+
+          // Throttled / Change-based state synchronization to eliminate React lag
+          setPollenPct((prev) => (prev !== currentPollen ? currentPollen : prev));
+          setCombo((prev) => (prev !== currentCombo ? currentCombo : prev));
 
           // Audio hum
           const speed = Math.hypot(engineRef.current.bee.vx, engineRef.current.bee.vy) / 260;

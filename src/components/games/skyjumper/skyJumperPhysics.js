@@ -235,6 +235,7 @@ export class SkyJumperPhysics {
   update(timestamp, dt = 16.66) {
     if (this.player.isDead) return;
 
+    const timeScale = Math.min(2.5, Math.max(0.2, dt / 16.666));
     const p = this.player;
 
     // 1. Check Powerup Timers
@@ -264,15 +265,15 @@ export class SkyJumperPhysics {
     }
 
     if (moveDir !== 0) {
-      p.vx += moveDir * PLAYER_CONFIG.ACCELERATION;
+      p.vx += moveDir * PLAYER_CONFIG.ACCELERATION * timeScale;
       p.vx = Math.max(-PLAYER_CONFIG.MOVE_SPEED, Math.min(PLAYER_CONFIG.MOVE_SPEED, p.vx));
       p.facing = moveDir > 0 ? 'right' : 'left';
     } else {
-      p.vx *= PLAYER_CONFIG.FRICTION;
+      p.vx *= Math.pow(PLAYER_CONFIG.FRICTION, timeScale);
       if (Math.abs(p.vx) < 0.1) p.vx = 0;
     }
 
-    p.x += p.vx;
+    p.x += p.vx * timeScale;
 
     // Wrap-around screen
     if (p.x < -p.width / 2) {
@@ -292,33 +293,33 @@ export class SkyJumperPhysics {
         this.spawnPropellerParticles(p.x + p.width / 2, p.y);
       }
     } else {
-      p.vy += PLAYER_CONFIG.GRAVITY;
+      p.vy += PLAYER_CONFIG.GRAVITY * timeScale;
       if (p.vy > PLAYER_CONFIG.MAX_FALL_SPEED) {
         p.vy = PLAYER_CONFIG.MAX_FALL_SPEED;
       }
     }
 
-    p.y += p.vy;
+    p.y += p.vy * timeScale;
 
     // Squash & stretch recovery
     if (p.squash !== 1.0) {
-      p.squash += (1.0 - p.squash) * 0.15;
+      p.squash += (1.0 - p.squash) * Math.min(1, 0.15 * timeScale);
     }
 
     // 4. Platform Updates & Collisions
-    this.updatePlatforms(timestamp);
+    this.updatePlatforms(timestamp, timeScale);
 
     // 5. Monster & Obstacle Updates & Collisions
-    this.updateMonsters(timestamp);
+    this.updateMonsters(timestamp, timeScale);
 
     // 6. Black Hole Updates & Collisions
-    this.updateBlackHoles();
+    this.updateBlackHoles(timeScale);
 
     // 7. Bullets Updates
-    this.updateBullets();
+    this.updateBullets(timeScale);
 
     // 8. Particles & Visual Effects
-    this.updateParticles();
+    this.updateParticles(timeScale);
 
     // 9. Camera Scrolling & Altitude Tracking
     this.handleCameraScroll();
@@ -332,7 +333,7 @@ export class SkyJumperPhysics {
     }
   }
 
-  updatePlatforms(timestamp) {
+  updatePlatforms(timestamp, timeScale = 1) {
     const p = this.player;
 
     for (let i = this.platforms.length - 1; i >= 0; i--) {
@@ -340,7 +341,7 @@ export class SkyJumperPhysics {
 
       // Update Moving Platform
       if (plat.type === 'moving') {
-        plat.x += plat.vx;
+        plat.x += plat.vx * timeScale;
         if (plat.x <= 5 || plat.x + plat.width >= CANVAS_WIDTH - 5) {
           plat.vx = -plat.vx;
         }
@@ -348,7 +349,7 @@ export class SkyJumperPhysics {
 
       // Update Vertical Platform
       if (plat.type === 'vertical') {
-        plat.y += plat.vy * plat.verticalDir;
+        plat.y += plat.vy * plat.verticalDir * timeScale;
         if (Math.abs(plat.y - plat.initialY) > PLATFORM_TYPES.VERTICAL.range) {
           plat.verticalDir *= -1;
         }
@@ -356,8 +357,8 @@ export class SkyJumperPhysics {
 
       // Update Broken Platform falling animation
       if (plat.isBroken) {
-        plat.brokenTime += 1;
-        plat.y += plat.brokenTime * 0.6;
+        plat.brokenTime += 1 * timeScale;
+        plat.y += plat.brokenTime * 0.6 * timeScale;
       }
 
       // Disappearing Platform visibility phase
@@ -470,7 +471,7 @@ export class SkyJumperPhysics {
     return false;
   }
 
-  updateMonsters(timestamp) {
+  updateMonsters(timestamp, timeScale = 1) {
     const p = this.player;
 
     for (let i = this.monsters.length - 1; i >= 0; i--) {
@@ -478,8 +479,8 @@ export class SkyJumperPhysics {
       if (m.isDead) continue;
 
       // Floating sine wave animation
-      m.flyTimer += 0.04;
-      m.x += m.vx;
+      m.flyTimer += 0.04 * timeScale;
+      m.x += m.vx * timeScale;
       m.y = m.baseY + Math.sin(m.flyTimer) * 16;
 
       if (m.x < 10 || m.x + m.width > CANVAS_WIDTH - 10) {
@@ -523,12 +524,12 @@ export class SkyJumperPhysics {
     }
   }
 
-  updateBlackHoles() {
+  updateBlackHoles(timeScale = 1) {
     const p = this.player;
 
     for (let i = this.blackHoles.length - 1; i >= 0; i--) {
       const bh = this.blackHoles[i];
-      bh.angle += 0.06;
+      bh.angle += 0.06 * timeScale;
 
       const pCenterX = p.x + p.width / 2;
       const pCenterY = p.y + p.height / 2;
@@ -539,8 +540,8 @@ export class SkyJumperPhysics {
       // Gravitational Pull
       if (dist < bh.pullRadius && !p.powerup) {
         const pull = (1 - dist / bh.pullRadius) * MONSTER_TYPES.BLACK_HOLE.pullForce;
-        p.x += (dx / dist) * pull * 10;
-        p.y += (dy / dist) * pull * 10;
+        p.x += (dx / dist) * pull * 10 * timeScale;
+        p.y += (dy / dist) * pull * 10 * timeScale;
       }
 
       // Absorbed into Black Hole
@@ -581,10 +582,10 @@ export class SkyJumperPhysics {
     skyJumperAudio.playShoot();
   }
 
-  updateBullets() {
+  updateBullets(timeScale = 1) {
     for (let i = this.bullets.length - 1; i >= 0; i--) {
       const b = this.bullets[i];
-      b.y += b.vy;
+      b.y += b.vy * timeScale;
 
       // Check collision with monsters
       let bulletHit = false;
@@ -812,12 +813,12 @@ export class SkyJumperPhysics {
     });
   }
 
-  updateParticles() {
+  updateParticles(timeScale = 1) {
     for (let i = this.particles.length - 1; i >= 0; i--) {
       const p = this.particles[i];
-      p.x += p.vx;
-      p.y += p.vy;
-      p.alpha -= p.decay;
+      p.x += p.vx * timeScale;
+      p.y += p.vy * timeScale;
+      p.alpha -= p.decay * timeScale;
       if (p.alpha <= 0) {
         this.particles.splice(i, 1);
       }
@@ -825,8 +826,8 @@ export class SkyJumperPhysics {
 
     for (let i = this.floatingTexts.length - 1; i >= 0; i--) {
       const t = this.floatingTexts[i];
-      t.y -= 1.0;
-      t.timer -= 1;
+      t.y -= 1.0 * timeScale;
+      t.timer -= 1 * timeScale;
       t.alpha = Math.max(0, t.timer / 45);
       if (t.timer <= 0) {
         this.floatingTexts.splice(i, 1);
@@ -834,7 +835,7 @@ export class SkyJumperPhysics {
     }
 
     if (this.milestonePopup) {
-      this.milestonePopup.timer -= 1;
+      this.milestonePopup.timer -= 1 * timeScale;
       if (this.milestonePopup.timer <= 0) {
         this.milestonePopup = null;
       }

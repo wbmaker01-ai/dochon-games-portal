@@ -104,6 +104,7 @@ export default function GnomeGame({ onScoreSubmitted }) {
   const [uiPower, setUiPower] = useState(0);
   const [flowersPlanted, setFlowersPlanted] = useState(0);
   const lastFlowerXRef = useRef(0);
+  const lastHudUpdateRef = useRef(0);
 
   // Feedback Toast & Modals
   const [toastAlert, setToastAlert] = useState(null);
@@ -332,14 +333,16 @@ export default function GnomeGame({ onScoreSubmitted }) {
 
       // 3. FLYING Physics Simulation
       if (state === 'FLYING') {
-        // Position update
-        gnome.x += gnome.vx;
-        gnome.y += gnome.vy;
+        const timeScale = Math.min(2.5, Math.max(0.2, dt / 16.666));
 
-        // Gravity & Drag
-        gnome.vy += PHYSICS_CONFIG.GRAVITY * gnome.mass;
-        gnome.vx *= gnome.drag;
-        gnome.vy *= gnome.drag;
+        // Position update with timeScale
+        gnome.x += gnome.vx * timeScale;
+        gnome.y += gnome.vy * timeScale;
+
+        // Gravity & Drag with timeScale
+        gnome.vy += PHYSICS_CONFIG.GRAVITY * gnome.mass * timeScale;
+        gnome.vx *= Math.pow(gnome.drag, timeScale);
+        gnome.vy *= Math.pow(gnome.drag, timeScale);
 
         // Velocity Soft Clamping (Prevents motion sickness / visual tearing)
         gnome.vx = Math.min(PHYSICS_CONFIG.MAX_HORIZONTAL_SPEED, Math.max(-10, gnome.vx));
@@ -485,8 +488,8 @@ export default function GnomeGame({ onScoreSubmitted }) {
           } else {
             // Sliding along the ground with steady turf deceleration
             gnome.vy = 0;
-            gnome.vx *= 0.86;
-            gnome.vx = Math.max(0, gnome.vx - 0.35);
+            gnome.vx *= Math.pow(0.86, timeScale);
+            gnome.vx = Math.max(0, gnome.vx - 0.35 * timeScale);
 
             // Full Stop Detection
             if (gnome.vx <= 0.6) {
@@ -510,14 +513,17 @@ export default function GnomeGame({ onScoreSubmitted }) {
           PHYSICS_CONFIG.MIN_CAMERA_ZOOM,
           1.0 - (speedRatio * 0.16 + altRatio * 0.10)
         );
-        cameraZoomRef.current += (targetZoom - cameraZoomRef.current) * 0.06;
+        cameraZoomRef.current += (targetZoom - cameraZoomRef.current) * Math.min(1, 0.06 * timeScale);
 
-        // Sync React HUD
-        setDistance(gnome.distance);
-        setAltitude(currentAlt);
-        setSpeedKmh(currentSpeed);
-        setBonusScore(gnome.bonusScore);
-        setFlowersPlanted(gnome.flowersPlanted);
+        // Sync React HUD (Throttled to 75ms to remove CPU lag on Chromebooks)
+        if (currentTime - lastHudUpdateRef.current > 75) {
+          lastHudUpdateRef.current = currentTime;
+          setDistance(gnome.distance);
+          setAltitude(currentAlt);
+          setSpeedKmh(currentSpeed);
+          setBonusScore(gnome.bonusScore);
+          setFlowersPlanted(gnome.flowersPlanted);
+        }
       } else {
         // Reset zoom smoothly when not flying
         cameraZoomRef.current += (1.0 - cameraZoomRef.current) * 0.08;

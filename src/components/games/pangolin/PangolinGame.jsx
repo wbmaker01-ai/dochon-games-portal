@@ -153,7 +153,7 @@ export default function PangolinGame({ onScoreSubmitted }) {
     };
   }, [gameState]);
 
-  // Main 60FPS Game Loop
+  // Main 60FPS Game Loop with Delta Time Normalization & React Throttling
   useEffect(() => {
     if (gameState !== 'PLAYING') {
       if (reqIdRef.current) cancelAnimationFrame(reqIdRef.current);
@@ -161,9 +161,15 @@ export default function PangolinGame({ onScoreSubmitted }) {
     }
 
     let isRunning = true;
+    let lastTime = performance.now();
+    let lastHudUpdate = 0;
 
-    const gameLoop = () => {
+    const gameLoop = (timestamp) => {
       if (!isRunning) return;
+
+      const elapsed = timestamp ? (timestamp - lastTime) : 16.666;
+      lastTime = timestamp || performance.now();
+      const dt = Math.min(48, Math.max(1, elapsed));
 
       const canvas = canvasRef.current;
       const logic = logicRef.current;
@@ -171,34 +177,39 @@ export default function PangolinGame({ onScoreSubmitted }) {
       if (canvas && logic) {
         const ctx = canvas.getContext('2d');
 
-        // Update Physics
+        // Update Physics with Delta-Time Normalization
         logic.update(
           keysRef.current,
           mobileInputRef.current.left,
           mobileInputRef.current.right,
           mobileInputRef.current.jump,
-          mobileInputRef.current.roll
+          mobileInputRef.current.roll,
+          dt
         );
 
         // Render Canvas
         logic.draw(ctx);
 
-        // Update HUD
-        const targetDist = logic.currentStage.targetDistance;
-        const currentDist = Math.max(0, logic.player.worldX);
-        const progress = Math.min(100, Math.floor((currentDist / targetDist) * 100));
+        // Update HUD (Throttled to 75ms to eliminate React re-render lag on Chromebooks)
+        const now = performance.now();
+        if (now - lastHudUpdate > 75) {
+          lastHudUpdate = now;
+          const targetDist = logic.currentStage.targetDistance;
+          const currentDist = Math.max(0, logic.player.worldX);
+          const progress = Math.min(100, Math.floor((currentDist / targetDist) * 100));
 
-        setHudData({
-          score: logic.score,
-          stageIndex: logic.stageIndex,
-          stageName: logic.currentStage.name,
-          country: logic.currentStage.country,
-          itemEmoji: logic.currentStage.itemEmoji,
-          collected: logic.totalCollected,
-          combo: logic.combo,
-          timeLeft: Math.ceil(logic.timeLeft),
-          distanceProgress: progress
-        });
+          setHudData({
+            score: logic.score,
+            stageIndex: logic.stageIndex,
+            stageName: logic.currentStage.name,
+            country: logic.currentStage.country,
+            itemEmoji: logic.currentStage.itemEmoji,
+            collected: logic.totalCollected,
+            combo: logic.combo,
+            timeLeft: Math.ceil(logic.timeLeft),
+            distanceProgress: progress
+          });
+        }
 
         // Check State Transitions
         if (logic.isGameWon) {

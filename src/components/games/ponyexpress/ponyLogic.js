@@ -107,34 +107,38 @@ export class PonyGameLogic {
   }
 
   // Update Game Physics & State
-  update() {
+  update(dt = 16.66) {
+    const timeScale = Math.min(2.5, Math.max(0.2, dt / 16.666));
+
     // Current Speed based on boost & hit stun
     let speed = GAME_SPEED_BASE;
     if (this.player.speedBoost > 0) {
-      this.player.speedBoost--;
+      this.player.speedBoost -= 1 * timeScale;
       speed *= 1.35;
     }
     if (this.player.hitStun > 0) {
-      this.player.hitStun--;
+      this.player.hitStun -= 1 * timeScale;
       speed *= 0.65;
     }
 
+    const scaledSpeed = speed * timeScale;
+
     if (this.isGoalReached) {
-      this.goalTimer++;
-      this.updateParticles();
+      this.goalTimer += 1 * timeScale;
+      this.updateParticles(timeScale);
       // Player slowly gallops into the town
-      this.player.x = Math.min(CANVAS_WIDTH * 0.65, this.player.x + 2.5);
+      this.player.x = Math.min(CANVAS_WIDTH * 0.65, this.player.x + 2.5 * timeScale);
       return;
     }
 
-    this.gameDistance += speed;
+    this.gameDistance += scaledSpeed;
 
     // 1. Player Jump & Lane Interpolation
-    this.player.y += (this.player.targetY - this.player.y) * 0.22;
+    this.player.y += (this.player.targetY - this.player.y) * Math.min(1, 0.22 * timeScale);
 
     if (this.player.isJumping) {
-      this.player.jumpTimer--;
-      const progress = 1 - this.player.jumpTimer / JUMP_DURATION_FRAMES;
+      this.player.jumpTimer -= 1 * timeScale;
+      const progress = 1 - Math.max(0, this.player.jumpTimer) / JUMP_DURATION_FRAMES;
       this.player.jumpOffset = Math.sin(progress * Math.PI) * JUMP_HEIGHT_MAX;
       if (this.player.jumpTimer <= 0) {
         this.player.isJumping = false;
@@ -145,7 +149,7 @@ export class PonyGameLogic {
     }
 
     // Horse Running Animation
-    this.player.animTimer += speed * 0.12;
+    this.player.animTimer += scaledSpeed * 0.12;
     if (this.player.animTimer >= 1) {
       this.player.animTimer = 0;
       this.player.animFrame = (this.player.animFrame + 1) % 4;
@@ -155,7 +159,7 @@ export class PonyGameLogic {
     }
 
     // Hoof Dust Particles
-    if (!this.player.isJumping && Math.random() < 0.35) {
+    if (!this.player.isJumping && Math.random() < 0.35 * timeScale) {
       this.particles.push({
         x: this.player.x - 28,
         y: this.player.y + 22,
@@ -184,7 +188,7 @@ export class PonyGameLogic {
     }
 
     // 3. Spawner System
-    this.spawnTimer += speed;
+    this.spawnTimer += scaledSpeed;
     if (this.spawnTimer >= this.nextSpawnDistance && this.spawnedLetters < TOTAL_LETTERS) {
       this.spawnTimer = 0;
       this.nextSpawnDistance = 110 + Math.random() * 70;
@@ -204,12 +208,12 @@ export class PonyGameLogic {
     }
 
     // 4. Update Scenery & Parallax
-    this.updateScenery(speed);
+    this.updateScenery(scaledSpeed);
 
     // 5. Update Items
     for (let i = this.items.length - 1; i >= 0; i--) {
       const it = this.items[i];
-      it.x -= speed;
+      it.x -= scaledSpeed;
 
       // Collision Check with Player
       if (Math.abs(it.x - this.player.x) < 40 && it.lane === this.player.lane) {
@@ -254,7 +258,7 @@ export class PonyGameLogic {
     // 6. Update Obstacles
     for (let i = this.obstacles.length - 1; i >= 0; i--) {
       const ob = this.obstacles[i];
-      ob.x -= speed;
+      ob.x -= scaledSpeed;
 
       // Check collision
       const xDiff = Math.abs(ob.x - this.player.x);
@@ -281,8 +285,18 @@ export class PonyGameLogic {
       }
     }
 
-    // 7. Update Particles
-    this.updateParticles();
+    // 7. Update Scenery End of Goal
+    const town = this.scenery.find(s => s.type === 'TOWN_GOAL');
+    if (town && town.x <= this.player.x - 30) {
+      if (!this.isGoalReached) {
+        this.isGoalReached = true;
+        this.goalTimer = 0;
+        ponyAudio.playGoalFanfare();
+      }
+    }
+
+    // 8. Update Particles
+    this.updateParticles(timeScale);
   }
 
   // Spawn Waves (Letters & Obstacles)
@@ -464,13 +478,13 @@ export class PonyGameLogic {
     }
   }
 
-  updateParticles() {
+  updateParticles(timeScale = 1) {
     for (let i = this.particles.length - 1; i >= 0; i--) {
       const p = this.particles[i];
-      p.x += p.vx || 0;
-      p.y += p.vy || 0;
-      if (p.gravity) p.vy += p.gravity;
-      p.life--;
+      p.x += (p.vx || 0) * timeScale;
+      p.y += (p.vy || 0) * timeScale;
+      if (p.gravity) p.vy += p.gravity * timeScale;
+      p.life -= 1 * timeScale;
       p.alpha = p.life / 35;
 
       if (p.life <= 0) {
@@ -516,29 +530,26 @@ export class PonyGameLogic {
       }
     }
 
-    // 5. Foreground Particles & Texts
+    // 5. Particles & Text
     this.drawParticles(ctx);
   }
 
-  // Background Sky & Mountains
+  // Draw Background Sky & Horizon
   drawBackground(ctx) {
     const stage = this.currentStage;
 
     // Sky Gradient
-    const skyGrad = ctx.createLinearGradient(0, 0, 0, 160);
-    skyGrad.addColorStop(0, stage.skyGradient[0]);
-    skyGrad.addColorStop(0.6, stage.skyGradient[1]);
-    skyGrad.addColorStop(1, stage.skyGradient[2]);
+    const skyGrad = ctx.createLinearGradient(0, 0, 0, 180);
+    skyGrad.addColorStop(0, stage.skyColors[0]);
+    skyGrad.addColorStop(1, stage.skyColors[1]);
     ctx.fillStyle = skyGrad;
-    ctx.fillRect(0, 0, CANVAS_WIDTH, 160);
+    ctx.fillRect(0, 0, CANVAS_WIDTH, 180);
 
     // Sun / Moon in sky
     ctx.save();
     ctx.beginPath();
     ctx.arc(CANVAS_WIDTH - 90, 50, 26, 0, Math.PI * 2);
     ctx.fillStyle = stage.theme === 'snow' ? '#F8FAFC' : '#FDE047';
-    ctx.shadowColor = '#FDE047';
-    ctx.shadowBlur = 18;
     ctx.fill();
     ctx.restore();
 
@@ -874,9 +885,6 @@ export class PonyGameLogic {
       ctx.fill();
     } else if (it.type === 'GOLD_LETTER') {
       // Golden Glowing Envelope
-      ctx.shadowColor = '#FBBF24';
-      ctx.shadowBlur = 12;
-
       ctx.fillStyle = '#FEF08A';
       ctx.strokeStyle = '#F59E0B';
       ctx.lineWidth = 2.5;
@@ -994,9 +1002,10 @@ export class PonyGameLogic {
       if (p.text) {
         ctx.font = 'bold 15px sans-serif';
         ctx.fillStyle = p.color;
-        ctx.shadowColor = '#000000';
-        ctx.shadowBlur = 4;
+        ctx.strokeStyle = '#000000';
+        ctx.lineWidth = 2.5;
         ctx.textAlign = 'center';
+        ctx.strokeText(p.text, p.x, p.y);
         ctx.fillText(p.text, p.x, p.y);
       } else {
         ctx.fillStyle = p.color;

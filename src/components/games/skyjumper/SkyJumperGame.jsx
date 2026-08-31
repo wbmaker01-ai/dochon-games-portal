@@ -59,18 +59,24 @@ export default function SkyJumperGame({ onScoreSubmitted }) {
 
   // Initialize Physics Engine
   useEffect(() => {
+    let lastScoreUpdate = 0;
+
     const engine = new SkyJumperPhysics({
-      onScoreAdd: (points) => {
-        setScore(engine.score);
-        setBestScore(prev => {
-          if (engine.score > prev) {
-            try {
-              localStorage.setItem('dochon_skyjumper_best', String(engine.score));
-            } catch (e) {}
-            return engine.score;
-          }
-          return prev;
-        });
+      onScoreAdd: () => {
+        const now = performance.now();
+        if (now - lastScoreUpdate > 75) {
+          lastScoreUpdate = now;
+          setScore(engine.score);
+          setBestScore(prev => {
+            if (engine.score > prev) {
+              try {
+                localStorage.setItem('dochon_skyjumper_best', String(engine.score));
+              } catch (e) {}
+              return engine.score;
+            }
+            return prev;
+          });
+        }
       },
       onGameOver: (reason, finalScore) => {
         haptics.warning();
@@ -102,7 +108,8 @@ export default function SkyJumperGame({ onScoreSubmitted }) {
 
     const loop = (timestamp) => {
       if (!lastTimeRef.current) lastTimeRef.current = timestamp;
-      const dt = Math.min(32, timestamp - lastTimeRef.current);
+      const elapsed = timestamp - lastTimeRef.current;
+      const dt = Math.min(48, Math.max(1, elapsed));
       lastTimeRef.current = timestamp;
 
       const engine = engineRef.current;

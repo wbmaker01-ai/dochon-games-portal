@@ -51,18 +51,32 @@ export default function MagicCatGame({ onScoreSubmitted }) {
     const ctx = canvas.getContext('2d');
 
     let lastStageIdx = 0;
+    let lastTime = performance.now();
+    let lastHudUpdate = 0;
 
-    const loop = () => {
+    const loop = (timestamp) => {
       if (logicRef.current) {
-        logicRef.current.update();
+        const elapsed = timestamp ? (timestamp - lastTime) : 16.666;
+        lastTime = timestamp || performance.now();
+        const dt = Math.min(48, Math.max(1, elapsed));
+
+        logicRef.current.update(dt);
         logicRef.current.render(ctx);
 
-        // Synchronize React states
-        setScore(logicRef.current.score);
-        setCombo(logicRef.current.combo);
-        setMaxCombo(logicRef.current.maxCombo);
-        setPlayerHp(logicRef.current.player.hp);
-        setGameState(logicRef.current.gameState);
+        // Synchronize React states (Throttled to 75ms to eliminate React re-render lag)
+        const now = performance.now();
+        if (now - lastHudUpdate > 75) {
+          lastHudUpdate = now;
+          setScore(logicRef.current.score);
+          setCombo(logicRef.current.combo);
+          setMaxCombo(logicRef.current.maxCombo);
+          setPlayerHp(logicRef.current.player.hp);
+          setGameState(logicRef.current.gameState);
+        } else if (logicRef.current.gameState === 'GAME_OVER' || logicRef.current.gameState === 'VICTORY') {
+          // Immediately sync terminal states
+          setGameState(logicRef.current.gameState);
+          setScore(logicRef.current.score);
+        }
 
         // Stage change announcement
         if (logicRef.current.stageIndex !== lastStageIdx) {

@@ -553,8 +553,6 @@ export default function PopcornGame({ onScoreSubmitted }) {
       ctx.arc(PAN_CENTER_X, PAN_CENTER_Y, PAN_RADIUS, 0, Math.PI * 2);
       ctx.lineWidth = 6;
       ctx.strokeStyle = freezeTimerRef.current > 0 ? '#38BDF8' : '#F97316';
-      ctx.shadowColor = freezeTimerRef.current > 0 ? '#0284C7' : '#EA580C';
-      ctx.shadowBlur = 16;
       ctx.stroke();
       ctx.restore();
 
@@ -599,8 +597,6 @@ export default function PopcornGame({ onScoreSubmitted }) {
         ctx.fill();
         ctx.lineWidth = 3;
         ctx.strokeStyle = '#38BDF8';
-        ctx.shadowColor = '#0284C7';
-        ctx.shadowBlur = 12;
         ctx.stroke();
       }
 

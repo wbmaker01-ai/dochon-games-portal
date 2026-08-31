@@ -119,16 +119,18 @@ export class MagicGameLogic {
     return syms;
   }
 
-  // Update Game Loop (60 FPS)
-  update() {
+  // Update Game Loop (60 FPS with Delta Time Normalization)
+  update(dt = 16.66) {
+    const timeScale = Math.min(2.5, Math.max(0.2, dt / 16.666));
+
     if (this.gameState === 'GAME_OVER' || this.gameState === 'VICTORY') {
-      this.updateParticles();
+      this.updateParticles(timeScale);
       return;
     }
 
     if (this.gameState === 'STAGE_CLEAR') {
-      this.stageClearTimer++;
-      this.updateParticles();
+      this.stageClearTimer += 1 * timeScale;
+      this.updateParticles(timeScale);
       if (this.stageClearTimer > 120) {
         this.stageClearTimer = 0;
         this.startStage(this.stageIndex + 1);
@@ -136,19 +138,19 @@ export class MagicGameLogic {
       return;
     }
 
-    // Player timers
-    if (this.player.invulnerableTimer > 0) this.player.invulnerableTimer--;
-    if (this.player.hurtAnimTimer > 0) this.player.hurtAnimTimer--;
+    // Player timers with timeScale
+    if (this.player.invulnerableTimer > 0) this.player.invulnerableTimer -= 1 * timeScale;
+    if (this.player.hurtAnimTimer > 0) this.player.hurtAnimTimer -= 1 * timeScale;
     if (this.player.castTimer > 0) {
-      this.player.castTimer--;
-      if (this.player.castTimer === 0) {
+      this.player.castTimer -= 1 * timeScale;
+      if (this.player.castTimer <= 0) {
         this.player.targetWandAngle = -Math.PI / 4;
       }
     }
-    this.player.wandAngle += (this.player.targetWandAngle - this.player.wandAngle) * 0.25;
+    this.player.wandAngle += (this.player.targetWandAngle - this.player.wandAngle) * Math.min(1, 0.25 * timeScale);
 
     // Player blinking animation
-    this.player.blinkTimer++;
+    this.player.blinkTimer += 1 * timeScale;
     if (this.player.blinkTimer > 180) {
       this.player.isBlinking = true;
       if (this.player.blinkTimer > 192) {
@@ -158,9 +160,9 @@ export class MagicGameLogic {
     }
 
     // Screen effects decay
-    if (this.screenFlash > 0) this.screenFlash -= 0.05;
-    if (this.hurtFlash > 0) this.hurtFlash -= 0.035;
-    if (this.screenShake > 0) this.screenShake *= 0.85;
+    if (this.screenFlash > 0) this.screenFlash -= 0.05 * timeScale;
+    if (this.hurtFlash > 0) this.hurtFlash -= 0.035 * timeScale;
+    if (this.screenShake > 0) this.screenShake *= Math.pow(0.85, timeScale);
     if (this.screenShake < 0.2) this.screenShake = 0;
 
     // Combo timeout check
@@ -169,14 +171,14 @@ export class MagicGameLogic {
     }
 
     // Spawn logic
-    this.updateSpawns();
+    this.updateSpawns(timeScale);
 
-    // Update Entities
-    this.updateGhosts();
-    this.updateBoss();
-    this.updateProjectiles();
-    this.updateParticles();
-    this.updateFloatingTexts();
+    // Update Entities with timeScale
+    this.updateGhosts(timeScale);
+    this.updateBoss(timeScale);
+    this.updateProjectiles(timeScale);
+    this.updateParticles(timeScale);
+    this.updateFloatingTexts(timeScale);
 
     // Check Stage Clear condition
     if (!this.currentStage.isBossStage) {
@@ -206,11 +208,11 @@ export class MagicGameLogic {
     }
   }
 
-  updateSpawns() {
+  updateSpawns(timeScale = 1) {
     if (this.currentStage.isBossStage) {
       // In boss stage, minions spawn periodically from the sides
       if (this.boss && this.ghosts.length < 3) {
-        this.boss.minionSpawnTimer--;
+        this.boss.minionSpawnTimer -= 1 * timeScale;
         if (this.boss.minionSpawnTimer <= 0) {
           this.boss.minionSpawnTimer = 160;
           this.spawnGhost(true);
@@ -220,7 +222,7 @@ export class MagicGameLogic {
     }
 
     if (this.stageKills + this.ghosts.length < this.currentStage.targetKills) {
-      this.spawnTimer--;
+      this.spawnTimer -= 1 * timeScale;
       if (this.spawnTimer <= 0) {
         this.spawnTimer = Math.max(45, this.currentStage.spawnInterval - Math.floor(this.stageKills * 1.5));
         this.spawnGhost(false);
@@ -275,11 +277,11 @@ export class MagicGameLogic {
     });
   }
 
-  updateGhosts() {
+  updateGhosts(timeScale = 1) {
     for (let i = this.ghosts.length - 1; i >= 0; i--) {
       const g = this.ghosts[i];
-      g.wobbleTimer += 0.06;
-      if (g.hitFlash > 0) g.hitFlash--;
+      g.wobbleTimer += 0.06 * timeScale;
+      if (g.hitFlash > 0) g.hitFlash -= 1 * timeScale;
 
       // Move toward player Momo
       const dx = this.player.x - g.x;
@@ -287,8 +289,8 @@ export class MagicGameLogic {
       const dist = Math.hypot(dx, dy);
 
       if (dist > 1) {
-        g.x += (dx / dist) * g.speed;
-        g.y += (dy / dist) * g.speed;
+        g.x += (dx / dist) * g.speed * timeScale;
+        g.y += (dy / dist) * g.speed * timeScale;
       }
 
       // Wobble perpendicular to movement
@@ -314,17 +316,17 @@ export class MagicGameLogic {
     }
   }
 
-  updateBoss() {
+  updateBoss(timeScale = 1) {
     if (!this.boss) return;
-    this.boss.phaseTimer += 0.04;
+    this.boss.phaseTimer += 0.04 * timeScale;
     this.boss.hoverOffset = Math.sin(this.boss.phaseTimer) * 14;
-    if (this.boss.hitTimer > 0) this.boss.hitTimer--;
+    if (this.boss.hitTimer > 0) this.boss.hitTimer -= 1 * timeScale;
   }
 
-  updateProjectiles() {
+  updateProjectiles(timeScale = 1) {
     for (let i = this.projectiles.length - 1; i >= 0; i--) {
       const p = this.projectiles[i];
-      p.life--;
+      p.life -= 1 * timeScale;
 
       const dx = p.targetX - p.x;
       const dy = p.targetY - p.y;
@@ -335,10 +337,10 @@ export class MagicGameLogic {
         this.createPurifiedBurst(p.targetX, p.targetY, p.color);
         this.projectiles.splice(i, 1);
       } else {
-        p.x += (dx / dist) * p.speed;
-        p.y += (dy / dist) * p.speed;
+        p.x += (dx / dist) * p.speed * timeScale;
+        p.y += (dy / dist) * p.speed * timeScale;
         // Sparkle trail
-        if (Math.random() < 0.7) {
+        if (Math.random() < 0.7 * timeScale) {
           this.createSparkleParticle(p.x, p.y, p.color);
         }
       }
@@ -601,15 +603,27 @@ export class MagicGameLogic {
     }
   }
 
-  updateParticles() {
+  updateParticles(timeScale = 1) {
     for (let i = this.particles.length - 1; i >= 0; i--) {
       const p = this.particles[i];
-      p.x += p.vx;
-      p.y += p.vy;
-      p.alpha -= p.decay;
-      p.size *= 0.96;
+      p.x += p.vx * timeScale;
+      p.y += p.vy * timeScale;
+      p.alpha -= p.decay * timeScale;
+      p.size *= Math.pow(0.96, timeScale);
       if (p.alpha <= 0 || p.size < 0.5) {
         this.particles.splice(i, 1);
+      }
+    }
+  }
+
+  updateFloatingTexts(timeScale = 1) {
+    for (let i = this.floatingTexts.length - 1; i >= 0; i--) {
+      const ft = this.floatingTexts[i];
+      ft.y -= 1.0 * timeScale;
+      ft.life -= 1 * timeScale;
+      ft.alpha = ft.life / 40;
+      if (ft.life <= 0) {
+        this.floatingTexts.splice(i, 1);
       }
     }
   }
@@ -904,8 +918,6 @@ export class MagicGameLogic {
 
     // Wand Tip Star Gem
     ctx.fillStyle = '#FBBF24';
-    ctx.shadowColor = '#FDE047';
-    ctx.shadowBlur = 14;
     ctx.beginPath();
     ctx.arc(38, 0, 6, 0, Math.PI * 2);
     ctx.fill();
@@ -938,9 +950,6 @@ export class MagicGameLogic {
         ctx.fillStyle = grad;
       }
 
-      ctx.shadowColor = 'rgba(125, 211, 252, 0.5)';
-      ctx.shadowBlur = 12;
-
       // Cute Ghost Body with wavy tail
       ctx.beginPath();
       ctx.arc(0, -8, 20, Math.PI, 0, false);
@@ -954,7 +963,6 @@ export class MagicGameLogic {
 
       // Ghost Eyes
       ctx.fillStyle = '#0F172A';
-      ctx.shadowBlur = 0;
       ctx.beginPath();
       ctx.arc(-7, -8, 3.5, 0, Math.PI * 2);
       ctx.arc(7, -8, 3.5, 0, Math.PI * 2);
@@ -1011,8 +1019,6 @@ export class MagicGameLogic {
 
     // Giant Glowing Red Eyes
     ctx.fillStyle = '#EF4444';
-    ctx.shadowColor = '#F87171';
-    ctx.shadowBlur = 10;
     ctx.beginPath();
     ctx.ellipse(-24, -20, 14, 18, -0.2, 0, Math.PI * 2);
     ctx.ellipse(24, -20, 14, 18, 0.2, 0, Math.PI * 2);
@@ -1069,8 +1075,6 @@ export class MagicGameLogic {
       ctx.fillStyle = 'rgba(15, 23, 42, 0.85)';
       ctx.strokeStyle = sym.color;
       ctx.lineWidth = idx === 0 ? 2.5 : 1.5;
-      ctx.shadowColor = sym.glowColor;
-      ctx.shadowBlur = idx === 0 ? 10 : 4;
 
       ctx.beginPath();
       ctx.arc(x, y, badgeSize / 2, 0, Math.PI * 2);
@@ -1092,8 +1096,6 @@ export class MagicGameLogic {
     this.projectiles.forEach((p) => {
       ctx.save();
       ctx.fillStyle = p.color;
-      ctx.shadowColor = p.color;
-      ctx.shadowBlur = 14;
       ctx.beginPath();
       ctx.arc(p.x, p.y, 6, 0, Math.PI * 2);
       ctx.fill();
@@ -1106,8 +1108,6 @@ export class MagicGameLogic {
       ctx.save();
       ctx.globalAlpha = Math.max(0, p.alpha);
       ctx.fillStyle = p.color;
-      ctx.shadowColor = p.color;
-      ctx.shadowBlur = 8;
       ctx.beginPath();
       ctx.arc(p.x, p.y, Math.max(0.5, p.size), 0, Math.PI * 2);
       ctx.fill();
@@ -1120,8 +1120,6 @@ export class MagicGameLogic {
 
     ctx.save();
     ctx.strokeStyle = '#FDE047';
-    ctx.shadowColor = '#F59E0B';
-    ctx.shadowBlur = 12;
     ctx.lineWidth = 5;
     ctx.lineCap = 'round';
     ctx.lineJoin = 'round';
@@ -1150,8 +1148,9 @@ export class MagicGameLogic {
       ctx.fillStyle = ft.color;
       ctx.font = '900 15px "Pretendard", sans-serif';
       ctx.textAlign = 'center';
-      ctx.shadowColor = 'rgba(0, 0, 0, 0.8)';
-      ctx.shadowBlur = 6;
+      ctx.strokeStyle = 'rgba(0, 0, 0, 0.85)';
+      ctx.lineWidth = 3;
+      ctx.strokeText(ft.text, ft.x, ft.y);
       ctx.fillText(ft.text, ft.x, ft.y);
       ctx.restore();
     });
