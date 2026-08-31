@@ -3,11 +3,38 @@
 
 export const CHANGELOG_DATA = [
   {
+    version: 'v1.48.5',
+    date: '2026-08-31',
+    title: '👻 [도촌 영혼 대결] P2P 실시간 대전 연결 안정성 대폭 강화',
+    badge: 'LATEST',
+    badgeColor: 'blue',
+    items: [
+      {
+        tag: 'TURN RELAY',
+        tagColor: 'blue',
+        text: '[학교 네트워크 P2P 접속 불가 문제 해결] TURN 릴레이 서버(포트 80/443) 추가로 학교 방화벽·대칭형 NAT 환경에서도 안정적인 P2P 연결 보장'
+      },
+      {
+        tag: 'AUTO RETRY',
+        tagColor: 'amber',
+        text: '[자동 재시도 시스템 도입] 방 참가 시 연결 실패하면 최대 3회까지 자동으로 재시도하여 일시적 네트워크 문제 자동 회복'
+      },
+      {
+        tag: 'STATUS DISPLAY',
+        tagColor: 'emerald',
+        text: '[실시간 연결 상태 표시] 방 생성/참가 시 현재 연결 진행 단계를 실시간으로 화면에 표시하여 접속 상태 파악 가능'
+      },
+      {
+        tag: 'TIMEOUT',
+        tagColor: 'purple',
+        text: '[연결 시간 초과 안내] 15초 이내 연결되지 않으면 명확한 오류 메시지와 해결 방법 안내 제공'
+      }
+    ]
+  },
+  {
     version: 'v1.48.4',
     date: '2026-08-28',
     title: '🔦 [도촌 야간 학교 숨바꼭질] 손전등 지향형 스티어링(전진/후진 및 좌우 회전) 조작 엔진 도입',
-    badge: 'LATEST',
-    badgeColor: 'blue',
     items: [
       {
         tag: 'STEERING CONTROLS',

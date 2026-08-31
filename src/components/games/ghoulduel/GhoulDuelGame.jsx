@@ -37,6 +37,7 @@ export default function GhoulDuelGame({ onScoreSubmitted }) {
   const [p2pPlayers, setP2pPlayers] = useState([]);
   const [p2pConnecting, setP2pConnecting] = useState(false);
   const [p2pError, setP2pError] = useState('');
+  const [p2pStatus, setP2pStatus] = useState(''); // Real-time connection status message
   const [copiedCode, setCopiedCode] = useState(false);
 
   // Final Match Result State
@@ -114,6 +115,7 @@ export default function GhoulDuelGame({ onScoreSubmitted }) {
   // --- P2P Network Handlers ---
   const handleCreateRoom = async () => {
     setP2pError('');
+    setP2pStatus('');
     setP2pConnecting(true);
     try {
       const hostName = p2pName.trim() || '방장';
@@ -131,6 +133,7 @@ export default function GhoulDuelGame({ onScoreSubmitted }) {
 
   const handleJoinRoom = async () => {
     setP2pError('');
+    setP2pStatus('');
     setP2pConnecting(true);
     try {
       const guestName = p2pName.trim() || '도촌 학생';
@@ -167,6 +170,7 @@ export default function GhoulDuelGame({ onScoreSubmitted }) {
     ghoulNet.disconnect();
     setGameState('START');
     setP2pError('');
+    setP2pStatus('');
   };
 
   const handleCopyCode = () => {
@@ -232,6 +236,10 @@ export default function GhoulDuelGame({ onScoreSubmitted }) {
       }
     };
 
+    ghoulNet.onConnectionStatus = (msg) => {
+      setP2pStatus(msg);
+    };
+
     return () => {
       ghoulNet.onLobbyUpdate = null;
       ghoulNet.onGameStart = null;
@@ -240,6 +248,7 @@ export default function GhoulDuelGame({ onScoreSubmitted }) {
       ghoulNet.onGameOver = null;
       ghoulNet.onError = null;
       ghoulNet.onDisconnect = null;
+      ghoulNet.onConnectionStatus = null;
     };
   }, [difficulty, gameState, handleGameOver, launchGameEngine]);
 
@@ -516,6 +525,7 @@ export default function GhoulDuelGame({ onScoreSubmitted }) {
               </div>
 
               {p2pError && <div className="p2p-error-banner">{p2pError}</div>}
+              {p2pStatus && !p2pError && <div className="p2p-status-banner">{p2pStatus}</div>}
 
               {/* SINGLE PLAYER MODE VIEW */}
               {playMode === 'SINGLE' && (
@@ -628,6 +638,7 @@ export default function GhoulDuelGame({ onScoreSubmitted }) {
               </div>
 
               {p2pError && <div className="p2p-error-banner">{p2pError}</div>}
+              {p2pStatus && !p2pError && <div className="p2p-status-banner">{p2pStatus}</div>}
 
               {/* 8 Slots (Green Team vs Purple Team) */}
               <div className="lobby-slots-container">
