@@ -180,6 +180,7 @@ export const AI_STATES = {
 
 export class SmartTaggerAI {
   constructor(tagger) {
+    const T = SCHOOL_TAG_CONSTANTS.TILE_SIZE;
     this.tagger = tagger;
     this.state = AI_STATES.PATROL;
     this.targetX = tagger.x;
@@ -188,16 +189,50 @@ export class SmartTaggerAI {
     this.investigateTimer = 0;
     this.lastSeenRunnerPos = null;
 
-    // School Patrol Waypoints (Key intersections across hallways and rooms)
+    // Continuous Anti-Stuck & Motion Tracking
+    this.lastPosX = tagger.x;
+    this.lastPosY = tagger.y;
+    this.stuckTimer = 0;
+    this.avoidanceAngle = 0;
+    this.sweepTimer = 0;
+
+    // School Map 26x18 Accurate Patrol Graph (Upper Hallway, Lower Hallway, Stairs, All Rooms)
     this.waypoints = [
-      { x: 300, y: 260 },
-      { x: 600, y: 260 },
-      { x: 950, y: 260 },
-      { x: 1050, y: 450 },
-      { x: 600, y: 600 },
-      { x: 200, y: 600 },
-      { x: 150, y: 400 },
-      { x: 600, y: 400 },
+      // 1. 2F Upper Corridor & Classrooms (West to East)
+      { x: 2.5 * T, y: 5.5 * T, name: '2층 서쪽 복도' },
+      { x: 2.5 * T, y: 2.5 * T, name: '1학년 1반' },
+      { x: 2.5 * T, y: 5.5 * T, name: '2층 복도 복귀' },
+      { x: 7.5 * T, y: 5.5 * T, name: '과학실 앞' },
+      { x: 8.5 * T, y: 2.5 * T, name: '과학실' },
+      { x: 7.5 * T, y: 5.5 * T, name: '과학실 앞' },
+      { x: 12.5 * T, y: 5.5 * T, name: '2층 중앙 계단' },
+      { x: 17.5 * T, y: 5.5 * T, name: '음악실 앞' },
+      { x: 15.5 * T, y: 2.5 * T, name: '음악실' },
+      { x: 17.5 * T, y: 5.5 * T, name: '음악실 앞' },
+      { x: 22.5 * T, y: 5.5 * T, name: '도서관 앞' },
+      { x: 22.5 * T, y: 2.5 * T, name: '도서관' },
+      { x: 22.5 * T, y: 5.5 * T, name: '도서관 앞' },
+
+      // 2. Descend via East Corridor to 1F
+      { x: 24.0 * T, y: 8.5 * T, name: '동쪽 연결 복도' },
+      { x: 23.5 * T, y: 12.5 * T, name: '1층 동쪽 복도' },
+      { x: 22.5 * T, y: 9.5 * T, name: '교무실' },
+      { x: 22.5 * T, y: 12.5 * T, name: '1층 동쪽 복도' },
+
+      // 3. 1F Lower Corridor & Special Rooms (East to West)
+      { x: 17.5 * T, y: 12.5 * T, name: '1층 보건실 앞' },
+      { x: 12.5 * T, y: 12.5 * T, name: '1층 중앙홀' },
+      { x: 12.5 * T, y: 15.5 * T, name: '중앙현관 로비' },
+      { x: 12.5 * T, y: 12.5 * T, name: '1층 중앙홀' },
+      { x: 7.5 * T, y: 12.5 * T, name: '방송실 앞' },
+      { x: 8.0 * T, y: 9.5 * T, name: '방송실' },
+      { x: 7.5 * T, y: 12.5 * T, name: '방송실 앞' },
+      { x: 2.5 * T, y: 12.5 * T, name: '1층 서쪽 복도' },
+      { x: 2.5 * T, y: 9.5 * T, name: '컴퓨터실' },
+      { x: 2.5 * T, y: 12.5 * T, name: '1층 서쪽 복도' },
+
+      // 4. Ascend via West Corridor to 2F
+      { x: 1.5 * T, y: 8.5 * T, name: '서쪽 연결 복도' },
     ];
   }
 
@@ -208,6 +243,8 @@ export class SmartTaggerAI {
       if (t.stunTimer <= 0) t.isStunned = false;
       return;
     }
+
+    this.sweepTimer += dt;
 
     // 1. Check for visible runners in tagger FOV
     let closestVisibleRunner = null;
@@ -226,8 +263,8 @@ export class SmartTaggerAI {
         while (diff < -Math.PI) diff += Math.PI * 2;
         while (diff > Math.PI) diff -= Math.PI * 2;
 
-        // Check if within FOV or very close
-        if (Math.abs(diff) < SCHOOL_TAG_CONSTANTS.TAGGER_FOV_ANGLE / 2 || dist < 70) {
+        // Check if within FOV or close proximity (within 75px radius)
+        if (Math.abs(diff) < SCHOOL_TAG_CONSTANTS.TAGGER_FOV_ANGLE / 2 || dist < 75) {
           if (dist < minDist) {
             minDist = dist;
             closestVisibleRunner = r;
@@ -242,8 +279,9 @@ export class SmartTaggerAI {
       this.targetX = closestVisibleRunner.x;
       this.targetY = closestVisibleRunner.y;
       this.lastSeenRunnerPos = { x: closestVisibleRunner.x, y: closestVisibleRunner.y };
+      this.investigateTimer = 0;
     } else if (this.state === AI_STATES.CHASE) {
-      // Lost sight, investigate last known spot
+      // Lost sight, smoothly transition to investigate last known spot
       this.state = AI_STATES.INVESTIGATE;
       this.investigateTimer = 3.5;
       if (this.lastSeenRunnerPos) {
@@ -257,7 +295,7 @@ export class SmartTaggerAI {
 
       noiseWaves.forEach((nw) => {
         const dist = Math.hypot(nw.x - t.x, nw.y - t.y);
-        if (dist < 450 && dist < closestNoiseDist) {
+        if (dist < 480 && dist < closestNoiseDist) {
           closestNoiseDist = dist;
           hearNoise = nw;
         }
@@ -271,11 +309,20 @@ export class SmartTaggerAI {
       }
     }
 
-    // 3. State Behavior Execution
+    // 3. State Behavior Execution & Dynamic Target Selection
     if (this.state === AI_STATES.INVESTIGATE) {
       this.investigateTimer -= dt;
       if (this.investigateTimer <= 0) {
         this.state = AI_STATES.PATROL;
+      } else {
+        // While investigating, if close to noise target, wander actively around the spot instead of stopping
+        const distToTarget = Math.hypot(this.targetX - t.x, this.targetY - t.y);
+        if (distToTarget < 35) {
+          // Patrol nearby circle to keep moving
+          const searchOffsetAngle = this.sweepTimer * 2.2;
+          this.targetX += Math.cos(searchOffsetAngle) * 50;
+          this.targetY += Math.sin(searchOffsetAngle) * 50;
+        }
       }
     }
 
@@ -285,34 +332,82 @@ export class SmartTaggerAI {
       this.targetY = currentWp.y;
 
       const distToWp = Math.hypot(currentWp.x - t.x, currentWp.y - t.y);
-      if (distToWp < 50) {
+      if (distToWp < 40) {
+        // Advance to next waypoint immediately for fluid uninterrupted walking
         this.patrolIndex = (this.patrolIndex + 1) % this.waypoints.length;
+        const nextWp = this.waypoints[this.patrolIndex];
+        this.targetX = nextWp.x;
+        this.targetY = nextWp.y;
       }
     }
 
-    // Move toward target
+    // 4. Calculate Desired Angle & Obstacle Avoidance
     const dx = this.targetX - t.x;
     const dy = this.targetY - t.y;
-    const dist = Math.hypot(dx, dy);
+    let desiredAngle = Math.atan2(dy, dx);
 
-    if (dist > 10) {
-      const desiredAngle = Math.atan2(dy, dx);
-      // Smoothly rotate facing angle toward target
-      let angleDiff = desiredAngle - t.facingAngle;
-      while (angleDiff < -Math.PI) angleDiff += Math.PI * 2;
-      while (angleDiff > Math.PI) angleDiff -= Math.PI * 2;
-      t.facingAngle += Math.sign(angleDiff) * Math.min(Math.abs(angleDiff), 4.5 * dt);
-
-      // Speed depends on state
-      let speed = SCHOOL_TAG_CONSTANTS.TAGGER_SPEED;
-      if (this.state === AI_STATES.CHASE) speed *= 1.15;
-      else if (this.state === AI_STATES.PATROL) speed *= 0.85;
-
-      const vx = Math.cos(t.facingAngle) * speed;
-      const vy = Math.sin(t.facingAngle) * speed;
-
-      moveEntityWithSliding(t, vx, vy, dt, walls, mapWidth, mapHeight);
+    // Apply Active Flashlight Sweeping during Patrol
+    if (this.state === AI_STATES.PATROL) {
+      const sweep = Math.sin(this.sweepTimer * 2.8) * 0.35;
+      desiredAngle += sweep;
     }
+
+    // Apply Avoidance Offset if Wall Collision is detected
+    if (Math.abs(this.avoidanceAngle) > 0.01) {
+      desiredAngle += this.avoidanceAngle;
+    }
+
+    // 5. Smooth Angular Rotation
+    let angleDiff = desiredAngle - t.facingAngle;
+    while (angleDiff < -Math.PI) angleDiff += Math.PI * 2;
+    while (angleDiff > Math.PI) angleDiff -= Math.PI * 2;
+    t.facingAngle += Math.sign(angleDiff) * Math.min(Math.abs(angleDiff), 5.5 * dt);
+
+    // 6. Dynamic Movement Speed
+    let speed = SCHOOL_TAG_CONSTANTS.TAGGER_SPEED;
+    if (this.state === AI_STATES.CHASE) speed *= 1.2;
+    else if (this.state === AI_STATES.PATROL) speed *= 0.95;
+    else if (this.state === AI_STATES.INVESTIGATE) speed *= 1.05;
+
+    const vx = Math.cos(t.facingAngle) * speed;
+    const vy = Math.sin(t.facingAngle) * speed;
+
+    const prevX = t.x;
+    const prevY = t.y;
+
+    moveEntityWithSliding(t, vx, vy, dt, walls, mapWidth, mapHeight);
+
+    // 7. Active Anti-Stuck & Auto-Bypass Recovery Engine
+    const actualDistMoved = Math.hypot(t.x - prevX, t.y - prevY);
+    const expectedDist = speed * dt * 0.45;
+
+    if (actualDistMoved < expectedDist) {
+      // Movement blocked by wall/corner
+      this.stuckTimer += dt;
+
+      if (this.stuckTimer > 0.35) {
+        // Steer sideways (turn 60 ~ 90 degrees) to slide around corners
+        this.avoidanceAngle = (Math.sin(this.sweepTimer * 4) > 0 ? 1 : -1) * (Math.PI / 2.5);
+      }
+
+      if (this.stuckTimer > 1.1) {
+        // Still stuck after 1.1s: skip to next waypoint or pick random clear route
+        if (this.state === AI_STATES.PATROL) {
+          this.patrolIndex = (this.patrolIndex + 1) % this.waypoints.length;
+        } else {
+          this.state = AI_STATES.PATROL;
+        }
+        this.avoidanceAngle = Math.PI; // Flip 180 degrees
+        this.stuckTimer = 0;
+      }
+    } else {
+      // Moving smoothly: quickly decay stuck timer and avoidance angle
+      this.stuckTimer = Math.max(0, this.stuckTimer - dt * 2.5);
+      this.avoidanceAngle *= Math.max(0, 1 - dt * 4);
+    }
+
+    this.lastPosX = t.x;
+    this.lastPosY = t.y;
   }
 }
 

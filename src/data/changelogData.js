@@ -3,10 +3,34 @@
 
 export const CHANGELOG_DATA = [
   {
+    version: 'v1.48.16',
+    date: '2026-08-31',
+    title: '🔦 [도촌 야간 학교 숨바꼭질] AI 당직선생님 맵 전역 26개 노드 연속 순찰 & 실시간 스턱 탈출 엔진 탑재',
+    badge: 'LATEST',
+    badgeColor: 'blue',
+    items: [
+      {
+        tag: 'CONTINUOUS PATROL',
+        tagColor: 'amber',
+        text: '[멈춤 없는 맵 전역 연속 순찰] 1·2층 복도와 8개 교실/특별실(과학실·음악실·도서관·컴퓨터실·방송실·교무실·로비)을 쉬지 않고 순환하는 26개 정밀 노드 순찰 그래프 구축'
+      },
+      {
+        tag: 'ANTI-STUCK RECOVERY',
+        tagColor: 'emerald',
+        text: '[스턱 멈춤 원천 방지] 벽이나 코너 모서리에 부딪혔을 때 제자리에 멈춰 서지 않도록 0.35초 단위 자동 조향 슬라이딩 및 1.1초 이상 지연 시 다음 순찰로 우회 탈출하는 지능형 엔진 탑재'
+      },
+      {
+        tag: 'ACTIVE SWEEP SEARCH',
+        tagColor: 'purple',
+        text: '[능동적 수색 및 손전등 스캔] 발소리를 탐지했을 때도 제자리에 서있지 않고 주변 반경을 탐색 배회하며, 순찰 도중 좌우 60도로 손전등을 스위핑(Sweeping)하며 두리번거리는 시야 스캔 연출 적용'
+      }
+    ]
+  },
+  {
     version: 'v1.48.15',
     date: '2026-08-31',
     title: '🔦 [도촌 야간 학교 숨바꼭질] 황금 열쇠 맵 전역 균등 분산 & 충돌 배제 동적 랜덤 스폰 엔진 구축',
-    badge: 'LATEST',
+    badge: 'UPDATE',
     badgeColor: 'blue',
     items: [
       {
