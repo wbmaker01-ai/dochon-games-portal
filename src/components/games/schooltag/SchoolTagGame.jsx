@@ -592,7 +592,7 @@ export default function SchoolTagGame({ onScoreSubmitted }) {
     if (!prompt) {
       keysRef.current.forEach((k) => {
         if (!k.isCollected && Math.hypot(k.x - p.x, k.y - p.y) <= 48) {
-          prompt = '🔑 [SPACE] 황금 열쇠 줍기';
+          prompt = `🔑 [SPACE] 황금 열쇠 줍기 (${k.room || '교실'})`;
         }
       });
     }
@@ -817,20 +817,25 @@ export default function SchoolTagGame({ onScoreSubmitted }) {
       ctx.fillText('사물함', loc.x, loc.y + 4);
     });
 
-    // 8. Draw Golden Keys (Sparkling & Pulsing)
+    // 8. Draw Golden Keys (Sparkling & Pulsing with Location Tag)
+    const nowTime = performance.now() * 0.006;
+    const pulseScale = 1 + Math.sin(nowTime) * 0.15;
     keysRef.current.forEach((k) => {
       if (!k.isCollected) {
         ctx.save();
         ctx.translate(k.x, k.y);
+        ctx.scale(pulseScale, pulseScale);
         ctx.fillStyle = '#fbbf24';
         ctx.shadowColor = '#f59e0b';
-        ctx.shadowBlur = 14;
+        ctx.shadowBlur = 16;
         ctx.beginPath();
-        ctx.arc(0, 0, 9, 0, Math.PI * 2);
+        ctx.arc(0, 0, 10, 0, Math.PI * 2);
         ctx.fill();
         ctx.fillStyle = '#1e293b';
-        ctx.font = 'bold 12px sans-serif';
-        ctx.fillText('🔑', 0, 4);
+        ctx.font = 'bold 13px sans-serif';
+        ctx.textAlign = 'center';
+        ctx.textBaseline = 'middle';
+        ctx.fillText('🔑', 0, 1);
         ctx.restore();
       }
     });

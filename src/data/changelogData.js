@@ -3,10 +3,34 @@
 
 export const CHANGELOG_DATA = [
   {
+    version: 'v1.48.15',
+    date: '2026-08-31',
+    title: '🔦 [도촌 야간 학교 숨바꼭질] 황금 열쇠 맵 전역 균등 분산 & 충돌 배제 동적 랜덤 스폰 엔진 구축',
+    badge: 'LATEST',
+    badgeColor: 'blue',
+    items: [
+      {
+        tag: 'STRATIFIED SPAWN',
+        tagColor: 'amber',
+        text: '[황금 열쇠 맵 전역 균등 분산] 게임을 시작하거나 다시 플레이할 때마다 맵의 서부(1학년 1반/컴퓨터실)·중앙(과학실/음악실/방송실)·동부(도서관/교무실) 등 서로 다른 3대 권역에서 최소 거리(7타일 이상)를 유지하며 고르게 무작위 배치되는 층화 샘플링 알고리즘 구축'
+      },
+      {
+        tag: 'COLLISION SAFETY',
+        tagColor: 'emerald',
+        text: '[벽/가구 겹침 100% 원천 차단] 벽(Wall), 책상(Desk), 사물함(Locker), 보건실 침대(Jail), 비상구(Exit) 및 플레이어/술래 스폰 지점과의 겹침을 엄격히 배제하고 순수 이동 가능한 바닥(Floor) 타일에만 정확히 스폰'
+      },
+      {
+        tag: 'ROOM TAG & PULSE',
+        tagColor: 'purple',
+        text: '[장소 이름 태깅 및 황금빛 펄스 효과] 열쇠 근접 시 해당 교실/복도 장소 이름(예: 과학실, 음악실 등) 상호작용 안내 및 어둠 속에서 영롱하게 빛나는 황금빛 펄스 애니메이션 연출 보강'
+      }
+    ]
+  },
+  {
     version: 'v1.48.14',
     date: '2026-08-31',
     title: '📈 [4대 게임 난이도 전면 개편] 야구·크리켓·하늘점퍼·스네이크 무제한 가속 & 5단계 테마 시스템 구축',
-    badge: 'LATEST',
+    badge: 'UPDATE',
     badgeColor: 'emerald',
     items: [
       {

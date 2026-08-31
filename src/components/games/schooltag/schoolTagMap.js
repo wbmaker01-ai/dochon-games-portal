@@ -139,10 +139,121 @@ export function createSchoolMap() {
   };
 }
 
-// Select 3 Unique Random Spawn Points for Golden Keys
+// Dynamic Room & Corridor Name Resolver
+export function getRoomNameForTile(col, row) {
+  if (row <= 4) {
+    if (col <= 4) return '1학년 1반';
+    if (col >= 6 && col <= 11) return '과학실';
+    if (col >= 13 && col <= 18) return '음악실';
+    if (col >= 20 && col <= 24) return '도서관';
+    return '2층 복도';
+  }
+  if (row >= 5 && row <= 6) {
+    if (col <= 6) return '2층 서쪽 복도';
+    if (col >= 19) return '2층 동쪽 복도';
+    return '2층 중앙 복도';
+  }
+  if (row >= 8 && row <= 10) {
+    if (col <= 4) return '컴퓨터실';
+    if (col >= 6 && col <= 9) return '방송실';
+    if (col >= 11 && col <= 14) return '중앙 계단홀';
+    if (col >= 21 && col <= 24) return '교무실';
+    return '1층 복도';
+  }
+  if (row >= 11 && row <= 13) {
+    if (col <= 6) return '1층 서쪽 복도';
+    if (col >= 19) return '1층 동쪽 복도';
+    return '1층 중앙 복도';
+  }
+  if (row >= 14) {
+    if (col >= 11 && col <= 14) return '중앙현관 비상구';
+    return '중앙현관 로비';
+  }
+  return '학교 복도';
+}
+
+// Get all safe and valid FLOOR tiles categorized by spatial zones
+export function getValidKeySpawnTiles() {
+  const validTiles = [];
+  const rows = RAW_MAP_DATA.length;
+  const cols = RAW_MAP_DATA[0].length;
+
+  for (let r = 0; r < rows; r++) {
+    for (let c = 0; c < cols; c++) {
+      // 1. Must be pure floor tile
+      if (RAW_MAP_DATA[r][c] !== TILE_TYPES.FLOOR) continue;
+
+      // 2. Exclude Jail / Infirmary Zone (col 16~19, row 8~10)
+      if (c >= 16 && c <= 19 && r >= 8 && r <= 10) continue;
+
+      // 3. Exclude Exit Gate Area (col 11~14, row 14~16)
+      if (c >= 11 && c <= 14 && r >= 14 && r <= 16) continue;
+
+      // 4. Exclude Player Spawn Safe Zone (col 4, row 2 area)
+      const distToPlayerSpawn = Math.hypot(c - 4.5, r - 2.5);
+      if (distToPlayerSpawn < 2.5) continue;
+
+      // 5. Exclude Tagger Spawn Safe Zone (col 13, row 5 area)
+      const distToTaggerSpawn = Math.hypot(c - 13, r - 5);
+      if (distToTaggerSpawn < 2.5) continue;
+
+      // Classify into 3 Geographic Zones for balanced map-wide distribution
+      let zone = 'ZONE_CENTER';
+      if (c <= 8) {
+        zone = 'ZONE_WEST'; // 1-1, Computer Lab, West Hallways
+      } else if (c >= 19) {
+        zone = 'ZONE_EAST'; // Library, Teachers Office, East Hallways
+      } else {
+        zone = 'ZONE_CENTER'; // Science Lab, Music Room, Broadcasting, Center Hall
+      }
+
+      validTiles.push({
+        col: c,
+        row: r,
+        zone,
+        room: getRoomNameForTile(c, r),
+      });
+    }
+  }
+
+  return validTiles;
+}
+
+// Select 3 Unique Random Spawn Points for Golden Keys across 3 distinct zones with minimum distance
 export function pickRandomKeyLocations(count = 3) {
-  const shuffled = [...KEY_SPAWN_CANDIDATES].sort(() => 0.5 - Math.random());
-  return shuffled.slice(0, count).map((item, idx) => ({
+  const allValid = getValidKeySpawnTiles();
+  const westTiles = allValid.filter((t) => t.zone === 'ZONE_WEST');
+  const centerTiles = allValid.filter((t) => t.zone === 'ZONE_CENTER');
+  const eastTiles = allValid.filter((t) => t.zone === 'ZONE_EAST');
+
+  // Fallback if zone is empty
+  const getRand = (arr) => arr[Math.floor(Math.random() * arr.length)];
+
+  let bestSelection = null;
+  let maxMinDist = -1;
+
+  // Perform stratified sampling with up to 40 attempts to maximize distribution distance
+  for (let attempt = 0; attempt < 40; attempt++) {
+    const t1 = westTiles.length > 0 ? getRand(westTiles) : getRand(allValid);
+    const t2 = centerTiles.length > 0 ? getRand(centerTiles) : getRand(allValid);
+    const t3 = eastTiles.length > 0 ? getRand(eastTiles) : getRand(allValid);
+
+    const d12 = Math.hypot(t1.col - t2.col, t1.row - t2.row);
+    const d23 = Math.hypot(t2.col - t3.col, t2.row - t3.row);
+    const d31 = Math.hypot(t3.col - t1.col, t3.row - t1.row);
+    const minDist = Math.min(d12, d23, d31);
+
+    if (minDist > maxMinDist) {
+      maxMinDist = minDist;
+      bestSelection = [t1, t2, t3];
+      // If minimum distance between any two keys is >= 7 tiles (~336px), ideal layout found
+      if (minDist >= 7.0) break;
+    }
+  }
+
+  const selected = bestSelection || [getRand(allValid), getRand(allValid), getRand(allValid)];
+
+  return selected.slice(0, count).map((item, idx) => ({
     id: `key_${idx + 1}`,
     col: item.col,
     row: item.row,
