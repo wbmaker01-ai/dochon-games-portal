@@ -1,20 +1,19 @@
 // Dochon Games Portal - The Great Ghoul Duel WebRTC P2P Network Manager (Zero-Cost PeerJS)
 // 4-Digit Numeric Room Code (e.g. '1234', '7788') to 'dochon-ghoul-XXXX' Peer ID
-// v2: TURN relay servers added for school/corporate NAT traversal
+// v3: 3-Way Handshake (JOIN_LOBBY <-> JOIN_ACK) with 400ms/10-retry protocol & input sanitization
 
 import { Peer } from 'peerjs';
 
 const PEER_PREFIX = 'dochon-ghoul-';
 
 // ICE Servers: STUN (public IP discovery) + TURN (relay fallback for restrictive NATs)
-// Uses Metered Open Relay (free 20GB/month) on ports 80/443 to bypass school firewalls
+// Uses Metered Open Relay on ports 80/443 to bypass restrictive school/corporate firewalls
 const ICE_SERVERS = [
-  // STUN servers for basic NAT traversal
+  // STUN servers for direct NAT traversal
   { urls: 'stun:stun.l.google.com:19302' },
   { urls: 'stun:global.stun.twilio.com:3478' },
   { urls: 'stun:stun.relay.metered.ca:80' },
-  // TURN relay servers (critical for school networks with symmetric NAT/firewalls)
-  // Port 80 (HTTP) and 443 (HTTPS) are almost never blocked by school firewalls
+  // TURN relay servers (ports 80/443 HTTP/HTTPS bypass)
   {
     urls: 'turn:global.relay.metered.ca:80',
     username: 'e8dd65b92f3b1e1ae3a37c20',
@@ -37,8 +36,10 @@ const ICE_SERVERS = [
   }
 ];
 
-const CONNECTION_TIMEOUT_MS = 15000; // 15 seconds connection timeout
-const MAX_RETRY_ATTEMPTS = 2; // Additional retry attempts after first failure
+const CONNECTION_TIMEOUT_MS = 15000; // 15 seconds overall connection timeout
+const MAX_CONNECTION_RETRIES = 2;   // Re-attempt full WebRTC connect up to 2 times
+const HANDSHAKE_INTERVAL_MS = 400;  // Re-send JOIN_LOBBY every 400ms
+const MAX_HANDSHAKE_ATTEMPTS = 10;  // Up to 10 handshake attempts (4.0s total)
 
 export class GhoulDuelNetworkManager {
   constructor() {
@@ -60,7 +61,10 @@ export class GhoulDuelNetworkManager {
     this.onGameOver = null;
     this.onError = null;
     this.onDisconnect = null;
-    this.onConnectionStatus = null; // NEW: status messages for UI feedback
+    this.onConnectionStatus = null; // Status messages for UI feedback
+
+    // Handshake internal state
+    this._handshakeInterval = null;
   }
 
   // Generate a random 4-digit numeric room code (e.g. 1000 ~ 9999)
@@ -68,9 +72,24 @@ export class GhoulDuelNetworkManager {
     return String(Math.floor(1000 + Math.random() * 9000));
   }
 
+  // Sanitize any input code to strict 4 digits (e.g. " 12 34 " -> "1234")
+  static sanitizeCode(rawCode) {
+    const digitsOnly = String(rawCode || '').replace(/[^0-9]/g, '');
+    if (!digitsOnly) return '0000';
+    return digitsOnly.padStart(4, '0').slice(0, 4);
+  }
+
   // Emit a user-facing connection status message
   _emitStatus(message) {
     if (this.onConnectionStatus) this.onConnectionStatus(message);
+  }
+
+  // Clear active handshake retry interval
+  _clearHandshakeTimer() {
+    if (this._handshakeInterval) {
+      clearInterval(this._handshakeInterval);
+      this._handshakeInterval = null;
+    }
   }
 
   // --- HOST: Create a P2P Room ---
@@ -78,18 +97,18 @@ export class GhoulDuelNetworkManager {
     return new Promise((resolve, reject) => {
       this.disconnect();
 
-      const cleanCode = String(numericCode).trim().padStart(4, '0').slice(0, 4);
+      const cleanCode = GhoulDuelNetworkManager.sanitizeCode(numericCode);
       this.roomCode = cleanCode;
       this.isHost = true;
-      this.myName = playerName || '방장';
+      this.myName = (playerName || '방장').trim();
       this.myTeam = team;
       const fullPeerId = `${PEER_PREFIX}${cleanCode}`;
 
-      this._emitStatus('🔗 시그널링 서버에 연결 중...');
+      this._emitStatus('🔗 시그널링 서버 연결 중...');
 
       // Timeout for signaling server connection
       const timeoutId = setTimeout(() => {
-        this._emitStatus('⏰ 연결 시간 초과! 네트워크 상태를 확인해 주세요.');
+        this._emitStatus('⏰ 시그널링 서버 연결 시간 초과! 네트워크 상태를 확인해 주세요.');
         const errorMsg = '시그널링 서버 연결 시간 초과 (15초). 인터넷 연결을 확인하고 다시 시도해 주세요.';
         if (this.onError) this.onError(errorMsg);
         this.disconnect();
@@ -124,7 +143,7 @@ export class GhoulDuelNetworkManager {
         });
 
         this.peer.on('connection', (conn) => {
-          this._emitStatus(`👋 새로운 친구가 접속 중...`);
+          this._emitStatus(`👋 새로운 친구가 연결을 요청했습니다...`);
           this.handleHostIncomingConnection(conn);
         });
 
@@ -150,13 +169,12 @@ export class GhoulDuelNetworkManager {
         });
 
         this.peer.on('disconnected', () => {
-          // Signaling server disconnected, attempt to reconnect
           this._emitStatus('⚠️ 시그널링 서버와 연결이 끊겼습니다. 재연결 시도 중...');
           if (this.peer && !this.peer.destroyed) {
             try {
               this.peer.reconnect();
             } catch (e) {
-              console.error('Reconnect failed:', e);
+              console.error('Host reconnect failed:', e);
             }
           }
         });
@@ -168,7 +186,6 @@ export class GhoulDuelNetworkManager {
   }
 
   handleHostIncomingConnection(conn) {
-    // Timeout for data channel opening
     const connTimeoutId = setTimeout(() => {
       console.warn('Incoming connection timed out for peer:', conn.peer);
     }, CONNECTION_TIMEOUT_MS);
@@ -176,10 +193,10 @@ export class GhoulDuelNetworkManager {
     conn.on('open', () => {
       clearTimeout(connTimeoutId);
       this.connections.set(conn.peer, conn);
-      this._emitStatus(`✅ 친구가 연결되었습니다!`);
+      this._emitStatus(`⚡ 친구와 P2P 터널 연결 수립 완료! 입장 확인 대기 중...`);
 
       conn.on('data', (data) => {
-        this.handleHostReceiveData(conn.peer, data);
+        this.handleHostReceiveData(conn.peer, data, conn);
       });
 
       conn.on('close', () => {
@@ -193,25 +210,47 @@ export class GhoulDuelNetworkManager {
     });
   }
 
-  handleHostReceiveData(peerId, data) {
+  handleHostReceiveData(peerId, data, conn) {
     if (!data || !data.type) return;
 
-    if (data.type === 'JOIN') {
-      // Find empty slot (max 8 players total)
-      if (this.lobbyPlayers.length >= 8) {
-        const conn = this.connections.get(peerId);
-        if (conn) conn.send({ type: 'ERROR', message: '방이 가득 찼습니다. (최대 8명)' });
+    // Handle 3-Way Handshake: JOIN_LOBBY (or legacy JOIN)
+    if (data.type === 'JOIN_LOBBY' || data.type === 'JOIN') {
+      const existingPlayer = this.lobbyPlayers.find((p) => p.id === peerId);
+
+      if (existingPlayer) {
+        // Already registered -> immediately reply with ACK to satisfy retry loop
+        if (conn && conn.open) {
+          conn.send({
+            type: 'JOIN_ACK',
+            accepted: true,
+            players: this.lobbyPlayers,
+            assignedTeam: existingPlayer.team,
+            slotIndex: existingPlayer.slotIndex
+          });
+        }
         return;
       }
 
-      // Balance teams if not specified
+      // Check max capacity (8 players)
+      if (this.lobbyPlayers.length >= 8) {
+        if (conn && conn.open) {
+          conn.send({
+            type: 'JOIN_ACK',
+            accepted: false,
+            message: '방이 가득 찼습니다. (최대 8명)'
+          });
+        }
+        return;
+      }
+
+      // Team balancing
       const greenCount = this.lobbyPlayers.filter((p) => p.team === 'green').length;
       const purpleCount = this.lobbyPlayers.filter((p) => p.team === 'purple').length;
       const assignedTeam = data.team || (greenCount <= purpleCount ? 'green' : 'purple');
 
       const newPlayer = {
         id: peerId,
-        name: data.name || `친구-${this.lobbyPlayers.length + 1}`,
+        name: (data.name || `친구-${this.lobbyPlayers.length + 1}`).trim(),
         team: assignedTeam,
         isHost: false,
         isReady: true,
@@ -219,6 +258,18 @@ export class GhoulDuelNetworkManager {
       };
 
       this.lobbyPlayers.push(newPlayer);
+
+      // Send JOIN_ACK back to the guest
+      if (conn && conn.open) {
+        conn.send({
+          type: 'JOIN_ACK',
+          accepted: true,
+          players: this.lobbyPlayers,
+          assignedTeam: newPlayer.team,
+          slotIndex: newPlayer.slotIndex
+        });
+      }
+
       this._emitStatus(`🎉 ${newPlayer.name}님이 ${assignedTeam === 'green' ? '초록 영혼팀' : '보라 유령팀'}에 합류!`);
       this.broadcastLobbyUpdate();
     } else if (data.type === 'TOGGLE_TEAM') {
@@ -228,7 +279,6 @@ export class GhoulDuelNetworkManager {
         this.broadcastLobbyUpdate();
       }
     } else if (data.type === 'INPUT') {
-      // Forward input directly to game logic engine via onGuestInput
       if (this.onGuestInput) {
         this.onGuestInput(peerId, data.vector, data.angle);
       }
@@ -289,7 +339,7 @@ export class GhoulDuelNetworkManager {
     });
   }
 
-  // --- GUEST: Join a P2P Room (with retry logic) ---
+  // --- GUEST: Join a P2P Room (with 3-Way Handshake + Auto-Retry) ---
   joinRoom(numericCode, playerName, team = 'green') {
     return this._joinRoomAttempt(numericCode, playerName, team, 0);
   }
@@ -297,23 +347,25 @@ export class GhoulDuelNetworkManager {
   _joinRoomAttempt(numericCode, playerName, team, attempt) {
     return new Promise((resolve, reject) => {
       this.disconnect();
+      this._clearHandshakeTimer();
 
-      const cleanCode = String(numericCode).trim().padStart(4, '0').slice(0, 4);
+      const cleanCode = GhoulDuelNetworkManager.sanitizeCode(numericCode);
       this.roomCode = cleanCode;
       this.isHost = false;
-      this.myName = playerName || '도촌 학생';
+      this.myName = (playerName || '도촌 학생').trim();
       this.myTeam = team;
       const targetHostPeerId = `${PEER_PREFIX}${cleanCode}`;
 
-      const attemptLabel = attempt > 0 ? ` (재시도 ${attempt}/${MAX_RETRY_ATTEMPTS})` : '';
-      this._emitStatus(`🔗 시그널링 서버에 연결 중...${attemptLabel}`);
+      const attemptLabel = attempt > 0 ? ` (재시도 ${attempt}/${MAX_CONNECTION_RETRIES})` : '';
+      this._emitStatus(`🔗 시그널링 서버 연결 중...${attemptLabel}`);
 
-      let settled = false; // Prevent double resolve/reject
+      let settled = false; // Prevent duplicate resolve/reject
       let timeoutId = null;
 
       const settle = (type, value) => {
         if (settled) return;
         settled = true;
+        this._clearHandshakeTimer();
         clearTimeout(timeoutId);
         if (type === 'resolve') resolve(value);
         else reject(value);
@@ -330,29 +382,28 @@ export class GhoulDuelNetworkManager {
 
         this.peer.on('open', (id) => {
           this.myPeerId = id;
-          this._emitStatus(`🔍 방 번호 [${cleanCode}]을 찾는 중...${attemptLabel}`);
+          this._emitStatus(`🔍 방장 찾는 중... (방 번호: [${cleanCode}])${attemptLabel}`);
 
-          // Connect to Host with reliable data channel
+          // Connect to Host with reliable channel
           const conn = this.peer.connect(targetHostPeerId, { reliable: true });
           this.hostConnection = conn;
 
-          // Overall connection timeout (signaling + ICE + data channel)
+          // Connection timeout for full process
           timeoutId = setTimeout(() => {
             if (!settled) {
+              this._clearHandshakeTimer();
               console.warn(`Connection attempt ${attempt + 1} timed out`);
 
-              // Retry logic
-              if (attempt < MAX_RETRY_ATTEMPTS) {
-                this._emitStatus(`⏰ 연결 시간 초과. 자동으로 재시도합니다... (${attempt + 1}/${MAX_RETRY_ATTEMPTS})`);
+              if (attempt < MAX_CONNECTION_RETRIES) {
+                this._emitStatus(`⏰ 연결 시간 초과. 자동으로 재시도합니다... (${attempt + 1}/${MAX_CONNECTION_RETRIES})`);
                 this.disconnect();
-                // Retry after a short delay
                 setTimeout(() => {
                   this._joinRoomAttempt(numericCode, playerName, team, attempt + 1)
                     .then(resolve)
                     .catch(reject);
                 }, 1500);
               } else {
-                const errorMsg = `방 번호 [${cleanCode}]에 연결할 수 없습니다.\n\n💡 해결 방법:\n1. 방장이 방을 열었는지 확인해 주세요\n2. 방 번호를 다시 확인해 주세요\n3. 같은 와이파이에 연결되어 있는지 확인해 주세요\n4. 방장에게 방을 다시 만들어 달라고 요청해 주세요`;
+                const errorMsg = `방 번호 [${cleanCode}]에 연결할 수 없습니다.\n\n💡 해결 방법:\n1. 방장이 방을 열었는지 확인해 주세요\n2. 방 번호(4자리)를 다시 확인해 주세요\n3. 같은 네트워크(Wi-Fi)인지 확인해 주세요\n4. 방장에게 방을 다시 생성해달라고 요청해 주세요`;
                 this._emitStatus(`❌ 연결 실패. 방 번호와 네트워크를 확인해 주세요.`);
                 if (this.onError) this.onError(errorMsg);
                 settle('reject', new Error(errorMsg));
@@ -361,30 +412,74 @@ export class GhoulDuelNetworkManager {
           }, CONNECTION_TIMEOUT_MS);
 
           conn.on('open', () => {
-            this._emitStatus('✅ 방장에게 연결되었습니다!');
-            // Send Join packet
-            conn.send({
-              type: 'JOIN',
-              name: this.myName,
-              team: this.myTeam
-            });
-            settle('resolve', cleanCode);
+            this._emitStatus('⚡ P2P 터널 수립 완료! 입장 요청(JOIN_LOBBY) 전송 중...');
+
+            // --- 🤝 3-Way Handshake Auto-Retry Protocol ---
+            let handshakeCount = 0;
+
+            const sendJoinPacket = () => {
+              if (settled || !conn.open) return;
+              handshakeCount++;
+              this._emitStatus(`🤝 방장에게 입장 요청(JOIN_LOBBY) 전송 중... (${handshakeCount}/${MAX_HANDSHAKE_ATTEMPTS})`);
+
+              conn.send({
+                type: 'JOIN_LOBBY',
+                name: this.myName,
+                team: this.myTeam,
+                peerId: this.myPeerId,
+                attempt: handshakeCount
+              });
+
+              if (handshakeCount >= MAX_HANDSHAKE_ATTEMPTS) {
+                this._clearHandshakeTimer();
+                console.warn('Max handshake attempts reached without ACK');
+              }
+            };
+
+            // Send immediately on open
+            sendJoinPacket();
+
+            // Set up 400ms periodic retry
+            this._handshakeInterval = setInterval(sendJoinPacket, HANDSHAKE_INTERVAL_MS);
           });
 
           conn.on('data', (data) => {
+            if (!data || !data.type) return;
+
+            // Handle 3-Way Handshake ACK from Host
+            if (data.type === 'JOIN_ACK') {
+              this._clearHandshakeTimer();
+
+              if (data.accepted) {
+                this.lobbyPlayers = data.players || [];
+                if (data.assignedTeam) this.myTeam = data.assignedTeam;
+                this._emitStatus('🎉 대기실 입장 완료!');
+                if (this.onLobbyUpdate) this.onLobbyUpdate(this.lobbyPlayers);
+                settle('resolve', cleanCode);
+              } else {
+                const errorMsg = data.message || '방 입장이 거부되었습니다.';
+                this._emitStatus(`❌ ${errorMsg}`);
+                if (this.onError) this.onError(errorMsg);
+                settle('reject', new Error(errorMsg));
+              }
+              return;
+            }
+
             this.handleGuestReceiveData(data);
           });
 
           conn.on('close', () => {
+            this._clearHandshakeTimer();
             const errorMsg = '방장과의 연결이 끊어졌습니다.';
             this._emitStatus(`⚠️ ${errorMsg}`);
             if (this.onDisconnect) this.onDisconnect(errorMsg);
           });
 
           conn.on('error', (err) => {
+            this._clearHandshakeTimer();
             console.error('Guest Connection Error:', err);
-            if (!settled && attempt < MAX_RETRY_ATTEMPTS) {
-              this._emitStatus(`⚠️ 연결 오류 발생. 재시도 중... (${attempt + 1}/${MAX_RETRY_ATTEMPTS})`);
+            if (!settled && attempt < MAX_CONNECTION_RETRIES) {
+              this._emitStatus(`⚠️ 연결 오류 발생. 재시도 중... (${attempt + 1}/${MAX_CONNECTION_RETRIES})`);
               this.disconnect();
               setTimeout(() => {
                 this._joinRoomAttempt(numericCode, playerName, team, attempt + 1)
@@ -398,11 +493,11 @@ export class GhoulDuelNetworkManager {
         });
 
         this.peer.on('error', (err) => {
+          this._clearHandshakeTimer();
           console.error('PeerJS Guest Error:', err);
           if (err.type === 'peer-unavailable') {
-            // The host peer ID doesn't exist on the signaling server
-            if (!settled && attempt < MAX_RETRY_ATTEMPTS) {
-              this._emitStatus(`⚠️ 방을 찾을 수 없습니다. 재시도 중... (${attempt + 1}/${MAX_RETRY_ATTEMPTS})`);
+            if (!settled && attempt < MAX_CONNECTION_RETRIES) {
+              this._emitStatus(`⚠️ 방을 찾을 수 없습니다. 재시도 중... (${attempt + 1}/${MAX_CONNECTION_RETRIES})`);
               this.disconnect();
               setTimeout(() => {
                 this._joinRoomAttempt(numericCode, playerName, team, attempt + 1)
@@ -429,7 +524,7 @@ export class GhoulDuelNetworkManager {
             try {
               this.peer.reconnect();
             } catch (e) {
-              console.error('Reconnect failed:', e);
+              console.error('Guest reconnect failed:', e);
             }
           }
         });
@@ -483,6 +578,8 @@ export class GhoulDuelNetworkManager {
 
   // Disconnect & cleanup
   disconnect() {
+    this._clearHandshakeTimer();
+
     if (this.connections) {
       this.connections.forEach((conn) => {
         try {

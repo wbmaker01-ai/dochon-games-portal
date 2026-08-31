@@ -119,7 +119,9 @@ export default function GhoulDuelGame({ onScoreSubmitted }) {
     setP2pConnecting(true);
     try {
       const hostName = p2pName.trim() || '방장';
-      const code = await ghoulNet.createRoom(p2pCode, hostName, 'green');
+      const cleanCode = GhoulDuelNetworkManager.sanitizeCode(p2pCode);
+      setP2pCode(cleanCode);
+      const code = await ghoulNet.createRoom(cleanCode, hostName, 'green');
       setP2pIsHost(true);
       setP2pPlayers(ghoulNet.lobbyPlayers);
       setGameState('LOBBY');
@@ -137,7 +139,9 @@ export default function GhoulDuelGame({ onScoreSubmitted }) {
     setP2pConnecting(true);
     try {
       const guestName = p2pName.trim() || '도촌 학생';
-      const code = await ghoulNet.joinRoom(p2pCode, guestName, 'purple');
+      const cleanCode = GhoulDuelNetworkManager.sanitizeCode(p2pCode);
+      setP2pCode(cleanCode);
+      const code = await ghoulNet.joinRoom(cleanCode, guestName, 'purple');
       setP2pIsHost(false);
       setP2pPlayers(ghoulNet.lobbyPlayers);
       setGameState('LOBBY');
@@ -589,7 +593,12 @@ export default function GhoulDuelGame({ onScoreSubmitted }) {
                       type="text"
                       value={p2pCode}
                       onChange={(e) => setP2pCode(e.target.value.replace(/[^0-9]/g, '').slice(0, 4))}
-                      maxLength={4}
+                      onPaste={(e) => {
+                        e.preventDefault();
+                        const pasted = e.clipboardData?.getData('text') || '';
+                        setP2pCode(GhoulDuelNetworkManager.sanitizeCode(pasted));
+                      }}
+                      maxLength={16}
                       placeholder="4자리 숫자 (예: 1234)"
                       className="p2p-text-input"
                       style={{ fontSize: '1.3rem', letterSpacing: '6px' }}

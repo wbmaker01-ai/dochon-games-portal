@@ -73,6 +73,8 @@ export default function SchoolTagGame({ onScoreSubmitted }) {
   const [currentRoomCode, setCurrentRoomCode] = useState('');
   const [lobbyPlayers, setLobbyPlayers] = useState([]);
   const [networkError, setNetworkError] = useState('');
+  const [connectionStatus, setConnectionStatus] = useState('');
+  const [isConnecting, setIsConnecting] = useState(false);
 
   // Refs for Animation Loop & Persistent Game Entities
   const canvasRef = useRef(null);
@@ -101,6 +103,22 @@ export default function SchoolTagGame({ onScoreSubmitted }) {
   // Initialize Network Manager on Mount
   useEffect(() => {
     networkRef.current = new SchoolTagNetworkManager();
+
+    networkRef.current.onConnectionStatus = (statusMsg) => {
+      setConnectionStatus(statusMsg);
+    };
+
+    networkRef.current.onError = (err) => {
+      setNetworkError(err);
+      setIsConnecting(false);
+    };
+
+    networkRef.current.onDisconnect = (msg) => {
+      setNetworkError(msg);
+      setCurrentRoomCode('');
+      setIsConnecting(false);
+      setGameState(GAME_STATES.MENU);
+    };
 
     networkRef.current.onLobbyUpdate = (players) => {
       setLobbyPlayers(players);
@@ -327,6 +345,8 @@ export default function SchoolTagGame({ onScoreSubmitted }) {
   // Host P2P Room
   const handleCreateRoom = async () => {
     setNetworkError('');
+    setConnectionStatus('');
+    setIsConnecting(true);
     const code = SchoolTagNetworkManager.generateRandomCode();
     try {
       const createdCode = await networkRef.current.createRoom(code, '방장(학생)', ROLE_TYPES.RUNNER, selectedSkin);
@@ -335,23 +355,30 @@ export default function SchoolTagGame({ onScoreSubmitted }) {
       setGameMode('MULTI');
     } catch (err) {
       setNetworkError(err.message || '방 생성에 실패했습니다.');
+    } finally {
+      setIsConnecting(false);
     }
   };
 
   // Join P2P Room
   const handleJoinRoom = async () => {
-    if (!roomCodeInput || roomCodeInput.trim().length !== 4) {
+    const cleanCode = (roomCodeInput || '').replace(/\D/g, '').trim();
+    if (cleanCode.length !== 4) {
       setNetworkError('4자리 숫자 방 코드를 입력하세요.');
       return;
     }
     setNetworkError('');
+    setConnectionStatus('');
+    setIsConnecting(true);
     try {
-      const joinedCode = await networkRef.current.joinRoom(roomCodeInput, '친구(학생)', selectedSkin);
+      const joinedCode = await networkRef.current.joinRoom(cleanCode, '친구(학생)', selectedSkin);
       setCurrentRoomCode(joinedCode);
       setGameState(GAME_STATES.LOBBY);
       setGameMode('MULTI');
     } catch (err) {
       setNetworkError(err.message || '방 입장에 실패했습니다.');
+    } finally {
+      setIsConnecting(false);
     }
   };
 
@@ -1234,19 +1261,31 @@ export default function SchoolTagGame({ onScoreSubmitted }) {
               <div style={{ display: 'flex', gap: '8px' }}>
                 <button
                   onClick={handleCreateRoom}
+                  disabled={isConnecting}
                   className="schooltag-btn-secondary"
-                  style={{ marginTop: 0 }}
+                  style={{ marginTop: 0, opacity: isConnecting ? 0.6 : 1 }}
                 >
-                  방 만들기
+                  {isConnecting ? '방 생성 중...' : '방 만들기'}
                 </button>
                 <button
-                  onClick={() => setGameState(GAME_STATES.LOBBY)}
+                  onClick={() => {
+                    setGameState(GAME_STATES.LOBBY);
+                    setNetworkError('');
+                    setConnectionStatus('');
+                  }}
+                  disabled={isConnecting}
                   className="schooltag-btn-secondary"
-                  style={{ marginTop: 0 }}
+                  style={{ marginTop: 0, opacity: isConnecting ? 0.6 : 1 }}
                 >
                   방 참가하기
                 </button>
               </div>
+
+              {connectionStatus && (
+                <div style={{ color: '#38bdf8', fontSize: '0.82rem', marginTop: '10px' }}>
+                  {connectionStatus}
+                </div>
+              )}
 
               {networkError && (
                 <div style={{ color: '#f87171', fontSize: '0.82rem', marginTop: '10px' }}>
@@ -1272,6 +1311,7 @@ export default function SchoolTagGame({ onScoreSubmitted }) {
                     value={roomCodeInput}
                     onChange={(e) => setRoomCodeInput(e.target.value.replace(/\D/g, ''))}
                     placeholder="예: 7421"
+                    disabled={isConnecting}
                     style={{
                       width: '140px',
                       padding: '10px',
@@ -1287,20 +1327,39 @@ export default function SchoolTagGame({ onScoreSubmitted }) {
                     }}
                   />
                   <div style={{ display: 'flex', gap: '8px' }}>
-                    <button onClick={handleJoinRoom} className="schooltag-btn-primary">
-                      참가하기
+                    <button
+                      onClick={handleJoinRoom}
+                      disabled={isConnecting || !roomCodeInput}
+                      className="schooltag-btn-primary"
+                      style={{ opacity: (isConnecting || !roomCodeInput) ? 0.6 : 1 }}
+                    >
+                      {isConnecting ? '연결 중...' : '참가하기'}
                     </button>
                     <button
                       onClick={() => {
                         setGameState(GAME_STATES.MENU);
                         setNetworkError('');
+                        setConnectionStatus('');
                       }}
+                      disabled={isConnecting}
                       className="schooltag-btn-secondary"
                       style={{ marginTop: 0 }}
                     >
                       취소
                     </button>
                   </div>
+
+                  {connectionStatus && (
+                    <div style={{ color: '#38bdf8', fontSize: '0.82rem', marginTop: '10px' }}>
+                      {connectionStatus}
+                    </div>
+                  )}
+
+                  {networkError && (
+                    <div style={{ color: '#f87171', fontSize: '0.82rem', marginTop: '10px' }}>
+                      {networkError}
+                    </div>
+                  )}
                 </div>
               ) : (
                 <div>
@@ -1335,12 +1394,18 @@ export default function SchoolTagGame({ onScoreSubmitted }) {
                     ))}
                   </div>
 
+                  {connectionStatus && (
+                    <div style={{ color: '#38bdf8', fontSize: '0.82rem', marginBottom: '10px' }}>
+                      {connectionStatus}
+                    </div>
+                  )}
+
                   {networkRef.current && networkRef.current.isHost ? (
                     <button onClick={handleStartMultiMatch} className="schooltag-btn-primary">
                       게임 시작하기
                     </button>
                   ) : (
-                    <div style={{ color: '#94a3b8', fontSize: '0.9rem' }}>
+                    <div style={{ color: '#94a3b8', fontSize: '0.9rem', marginBottom: '10px' }}>
                       방장이 게임을 시작하기를 기다리는 중...
                     </div>
                   )}
@@ -1349,6 +1414,7 @@ export default function SchoolTagGame({ onScoreSubmitted }) {
                     onClick={() => {
                       networkRef.current.disconnect();
                       setCurrentRoomCode('');
+                      setConnectionStatus('');
                       setGameState(GAME_STATES.MENU);
                     }}
                     className="schooltag-btn-secondary"

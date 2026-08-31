@@ -3,10 +3,63 @@
 
 export const CHANGELOG_DATA = [
   {
+    version: 'v1.48.8',
+    date: '2026-08-31',
+    title: '👻 [도촌 영혼 대결] 3-Way Handshake 자동 재시도 프로토콜 & 방 번호 자동 정제 시스템 도입',
+    badge: 'LATEST',
+    badgeColor: 'blue',
+    items: [
+      {
+        tag: '3-WAY HANDSHAKE',
+        tagColor: 'blue',
+        text: '[신뢰성 높은 3-Way Handshake 프로토콜] 게스트가 방장에게 입장 요청(JOIN_LOBBY)을 보낼 때, 방장으로부터 확실한 응답(ACK)을 받을 때까지 400ms 주기로 최대 10회까지 안전하게 재전송하여 첫 패킷 유실 문제를 원천 차단'
+      },
+      {
+        tag: 'INPUT SANITIZATION',
+        tagColor: 'emerald',
+        text: '[방 번호 입력값 자동 정제] 입력창에 공백, 한글, 특수문자 등이 섞여 들어가도 자동으로 숫자 4자리만 추출(replace(/[^0-9]/g, \'\'))하여 정확한 방으로 연결되도록 개선'
+      },
+      {
+        tag: 'STATUS FEEDBACK',
+        tagColor: 'amber',
+        text: '[실시간 연결 진행 상황 피드백 UI] 방을 만들거나 참가할 때 "🔗 시그널링 서버 연결 중...", "🔍 방장 찾는 중...", "⚡ P2P 터널 수립 완료!" 등의 실시간 상태 뱃지를 화면에 표시하여 연결 상태를 한눈에 확인 가능'
+      }
+    ]
+  },
+  {
+    version: 'v1.48.7',
+    date: '2026-08-31',
+    title: '🔦 [도촌 야간 학교 숨바꼭질] P2P 멀티플레이 학내망/방화벽 우회 TURN 릴레이 탑재 및 3-Way 핸드셰이크 접속 안정화 패치',
+    badge: 'UPDATE',
+    badgeColor: 'emerald',
+    items: [
+      {
+        tag: 'TURN RELAY',
+        tagColor: 'blue',
+        text: '[학교 네트워크 P2P 접속 차단 문제 해결] 학교 방화벽 및 대칭형 NAT(Symmetric NAT) 환경에서도 접속이 막히지 않도록 포트 80/443 전용 고가용성 Metered TURN 릴레이 서버 풀 및 TCP 전송 지원 탑재'
+      },
+      {
+        tag: 'HANDSHAKE RETRY',
+        tagColor: 'emerald',
+        text: '[초기 패킷 유실 방지 핸드셰이크] 게스트 입장 시 초기 WebRTC 데이터 채널 패킷 유실로 인한 대기실 고립을 방지하기 위해 400ms 주기 자동 재전송 및 호스트 즉시 ACK 회신 프로토콜 구축'
+      },
+      {
+        tag: 'STATUS & TIMEOUT',
+        tagColor: 'amber',
+        text: '[실시간 연결 상태 안내 및 15초 타임아웃] 시그널링 서버 연결 ➔ P2P 터널 수립 ➔ 대기실 입장 단계별 상태 피드백과 15초 타임아웃 예외 처리를 통해 접속 멈춤 현상 완벽 방지'
+      },
+      {
+        tag: 'AUTO SANITIZE',
+        tagColor: 'purple',
+        text: '[방 코드 자동 정제] 4자리 방 번호 입력 시 공백이나 특수문자를 자동 제거하여 방 번호 불일치 오류 방지'
+      }
+    ]
+  },
+  {
     version: 'v1.48.6',
     date: '2026-08-31',
     title: '☃️ [도촌 눈싸움 서바이벌] P2P 멀티플레이 학내망/방화벽 우회 TURN 릴레이 탑재 및 접속 안정화 패치',
-    badge: 'LATEST',
+    badge: 'UPDATE',
     badgeColor: 'emerald',
     items: [
       {

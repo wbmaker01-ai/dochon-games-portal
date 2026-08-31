@@ -32,6 +32,8 @@ const ICE_SERVERS = [
   }
 ];
 
+const CONNECTION_TIMEOUT_MS = 15000;
+
 export class SchoolTagNetworkManager {
   constructor() {
     this.peer = null;
@@ -56,8 +58,12 @@ export class SchoolTagNetworkManager {
     this.onGameOver = null;
     this.onError = null;
     this.onDisconnect = null;
+    this.onConnectionStatus = null; // Status message callback for UI feedback
+    this.onPlayerInput = null;
+    this.onPlayerAction = null;
   }
 
+  // Generate random 4-digit numeric code
   static generateRandomCode() {
     return String(Math.floor(1000 + Math.random() * 9000));
   }
@@ -68,29 +74,45 @@ export class SchoolTagNetworkManager {
     return digits.padStart(4, '0').slice(0, 4);
   }
 
+  // Emit status message for user UI feedback
+  _emitStatus(message) {
+    if (this.onConnectionStatus) this.onConnectionStatus(message);
+  }
+
   // --- HOST: Create a P2P Room ---
-  createRoom(numericCode, playerName, role = ROLE_TYPES.TAGGER, skinId = 'ghost') {
+  createRoom(numericCode, playerName, role = ROLE_TYPES.RUNNER, skinId = 'boy') {
     return new Promise((resolve, reject) => {
       this.disconnect();
 
       const cleanCode = SchoolTagNetworkManager.cleanCode(numericCode);
       this.roomCode = cleanCode;
       this.isHost = true;
-      this.myName = playerName || '방장(당직선생님)';
+      this.myName = playerName || '방장(학생)';
       this.myRole = role;
       this.mySkinId = skinId;
       const fullPeerId = `${SCHOOL_TAG_CONSTANTS.PEER_PREFIX}${cleanCode}`;
+
+      this._emitStatus('🔗 P2P 시그널링 서버에 방 개설 중...');
+
+      const timeoutId = setTimeout(() => {
+        this._emitStatus('⏰ 시그널링 서버 연결 시간 초과');
+        const err = new Error('시그널링 서버 연결 시간 초과 (15초). 인터넷 연결을 확인해주세요.');
+        if (this.onError) this.onError(err.message);
+        this.disconnect();
+        reject(err);
+      }, CONNECTION_TIMEOUT_MS);
 
       try {
         this.peer = new Peer(fullPeerId, {
           debug: 0,
           config: {
             iceServers: ICE_SERVERS,
-            iceCandidatePoolSize: 10
+            iceCandidatePoolSize: 10,
           },
         });
 
         this.peer.on('open', (id) => {
+          clearTimeout(timeoutId);
           this.myPeerId = id;
           this.lobbyPlayers = [
             {
@@ -103,6 +125,7 @@ export class SchoolTagNetworkManager {
               slotIndex: 0,
             },
           ];
+          this._emitStatus(`✅ 방(${cleanCode}) 개설 완료! 참가자를 기다리는 중...`);
           if (this.onLobbyUpdate) this.onLobbyUpdate([...this.lobbyPlayers]);
           resolve(this.roomCode);
         });
@@ -112,13 +135,19 @@ export class SchoolTagNetworkManager {
         });
 
         this.peer.on('error', (err) => {
+          clearTimeout(timeoutId);
           if (err.type === 'unavailable-id') {
-            reject(new Error(`이미 사용 중인 방 번호(${cleanCode})입니다. 다른 번호를 입력하세요.`));
+            const msg = `이미 사용 중인 방 번호(${cleanCode})입니다. 다른 번호로 방을 만들어주세요.`;
+            this._emitStatus(`❌ ${msg}`);
+            reject(new Error(msg));
           } else {
-            reject(new Error(`P2P 네트워크 연결 오류: ${err.message || err.type}`));
+            const msg = `P2P 네트워크 연결 오류: ${err.message || err.type}`;
+            this._emitStatus(`❌ ${msg}`);
+            reject(new Error(msg));
           }
         });
       } catch (err) {
+        clearTimeout(timeoutId);
         reject(err);
       }
     });
@@ -135,9 +164,11 @@ export class SchoolTagNetworkManager {
       });
 
       conn.on('close', () => {
-        this.connections.delete(conn.peer);
-        this.lobbyPlayers = this.lobbyPlayers.filter((p) => p.id !== conn.peer);
-        this._broadcastLobby();
+        this._handlePlayerLeave(conn.peer);
+      });
+
+      conn.on('error', () => {
+        this._handlePlayerLeave(conn.peer);
       });
     });
   }
@@ -147,30 +178,50 @@ export class SchoolTagNetworkManager {
 
     switch (data.type) {
       case 'JOIN_LOBBY': {
-        const slot = this.lobbyPlayers.length;
-        if (slot >= 4) {
+        if (this.lobbyPlayers.length >= 4) {
           const conn = this.connections.get(senderPeerId);
-          if (conn) conn.send({ type: 'ROOM_FULL' });
+          if (conn && conn.open) {
+            conn.send({ type: 'ROOM_FULL', reason: '방의 인원이 가득 찼습니다. (최대 4인)' });
+            conn.close();
+          }
           return;
         }
 
-        const newPlayer = {
-          id: senderPeerId,
-          name: data.name || `학생 ${slot + 1}`,
-          skinId: data.skinId || 'boy',
-          role: ROLE_TYPES.RUNNER,
-          isHost: false,
-          isReady: true,
-          slotIndex: slot,
-        };
+        // Check if player already exists in lobby (prevent duplicates on handshake retry)
+        let player = this.lobbyPlayers.find((p) => p.id === senderPeerId);
+        if (!player) {
+          const slot = this.lobbyPlayers.length;
+          player = {
+            id: senderPeerId,
+            name: data.name || `학생 ${slot + 1}`,
+            skinId: data.skinId || 'boy',
+            role: ROLE_TYPES.RUNNER,
+            isHost: false,
+            isReady: true,
+            slotIndex: slot,
+          };
+          this.lobbyPlayers.push(player);
+        } else {
+          player.name = data.name || player.name;
+          player.skinId = data.skinId || player.skinId;
+        }
 
-        this.lobbyPlayers.push(newPlayer);
+        // Immediately ACK back to the joining guest
+        const conn = this.connections.get(senderPeerId);
+        if (conn && conn.open) {
+          conn.send({
+            type: 'LOBBY_STATE',
+            players: this.lobbyPlayers,
+            roomCode: this.roomCode,
+            isAck: true,
+          });
+        }
+
         this._broadcastLobby();
         break;
       }
 
       case 'CLIENT_INPUT': {
-        // Forward runner input to game logic in host
         if (this.onPlayerInput) {
           this.onPlayerInput(senderPeerId, data.payload);
         }
@@ -189,11 +240,19 @@ export class SchoolTagNetworkManager {
     }
   }
 
+  _handlePlayerLeave(peerId) {
+    if (!this.isHost) return;
+    this.connections.delete(peerId);
+    this.lobbyPlayers = this.lobbyPlayers.filter((p) => p.id !== peerId);
+    this._broadcastLobby();
+  }
+
   _broadcastLobby() {
     if (!this.isHost) return;
     const packet = {
-      type: 'LOBBY_UPDATE',
+      type: 'LOBBY_STATE',
       players: this.lobbyPlayers,
+      roomCode: this.roomCode,
     };
     this.connections.forEach((conn) => {
       if (conn.open) conn.send(packet);
@@ -201,7 +260,7 @@ export class SchoolTagNetworkManager {
     if (this.onLobbyUpdate) this.onLobbyUpdate([...this.lobbyPlayers]);
   }
 
-  // --- GUEST: Join a P2P Room ---
+  // --- GUEST: Join a P2P Room with Handshake Retries ---
   joinRoom(numericCode, playerName, skinId = 'boy') {
     return new Promise((resolve, reject) => {
       this.disconnect();
@@ -209,51 +268,100 @@ export class SchoolTagNetworkManager {
       const cleanCode = SchoolTagNetworkManager.cleanCode(numericCode);
       this.roomCode = cleanCode;
       this.isHost = false;
-      this.myName = playerName || '도망자';
+      this.myName = playerName || '친구(학생)';
       this.myRole = ROLE_TYPES.RUNNER;
       this.mySkinId = skinId;
       const targetHostPeerId = `${SCHOOL_TAG_CONSTANTS.PEER_PREFIX}${cleanCode}`;
 
+      this._emitStatus(`🔍 방(${cleanCode}) 찾는 중... 방화벽/TURN 우회 탐색`);
+
+      let handshakeTimer = null;
+      let isResolved = false;
+
+      const connectionTimeout = setTimeout(() => {
+        if (handshakeTimer) clearInterval(handshakeTimer);
+        if (!isResolved) {
+          this._emitStatus(`⏰ 방(${cleanCode}) 연결 시간 초과`);
+          this.disconnect();
+          reject(new Error(`방(${cleanCode})을 찾을 수 없거나 방장이 아직 방을 개설하지 않았습니다. 번호를 확인해주세요.`));
+        }
+      }, CONNECTION_TIMEOUT_MS);
+
       try {
-        this.peer = new Peer(null, {
+        this.peer = new Peer({
           debug: 0,
           config: {
             iceServers: ICE_SERVERS,
-            iceCandidatePoolSize: 10
+            iceCandidatePoolSize: 10,
           },
         });
 
         this.peer.on('open', (id) => {
           this.myPeerId = id;
-          const conn = this.peer.connect(targetHostPeerId, { reliable: true });
+          this._emitStatus(`🤝 방장과 P2P 터널 연결 시도 중...`);
+
+          const conn = this.peer.connect(targetHostPeerId, {
+            reliable: true,
+          });
           this.hostConnection = conn;
 
           conn.on('open', () => {
-            conn.send({
-              type: 'JOIN_LOBBY',
-              name: this.myName,
-              skinId: this.mySkinId,
-            });
-            resolve(this.roomCode);
+            this._emitStatus(`⚡ P2P 채널 연결 성공! 대기실 입장 요청 전송 중...`);
+
+            // Send JOIN_LOBBY payload
+            const sendJoin = () => {
+              if (conn.open) {
+                conn.send({
+                  type: 'JOIN_LOBBY',
+                  name: this.myName,
+                  skinId: this.mySkinId,
+                });
+              }
+            };
+            sendJoin();
+
+            // Handshake Keep-Alive Retry: repeat every 400ms until ACK/LOBBY_STATE received
+            let retryCount = 0;
+            handshakeTimer = setInterval(() => {
+              if (isResolved || !conn.open || retryCount >= 10) {
+                clearInterval(handshakeTimer);
+                return;
+              }
+              retryCount++;
+              sendJoin();
+            }, 400);
           });
 
           conn.on('data', (data) => {
+            if ((data.type === 'LOBBY_STATE' || data.type === 'LOBBY_UPDATE') && !isResolved) {
+              isResolved = true;
+              clearTimeout(connectionTimeout);
+              if (handshakeTimer) clearInterval(handshakeTimer);
+              this._emitStatus(`✅ 대기실 입장 완료!`);
+              resolve(cleanCode);
+            }
             this._handleGuestReceivedData(data);
           });
 
           conn.on('close', () => {
+            if (handshakeTimer) clearInterval(handshakeTimer);
             if (this.onDisconnect) this.onDisconnect('방장과의 연결이 종료되었습니다.');
           });
 
           conn.on('error', (err) => {
+            if (handshakeTimer) clearInterval(handshakeTimer);
             reject(new Error(`방 연결 실패: ${err.message || '호스트를 찾을 수 없습니다.'}`));
           });
         });
 
         this.peer.on('error', (err) => {
+          clearTimeout(connectionTimeout);
+          if (handshakeTimer) clearInterval(handshakeTimer);
           reject(new Error(`P2P 네트워크 오류: ${err.message || err.type}`));
         });
       } catch (err) {
+        clearTimeout(connectionTimeout);
+        if (handshakeTimer) clearInterval(handshakeTimer);
         reject(err);
       }
     });
@@ -263,6 +371,7 @@ export class SchoolTagNetworkManager {
     if (!data || !data.type) return;
 
     switch (data.type) {
+      case 'LOBBY_STATE':
       case 'LOBBY_UPDATE':
         this.lobbyPlayers = data.players || [];
         if (this.onLobbyUpdate) this.onLobbyUpdate([...this.lobbyPlayers]);
@@ -289,7 +398,7 @@ export class SchoolTagNetworkManager {
         break;
 
       case 'ROOM_FULL':
-        if (this.onError) this.onError('방의 인원이 가득 찼습니다. (최대 4인)');
+        if (this.onError) this.onError(data.reason || '방의 인원이 가득 찼습니다. (최대 4인)');
         this.disconnect();
         break;
 
@@ -361,15 +470,17 @@ export class SchoolTagNetworkManager {
 
   disconnect() {
     if (this.connections) {
-      this.connections.forEach((conn) => conn.close());
+      this.connections.forEach((conn) => {
+        try { conn.close(); } catch (_) {}
+      });
       this.connections.clear();
     }
     if (this.hostConnection) {
-      this.hostConnection.close();
+      try { this.hostConnection.close(); } catch (_) {}
       this.hostConnection = null;
     }
     if (this.peer) {
-      this.peer.destroy();
+      try { this.peer.destroy(); } catch (_) {}
       this.peer = null;
     }
     this.lobbyPlayers = [];
