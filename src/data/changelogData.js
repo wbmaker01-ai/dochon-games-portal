@@ -3,11 +3,30 @@
 
 export const CHANGELOG_DATA = [
   {
+    version: 'v1.48.9',
+    date: '2026-08-31',
+    title: '👻 [도촌 영혼 대결] P2P 대기실 초대 룸코드 대형 히어로 카드 UI 개편',
+    badge: 'LATEST',
+    badgeColor: 'blue',
+    items: [
+      {
+        tag: 'HERO ROOM CODE',
+        tagColor: 'blue',
+        text: '[초대 룸코드 대형 시각화] 방 생성 후 친구들이 멀리서도 한눈에 알아볼 수 있도록 4자리 방 번호를 대형 황금빛 히어로 카드(골든 네온 폰트 및 원클릭 복사 버튼)로 전면 확대 개편'
+      },
+      {
+        tag: 'COMPACT LAYOUT',
+        tagColor: 'emerald',
+        text: '[대기실 레이아웃 최적화] 모달 내부 스크롤 없이 팀별 참가자 명단과 조작 버튼이 깔끔하게 한눈에 들어오도록 컴팩트 반응형 핏 적용'
+      }
+    ]
+  },
+  {
     version: 'v1.48.8',
     date: '2026-08-31',
     title: '👻 [도촌 영혼 대결] 3-Way Handshake 자동 재시도 프로토콜 & 방 번호 자동 정제 시스템 도입',
-    badge: 'LATEST',
-    badgeColor: 'blue',
+    badge: 'UPDATE',
+    badgeColor: 'emerald',
     items: [
       {
         tag: '3-WAY HANDSHAKE',

@@ -639,11 +639,29 @@ export default function GhoulDuelGame({ onScoreSubmitted }) {
                 친구에게 아래 <strong>4자리 룸코드</strong>를 알려주세요!
               </p>
 
-              {/* 4-Digit Numeric Room Code Badge */}
-              <div className="lobby-room-code-badge cursor-pointer" onClick={handleCopyCode} title="클릭하여 번호 복사">
-                <span className="text-xs text-purple-300 font-bold">방 번호</span>
-                <span className="lobby-code-num">{p2pCode}</span>
-                {copiedCode ? <Check size={18} className="text-emerald-400" /> : <Copy size={18} className="text-purple-300" />}
+              {/* 4-Digit Numeric Room Code Hero Card */}
+              <div
+                className="lobby-room-code-hero cursor-pointer"
+                onClick={handleCopyCode}
+                title="클릭하여 4자리 방 번호 복사"
+              >
+                <div className="lobby-hero-label-row">
+                  <span className="lobby-hero-tag">🔑 초대 룸코드 (4자리)</span>
+                  <div className="lobby-copy-hint">
+                    {copiedCode ? (
+                      <span className="copied-text text-emerald-400 font-bold flex items-center gap-1">
+                        <Check size={14} className="inline mr-1" /> 복사 완료!
+                      </span>
+                    ) : (
+                      <span className="flex items-center gap-1 text-purple-300 font-bold">
+                        <Copy size={14} className="inline mr-1" /> 클릭하여 복사
+                      </span>
+                    )}
+                  </div>
+                </div>
+                <div className="lobby-code-display">
+                  <span className="lobby-code-large-num">{p2pCode}</span>
+                </div>
               </div>
 
               {p2pError && <div className="p2p-error-banner">{p2pError}</div>}
