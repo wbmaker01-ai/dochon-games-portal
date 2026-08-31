@@ -1,8 +1,41 @@
 // Dochon Games Portal - Snowball Survival WebRTC P2P Network Manager (Zero-Cost PeerJS)
 // 4-Digit Numeric Room Code (e.g. '1234', '7788') to 'dochon-snow-XXXX' Peer ID
+// v2: SchoolNet / Symmetric NAT Traversal with Metered TURN Relays (Ports 80/443) & Handshake Retries
 
 import { Peer } from 'peerjs';
 import { SNOWBALL_PEER_PREFIX } from './snowballConstants';
+
+// Multi-tier ICE Servers: High-availability STUN + Port 80/443 TURN Relays
+// Bypasses restrictive school firewalls, symmetric NATs, and carrier-grade NATs
+const ICE_SERVERS = [
+  { urls: 'stun:stun.l.google.com:19302' },
+  { urls: 'stun:stun1.l.google.com:19302' },
+  { urls: 'stun:stun2.l.google.com:19302' },
+  { urls: 'stun:global.stun.twilio.com:3478' },
+  { urls: 'stun:stun.relay.metered.ca:80' },
+  {
+    urls: 'turn:global.relay.metered.ca:80',
+    username: 'e8dd65b92f3b1e1ae3a37c20',
+    credential: 'gVNgSOl87pwvCYLu'
+  },
+  {
+    urls: 'turn:global.relay.metered.ca:80?transport=tcp',
+    username: 'e8dd65b92f3b1e1ae3a37c20',
+    credential: 'gVNgSOl87pwvCYLu'
+  },
+  {
+    urls: 'turn:global.relay.metered.ca:443',
+    username: 'e8dd65b92f3b1e1ae3a37c20',
+    credential: 'gVNgSOl87pwvCYLu'
+  },
+  {
+    urls: 'turns:global.relay.metered.ca:443?transport=tcp',
+    username: 'e8dd65b92f3b1e1ae3a37c20',
+    credential: 'gVNgSOl87pwvCYLu'
+  }
+];
+
+const CONNECTION_TIMEOUT_MS = 15000;
 
 export class SnowballNetworkManager {
   constructor() {
@@ -26,6 +59,7 @@ export class SnowballNetworkManager {
     this.onGameOver = null;
     this.onError = null;
     this.onDisconnect = null;
+    this.onConnectionStatus = null; // Status message callback for UI feedback
   }
 
   // Generate random 4-digit numeric code
@@ -33,30 +67,50 @@ export class SnowballNetworkManager {
     return String(Math.floor(1000 + Math.random() * 9000));
   }
 
+  // Emit status message for user UI feedback
+  _emitStatus(message) {
+    if (this.onConnectionStatus) this.onConnectionStatus(message);
+  }
+
+  // Clean numeric code string
+  static cleanCode(code) {
+    const digits = String(code || '').replace(/[^0-9]/g, '');
+    return digits.padStart(4, '0').slice(0, 4);
+  }
+
   // --- HOST: Create a P2P Room ---
   createRoom(numericCode, playerName, skinId = 'penguin') {
     return new Promise((resolve, reject) => {
       this.disconnect();
 
-      const cleanCode = String(numericCode).trim().padStart(4, '0').slice(0, 4);
+      const cleanCode = SnowballNetworkManager.cleanCode(numericCode);
       this.roomCode = cleanCode;
       this.isHost = true;
       this.myName = playerName || '방장';
       this.mySkinId = skinId;
       const fullPeerId = `${SNOWBALL_PEER_PREFIX}${cleanCode}`;
 
+      this._emitStatus('🔗 P2P 시그널링 서버에 방 개설 중...');
+
+      const timeoutId = setTimeout(() => {
+        this._emitStatus('⏰ 시그널링 서버 연결 시간 초과');
+        const err = new Error(`시그널링 서버 연결 시간 초과 (15초). 인터넷 연결을 확인해주세요.`);
+        if (this.onError) this.onError(err.message);
+        this.disconnect();
+        reject(err);
+      }, CONNECTION_TIMEOUT_MS);
+
       try {
         this.peer = new Peer(fullPeerId, {
           debug: 0,
           config: {
-            iceServers: [
-              { urls: 'stun:stun.l.google.com:19302' },
-              { urls: 'stun:global.stun.twilio.com:3478' }
-            ]
+            iceServers: ICE_SERVERS,
+            iceCandidatePoolSize: 10
           }
         });
 
         this.peer.on('open', (id) => {
+          clearTimeout(timeoutId);
           this.myPeerId = id;
           this.lobbyPlayers = [
             {
@@ -68,6 +122,7 @@ export class SnowballNetworkManager {
               slotIndex: 0
             }
           ];
+          this._emitStatus(`✅ 방(${cleanCode}) 개설 완료! 참가자를 기다리는 중...`);
           if (this.onLobbyUpdate) this.onLobbyUpdate([...this.lobbyPlayers]);
           resolve(this.roomCode);
         });
@@ -77,13 +132,19 @@ export class SnowballNetworkManager {
         });
 
         this.peer.on('error', (err) => {
+          clearTimeout(timeoutId);
           if (err.type === 'unavailable-id') {
-            reject(new Error(`이미 사용 중인 방 번호(${cleanCode})입니다. 다른 번호를 입력하세요.`));
+            const msg = `이미 사용 중인 방 번호(${cleanCode})입니다. 다른 번호로 방을 만들어주세요.`;
+            this._emitStatus(`❌ ${msg}`);
+            reject(new Error(msg));
           } else {
-            reject(new Error(`P2P 네트워크 연결 오류: ${err.message || err.type}`));
+            const msg = `P2P 네트워크 연결 오류: ${err.message || err.type}`;
+            this._emitStatus(`❌ ${msg}`);
+            reject(new Error(msg));
           }
         });
       } catch (err) {
+        clearTimeout(timeoutId);
         reject(err);
       }
     });
@@ -115,24 +176,43 @@ export class SnowballNetworkManager {
     if (data.type === 'JOIN_LOBBY') {
       if (this.lobbyPlayers.length >= 8) {
         const conn = this.connections.get(senderPeerId);
-        if (conn) {
+        if (conn && conn.open) {
           conn.send({ type: 'JOIN_REJECTED', reason: '방 인원이 가득 찼습니다 (최대 8인).' });
           conn.close();
         }
         return;
       }
 
-      const newSlot = this.lobbyPlayers.length;
-      const newPlayer = {
-        id: senderPeerId,
-        name: data.playerName || `참가자${newSlot + 1}`,
-        skinId: data.skinId || 'snowman',
-        isHost: false,
-        isReady: true,
-        slotIndex: newSlot
-      };
+      // Check if already in lobby (prevent duplicate entries on retry)
+      let player = this.lobbyPlayers.find(p => p.id === senderPeerId);
+      if (!player) {
+        const newSlot = this.lobbyPlayers.length;
+        player = {
+          id: senderPeerId,
+          name: data.playerName || `참가자${newSlot + 1}`,
+          skinId: data.skinId || 'snowman',
+          isHost: false,
+          isReady: true,
+          slotIndex: newSlot
+        };
+        this.lobbyPlayers.push(player);
+      } else {
+        // Update info if existing
+        player.name = data.playerName || player.name;
+        player.skinId = data.skinId || player.skinId;
+      }
 
-      this.lobbyPlayers.push(newPlayer);
+      // Immediately ACK to the joining guest and broadcast to all
+      const conn = this.connections.get(senderPeerId);
+      if (conn && conn.open) {
+        conn.send({
+          type: 'LOBBY_STATE',
+          players: this.lobbyPlayers,
+          roomCode: this.roomCode,
+          isAck: true
+        });
+      }
+
       this._broadcastToAll({
         type: 'LOBBY_STATE',
         players: this.lobbyPlayers,
@@ -151,7 +231,6 @@ export class SnowballNetworkManager {
         if (this.onLobbyUpdate) this.onLobbyUpdate([...this.lobbyPlayers]);
       }
     } else if (data.type === 'CLIENT_INPUT') {
-      // Forward client input or trigger local logic
       if (this.onClientInput) {
         this.onClientInput(senderPeerId, data);
       }
@@ -171,65 +250,107 @@ export class SnowballNetworkManager {
     if (this.onLobbyUpdate) this.onLobbyUpdate([...this.lobbyPlayers]);
   }
 
-  // --- GUEST: Join Room ---
+  // --- GUEST: Join Room with Handshake Retries ---
   joinRoom(numericCode, playerName, skinId = 'snowman') {
     return new Promise((resolve, reject) => {
       this.disconnect();
 
-      const cleanCode = String(numericCode).trim().padStart(4, '0').slice(0, 4);
+      const cleanCode = SnowballNetworkManager.cleanCode(numericCode);
       this.roomCode = cleanCode;
       this.isHost = false;
       this.myName = playerName || '참가자';
       this.mySkinId = skinId;
       const targetHostPeerId = `${SNOWBALL_PEER_PREFIX}${cleanCode}`;
 
+      this._emitStatus(`🔍 방(${cleanCode}) 찾는 중... 방화벽/TURN 우회 탐색`);
+
+      let handshakeTimer = null;
+      let isResolved = false;
+
+      const connectionTimeout = setTimeout(() => {
+        if (handshakeTimer) clearInterval(handshakeTimer);
+        if (!isResolved) {
+          this._emitStatus(`⏰ 방(${cleanCode}) 연결 시간 초과`);
+          this.disconnect();
+          reject(new Error(`방(${cleanCode})을 찾을 수 없거나 방장이 아직 방을 개설하지 않았습니다. 번호를 확인해주세요.`));
+        }
+      }, CONNECTION_TIMEOUT_MS);
+
       try {
         this.peer = new Peer({
           debug: 0,
           config: {
-            iceServers: [
-              { urls: 'stun:stun.l.google.com:19302' },
-              { urls: 'stun:global.stun.twilio.com:3478' }
-            ]
+            iceServers: ICE_SERVERS,
+            iceCandidatePoolSize: 10
           }
         });
 
         this.peer.on('open', (id) => {
           this.myPeerId = id;
-          const conn = this.peer.connect(targetHostPeerId, { reliable: true });
+          this._emitStatus(`🤝 방장과 P2P 터널 연결 시도 중...`);
+
+          const conn = this.peer.connect(targetHostPeerId, {
+            reliable: true
+          });
           this.hostConnection = conn;
 
-          const connectionTimeout = setTimeout(() => {
-            reject(new Error(`방(${cleanCode})을 찾을 수 없거나 응답이 없습니다. 번호를 확인하세요.`));
-          }, 8000);
-
           conn.on('open', () => {
-            clearTimeout(connectionTimeout);
-            conn.send({
-              type: 'JOIN_LOBBY',
-              playerName: this.myName,
-              skinId: this.mySkinId
-            });
-            resolve(cleanCode);
+            this._emitStatus(`⚡ P2P 채널 연결 성공! 대기실 입장 요청 전송 중...`);
+
+            // Send JOIN_LOBBY immediately
+            const sendJoin = () => {
+              if (conn.open) {
+                conn.send({
+                  type: 'JOIN_LOBBY',
+                  playerName: this.myName,
+                  skinId: this.mySkinId
+                });
+              }
+            };
+            sendJoin();
+
+            // Handshake Keep-Alive Retry: repeat every 400ms until ACK/LOBBY_STATE received
+            let retryCount = 0;
+            handshakeTimer = setInterval(() => {
+              if (isResolved || !conn.open || retryCount >= 10) {
+                clearInterval(handshakeTimer);
+                return;
+              }
+              retryCount++;
+              sendJoin();
+            }, 400);
           });
 
           conn.on('data', (data) => {
+            if (data.type === 'LOBBY_STATE' && !isResolved) {
+              isResolved = true;
+              clearTimeout(connectionTimeout);
+              if (handshakeTimer) clearInterval(handshakeTimer);
+              this._emitStatus(`✅ 대기실 입장 완료!`);
+              resolve(cleanCode);
+            }
             this._handleGuestReceivedData(data);
           });
 
           conn.on('close', () => {
+            if (handshakeTimer) clearInterval(handshakeTimer);
             if (this.onDisconnect) this.onDisconnect('방장과의 연결이 끊어졌습니다.');
           });
 
           conn.on('error', (err) => {
+            if (handshakeTimer) clearInterval(handshakeTimer);
             reject(new Error(`방 연결 실패: ${err.message || '방이 존재하지 않습니다.'}`));
           });
         });
 
         this.peer.on('error', (err) => {
+          clearTimeout(connectionTimeout);
+          if (handshakeTimer) clearInterval(handshakeTimer);
           reject(new Error(`P2P 네트워크 초기화 실패: ${err.message || err.type}`));
         });
       } catch (err) {
+        clearTimeout(connectionTimeout);
+        if (handshakeTimer) clearInterval(handshakeTimer);
         reject(err);
       }
     });

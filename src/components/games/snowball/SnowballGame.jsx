@@ -55,6 +55,7 @@ export default function SnowballGame({ onScoreSubmitted }) {
   const [p2pIsHost, setP2pIsHost] = useState(false);
   const [p2pPlayers, setP2pPlayers] = useState([]);
   const [p2pConnecting, setP2pConnecting] = useState(false);
+  const [p2pStatus, setP2pStatus] = useState('');
   const [p2pError, setP2pError] = useState('');
   const [copiedCode, setCopiedCode] = useState(false);
 
@@ -245,10 +246,12 @@ export default function SnowballGame({ onScoreSubmitted }) {
   const handleHostCreateRoom = async () => {
     setP2pConnecting(true);
     setP2pError('');
+    setP2pStatus('시그널링 서버 연결 중...');
     try {
       snowballNet.onLobbyUpdate = (players) => {
         setP2pPlayers(players);
       };
+      snowballNet.onConnectionStatus = (status) => setP2pStatus(status);
       snowballNet.onError = (msg) => setP2pError(msg);
 
       await snowballNet.createRoom(p2pCode, p2pName || '도촌눈사람', selectedSkin);
@@ -263,18 +266,21 @@ export default function SnowballGame({ onScoreSubmitted }) {
 
   // --- P2P GUEST: Join Room ---
   const handleGuestJoinRoom = async () => {
-    if (!joinCodeInput || joinCodeInput.length !== 4) {
-      setP2pError('4자리 숫자 방 코드를 입력해주세요.');
+    const cleanDigits = joinCodeInput.replace(/[^0-9]/g, '');
+    if (!cleanDigits || cleanDigits.length !== 4) {
+      setP2pError('4자리 숫자 방 코드를 올바르게 입력해주세요.');
       return;
     }
 
     setP2pConnecting(true);
     setP2pError('');
+    setP2pStatus('방 연결 시도 중...');
 
     try {
       snowballNet.onLobbyUpdate = (players) => {
         setP2pPlayers(players);
       };
+      snowballNet.onConnectionStatus = (status) => setP2pStatus(status);
       snowballNet.onGameStart = (data) => {
         launchGameEngine({
           mode: 'guest',
@@ -285,7 +291,7 @@ export default function SnowballGame({ onScoreSubmitted }) {
       };
       snowballNet.onError = (msg) => setP2pError(msg);
 
-      await snowballNet.joinRoom(joinCodeInput, p2pName || '도촌친구', selectedSkin);
+      await snowballNet.joinRoom(cleanDigits, p2pName || '도촌친구', selectedSkin);
       setP2pIsHost(false);
     } catch (err) {
       setP2pError(err.message || '방 접속에 실패했습니다.');
@@ -590,9 +596,15 @@ export default function SnowballGame({ onScoreSubmitted }) {
                   </>
                 )}
 
+                {p2pStatus && p2pConnecting && (
+                  <div style={{ color: '#38BDF8', fontSize: '12px', textAlign: 'center', padding: '6px 10px', background: 'rgba(2, 132, 199, 0.15)', borderRadius: '8px', border: '1px solid rgba(56, 189, 248, 0.3)' }}>
+                    ⏳ {p2pStatus}
+                  </div>
+                )}
+
                 {p2pError && (
-                  <div style={{ color: '#F87171', fontSize: '12px', textAlign: 'center' }}>
-                    {p2pError}
+                  <div style={{ color: '#F87171', fontSize: '12px', textAlign: 'center', padding: '6px 10px', background: 'rgba(239, 68, 68, 0.15)', borderRadius: '8px', border: '1px solid rgba(239, 68, 68, 0.3)' }}>
+                    ❌ {p2pError}
                   </div>
                 )}
               </div>

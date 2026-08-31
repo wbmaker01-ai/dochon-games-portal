@@ -4,6 +4,34 @@
 import { Peer } from 'peerjs';
 import { SCHOOL_TAG_CONSTANTS, ROLE_TYPES } from './schoolTagConstants';
 
+const ICE_SERVERS = [
+  { urls: 'stun:stun.l.google.com:19302' },
+  { urls: 'stun:stun1.l.google.com:19302' },
+  { urls: 'stun:stun2.l.google.com:19302' },
+  { urls: 'stun:global.stun.twilio.com:3478' },
+  { urls: 'stun:stun.relay.metered.ca:80' },
+  {
+    urls: 'turn:global.relay.metered.ca:80',
+    username: 'e8dd65b92f3b1e1ae3a37c20',
+    credential: 'gVNgSOl87pwvCYLu'
+  },
+  {
+    urls: 'turn:global.relay.metered.ca:80?transport=tcp',
+    username: 'e8dd65b92f3b1e1ae3a37c20',
+    credential: 'gVNgSOl87pwvCYLu'
+  },
+  {
+    urls: 'turn:global.relay.metered.ca:443',
+    username: 'e8dd65b92f3b1e1ae3a37c20',
+    credential: 'gVNgSOl87pwvCYLu'
+  },
+  {
+    urls: 'turns:global.relay.metered.ca:443?transport=tcp',
+    username: 'e8dd65b92f3b1e1ae3a37c20',
+    credential: 'gVNgSOl87pwvCYLu'
+  }
+];
+
 export class SchoolTagNetworkManager {
   constructor() {
     this.peer = null;
@@ -34,12 +62,18 @@ export class SchoolTagNetworkManager {
     return String(Math.floor(1000 + Math.random() * 9000));
   }
 
+  // Clean numeric code string
+  static cleanCode(code) {
+    const digits = String(code || '').replace(/[^0-9]/g, '');
+    return digits.padStart(4, '0').slice(0, 4);
+  }
+
   // --- HOST: Create a P2P Room ---
   createRoom(numericCode, playerName, role = ROLE_TYPES.TAGGER, skinId = 'ghost') {
     return new Promise((resolve, reject) => {
       this.disconnect();
 
-      const cleanCode = String(numericCode).trim().padStart(4, '0').slice(0, 4);
+      const cleanCode = SchoolTagNetworkManager.cleanCode(numericCode);
       this.roomCode = cleanCode;
       this.isHost = true;
       this.myName = playerName || '방장(당직선생님)';
@@ -51,10 +85,8 @@ export class SchoolTagNetworkManager {
         this.peer = new Peer(fullPeerId, {
           debug: 0,
           config: {
-            iceServers: [
-              { urls: 'stun:stun.l.google.com:19302' },
-              { urls: 'stun:global.stun.twilio.com:3478' },
-            ],
+            iceServers: ICE_SERVERS,
+            iceCandidatePoolSize: 10
           },
         });
 
@@ -174,7 +206,7 @@ export class SchoolTagNetworkManager {
     return new Promise((resolve, reject) => {
       this.disconnect();
 
-      const cleanCode = String(numericCode).trim().padStart(4, '0').slice(0, 4);
+      const cleanCode = SchoolTagNetworkManager.cleanCode(numericCode);
       this.roomCode = cleanCode;
       this.isHost = false;
       this.myName = playerName || '도망자';
@@ -186,10 +218,8 @@ export class SchoolTagNetworkManager {
         this.peer = new Peer(null, {
           debug: 0,
           config: {
-            iceServers: [
-              { urls: 'stun:stun.l.google.com:19302' },
-              { urls: 'stun:global.stun.twilio.com:3478' },
-            ],
+            iceServers: ICE_SERVERS,
+            iceCandidatePoolSize: 10
           },
         });
 

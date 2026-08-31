@@ -3,10 +3,39 @@
 
 export const CHANGELOG_DATA = [
   {
+    version: 'v1.48.6',
+    date: '2026-08-31',
+    title: '☃️ [도촌 눈싸움 서바이벌] P2P 멀티플레이 학내망/방화벽 우회 TURN 릴레이 탑재 및 접속 안정화 패치',
+    badge: 'LATEST',
+    badgeColor: 'emerald',
+    items: [
+      {
+        tag: 'TURN RELAY',
+        tagColor: 'blue',
+        text: '[학교 네트워크 P2P 접속 차단 문제 해결] 학교 방화벽 및 대칭형 NAT(Symmetric NAT) 환경에서도 접속이 막히지 않도록 포트 80/443 전용 고가용성 TURN 릴레이 서버 풀 탑재'
+      },
+      {
+        tag: '3-WAY HANDSHAKE',
+        tagColor: 'emerald',
+        text: '[초기 패킷 유실 방지 핸드셰이크] 게스트 입장 시 패킷 유실로 인한 무한 로딩을 방지하기 위해 400ms 주기 자동 재전송 및 호스트 ACK 즉시 회신 프로토콜 구축'
+      },
+      {
+        tag: 'AUTO SANITIZE',
+        tagColor: 'purple',
+        text: '[방 코드 입력 정제 알고리즘] 복사/붙여넣기 시 공백, 전각 문자, 특수문자를 자동 정제하여 4자리 숫자 방 코드가 완벽하게 매칭되도록 개선'
+      },
+      {
+        tag: 'REALTIME STATUS',
+        tagColor: 'amber',
+        text: '[실시간 연결 진행 상황 안내] 시그널링 서버 연결, 방장 탐색, P2P 터널 수립 등 접속 단계별 실시간 상태 메시지를 화면에 명확하게 안내'
+      }
+    ]
+  },
+  {
     version: 'v1.48.5',
     date: '2026-08-31',
     title: '👻 [도촌 영혼 대결] P2P 실시간 대전 연결 안정성 대폭 강화',
-    badge: 'LATEST',
+    badge: 'UPDATE',
     badgeColor: 'blue',
     items: [
       {
