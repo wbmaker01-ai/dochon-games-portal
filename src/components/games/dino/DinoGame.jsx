@@ -146,9 +146,9 @@ export default function DinoGame({ onScoreSubmitted }) {
     g.player = { ...INITIAL_PLAYER_STATE };
     g.obstacles = [];
     g.particles = [];
-    g.speed = 6.5;
+    g.speed = 7.8;
     g.score = 0;
-    g.nextObstacleTimer = 30;
+    g.nextObstacleTimer = 35;
     g.bgScroll = 0;
     g.bgPhase = 'DAY';
     setScore(0);
@@ -162,6 +162,9 @@ export default function DinoGame({ onScoreSubmitted }) {
     const ctx = canvas.getContext('2d');
     let animationFrameId;
     let frameCount = 0;
+    let lastTime = performance.now();
+    let lastRenderedScore = 0;
+    let lastScoreUpdateTimestamp = 0;
 
     const spawnObstacle = () => {
       const g = gameStateRef.current;
@@ -204,14 +207,15 @@ export default function DinoGame({ onScoreSubmitted }) {
       }
     };
 
-    const update = () => {
+    const update = (dt) => {
       if (gameState !== 'PLAYING') return;
 
       const g = gameStateRef.current;
       const p = g.player;
 
-      p.vy += p.gravity;
-      p.y += p.vy;
+      // 1. Delta-time normalized physics
+      p.vy += p.gravity * dt;
+      p.y += p.vy * dt;
 
       if (p.y >= GROUND_Y - p.height) {
         p.y = GROUND_Y - p.height;
@@ -219,12 +223,12 @@ export default function DinoGame({ onScoreSubmitted }) {
         p.isGrounded = true;
       }
 
-      frameCount++;
-      p.animTimer += 0.2;
-      g.bgScroll += g.speed * 0.45;
+      frameCount += dt;
+      p.animTimer += 0.25 * dt;
+      g.bgScroll += g.speed * 0.45 * dt;
 
       // Dust particles when running on ground
-      if (p.isGrounded && frameCount % 6 === 0) {
+      if (p.isGrounded && Math.random() < 0.25 * dt) {
         g.particles.push({
           x: p.x + 8,
           y: GROUND_Y - 3,
@@ -237,24 +241,32 @@ export default function DinoGame({ onScoreSubmitted }) {
         });
       }
 
-      // Update particle physics
+      // Update particle physics with dt
       for (let i = g.particles.length - 1; i >= 0; i--) {
         const pt = g.particles[i];
-        pt.x += pt.vx;
-        pt.y += pt.vy;
-        pt.alpha -= 1 / pt.life;
+        pt.x += pt.vx * dt;
+        pt.y += pt.vy * dt;
+        pt.alpha -= (1 / pt.life) * dt;
         if (pt.alpha <= 0) {
           g.particles.splice(i, 1);
         }
       }
 
-      g.score += 1;
+      // Progress score with dt
+      g.score += 1.2 * dt;
       const currentPts = Math.floor(g.score / 5);
-      setScore(currentPts);
+
+      // Throttled React state update to prevent 60fps re-render bottlenecks
+      const now = performance.now();
+      if (currentPts !== lastRenderedScore && (now - lastScoreUpdateTimestamp > 75 || currentPts % 5 === 0)) {
+        lastRenderedScore = currentPts;
+        lastScoreUpdateTimestamp = now;
+        setScore(currentPts);
+      }
 
       // Speed milestones
-      if (g.score % 500 === 0) {
-        g.speed += 0.5;
+      if (Math.floor(g.score) % 450 < Math.floor(1.2 * dt) && g.score > 200) {
+        g.speed += 0.4;
         soundFx.playMilestone();
         triggerBadge(`⚡ 스퍼트 가속! (${currentPts}m 돌파)`);
         confetti({
@@ -269,15 +281,15 @@ export default function DinoGame({ onScoreSubmitted }) {
       else if (currentPts > 300) g.bgPhase = 'SUNSET';
       else g.bgPhase = 'DAY';
 
-      g.nextObstacleTimer--;
+      g.nextObstacleTimer -= dt;
       if (g.nextObstacleTimer <= 0) {
         spawnObstacle();
-        g.nextObstacleTimer = Math.floor(Math.random() * 45) + Math.max(38, 85 - Math.floor(g.speed * 3));
+        g.nextObstacleTimer = Math.floor(Math.random() * 40) + Math.max(34, 75 - Math.floor(g.speed * 2.5));
       }
 
       for (let i = g.obstacles.length - 1; i >= 0; i--) {
         const obs = g.obstacles[i];
-        obs.x -= g.speed;
+        obs.x -= g.speed * dt;
 
         // Flying obstacle bobbing
         if (obs.type === 'ghost') {
@@ -310,6 +322,7 @@ export default function DinoGame({ onScoreSubmitted }) {
           playerBox.bottom > obsBox.top
         ) {
           soundFx.playGameOver();
+          setScore(currentPts); // Sync exact final score immediately
           setGameState('GAMEOVER');
           if (currentPts > highScore) {
             setHighScore(currentPts);
@@ -389,7 +402,6 @@ export default function DinoGame({ onScoreSubmitted }) {
         ctx.fillRect(x, GROUND_Y + 14, 22, 3);
       }
 
-
       // 3. Draw Running Dust Particles
       g.particles.forEach((pt) => {
         ctx.save();
@@ -420,12 +432,13 @@ export default function DinoGame({ onScoreSubmitted }) {
 
         if (spriteImg && spriteImg.complete) {
           if (obs.type === 'ghost') {
-            // Glow around flying ghost
-            ctx.shadowColor = '#00F5D4';
-            ctx.shadowBlur = 12;
+            // Lightweight glow halo (replaces heavy Gaussian shadowBlur)
+            ctx.fillStyle = 'rgba(0, 245, 212, 0.22)';
+            ctx.beginPath();
+            ctx.ellipse(obs.x + obs.width / 2, obs.y + obs.height / 2, obs.width * 0.62, obs.height * 0.62, 0, 0, Math.PI * 2);
+            ctx.fill();
           }
           ctx.drawImage(spriteImg, obs.x, obs.y, obs.width, obs.height);
-          ctx.shadowBlur = 0;
         } else {
           // Fallback simple shapes
           if (obs.type === 'backpack') {
@@ -472,7 +485,7 @@ export default function DinoGame({ onScoreSubmitted }) {
       }
 
       if (playerSprite && playerSprite.complete) {
-        // Running slight energetic bounce
+        // Running energetic bounce
         const bounce = p.isGrounded && !p.isDucking ? Math.sin(p.animTimer * 2) * 2 : 0;
         ctx.drawImage(playerSprite, p.x, p.y + bounce, p.width, p.height);
       } else {
@@ -485,12 +498,19 @@ export default function DinoGame({ onScoreSubmitted }) {
       ctx.restore();
     };
 
-    const gameLoop = () => {
-      update();
+    const gameLoop = (currentTime) => {
+      // Calculate normalized delta time (dt = 1.0 at 60 FPS)
+      const elapsed = currentTime - lastTime;
+      lastTime = currentTime;
+      // Clamp dt to avoid physics jumping if tab is inactive or frame drops suddenly
+      const dt = Math.min(Math.max(elapsed / (1000 / 60), 0.1), 2.5);
+
+      update(dt);
       draw();
       animationFrameId = requestAnimationFrame(gameLoop);
     };
 
+    lastTime = performance.now();
     animationFrameId = requestAnimationFrame(gameLoop);
     return () => cancelAnimationFrame(animationFrameId);
   }, [gameState, highScore]);

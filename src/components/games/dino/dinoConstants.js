@@ -18,9 +18,9 @@ export const INITIAL_PLAYER_STATE = {
 };
 
 export const INITIAL_GAME_CONFIG = {
-  speed: 6.5,
+  speed: 7.8,
   score: 0,
-  nextObstacleTimer: 30,
+  nextObstacleTimer: 35,
   bgScroll: 0,
   bgPhase: 'DAY',
 };
