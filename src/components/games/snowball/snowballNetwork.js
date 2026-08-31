@@ -11,6 +11,8 @@ const ICE_SERVERS = [
   { urls: 'stun:stun.l.google.com:19302' },
   { urls: 'stun:stun1.l.google.com:19302' },
   { urls: 'stun:stun2.l.google.com:19302' },
+  { urls: 'stun:stun3.l.google.com:19302' },
+  { urls: 'stun:stun4.l.google.com:19302' },
   { urls: 'stun:global.stun.twilio.com:3478' },
   { urls: 'stun:stun.relay.metered.ca:80' },
   {
@@ -35,7 +37,8 @@ const ICE_SERVERS = [
   }
 ];
 
-const CONNECTION_TIMEOUT_MS = 15000;
+const CONNECTION_TIMEOUT_MS = 18000;
+const MAX_CONNECT_RETRIES = 3;
 
 export class SnowballNetworkManager {
   constructor() {
@@ -47,6 +50,7 @@ export class SnowballNetworkManager {
     this.mySkinId = 'penguin';
     this.connections = new Map(); // For host: peerId -> conn
     this.hostConnection = null;   // For guest: conn to host
+    this.heartbeatTimer = null;   // WebSocket keep-alive timer
 
     this.lobbyPlayers = [];       // [{ id, name, skinId, isHost, isReady, slotIndex }]
 
@@ -78,6 +82,23 @@ export class SnowballNetworkManager {
     return digits.padStart(4, '0').slice(0, 4);
   }
 
+  // Start periodic heartbeat to prevent signaling server disconnects
+  _startHeartbeat() {
+    if (this.heartbeatTimer) clearInterval(this.heartbeatTimer);
+    this.heartbeatTimer = setInterval(() => {
+      if (this.peer && !this.peer.destroyed) {
+        if (this.peer.disconnected) {
+          console.warn('[P2P] Peer disconnected from signaling server, reconnecting...');
+          try {
+            this.peer.reconnect();
+          } catch (err) {
+            console.error('[P2P] Reconnect error:', err);
+          }
+        }
+      }
+    }, 10000);
+  }
+
   // --- HOST: Create a P2P Room ---
   createRoom(numericCode, playerName, skinId = 'penguin') {
     return new Promise((resolve, reject) => {
@@ -90,11 +111,11 @@ export class SnowballNetworkManager {
       this.mySkinId = skinId;
       const fullPeerId = `${SNOWBALL_PEER_PREFIX}${cleanCode}`;
 
-      this._emitStatus('🔗 P2P 시그널링 서버에 방 개설 중...');
+      this._emitStatus('🔗 P2P 시그널링 서버에 방 등록 중...');
 
       const timeoutId = setTimeout(() => {
         this._emitStatus('⏰ 시그널링 서버 연결 시간 초과');
-        const err = new Error(`시그널링 서버 연결 시간 초과 (15초). 인터넷 연결을 확인해주세요.`);
+        const err = new Error(`시그널링 서버 연결 시간 초과 (18초). 인터넷 연결을 확인해주세요.`);
         if (this.onError) this.onError(err.message);
         this.disconnect();
         reject(err);
@@ -122,23 +143,37 @@ export class SnowballNetworkManager {
               slotIndex: 0
             }
           ];
+          this._startHeartbeat();
           this._emitStatus(`✅ 방(${cleanCode}) 개설 완료! 참가자를 기다리는 중...`);
           if (this.onLobbyUpdate) this.onLobbyUpdate([...this.lobbyPlayers]);
           resolve(this.roomCode);
         });
 
         this.peer.on('connection', (conn) => {
+          this._emitStatus(`👋 새로운 친구가 접속을 시도합니다...`);
           this._handleIncomingConnection(conn);
+        });
+
+        this.peer.on('disconnected', () => {
+          console.warn('[P2P Host] Disconnected from signaling server. Auto-reconnecting...');
+          if (this.peer && !this.peer.destroyed) {
+            try {
+              this.peer.reconnect();
+            } catch (e) {
+              console.error('[P2P Host] Reconnect failed:', e);
+            }
+          }
         });
 
         this.peer.on('error', (err) => {
           clearTimeout(timeoutId);
+          console.error('[P2P Host Error]', err);
           if (err.type === 'unavailable-id') {
-            const msg = `이미 사용 중인 방 번호(${cleanCode})입니다. 다른 번호로 방을 만들어주세요.`;
+            const msg = `이미 사용 중이거나 방금 닫힌 방 번호(${cleanCode})입니다. '새 코드' 버튼을 눌러 다른 번호로 방을 만들어주세요.`;
             this._emitStatus(`❌ ${msg}`);
             reject(new Error(msg));
           } else {
-            const msg = `P2P 네트워크 연결 오류: ${err.message || err.type}`;
+            const msg = `P2P 네트워크 오류: ${err.message || err.type}`;
             this._emitStatus(`❌ ${msg}`);
             reject(new Error(msg));
           }
@@ -155,6 +190,7 @@ export class SnowballNetworkManager {
 
     conn.on('open', () => {
       this.connections.set(conn.peer, conn);
+      this._emitStatus(`⚡ 친구와 P2P 터널 연결 수립 완료!`);
 
       conn.on('data', (data) => {
         this._handleHostReceivedData(conn.peer, data);
@@ -250,7 +286,7 @@ export class SnowballNetworkManager {
     if (this.onLobbyUpdate) this.onLobbyUpdate([...this.lobbyPlayers]);
   }
 
-  // --- GUEST: Join Room with Handshake Retries ---
+  // --- GUEST: Join Room with Auto-Retry and Handshake ---
   joinRoom(numericCode, playerName, skinId = 'snowman') {
     return new Promise((resolve, reject) => {
       this.disconnect();
@@ -266,38 +302,36 @@ export class SnowballNetworkManager {
 
       let handshakeTimer = null;
       let isResolved = false;
+      let retryAttempts = 0;
+      let activeConn = null;
 
       const connectionTimeout = setTimeout(() => {
         if (handshakeTimer) clearInterval(handshakeTimer);
         if (!isResolved) {
           this._emitStatus(`⏰ 방(${cleanCode}) 연결 시간 초과`);
           this.disconnect();
-          reject(new Error(`방(${cleanCode})을 찾을 수 없거나 방장이 아직 방을 개설하지 않았습니다. 번호를 확인해주세요.`));
+          reject(new Error(`방(${cleanCode})을 찾을 수 없습니다. 방장이 방을 먼저 열었는지 확인해 주세요.`));
         }
       }, CONNECTION_TIMEOUT_MS);
 
-      try {
-        this.peer = new Peer({
-          debug: 0,
-          config: {
-            iceServers: ICE_SERVERS,
-            iceCandidatePoolSize: 10
+      const attemptConnect = (peerInstance) => {
+        if (isResolved) return;
+        this._emitStatus(`🤝 방장과 P2P 연결 시도 중... (${retryAttempts + 1}/${MAX_CONNECT_RETRIES + 1})`);
+
+        try {
+          if (activeConn) {
+            try { activeConn.close(); } catch { /* ignore */ }
           }
-        });
 
-        this.peer.on('open', (id) => {
-          this.myPeerId = id;
-          this._emitStatus(`🤝 방장과 P2P 터널 연결 시도 중...`);
-
-          const conn = this.peer.connect(targetHostPeerId, {
+          const conn = peerInstance.connect(targetHostPeerId, {
             reliable: true
           });
+          activeConn = conn;
           this.hostConnection = conn;
 
           conn.on('open', () => {
             this._emitStatus(`⚡ P2P 채널 연결 성공! 대기실 입장 요청 전송 중...`);
 
-            // Send JOIN_LOBBY immediately
             const sendJoin = () => {
               if (conn.open) {
                 conn.send({
@@ -309,16 +343,17 @@ export class SnowballNetworkManager {
             };
             sendJoin();
 
-            // Handshake Keep-Alive Retry: repeat every 400ms until ACK/LOBBY_STATE received
-            let retryCount = 0;
+            // Handshake Keep-Alive Retry: repeat every 350ms until LOBBY_STATE received
+            if (handshakeTimer) clearInterval(handshakeTimer);
+            let ackRetries = 0;
             handshakeTimer = setInterval(() => {
-              if (isResolved || !conn.open || retryCount >= 10) {
+              if (isResolved || !conn.open || ackRetries >= 12) {
                 clearInterval(handshakeTimer);
                 return;
               }
-              retryCount++;
+              ackRetries++;
               sendJoin();
-            }, 400);
+            }, 350);
           });
 
           conn.on('data', (data) => {
@@ -338,15 +373,57 @@ export class SnowballNetworkManager {
           });
 
           conn.on('error', (err) => {
-            if (handshakeTimer) clearInterval(handshakeTimer);
-            reject(new Error(`방 연결 실패: ${err.message || '방이 존재하지 않습니다.'}`));
+            console.warn('[P2P Guest Conn Error]', err);
+            // If not resolved and retries remain, try again
+            if (!isResolved && retryAttempts < MAX_CONNECT_RETRIES) {
+              retryAttempts++;
+              setTimeout(() => attemptConnect(peerInstance), 1200);
+            }
           });
+        } catch (err) {
+          console.error('[P2P Connect Exception]', err);
+        }
+      };
+
+      try {
+        this.peer = new Peer({
+          debug: 0,
+          config: {
+            iceServers: ICE_SERVERS,
+            iceCandidatePoolSize: 10
+          }
+        });
+
+        this.peer.on('open', (id) => {
+          this.myPeerId = id;
+          this._startHeartbeat();
+          attemptConnect(this.peer);
+        });
+
+        this.peer.on('disconnected', () => {
+          if (this.peer && !this.peer.destroyed) {
+            try { this.peer.reconnect(); } catch { /* ignore */ }
+          }
         });
 
         this.peer.on('error', (err) => {
-          clearTimeout(connectionTimeout);
-          if (handshakeTimer) clearInterval(handshakeTimer);
-          reject(new Error(`P2P 네트워크 초기화 실패: ${err.message || err.type}`));
+          console.warn('[P2P Guest Peer Error]', err.type, err);
+          if (err.type === 'peer-unavailable' && !isResolved && retryAttempts < MAX_CONNECT_RETRIES) {
+            retryAttempts++;
+            this._emitStatus(`⏳ 방장이 준비 중입니다... 재시도 중 (${retryAttempts}/${MAX_CONNECT_RETRIES})`);
+            setTimeout(() => {
+              if (this.peer && !this.peer.destroyed && !isResolved) {
+                attemptConnect(this.peer);
+              }
+            }, 1500);
+            return;
+          }
+
+          if (!isResolved && retryAttempts >= MAX_CONNECT_RETRIES) {
+            clearTimeout(connectionTimeout);
+            if (handshakeTimer) clearInterval(handshakeTimer);
+            reject(new Error(`방(${cleanCode})을 찾을 수 없습니다. 방 번호를 확인해주세요.`));
+          }
         });
       } catch (err) {
         clearTimeout(connectionTimeout);

@@ -75,6 +75,7 @@ export default function SchoolTagGame({ onScoreSubmitted }) {
   const [networkError, setNetworkError] = useState('');
   const [connectionStatus, setConnectionStatus] = useState('');
   const [isConnecting, setIsConnecting] = useState(false);
+  const [isCopied, setIsCopied] = useState(false);
 
   // Refs for Animation Loop & Persistent Game Entities
   const canvasRef = useRef(null);
@@ -1363,10 +1364,86 @@ export default function SchoolTagGame({ onScoreSubmitted }) {
                 </div>
               ) : (
                 <div>
-                  <div style={{ margin: '14px 0', padding: '12px', background: 'rgba(30, 41, 59, 0.6)', borderRadius: '12px' }}>
-                    <div style={{ fontSize: '0.85rem', color: '#94a3b8', marginBottom: '4px' }}>초대 방 번호</div>
-                    <div style={{ fontSize: '2.2rem', fontWeight: '900', color: '#fbbf24', fontFamily: 'monospace', letterSpacing: '4px' }}>
-                      {currentRoomCode}
+                  <div
+                    style={{
+                      margin: '16px 0',
+                      padding: '16px 14px',
+                      background: 'linear-gradient(135deg, rgba(30, 41, 59, 0.85), rgba(15, 23, 42, 0.95))',
+                      border: '2px solid rgba(251, 191, 36, 0.5)',
+                      borderRadius: '16px',
+                      boxShadow: '0 8px 24px rgba(0, 0, 0, 0.4), inset 0 0 15px rgba(251, 191, 36, 0.1)',
+                    }}
+                  >
+                    <div style={{ fontSize: '0.9rem', color: '#cbd5e1', fontWeight: '700', marginBottom: '10px', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '6px' }}>
+                      <span>📢 친구들에게 아래 4자리 번호를 알려주세요!</span>
+                    </div>
+
+                    {/* 4자리 개별 거대 네온 디지털 번호 카드 */}
+                    <div
+                      onClick={() => {
+                        if (navigator.clipboard) {
+                          navigator.clipboard.writeText(currentRoomCode);
+                          setIsCopied(true);
+                          setTimeout(() => setIsCopied(false), 2000);
+                        }
+                      }}
+                      title="클릭하여 방 번호 복사"
+                      style={{
+                        display: 'flex',
+                        justifyContent: 'center',
+                        alignItems: 'center',
+                        gap: '8px',
+                        margin: '6px 0',
+                        cursor: 'pointer',
+                      }}
+                    >
+                      {String(currentRoomCode).padStart(4, '0').split('').map((digit, i) => (
+                        <div
+                          key={i}
+                          style={{
+                            width: '56px',
+                            height: '68px',
+                            display: 'flex',
+                            alignItems: 'center',
+                            justifyContent: 'center',
+                            background: 'radial-gradient(circle, #1e293b 0%, #0f172a 100%)',
+                            border: '2.5px solid #fbbf24',
+                            borderRadius: '12px',
+                            fontSize: '3.2rem',
+                            fontWeight: '900',
+                            color: '#fef08a',
+                            fontFamily: 'monospace',
+                            textShadow: '0 0 14px rgba(251, 191, 36, 0.8), 0 0 28px rgba(245, 158, 11, 0.5)',
+                            boxShadow: '0 4px 14px rgba(0, 0, 0, 0.5), inset 0 0 12px rgba(251, 191, 36, 0.2)',
+                            userSelect: 'none',
+                          }}
+                        >
+                          {digit}
+                        </div>
+                      ))}
+                    </div>
+
+                    <div
+                      style={{
+                        fontSize: '0.78rem',
+                        color: isCopied ? '#4ade80' : '#fbbf24',
+                        marginTop: '8px',
+                        fontWeight: '600',
+                        cursor: 'pointer',
+                        display: 'flex',
+                        alignItems: 'center',
+                        justifyContent: 'center',
+                        gap: '4px',
+                      }}
+                      onClick={() => {
+                        if (navigator.clipboard) {
+                          navigator.clipboard.writeText(currentRoomCode);
+                          setIsCopied(true);
+                          setTimeout(() => setIsCopied(false), 2000);
+                        }
+                      }}
+                    >
+                      <span>{isCopied ? '✨ 방 번호가 클립보드에 복사되었습니다!' : '📋 번호를 누르면 복사됩니다'}</span>
                     </div>
                   </div>
 

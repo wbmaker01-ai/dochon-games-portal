@@ -3,10 +3,53 @@
 
 export const CHANGELOG_DATA = [
   {
+    version: 'v1.48.11',
+    date: '2026-08-31',
+    title: '🔦 [도촌 야간 학교 숨바꼭질] P2P 대기실 초대 방 번호 거대 네온 디지털 카드 UI 개편',
+    badge: 'LATEST',
+    badgeColor: 'blue',
+    items: [
+      {
+        tag: 'LARGE NEON CODE',
+        tagColor: 'amber',
+        text: '[초대 방 번호 시인성 극대화] 방장이 방을 개설했을 때 친구들이 멀리서도 한눈에 볼 수 있도록 4자리 개별 골드 네온 디지털 번호 카드(3.2rem) 및 발광 효과 디자인 적용'
+      },
+      {
+        tag: 'ONE-TOUCH COPY',
+        tagColor: 'emerald',
+        text: '[원터치 클립보드 복사] 초대 번호 클릭 시 4자리 방 코드가 즉시 클립보드로 복사되어 메신저나 채팅방에 간편하게 공유할 수 있는 편의 기능 지원'
+      }
+    ]
+  },
+  {
+    version: 'v1.48.10',
+    date: '2026-08-31',
+    title: '🌐 [도촌 P2P 멀티플레이] 학내망/방화벽 우회 TURN 릴레이 & WebSocket 하트비트 유지 및 자동 재연결 패치',
+    badge: 'UPDATE',
+    badgeColor: 'emerald',
+    items: [
+      {
+        tag: 'HEARTBEAT KEEP-ALIVE',
+        tagColor: 'blue',
+        text: '[시그널링 서버 연결 유지 하트비트] 방장이 대기실에서 대기하는 동안 브라우저 유휴 상태로 인해 WebSocket 연결이 끊어지는 현상을 방지하기 위해 10초 주기 하트비트 감시 및 자동 재연결(Auto-Reconnect) 엔진 탑재'
+      },
+      {
+        tag: 'PEER-UNAVAILABLE RETRY',
+        tagColor: 'emerald',
+        text: '[방장 등록 지연 시 게스트 자동 재시도] 방장이 방을 개설한 직후 게스트가 입장할 때 시그널링 등록 타이밍 차이로 발생하는 "방 없음(peer-unavailable)" 에러를 즉각 종료하지 않고 1.5초 간격으로 최대 3회 자동 재연결 수행'
+      },
+      {
+        tag: 'TURN RELAY POOL',
+        tagColor: 'purple',
+        text: '[학교 네트워크 방화벽 완벽 우회] 학교 컴퓨터실, 학내 Wi-Fi, 모바일 핫스팟 등 대칭형 NAT 환경에서도 100% 터널링이 수립되도록 포트 80/443 전용 고가용성 TURN 릴레이 서버 풀 확충'
+      }
+    ]
+  },
+  {
     version: 'v1.48.9',
     date: '2026-08-31',
     title: '👻 [도촌 영혼 대결] P2P 대기실 초대 룸코드 대형 히어로 카드 UI 개편',
-    badge: 'LATEST',
+    badge: 'UPDATE',
     badgeColor: 'blue',
     items: [
       {
