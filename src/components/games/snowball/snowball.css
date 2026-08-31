@@ -267,22 +267,111 @@
   border-color: #38BDF8;
 }
 
-.snowball-code-box {
+.snowball-code-hero-card {
+  width: 100%;
+  background: linear-gradient(135deg, rgba(15, 23, 42, 0.95), rgba(30, 41, 59, 0.9));
+  border: 2px solid rgba(251, 191, 36, 0.5);
+  border-radius: 20px;
+  padding: 16px 20px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 10px;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5), 0 0 24px rgba(251, 191, 36, 0.2);
+  transition: all 0.3s ease;
+}
+
+.snowball-code-hero-header {
+  width: 100%;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.snowball-code-hero-tag {
+  font-size: 12px;
+  font-weight: 800;
+  color: #FDE047;
+  letter-spacing: 0.5px;
+}
+
+.snowball-code-hero-actions {
+  display: flex;
+  gap: 8px;
+}
+
+.snowball-hero-copy-btn,
+.snowball-hero-dice-btn {
+  background: rgba(30, 41, 59, 0.85);
+  border: 1px solid rgba(56, 189, 248, 0.35);
+  color: #BAE6FD;
+  font-size: 12px;
+  font-weight: 700;
+  padding: 5px 10px;
+  border-radius: 8px;
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.snowball-hero-copy-btn:hover,
+.snowball-hero-dice-btn:hover {
+  background: rgba(56, 189, 248, 0.2);
+  border-color: #38BDF8;
+  color: #FFFFFF;
+  transform: translateY(-1px);
+}
+
+.snowball-hero-copy-btn.copied {
+  background: rgba(16, 185, 129, 0.2);
+  border-color: #10B981;
+  color: #34D399;
+}
+
+.snowball-code-hero-display {
   display: flex;
   align-items: center;
   justify-content: center;
-  gap: 12px;
-  background: rgba(15, 23, 42, 0.8);
-  padding: 14px;
-  border-radius: 14px;
-  border: 1px dashed rgba(56, 189, 248, 0.4);
+  padding: 8px 16px;
+  background: rgba(2, 6, 23, 0.7);
+  border-radius: 16px;
+  border: 1px solid rgba(251, 191, 36, 0.3);
+  width: 100%;
+  max-width: 320px;
+  box-shadow: inset 0 2px 8px rgba(0, 0, 0, 0.6);
 }
 
-.snowball-code-value {
-  font-size: 28px;
+.snowball-code-hero-digits {
+  font-family: 'Outfit', 'Montserrat', 'Pretendard', sans-serif;
+  font-size: 52px;
   font-weight: 900;
-  letter-spacing: 6px;
+  letter-spacing: 12px;
+  text-indent: 12px;
   color: #FDE047;
+  background: linear-gradient(135deg, #FFFBEB, #FDE047, #F59E0B);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  filter: drop-shadow(0 0 16px rgba(251, 191, 36, 0.6));
+  line-height: 1.1;
+}
+
+.snowball-code-hero-hint {
+  font-size: 11.5px;
+  color: #94A3B8;
+  text-align: center;
+  line-height: 1.4;
+}
+
+@media (max-width: 640px) {
+  .snowball-code-hero-digits {
+    font-size: 40px;
+    letter-spacing: 8px;
+    text-indent: 8px;
+  }
 }
 
 .snowball-input-row {

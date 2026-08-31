@@ -517,23 +517,37 @@ export default function SnowballGame({ onScoreSubmitted }) {
                 {/* Subtab 1: Create Room */}
                 {p2pSubtab === 'CREATE' && (
                   <>
-                    <div className="snowball-code-box">
-                      <span style={{ fontSize: '13px', color: '#94A3B8' }}>내 방 코드:</span>
-                      <span className="snowball-code-value">{p2pCode}</span>
-                      <button
-                        className="snowball-icon-btn"
-                        onClick={handleCopyCode}
-                        title="방 코드 복사"
-                      >
-                        {copiedCode ? <Check size={16} color="#10B981" /> : <Copy size={16} />}
-                      </button>
-                      <button
-                        className="snowball-icon-btn"
-                        onClick={() => setP2pCode(SnowballNetworkManager.generateRandomCode())}
-                        title="새 코드 생성"
-                      >
-                        <Dices size={16} />
-                      </button>
+                    <div className="snowball-code-hero-card">
+                      <div className="snowball-code-hero-header">
+                        <span className="snowball-code-hero-tag">✨ 친구들을 초대할 4자리 방 번호 ✨</span>
+                        <div className="snowball-code-hero-actions">
+                          <button
+                            className={`snowball-hero-copy-btn ${copiedCode ? 'copied' : ''}`}
+                            onClick={handleCopyCode}
+                            title="방 코드 복사"
+                          >
+                            {copiedCode ? <Check size={14} color="#10B981" /> : <Copy size={14} />}
+                            <span>{copiedCode ? '복사 완료!' : '코드 복사'}</span>
+                          </button>
+                          {p2pPlayers.length === 0 && (
+                            <button
+                              className="snowball-hero-dice-btn"
+                              onClick={() => setP2pCode(SnowballNetworkManager.generateRandomCode())}
+                              title="새 번호 생성"
+                            >
+                              <Dices size={14} />
+                              <span>새 번호</span>
+                            </button>
+                          )}
+                        </div>
+                      </div>
+
+                      <div className="snowball-code-hero-display">
+                        <span className="snowball-code-hero-digits">{p2pCode}</span>
+                      </div>
+                      <div className="snowball-code-hero-hint">
+                        친구들은 아래 [코드로 참가하기] 탭에서 위 4자리 번호를 입력하면 즉시 입장합니다!
+                      </div>
                     </div>
 
                     {p2pPlayers.length === 0 ? (

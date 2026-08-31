@@ -3,10 +3,29 @@
 
 export const CHANGELOG_DATA = [
   {
+    version: 'v1.48.12',
+    date: '2026-08-31',
+    title: '☃️ [도촌 눈싸움 서바이벌] P2P 대기실 초대 방 번호 52px 대형 골든 히어로 카드 UI 개편',
+    badge: 'LATEST',
+    badgeColor: 'emerald',
+    items: [
+      {
+        tag: 'HERO ROOM CODE',
+        tagColor: 'amber',
+        text: '[초대 방 번호 시인성 극대화] 교실 모니터나 프로젝터 화면에서 친구들이 멀리서도 한눈에 알아볼 수 있도록 4자리 방 번호를 52px 대형 골든 네온 폰트 및 골드 글로우 카드로 전면 확대 개편'
+      },
+      {
+        tag: 'ONE-CLICK ACTIONS',
+        tagColor: 'emerald',
+        text: '[원클릭 복사 & 직관적 피드백] 코드 복사 버튼 클릭 시 "복사 완료!"로 시각적 피드백을 제공하고, 새 번호 생성 버튼을 배치하여 더욱 편리한 방 개설 지원'
+      }
+    ]
+  },
+  {
     version: 'v1.48.11',
     date: '2026-08-31',
     title: '🔦 [도촌 야간 학교 숨바꼭질] P2P 대기실 초대 방 번호 거대 네온 디지털 카드 UI 개편',
-    badge: 'LATEST',
+    badge: 'UPDATE',
     badgeColor: 'blue',
     items: [
       {
