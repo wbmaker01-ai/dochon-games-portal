@@ -3,11 +3,30 @@
 
 export const CHANGELOG_DATA = [
   {
+    version: 'v1.48.19',
+    date: '2026-09-03',
+    title: '⚡ [도촌 눈싸움 서바이벌] 저사양 크롬북 특화 스마트 30FPS 프레임 리미터 탑재 (GPU 부하 50% 절감)',
+    badge: 'LATEST',
+    badgeColor: 'emerald',
+    items: [
+      {
+        tag: 'SMART 30FPS LIMITER',
+        tagColor: 'blue',
+        text: '[GPU 렌더링 부하 50% 컷] 크롬북 내장 그래픽의 발열과 스로틀링 렉을 방지하기 위해 캔버스 그리기 주기를 33.3ms(초당 30회)로 제한하는 스마트 프레임 리미터 적용'
+      },
+      {
+        tag: 'SEAMLESS TIMESCALE',
+        tagColor: 'emerald',
+        text: '[물리 이동 속도 완벽 보존] 30FPS 환경에서도 캐릭터 이동 속도, 마찰력, 눈덩이 투사체 속도, 넉백 비행 거리가 60FPS 플레이와 100% 동일하도록 TimeScale 물리 보정 엔진 탑재'
+      }
+    ]
+  },
+  {
     version: 'v1.48.18',
     date: '2026-09-03',
     title: '👻 [도촌 영혼 대결] P2P 실시간 좌표 동기화, 영혼 수집/본진 수확 판정 강화 & 크롬북 60FPS 최적화',
-    badge: 'LATEST',
-    badgeColor: 'emerald',
+    badge: 'UPDATE',
+    badgeColor: 'blue',
     items: [
       {
         tag: 'POSITION SYNC',

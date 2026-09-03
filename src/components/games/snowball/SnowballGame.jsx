@@ -101,20 +101,29 @@ export default function SnowballGame({ onScoreSubmitted }) {
       setGameState('PLAYING');
       lastTimeRef.current = performance.now();
 
-      // Main Canvas Animation Loop (Guarded with try-catch-finally to eliminate sudden freezes)
+      // Smart 30FPS Frame Limiter (Reduces GPU draw calls by 50% for Chromebooks)
+      const TARGET_FPS = 30;
+      const FRAME_INTERVAL = 1000 / TARGET_FPS; // 33.33ms
+      let lastRenderTime = performance.now();
+
+      // Main Canvas Animation Loop (Guarded with try-catch-finally and capped at 30FPS)
       const loop = (currentTime) => {
         try {
-          const dt = Math.min((currentTime - lastTimeRef.current) / 1000, 0.1);
-          lastTimeRef.current = currentTime;
+          const elapsed = currentTime - lastRenderTime;
 
-          if (logicRef.current) {
-            logicRef.current.update(dt);
+          if (elapsed >= FRAME_INTERVAL) {
+            lastRenderTime = currentTime - (elapsed % FRAME_INTERVAL);
+            const dt = Math.min(elapsed / 1000, 0.08); // Clamped delta time
 
-            const canvas = canvasRef.current;
-            if (canvas) {
-              const ctx = canvas.getContext('2d');
-              if (ctx) {
-                logicRef.current.render(ctx);
+            if (logicRef.current) {
+              logicRef.current.update(dt);
+
+              const canvas = canvasRef.current;
+              if (canvas) {
+                const ctx = canvas.getContext('2d');
+                if (ctx) {
+                  logicRef.current.render(ctx);
+                }
               }
             }
           }

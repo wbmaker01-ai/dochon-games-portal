@@ -583,15 +583,19 @@ export class SnowballLogic {
     });
   }
 
-  // --- Players Physics & Growth (Gentle acceleration, controllable braking) ---
+  // --- Players Physics & Growth (Gentle acceleration, controllable braking, timeScaled for 30FPS) ---
   updatePlayersPhysics(dt) {
+    const timeScale = Math.min(Math.max(dt / (1 / 60), 0.5), 3.0);
+    const frictionFactor = Math.pow(ARENA_CONFIG.FRICTION, timeScale);
+    const knockbackFrictionFactor = Math.pow(ARENA_CONFIG.KNOCKBACK_FRICTION, timeScale);
+
     this.players.forEach(p => {
       if (!p.isAlive) return;
 
       // Smooth Angle Interpolation (zero risk of infinite loop)
       const rawDiff = p.inputAngle - p.angle;
       const diff = Math.atan2(Math.sin(rawDiff), Math.cos(rawDiff));
-      p.angle += diff * (p.isBot ? 0.12 : PLAYER_CONFIG.TURN_SPEED);
+      p.angle += diff * (p.isBot ? 0.12 : PLAYER_CONFIG.TURN_SPEED) * timeScale;
 
       // Speed penalty based on snowball size (heavier as ball grows)
       const sizeRatio = (p.snowballRadius - PLAYER_CONFIG.SNOWBALL_MIN_RADIUS) /
@@ -600,8 +604,8 @@ export class SnowballLogic {
       const maxAllowedSpeed = PLAYER_CONFIG.BASE_SPEED * speedModifier;
 
       if (p.isMoving) {
-        // Smooth progressive acceleration (no instant jerk)
-        const accel = maxAllowedSpeed * 0.12;
+        // Smooth progressive acceleration (scaled with timeScale)
+        const accel = maxAllowedSpeed * 0.12 * timeScale;
         p.vx += Math.cos(p.angle) * accel;
         p.vy += Math.sin(p.angle) * accel;
 
@@ -637,20 +641,20 @@ export class SnowballLogic {
         }
       }
 
-      // Apply Friction & Knockback
-      p.vx *= ARENA_CONFIG.FRICTION;
-      p.vy *= ARENA_CONFIG.FRICTION;
-      p.kvx *= ARENA_CONFIG.KNOCKBACK_FRICTION;
-      p.kvy *= ARENA_CONFIG.KNOCKBACK_FRICTION;
+      // Apply Friction & Knockback (Exponentiated with timeScale)
+      p.vx *= frictionFactor;
+      p.vy *= frictionFactor;
+      p.kvx *= knockbackFrictionFactor;
+      p.kvy *= knockbackFrictionFactor;
 
-      p.x += p.vx + p.kvx;
-      p.y += p.vy + p.kvy;
+      p.x += (p.vx + p.kvx) * timeScale;
+      p.y += (p.vy + p.kvy) * timeScale;
 
       // Spinning animation during heavy knockback
       const knockbackSpeed = Math.hypot(p.kvx, p.kvy);
       if (knockbackSpeed > 2.0) {
         p.isSpinning = true;
-        p.spinAngle += knockbackSpeed * 0.08;
+        p.spinAngle += knockbackSpeed * 0.08 * timeScale;
       } else {
         p.isSpinning = false;
         p.spinAngle = 0;
@@ -703,10 +707,11 @@ export class SnowballLogic {
 
   // --- Projectiles Update & Collision ---
   updateProjectiles(dt) {
+    const timeScale = Math.min(Math.max(dt / (1 / 60), 0.5), 3.0);
     for (let i = this.projectiles.length - 1; i >= 0; i--) {
       const proj = this.projectiles[i];
-      proj.x += proj.vx;
-      proj.y += proj.vy;
+      proj.x += proj.vx * timeScale;
+      proj.y += proj.vy * timeScale;
       proj.lifetime -= dt;
 
       // Trail particles
@@ -957,6 +962,7 @@ export class SnowballLogic {
   }
 
   updateParticles(dt) {
+    const timeScale = Math.min(Math.max(dt / (1 / 60), 0.5), 3.0);
     // Enforce max limits to maintain 60FPS on low-spec Chromebooks
     if (this.particles.length > 50) {
       this.particles.splice(0, this.particles.length - 50);
@@ -968,8 +974,8 @@ export class SnowballLogic {
     // Regular particles
     for (let i = this.particles.length - 1; i >= 0; i--) {
       const p = this.particles[i];
-      p.x += p.vx;
-      p.y += p.vy;
+      p.x += p.vx * timeScale;
+      p.y += p.vy * timeScale;
       p.vy += 2.0 * dt; // Gravity
       p.alpha -= p.decay * dt;
       if (p.alpha <= 0) {
