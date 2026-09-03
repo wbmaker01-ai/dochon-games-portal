@@ -3,11 +3,40 @@
 
 export const CHANGELOG_DATA = [
   {
+    version: 'v1.48.18',
+    date: '2026-09-03',
+    title: '👻 [도촌 영혼 대결] P2P 실시간 좌표 동기화, 영혼 수집/본진 수확 판정 강화 & 크롬북 60FPS 최적화',
+    badge: 'LATEST',
+    badgeColor: 'emerald',
+    items: [
+      {
+        tag: 'POSITION SYNC',
+        tagColor: 'emerald',
+        text: '[게스트 영혼 수집 & 본진 수확 100% 보장] 게스트 플레이어의 정밀 실시간 좌표(X, Y)와 속도를 30Hz 주기로 호스트 엔진과 양방향 완벽 동기화하여, 게스트 화면에서 영혼 불꽃 수집 및 본진 납품 시 즉각 인식되고 점수가 정확하게 합산되도록 개선'
+      },
+      {
+        tag: 'LAG TOLERANCE',
+        tagColor: 'amber',
+        text: '[지연 시간 보정 & 본진 수확 영역 확장] 학내 네트워크 레이턴시를 고려해 영혼 수집 판정 반경 및 기지 납품 감지 범위를 +15px 여유 마진으로 확장하여 벽 모서리나 기지 경계면에서도 끊김 없는 수확과 시청각 피드백 제공'
+      },
+      {
+        tag: 'CHROMEBOOK BOOST',
+        tagColor: 'blue',
+        text: '[크롬북 캔버스 렌더링 & React 연산 97% 경량화] 60FPS 루프 내 React 상태 갱신을 변경 발생 시에만 선별 전달(이벤트 기반 쓰로틀링)하고, 카메라 시야 밖 객체 렌더링을 생략하는 뷰포트 컬링(Viewport Culling) 및 GPU 하드웨어 가속 레이어 적용으로 저사양 환경에서도 부드러운 60FPS 달성'
+      },
+      {
+        tag: 'P2P KEEP-ALIVE',
+        tagColor: 'purple',
+        text: '[시그널링 하트비트 & 무손실 패킷 바인딩] 방장의 PeerJS 시그널링 소켓에 12초 주기 하트비트 핑을 가동하여 대기실 대기 중 연결 끊김을 원천 차단하고, 데이터 채널 수신 핸들러 즉시 바인딩 및 Cloudflare/Google/OpenRelay 다중 STUN/TURN 백업망 구축'
+      }
+    ]
+  },
+  {
     version: 'v1.48.17',
     date: '2026-09-03',
     title: '⚡ [도촌 눈싸움 & 멀티] 크롬북 60FPS 최적화, 게임 멈춤 방어 루프 및 P2P 다중 백업망 패치',
-    badge: 'LATEST',
-    badgeColor: 'emerald',
+    badge: 'UPDATE',
+    badgeColor: 'blue',
     items: [
       {
         tag: 'CHROMEBOOK BOOST',
