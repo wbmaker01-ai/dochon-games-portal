@@ -101,24 +101,28 @@ export default function SnowballGame({ onScoreSubmitted }) {
       setGameState('PLAYING');
       lastTimeRef.current = performance.now();
 
-      // Main Canvas Animation Loop
+      // Main Canvas Animation Loop (Guarded with try-catch-finally to eliminate sudden freezes)
       const loop = (currentTime) => {
-        const dt = Math.min((currentTime - lastTimeRef.current) / 1000, 0.1);
-        lastTimeRef.current = currentTime;
+        try {
+          const dt = Math.min((currentTime - lastTimeRef.current) / 1000, 0.1);
+          lastTimeRef.current = currentTime;
 
-        if (logicRef.current) {
-          logicRef.current.update(dt);
+          if (logicRef.current) {
+            logicRef.current.update(dt);
 
-          const canvas = canvasRef.current;
-          if (canvas) {
-            const ctx = canvas.getContext('2d');
-            if (ctx) {
-              logicRef.current.render(ctx);
+            const canvas = canvasRef.current;
+            if (canvas) {
+              const ctx = canvas.getContext('2d');
+              if (ctx) {
+                logicRef.current.render(ctx);
+              }
             }
           }
+        } catch (err) {
+          console.error('[Snowball Loop Error]', err);
+        } finally {
+          reqAnimRef.current = requestAnimationFrame(loop);
         }
-
-        reqAnimRef.current = requestAnimationFrame(loop);
       };
 
       if (reqAnimRef.current) cancelAnimationFrame(reqAnimRef.current);
@@ -252,6 +256,7 @@ export default function SnowballGame({ onScoreSubmitted }) {
         setP2pPlayers(players);
       };
       snowballNet.onConnectionStatus = (status) => setP2pStatus(status);
+      snowballNet.onRoomCodeChanged = (newCode) => setP2pCode(newCode);
       snowballNet.onError = (msg) => setP2pError(msg);
 
       await snowballNet.createRoom(p2pCode, p2pName || '도촌눈사람', selectedSkin);

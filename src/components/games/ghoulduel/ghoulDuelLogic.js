@@ -1,4 +1,5 @@
 // Dochon Games Portal - The Great Ghoul Duel 2D Canvas Physics, AI & P2P Network Renderer Engine
+// v4: Synchronized P2P Authority (Position Sync, Lag-Compensated Pickups/Deposits, Viewport Culling & Chromebook Optimization)
 
 import {
   CANVAS_WIDTH,
@@ -25,12 +26,20 @@ export class GhoulDuelLogic {
     this.networkMode = options.networkMode || 'local'; // 'local' | 'host' | 'guest'
     this.networkPlayers = options.networkPlayers || []; // [{ id, name, team, isHost, slotIndex }]
     this.myPeerId = options.myPeerId || 'local';
+    this.playerName = options.playerName || '';
     this.onBroadcastSnapshot = options.onBroadcastSnapshot || null;
     this.onBroadcastGameOver = options.onBroadcastGameOver || null;
     this.onSendInput = options.onSendInput || null;
 
     this.lastBroadcastTime = 0;
-    this.remoteInputs = new Map(); // peerId -> { vx, vy, angle }
+    this.lastInputSendTime = 0;
+    this.remoteInputs = new Map(); // peerId -> { x, y, vx, vy, angle, vector }
+
+    // Throttled React state change cache to eliminate 60Hz re-render lag
+    this._lastReportedScores = null;
+    this._lastReportedSec = -1;
+    this._lastReportedTail = -1;
+    this._lastReportedDep = -1;
 
     this.reset();
   }
@@ -42,9 +51,9 @@ export class GhoulDuelLogic {
     }
   }
 
-  // Handle incoming guest input packet on Host
-  handleGuestInput(peerId, vector, angle) {
-    this.remoteInputs.set(peerId, { vector, angle });
+  // Handle incoming guest input & position packet on Host
+  handleGuestInput(peerId, data) {
+    this.remoteInputs.set(peerId, data);
   }
 
   // Apply received snapshot on Guest
@@ -59,14 +68,55 @@ export class GhoulDuelLogic {
       snapshot.ghosts.forEach((snapG, idx) => {
         if (this.ghosts[idx]) {
           const g = this.ghosts[idx];
-          // Smoothly interpolate positions for other players/bots
+
           if (!g.isPlayer) {
-            g.x += (snapG.x - g.x) * 0.45;
-            g.y += (snapG.y - g.y) * 0.45;
+            // Smoothly interpolate positions for other players and bots
+            g.x += (snapG.x - g.x) * 0.55;
+            g.y += (snapG.y - g.y) * 0.55;
             g.angle = snapG.angle;
             g.vx = snapG.vx;
             g.vy = snapG.vy;
+          } else {
+            // Local player on Guest:
+            // Check for pickups and deposits registered by Host to play sounds and FX
+            const oldTailLen = g.tail ? g.tail.length : 0;
+            const newTailLen = snapG.tail ? snapG.tail.length : 0;
+            const oldDeposited = g.depositedCount || 0;
+            const newDeposited = snapG.depositedCount || 0;
+
+            if (newTailLen > oldTailLen) {
+              const gained = newTailLen - oldTailLen;
+              if (gained >= 5) {
+                ghoulAudio.playMegaSpirit();
+                this.addFloatingText(g.x, g.y - 30, `🌟 MEGA SPIRIT! +${gained}`, '#fde047');
+              } else {
+                ghoulAudio.playSpiritPickup();
+              }
+              this.addSparks(g.x, g.y, g.team === 'green' ? '#34d399' : '#c084fc', 8);
+            }
+
+            if (newDeposited > oldDeposited) {
+              const pts = newDeposited - oldDeposited;
+              const base = g.team === 'green' ? TEAMS.GREEN : TEAMS.PURPLE;
+              ghoulAudio.playBaseDeposit(pts);
+              this.addFloatingText(g.x, g.y - 30, `+${pts} 영혼 납품!`, base.primaryColor);
+              this.addDepositParticle(
+                g.x,
+                g.y,
+                base.baseX + base.baseWidth / 2,
+                base.baseY + base.baseHeight / 2,
+                base.primaryColor
+              );
+            }
+
+            // Gently blend towards Host position if large drift occurred (> 100px)
+            const driftDist = Math.hypot(snapG.x - g.x, snapG.y - g.y);
+            if (driftDist > 100) {
+              g.x += (snapG.x - g.x) * 0.35;
+              g.y += (snapG.y - g.y) * 0.35;
+            }
           }
+
           g.tail = snapG.tail || [];
           g.depositedCount = snapG.depositedCount;
           g.stolenCount = snapG.stolenCount;
@@ -131,7 +181,10 @@ export class GhoulDuelLogic {
         if (assignedPlayer) {
           const isMe =
             assignedPlayer.id === this.myPeerId ||
-            (assignedPlayer.isHost && this.networkMode === 'host');
+            (assignedPlayer.isHost && this.networkMode === 'host') ||
+            (this.networkMode === 'guest' &&
+              this.playerName &&
+              assignedPlayer.name === this.playerName);
 
           if (isMe) {
             isPlayer = true;
@@ -158,106 +211,125 @@ export class GhoulDuelLogic {
         targetAngle: isGreen ? Math.PI / 4 : -3 * Math.PI / 4,
         speed: isPlayer ? this.difficulty.playerSpeed : this.difficulty.aiSpeed,
         radius: 22,
-        tail: [], // Array of { x, y, angle, isMega }
+        tail: [], // [{ x, y, angle, isMega }]
         depositedCount: 0,
         stolenCount: 0,
         invulnerableTimer: 0,
         activePowerup: null, // { type, timer }
-        // AI State
-        fsmState: 'SEARCH',
-        targetX: startX,
-        targetY: startY,
-        aiTimer: Math.random() * 2,
+        fsmState: 'SEARCH', // 'SEARCH' | 'RETURN' | 'HUNT_STEAL' | 'FLEE'
+        fsmTarget: null,
+        fsmTimer: 0,
         wobbleOffset: Math.random() * Math.PI * 2
       };
     });
 
-    this.player = this.ghosts.find((g) => g.isPlayer) || this.ghosts[0];
+    this.player = this.ghosts.find((g) => g.isPlayer);
+    if (!this.player) {
+      // Robust fallback: if no ghost matched isPlayer, assign first human or team leader
+      const fallback =
+        this.ghosts.find((g) => g.isRemoteHuman) ||
+        (this.networkMode === 'guest' ? this.ghosts[4] : this.ghosts[0]);
+      if (fallback) {
+        fallback.isPlayer = true;
+        fallback.isRemoteHuman = false;
+        fallback.name = `${fallback.name} (나)`;
+        this.player = fallback;
+      }
+    }
 
-    // Initialize Floating Spirits & Powerups
-    this.spirits = [];
-    this.initSpirits(65);
-
-    this.powerupDrops = [];
-    this.spawnPowerupDrop();
-
-    // Particle & Visual Effect Systems
-    this.particles = [];
-    this.floatingTexts = [];
-    this.depositBeams = [];
-
-    // Controller input
+    // Input States
     this.keys = {};
     this.joystickVector = { x: 0, y: 0 };
-  }
 
-  // Generate Initial Spirit Clusters across the Mansion
-  initSpirits(count) {
+    // Initial Spirits & Powerups
     this.spirits = [];
-    for (let i = 0; i < count; i++) {
-      this.spawnSingleSpirit(i < 6 ? 'mega' : 'normal');
+    this.powerupDrops = [];
+    this.particles = [];
+    this.floatingTexts = [];
+
+    this.spawnInitialSpirits(65);
+    this.spawnPowerupDrops(4);
+
+    // Initial camera position
+    if (this.player) {
+      this.camera.x = Math.max(0, Math.min(WORLD_WIDTH - CANVAS_WIDTH, this.player.x - CANVAS_WIDTH / 2));
+      this.camera.y = Math.max(0, Math.min(WORLD_HEIGHT - CANVAS_HEIGHT, this.player.y - CANVAS_HEIGHT / 2));
     }
   }
 
-  spawnSingleSpirit(type = 'normal') {
+  // Viewport Culling Helper for Canvas 2D Performance
+  isInViewport(x, y, margin = 60) {
+    return (
+      x >= this.camera.x - margin &&
+      x <= this.camera.x + CANVAS_WIDTH + margin &&
+      y >= this.camera.y - margin &&
+      y <= this.camera.y + CANVAS_HEIGHT + margin
+    );
+  }
+
+  spawnInitialSpirits(count) {
+    for (let i = 0; i < count; i++) {
+      this.spawnSpirit();
+    }
+  }
+
+  spawnSpirit() {
     let attempts = 0;
-    while (attempts < 30) {
+    while (attempts < 20) {
       attempts++;
       const x = 60 + Math.random() * (WORLD_WIDTH - 120);
       const y = 60 + Math.random() * (WORLD_HEIGHT - 120);
 
-      // Check if inside wall
+      // Do not spawn inside bases
+      if (
+        (x > TEAMS.GREEN.baseX - 40 &&
+          x < TEAMS.GREEN.baseX + TEAMS.GREEN.baseWidth + 40 &&
+          y > TEAMS.GREEN.baseY - 40 &&
+          y < TEAMS.GREEN.baseY + TEAMS.GREEN.baseHeight + 40) ||
+        (x > TEAMS.PURPLE.baseX - 40 &&
+          x < TEAMS.PURPLE.baseX + TEAMS.PURPLE.baseWidth + 40 &&
+          y > TEAMS.PURPLE.baseY - 40 &&
+          y < TEAMS.PURPLE.baseY + TEAMS.PURPLE.baseHeight + 40)
+      ) {
+        continue;
+      }
+
+      // Do not spawn inside walls
       let insideWall = false;
       for (const wall of MANSION_WALLS) {
-        if (x >= wall.x - 20 && x <= wall.x + wall.w + 20 && y >= wall.y - 20 && y <= wall.y + wall.h + 20) {
+        if (x > wall.x - 15 && x < wall.x + wall.w + 15 && y > wall.y - 15 && y < wall.y + wall.h + 15) {
           insideWall = true;
           break;
         }
       }
+      if (insideWall) continue;
 
-      if (!insideWall) {
-        this.spirits.push({
-          id: Math.random().toString(36).substring(2, 9),
-          x,
-          y,
-          type,
-          value: type === 'mega' ? 5 : 1,
-          radius: type === 'mega' ? 14 : 9,
-          floatOffset: Math.random() * Math.PI * 2
-        });
-        break;
-      }
+      const isMega = Math.random() < 0.12; // 12% chance for 5-pt Mega Spirit
+      this.spirits.push({
+        x,
+        y,
+        type: isMega ? 'mega' : 'normal',
+        radius: isMega ? 12 : 7,
+        floatOffset: Math.random() * Math.PI * 2
+      });
+      break;
     }
   }
 
-  spawnPowerupDrop() {
+  spawnPowerupDrops(count) {
     const types = Object.keys(POWERUP_TYPES);
-    const selectedType = types[Math.floor(Math.random() * types.length)];
-    let attempts = 0;
-    while (attempts < 20) {
-      attempts++;
-      const x = 200 + Math.random() * (WORLD_WIDTH - 400);
-      const y = 200 + Math.random() * (WORLD_HEIGHT - 400);
+    for (let i = 0; i < count; i++) {
+      const type = types[Math.floor(Math.random() * types.length)];
+      const x = 120 + Math.random() * (WORLD_WIDTH - 240);
+      const y = 120 + Math.random() * (WORLD_HEIGHT - 240);
 
-      let insideWall = false;
-      for (const wall of MANSION_WALLS) {
-        if (x >= wall.x - 30 && x <= wall.x + wall.w + 30 && y >= wall.y - 30 && y <= wall.y + wall.h + 30) {
-          insideWall = true;
-          break;
-        }
-      }
-
-      if (!insideWall) {
-        this.powerupDrops.push({
-          id: Math.random().toString(36).substring(2, 9),
-          x,
-          y,
-          type: selectedType,
-          info: POWERUP_TYPES[selectedType],
-          pulse: 0
-        });
-        break;
-      }
+      this.powerupDrops.push({
+        x,
+        y,
+        type,
+        info: POWERUP_TYPES[type],
+        floatOffset: Math.random() * Math.PI * 2
+      });
     }
   }
 
@@ -269,15 +341,19 @@ export class GhoulDuelLogic {
     this.keys[code] = false;
   }
 
-  setJoystick(vector) {
-    this.joystickVector = vector;
+  handleJoystickMove(x, y) {
+    this.joystickVector = { x, y };
   }
 
-  // Main Game Loop Update
+  handleJoystickEnd() {
+    this.joystickVector = { x: 0, y: 0 };
+  }
+
+  // Main 60 FPS Physics & AI Loop
   update(deltaTime) {
     if (this.isGameOver || this.isPaused) return;
 
-    // 1. Update Match Time
+    // 1. Update Match Timer
     this.matchTime -= deltaTime;
     if (this.matchTime <= 0) {
       this.matchTime = 0;
@@ -285,33 +361,35 @@ export class GhoulDuelLogic {
       return;
     }
 
-    const currentSec = Math.ceil(this.matchTime);
-    if (currentSec <= 10 && currentSec !== this.lastSecond) {
-      this.lastSecond = currentSec;
-      ghoulAudio.playCountdownBeep();
+    // Audio warning when time is low
+    const currentSecond = Math.ceil(this.matchTime);
+    if (currentSecond <= 10 && currentSecond < this.lastSecond && currentSecond > 0) {
+      ghoulAudio.playTimeWarning();
     }
+    this.lastSecond = currentSecond;
 
-    // 2. Host / Local: Periodic Respawn of Spirits & Powerups
+    // 2. Spirit & Powerup Replenishment (Host / Local only)
     if (this.networkMode !== 'guest') {
-      if (this.spirits.length < 65 && Math.random() < 0.05) {
-        this.spawnSingleSpirit(Math.random() < 0.08 ? 'mega' : 'normal');
+      const targetSpirits = 65 * this.difficulty.spiritSpawnRate;
+      if (this.spirits.length < targetSpirits && Math.random() < 0.08) {
+        this.spawnSpirit();
       }
-      if (this.powerupDrops.length < 2 && Math.random() < 0.01) {
-        this.spawnPowerupDrop();
+      if (this.powerupDrops.length < 4 && Math.random() < 0.008) {
+        this.spawnPowerupDrops(1);
       }
     }
 
-    // 3. Update Ghosts
+    // 3. Update All 8 Ghosts
     this.ghosts.forEach((ghost) => {
       this.updateGhost(ghost, deltaTime);
     });
 
-    // 4. Host / Local: Check Tail Steal Collisions
+    // 4. Interception Tail Stealing (Host / Local only)
     if (this.networkMode !== 'guest') {
       this.checkTailSteals();
     }
 
-    // 5. Host: 30Hz Snapshot Broadcast to all connected peers
+    // 5. Host P2P Snapshot Broadcast (30 FPS throttle)
     if (this.networkMode === 'host' && this.onBroadcastSnapshot) {
       const now = performance.now();
       if (now - this.lastBroadcastTime >= 33) {
@@ -354,13 +432,32 @@ export class GhoulDuelLogic {
     // 7. Update Particle & Floating Text FX
     this.updateParticles(deltaTime);
 
-    // Notify React state changes
-    this.onStateChange({
-      teamScores: this.teamScores,
-      matchTime: Math.ceil(this.matchTime),
-      playerTail: this.player ? this.player.tail.length : 0,
-      playerDeposited: this.player ? this.player.depositedCount : 0
-    });
+    // 8. Throttled State Change Notifications to React (eliminates 60Hz re-render choke on Chromebooks)
+    const curSec = Math.ceil(this.matchTime);
+    const pTail = this.player ? this.player.tail.length : 0;
+    const pDep = this.player ? this.player.depositedCount : 0;
+
+    const scoresChanged =
+      !this._lastReportedScores ||
+      this._lastReportedScores.green !== this.teamScores.green ||
+      this._lastReportedScores.purple !== this.teamScores.purple;
+    const timerChanged = this._lastReportedSec !== curSec;
+    const tailChanged = this._lastReportedTail !== pTail;
+    const depChanged = this._lastReportedDep !== pDep;
+
+    if (scoresChanged || timerChanged || tailChanged || depChanged) {
+      this._lastReportedScores = { ...this.teamScores };
+      this._lastReportedSec = curSec;
+      this._lastReportedTail = pTail;
+      this._lastReportedDep = pDep;
+
+      this.onStateChange({
+        teamScores: this._lastReportedScores,
+        matchTime: curSec,
+        playerTail: pTail,
+        playerDeposited: pDep
+      });
+    }
   }
 
   updateGhost(ghost, deltaTime) {
@@ -378,7 +475,7 @@ export class GhoulDuelLogic {
       const pInfo = POWERUP_TYPES[ghost.activePowerup.type];
       if (pInfo) {
         if (pInfo.speedMultiplier) speedMultiplier = pInfo.speedMultiplier;
-        if (pInfo.id === 'ghost_walk') canPassWalls = true;
+        if (pInfo.canPassWalls) canPassWalls = true;
         if (pInfo.magnetRadius) magnetRadius = pInfo.magnetRadius;
       }
       if (ghost.activePowerup.timer <= 0) {
@@ -402,16 +499,48 @@ export class GhoulDuelLogic {
         moveY += this.joystickVector.y;
       }
 
-      // Guest: send input to host via P2P
+      // Guest: send input and authoritative position to host via P2P (throttled ~30fps)
       if (this.networkMode === 'guest' && this.onSendInput) {
-        this.onSendInput({ x: moveX, y: moveY }, ghost.angle);
+        const now = performance.now();
+        if (!this.lastInputSendTime || now - this.lastInputSendTime >= 32) {
+          this.lastInputSendTime = now;
+          this.onSendInput({
+            x: Math.round(ghost.x),
+            y: Math.round(ghost.y),
+            vx: Number(ghost.vx.toFixed(2)),
+            vy: Number(ghost.vy.toFixed(2)),
+            angle: Number(ghost.angle.toFixed(2)),
+            vector: { x: moveX, y: moveY }
+          });
+        }
       }
     } else if (ghost.isRemoteHuman) {
-      // Remote Network Human Player: Apply received network input
+      // Remote Network Human Player: Apply received authoritative network position & velocity
       const remoteInput = this.remoteInputs.get(ghost.networkPeerId);
-      if (remoteInput && remoteInput.vector) {
-        moveX = remoteInput.vector.x || 0;
-        moveY = remoteInput.vector.y || 0;
+      if (remoteInput) {
+        if (typeof remoteInput.x === 'number' && typeof remoteInput.y === 'number') {
+          // Reconcile position smoothly towards guest's reported position
+          const safeX = Math.max(30, Math.min(WORLD_WIDTH - 30, remoteInput.x));
+          const safeY = Math.max(30, Math.min(WORLD_HEIGHT - 30, remoteInput.y));
+          const dist = Math.hypot(safeX - ghost.x, safeY - ghost.y);
+
+          if (dist > 150) {
+            ghost.x = safeX;
+            ghost.y = safeY;
+          } else {
+            ghost.x += (safeX - ghost.x) * 0.65;
+            ghost.y += (safeY - ghost.y) * 0.65;
+          }
+
+          ghost.vx = remoteInput.vx || 0;
+          ghost.vy = remoteInput.vy || 0;
+          if (typeof remoteInput.angle === 'number') {
+            ghost.angle = remoteInput.angle;
+          }
+        } else if (remoteInput.vector) {
+          moveX = remoteInput.vector.x || 0;
+          moveY = remoteInput.vector.y || 0;
+        }
       }
     } else {
       // Smart AI Behavior (FSM)
@@ -422,38 +551,41 @@ export class GhoulDuelLogic {
       }
     }
 
-    // Normalize & Apply Speed
-    const len = Math.hypot(moveX, moveY);
-    if (len > 0.05) {
-      const currentSpeed = ghost.speed * speedMultiplier;
-      const normalizedX = (moveX / len) * currentSpeed;
-      const normalizedY = (moveY / len) * currentSpeed;
+    // Non-remote human movement & collision resolution
+    if (!ghost.isRemoteHuman) {
+      // Normalize & Apply Speed
+      const len = Math.hypot(moveX, moveY);
+      if (len > 0.05) {
+        const currentSpeed = ghost.speed * speedMultiplier;
+        const normalizedX = (moveX / len) * currentSpeed;
+        const normalizedY = (moveY / len) * currentSpeed;
 
-      ghost.vx = normalizedX;
-      ghost.vy = normalizedY;
-      ghost.targetAngle = Math.atan2(normalizedY, normalizedX);
+        ghost.vx = normalizedX;
+        ghost.vy = normalizedY;
+        ghost.targetAngle = Math.atan2(normalizedY, normalizedX);
 
-      // Smooth turn angle
-      let diff = ghost.targetAngle - ghost.angle;
-      while (diff < -Math.PI) diff += Math.PI * 2;
-      while (diff > Math.PI) diff -= Math.PI * 2;
-      ghost.angle += diff * 0.15;
-    } else {
-      ghost.vx *= 0.8;
-      ghost.vy *= 0.8;
-    }
+        // Smooth turn angle
+        let diff = ghost.targetAngle - ghost.angle;
+        while (diff < -Math.PI) diff += Math.PI * 2;
+        while (diff > Math.PI) diff -= Math.PI * 2;
+        ghost.angle += diff * 0.15;
+      } else {
+        ghost.vx *= 0.8;
+        ghost.vy *= 0.8;
+      }
 
-    // Move ghost with Wall Collision Check
-    const newX = ghost.x + ghost.vx;
-    const newY = ghost.y + ghost.vy;
+      // Move ghost with Wall Collision Check
+      const newX = ghost.x + ghost.vx;
+      const newY = ghost.y + ghost.vy;
 
-    if (canPassWalls) {
-      ghost.x = Math.max(30, Math.min(WORLD_WIDTH - 30, newX));
-      ghost.y = Math.max(30, Math.min(WORLD_HEIGHT - 30, newY));
-    } else {
-      const resolved = this.resolveWallCollisions(ghost.x, ghost.y, newX, newY, ghost.radius);
-      ghost.x = resolved.x;
-      ghost.y = resolved.y;
+      if (canPassWalls) {
+        ghost.x = Math.max(30, Math.min(WORLD_WIDTH - 30, newX));
+        ghost.y = Math.max(30, Math.min(WORLD_HEIGHT - 30, newY));
+      } else {
+        const resolved = this.resolveWallCollisions(ghost.x, ghost.y, newX, newY, ghost.radius);
+        ghost.x = resolved.x;
+        ghost.y = resolved.y;
+      }
     }
 
     // C. Update Chain IK Spirit Tail
@@ -468,203 +600,152 @@ export class GhoulDuelLogic {
   }
 
   // Resolve Circle vs Axis-Aligned Bounding Box (AABB) Wall Obstacles
-  resolveWallCollisions(currX, currY, nextX, nextY, radius) {
-    let finalX = nextX;
-    let finalY = nextY;
-
-    finalX = Math.max(radius + 40, Math.min(WORLD_WIDTH - radius - 40, finalX));
-    finalY = Math.max(radius + 40, Math.min(WORLD_HEIGHT - radius - 40, finalY));
+  resolveWallCollisions(oldX, oldY, newX, newY, radius) {
+    let curX = newX;
+    let curY = newY;
 
     for (const wall of MANSION_WALLS) {
-      const closestX = Math.max(wall.x, Math.min(finalX, wall.x + wall.w));
-      const closestY = Math.max(wall.y, Math.min(finalY, wall.y + wall.h));
+      const closestX = Math.max(wall.x, Math.min(curX, wall.x + wall.w));
+      const closestY = Math.max(wall.y, Math.min(curY, wall.y + wall.h));
 
-      const distX = finalX - closestX;
-      const distY = finalY - closestY;
-      const distance = Math.hypot(distX, distY);
+      const distX = curX - closestX;
+      const distY = curY - closestY;
+      const distSq = distX * distX + distY * distY;
 
-      if (distance < radius) {
-        if (distance > 0) {
-          const overlap = radius - distance;
-          finalX += (distX / distance) * overlap;
-          finalY += (distY / distance) * overlap;
-        } else {
-          finalX = currX;
-          finalY = currY;
-        }
+      if (distSq < radius * radius && distSq > 0.001) {
+        const dist = Math.sqrt(distSq);
+        const overlap = radius - dist;
+        curX += (distX / dist) * overlap;
+        curY += (distY / dist) * overlap;
       }
     }
 
-    return { x: finalX, y: finalY };
+    curX = Math.max(radius, Math.min(WORLD_WIDTH - radius, curX));
+    curY = Math.max(radius, Math.min(WORLD_HEIGHT - radius, curY));
+
+    return { x: curX, y: curY };
   }
 
-  // Chain Inverse Kinematics for Smooth Spirit Tail Motion
+  // Update Inverse Kinematic (IK) Chain Tail
   updateGhostTail(ghost) {
-    const tailSpacing = 16;
-    let prevX = ghost.x;
-    let prevY = ghost.y;
+    if (ghost.tail.length === 0) return;
+
+    let prevNode = ghost;
+    const segmentDistance = 14;
 
     for (let i = 0; i < ghost.tail.length; i++) {
-      const segment = ghost.tail[i];
-      const dx = segment.x - prevX;
-      const dy = segment.y - prevY;
+      const node = ghost.tail[i];
+      const dx = node.x - prevNode.x;
+      const dy = node.y - prevNode.y;
       const dist = Math.hypot(dx, dy);
 
-      if (dist > tailSpacing) {
-        const ratio = tailSpacing / dist;
-        segment.x = prevX + dx * ratio;
-        segment.y = prevY + dy * ratio;
+      if (dist > segmentDistance) {
+        const angle = Math.atan2(dy, dx);
+        node.x = prevNode.x + Math.cos(angle) * segmentDistance;
+        node.y = prevNode.y + Math.sin(angle) * segmentDistance;
+        node.angle = angle;
       }
-      segment.angle = Math.atan2(prevY - segment.y, prevX - segment.x);
 
-      prevX = segment.x;
-      prevY = segment.y;
+      prevNode = node;
     }
   }
 
-  // Smart AI Finite State Machine (SEARCH, RETURN, HUNT_STEAL, FLEE)
-  updateAIBehavior(bot, deltaTime) {
-    bot.aiTimer -= deltaTime;
-    const isGreen = bot.team === 'green';
-    const myBase = isGreen ? TEAMS.GREEN : TEAMS.PURPLE;
+  // Autonomous Bot AI (Finite State Machine)
+  updateAIBehavior(ghost, deltaTime) {
+    ghost.fsmTimer -= deltaTime;
+
+    const myBase = ghost.team === 'green' ? TEAMS.GREEN : TEAMS.PURPLE;
     const baseCenterX = myBase.baseX + myBase.baseWidth / 2;
     const baseCenterY = myBase.baseY + myBase.baseHeight / 2;
 
-    const tailCount = bot.tail.length;
-    const distToBase = Math.hypot(baseCenterX - bot.x, baseCenterY - bot.y);
-
-    // 1. Evaluate State Transitions every 0.25~0.5 sec
-    if (bot.aiTimer <= 0) {
-      bot.aiTimer = 0.25 + Math.random() * 0.35;
-
-      let threateningEnemy = null;
-      let closestEnemyDist = 9999;
-      for (const enemy of this.ghosts) {
-        if (enemy.team !== bot.team) {
-          const d = Math.hypot(enemy.x - bot.x, enemy.y - bot.y);
-          if (d < closestEnemyDist) {
-            closestEnemyDist = d;
-            threateningEnemy = enemy;
-          }
-        }
-      }
-
-      let stealTarget = null;
-      let bestStealDist = 380;
-      for (const enemy of this.ghosts) {
-        if (enemy.team !== bot.team && enemy.tail.length >= 2 && enemy.invulnerableTimer <= 0) {
-          const d = Math.hypot(enemy.x - bot.x, enemy.y - bot.y);
-          if (d < bestStealDist && Math.random() < this.difficulty.aiStealAggressiveness) {
-            bestStealDist = d;
-            stealTarget = enemy;
-          }
-        }
-      }
-
-      // Priority: FLEE > RETURN > HUNT_STEAL > SEARCH
-      if (tailCount >= 4 && threateningEnemy && closestEnemyDist < 220) {
-        bot.fsmState = 'FLEE';
-        bot.threatGhost = threateningEnemy;
-      } else if (this.matchTime < 18 || tailCount >= 8 || (tailCount >= 5 && distToBase < 350)) {
-        bot.fsmState = 'RETURN';
-      } else if (stealTarget) {
-        bot.fsmState = 'HUNT_STEAL';
-        bot.targetGhost = stealTarget;
+    // State Transitions
+    if (ghost.tail.length >= 7) {
+      ghost.fsmState = 'RETURN';
+    } else if (ghost.tail.length >= 3 && Math.random() < 0.015) {
+      ghost.fsmState = 'RETURN';
+    } else if (ghost.tail.length < 3) {
+      if (Math.random() < this.difficulty.aiStealAggressiveness * 0.02) {
+        ghost.fsmState = 'HUNT_STEAL';
       } else {
-        bot.fsmState = 'SEARCH';
+        ghost.fsmState = 'SEARCH';
       }
     }
 
-    // 2. Execute Target Calculation per State
-    let targetX = baseCenterX;
-    let targetY = baseCenterY;
+    // State Execution
+    if (ghost.fsmState === 'RETURN') {
+      const angle = Math.atan2(baseCenterY - ghost.y, baseCenterX - ghost.x);
+      ghost.vx = Math.cos(angle);
+      ghost.vy = Math.sin(angle);
+    } else if (ghost.fsmState === 'HUNT_STEAL') {
+      let targetGhost = null;
+      let maxTail = 0;
 
-    if (bot.fsmState === 'FLEE' && bot.threatGhost) {
-      const awayX = bot.x - bot.threatGhost.x;
-      const awayY = bot.y - bot.threatGhost.y;
-      const awayLen = Math.hypot(awayX, awayY) || 1;
+      for (const other of this.ghosts) {
+        if (other.team !== ghost.team && other.tail.length > maxTail && other.invulnerableTimer <= 0) {
+          maxTail = other.tail.length;
+          targetGhost = other;
+        }
+      }
 
-      const toBaseX = baseCenterX - bot.x;
-      const toBaseY = baseCenterY - bot.y;
-      const toBaseLen = Math.hypot(toBaseX, toBaseY) || 1;
-
-      targetX = bot.x + (awayX / awayLen) * 300 + (toBaseX / toBaseLen) * 120;
-      targetY = bot.y + (awayY / awayLen) * 300 + (toBaseY / toBaseLen) * 120;
-    } else if (bot.fsmState === 'RETURN') {
-      targetX = baseCenterX;
-      targetY = baseCenterY;
-    } else if (bot.fsmState === 'HUNT_STEAL' && bot.targetGhost) {
-      const targetTail = bot.targetGhost.tail;
-      if (targetTail.length > 0) {
-        const interceptIdx = Math.min(targetTail.length - 1, Math.max(1, Math.floor(targetTail.length * 0.6)));
-        const targetNode = targetTail[interceptIdx];
-        targetX = targetNode.x + (bot.targetGhost.vx || 0) * 8;
-        targetY = targetNode.y + (bot.targetGhost.vy || 0) * 8;
+      if (targetGhost && targetGhost.tail.length > 0) {
+        const targetTailNode = targetGhost.tail[Math.floor(targetGhost.tail.length / 2)];
+        const angle = Math.atan2(targetTailNode.y - ghost.y, targetTailNode.x - ghost.x);
+        ghost.vx = Math.cos(angle);
+        ghost.vy = Math.sin(angle);
       } else {
-        targetX = bot.targetGhost.x;
-        targetY = bot.targetGhost.y;
+        ghost.fsmState = 'SEARCH';
       }
     } else {
-      let bestScore = -99999;
+      // SEARCH for closest spirit flame or powerup
+      let closestItem = null;
+      let minDist = 999999;
+
       for (const spirit of this.spirits) {
-        const d = Math.hypot(spirit.x - bot.x, spirit.y - bot.y);
-        const score = (spirit.value * 200) - d;
-        if (score > bestScore) {
-          bestScore = score;
-          targetX = spirit.x;
-          targetY = spirit.y;
+        const dist = Math.hypot(spirit.x - ghost.x, spirit.y - ghost.y);
+        const weight = spirit.type === 'mega' ? dist * 0.4 : dist;
+        if (weight < minDist) {
+          minDist = weight;
+          closestItem = spirit;
         }
       }
 
       for (const drop of this.powerupDrops) {
-        const d = Math.hypot(drop.x - bot.x, drop.y - bot.y);
-        const score = 800 - d;
-        if (score > bestScore) {
-          bestScore = score;
-          targetX = drop.x;
-          targetY = drop.y;
+        const dist = Math.hypot(drop.x - ghost.x, drop.y - ghost.y) * 0.7;
+        if (dist < minDist) {
+          minDist = dist;
+          closestItem = drop;
         }
+      }
+
+      if (closestItem) {
+        const angle = Math.atan2(closestItem.y - ghost.y, closestItem.x - ghost.x);
+        ghost.vx = Math.cos(angle);
+        ghost.vy = Math.sin(angle);
+      } else {
+        ghost.vx = Math.cos(ghost.angle);
+        ghost.vy = Math.sin(ghost.angle);
       }
     }
 
-    // 3. Compute Steering Vector with Wall Avoidance
-    let steerX = targetX - bot.x;
-    let steerY = targetY - bot.y;
-    const steerLen = Math.hypot(steerX, steerY) || 1;
-    let dirX = steerX / steerLen;
-    let dirY = steerY / steerLen;
+    // Obstacle Avoidance Raycasting
+    for (const wall of MANSION_WALLS) {
+      const lookAhead = 45;
+      const probeX = ghost.x + ghost.vx * lookAhead;
+      const probeY = ghost.y + ghost.vy * lookAhead;
 
-    if (!bot.activePowerup || bot.activePowerup.type !== 'ghost_walk') {
-      const probeDist = 55;
-      const probeX = bot.x + dirX * probeDist;
-      const probeY = bot.y + dirY * probeDist;
-
-      for (const wall of MANSION_WALLS) {
-        if (
-          probeX >= wall.x - 10 &&
-          probeX <= wall.x + wall.w + 10 &&
-          probeY >= wall.y - 10 &&
-          probeY <= wall.y + wall.h + 10
-        ) {
-          const slideX = -dirY;
-          const slideY = dirX;
-          dirX = dirX * 0.3 + slideX * 0.7;
-          dirY = dirY * 0.3 + slideY * 0.7;
-          break;
-        }
+      if (probeX > wall.x - 20 && probeX < wall.x + wall.w + 20 && probeY > wall.y - 20 && probeY < wall.y + wall.h + 20) {
+        const avoidAngle = ghost.angle + Math.PI * 0.5;
+        ghost.vx = Math.cos(avoidAngle);
+        ghost.vy = Math.sin(avoidAngle);
+        break;
       }
     }
-
-    const wobble = Math.sin(Date.now() * 0.004 + bot.wobbleOffset) * 0.18;
-    const finalAngle = Math.atan2(dirY, dirX) + wobble;
-
-    bot.vx = Math.cos(finalAngle);
-    bot.vy = Math.sin(finalAngle);
   }
 
   // Spirit Flame Pickups
   checkSpiritPickups(ghost, magnetRadius) {
     const pickupRadius = ghost.radius + 15 + magnetRadius;
+    const directCatchDist = ghost.radius + 14;
 
     for (let i = this.spirits.length - 1; i >= 0; i--) {
       const spirit = this.spirits[i];
@@ -675,7 +756,7 @@ export class GhoulDuelLogic {
         spirit.y += (ghost.y - spirit.y) * 0.12;
       }
 
-      if (dist < ghost.radius + spirit.radius) {
+      if (dist < directCatchDist + spirit.radius) {
         const isMega = spirit.type === 'mega';
         const addCount = isMega ? 5 : 1;
 
@@ -704,7 +785,7 @@ export class GhoulDuelLogic {
     }
   }
 
-  // Powerup Rune Pickups
+  // Powerup Pickup Detection
   checkPowerupPickups(ghost) {
     for (let i = this.powerupDrops.length - 1; i >= 0; i--) {
       const drop = this.powerupDrops[i];
@@ -713,15 +794,15 @@ export class GhoulDuelLogic {
       if (dist < ghost.radius + 20) {
         ghost.activePowerup = {
           type: drop.type,
-          timer: drop.info.duration
+          timer: drop.info.durationMs
         };
 
         if (ghost.isPlayer) {
           ghoulAudio.playPowerup();
-          this.addFloatingText(ghost.x, ghost.y - 40, `${drop.info.icon} ${drop.info.name}!`, drop.info.color);
+          this.addFloatingText(ghost.x, ghost.y - 30, `⚡ ${drop.info.name}!`, drop.info.color);
         }
 
-        this.addSparks(drop.x, drop.y, drop.info.color, 25);
+        this.addSparks(drop.x, drop.y, drop.info.color, 20);
         this.powerupDrops.splice(i, 1);
       }
     }
@@ -738,15 +819,16 @@ export class GhoulDuelLogic {
           const seg = victim.tail[i];
           const dist = Math.hypot(attacker.x - seg.x, attacker.y - seg.y);
 
-          if (dist < attacker.radius + 12) {
-            const severedTail = victim.tail.splice(i);
-            const stolenCount = severedTail.length;
+          if (dist < attacker.radius + 14) {
+            const stolenNodes = victim.tail.splice(i);
+            const stolenCount = stolenNodes.length;
 
             if (stolenCount > 0) {
-              for (const stolenNode of severedTail) {
+              for (const stolenNode of stolenNodes) {
+                const lastNode = attacker.tail.length > 0 ? attacker.tail[attacker.tail.length - 1] : attacker;
                 attacker.tail.push({
-                  x: stolenNode.x,
-                  y: stolenNode.y,
+                  x: lastNode.x - Math.cos(attacker.angle) * 14,
+                  y: lastNode.y - Math.sin(attacker.angle) * 14,
                   angle: attacker.angle,
                   isMega: stolenNode.isMega
                 });
@@ -778,11 +860,13 @@ export class GhoulDuelLogic {
     const isGreen = ghost.team === 'green';
     const base = isGreen ? TEAMS.GREEN : TEAMS.PURPLE;
 
+    // Generous base boundary (+15px margin) so players touching the base edge deposit smoothly
+    const margin = 15;
     if (
-      ghost.x >= base.baseX &&
-      ghost.x <= base.baseX + base.baseWidth &&
-      ghost.y >= base.baseY &&
-      ghost.y <= base.baseY + base.baseHeight
+      ghost.x >= base.baseX - margin &&
+      ghost.x <= base.baseX + base.baseWidth + margin &&
+      ghost.y >= base.baseY - margin &&
+      ghost.y <= base.baseY + base.baseHeight + margin
     ) {
       if (ghost.tail.length > 0) {
         const depositRate = Math.min(3, ghost.tail.length);
@@ -818,35 +902,34 @@ export class GhoulDuelLogic {
     ghoulAudio.playMatchEnd();
     setTimeout(() => {
       if (isVictory) {
-        ghoulAudio.playVictory();
+        ghoulAudio.playMatchVictory();
       } else {
-        ghoulAudio.playDefeat();
+        ghoulAudio.playMatchDefeat();
       }
     }, 400);
 
-    // Build and sort 8-player roster by deposited score descending (tie-breaker: stolen)
-    const sortedRoster = this.ghosts
-      .map((g) => ({
-        id: g.id,
-        name: g.name,
-        team: g.team,
-        isPlayer: g.isPlayer,
-        isRemoteHuman: g.isRemoteHuman,
-        deposited: g.depositedCount || 0,
-        stolen: g.stolenCount || 0
-      }))
-      .sort((a, b) => b.deposited - a.deposited || b.stolen - a.stolen);
+    const rosterStats = this.ghosts.map((g) => ({
+      id: g.id,
+      name: g.name,
+      team: g.team,
+      isPlayer: g.isPlayer,
+      depositedCount: g.depositedCount,
+      stolenCount: g.stolenCount,
+      score: g.depositedCount * 10 + g.stolenCount * 15
+    }));
 
-    const mvpPlayer = sortedRoster[0] || null;
+    rosterStats.sort((a, b) => b.score - a.score);
 
     const stats = {
+      isVictory,
+      isDraw: greenTotal === purpleTotal,
       teamGreenScore: greenTotal,
       teamPurpleScore: purpleTotal,
-      isVictory,
-      playerScore: this.player ? this.player.depositedCount : 0,
+      playerScore: this.player ? this.player.depositedCount * 10 + this.player.stolenCount * 15 : 0,
+      playerDeposited: this.player ? this.player.depositedCount : 0,
       playerStolen: this.player ? this.player.stolenCount : 0,
-      roster: sortedRoster,
-      mvp: mvpPlayer
+      roster: rosterStats,
+      mvp: rosterStats[0] || null
     };
 
     if (this.networkMode === 'host' && this.onBroadcastGameOver) {
@@ -943,7 +1026,7 @@ export class GhoulDuelLogic {
     }
   }
 
-  // Main 2D Canvas Renderer
+  // Main 2D Canvas Renderer (Viewport-Culled & Chromebook Optimized)
   render(ctx) {
     ctx.save();
     ctx.clearRect(0, 0, CANVAS_WIDTH, CANVAS_HEIGHT);
@@ -952,23 +1035,23 @@ export class GhoulDuelLogic {
     ctx.save();
     ctx.translate(-this.camera.x, -this.camera.y);
 
-    // 1. Draw Mansion Floor
+    // 1. Draw Mansion Floor (Viewport-only lines)
     this.renderMansionFloor(ctx);
 
     // 2. Draw Team Bases
     this.renderTeamBase(ctx, TEAMS.GREEN);
     this.renderTeamBase(ctx, TEAMS.PURPLE);
 
-    // 3. Draw Mansion Walls & Columns
+    // 3. Draw Mansion Walls & Columns (Viewport-culled)
     this.renderMansionWalls(ctx);
 
-    // 4. Draw Powerup Drops
+    // 4. Draw Powerup Drops (Viewport-culled)
     this.renderPowerupDrops(ctx);
 
-    // 5. Draw Floating Spirit Flames
+    // 5. Draw Floating Spirit Flames (Viewport-culled & lightweight alpha arcs)
     this.renderSpirits(ctx);
 
-    // 6. Draw Ghost Tails
+    // 6. Draw Ghost Tails (Viewport-culled)
     this.ghosts.forEach((ghost) => {
       this.renderGhostTail(ctx, ghost);
     });
@@ -994,28 +1077,33 @@ export class GhoulDuelLogic {
 
   renderMansionFloor(ctx) {
     ctx.fillStyle = '#0f172a';
-    ctx.fillRect(0, 0, WORLD_WIDTH, WORLD_HEIGHT);
+    ctx.fillRect(this.camera.x, this.camera.y, CANVAS_WIDTH, CANVAS_HEIGHT);
 
-    ctx.strokeStyle = 'rgba(51, 65, 85, 0.25)';
+    ctx.strokeStyle = 'rgba(51, 65, 85, 0.2)';
     ctx.lineWidth = 1;
     const step = 80;
-    for (let x = 0; x < WORLD_WIDTH; x += step) {
-      ctx.beginPath();
-      ctx.moveTo(x, 0);
-      ctx.lineTo(x, WORLD_HEIGHT);
-      ctx.stroke();
+    const startX = Math.floor(this.camera.x / step) * step;
+    const endX = Math.min(WORLD_WIDTH, this.camera.x + CANVAS_WIDTH + step);
+    const startY = Math.floor(this.camera.y / step) * step;
+    const endY = Math.min(WORLD_HEIGHT, this.camera.y + CANVAS_HEIGHT + step);
+
+    ctx.beginPath();
+    for (let x = startX; x <= endX; x += step) {
+      ctx.moveTo(x, startY);
+      ctx.lineTo(x, endY);
     }
-    for (let y = 0; y < WORLD_HEIGHT; y += step) {
-      ctx.beginPath();
-      ctx.moveTo(0, y);
-      ctx.lineTo(WORLD_WIDTH, y);
-      ctx.stroke();
+    for (let y = startY; y <= endY; y += step) {
+      ctx.moveTo(startX, y);
+      ctx.lineTo(endX, y);
     }
+    ctx.stroke();
   }
 
   renderTeamBase(ctx, team) {
     const cx = team.baseX + team.baseWidth / 2;
     const cy = team.baseY + team.baseHeight / 2;
+
+    if (!this.isInViewport(cx, cy, 200)) return;
 
     ctx.save();
     ctx.fillStyle = team.baseColor;
@@ -1027,13 +1115,12 @@ export class GhoulDuelLogic {
     ctx.stroke();
 
     const pulse = Math.sin(Date.now() * 0.005) * 6;
-    const grad = ctx.createRadialGradient(cx, cy, 10, cx, cy, 80 + pulse);
-    grad.addColorStop(0, team.primaryColor);
-    grad.addColorStop(1, 'transparent');
-    ctx.fillStyle = grad;
+    ctx.fillStyle = team.primaryColor;
+    ctx.globalAlpha = 0.22;
     ctx.beginPath();
     ctx.arc(cx, cy, 80 + pulse, 0, Math.PI * 2);
     ctx.fill();
+    ctx.globalAlpha = 1.0;
 
     ctx.strokeStyle = team.glowColor;
     ctx.lineWidth = 2;
@@ -1055,13 +1142,19 @@ export class GhoulDuelLogic {
   renderMansionWalls(ctx) {
     ctx.save();
     for (const wall of MANSION_WALLS) {
+      if (
+        wall.x + wall.w < this.camera.x - 20 ||
+        wall.x > this.camera.x + CANVAS_WIDTH + 20 ||
+        wall.y + wall.h < this.camera.y - 20 ||
+        wall.y > this.camera.y + CANVAS_HEIGHT + 20
+      ) {
+        continue;
+      }
+
       ctx.fillStyle = 'rgba(0, 0, 0, 0.4)';
       ctx.fillRect(wall.x + 4, wall.y + 4, wall.w, wall.h);
 
-      const grad = ctx.createLinearGradient(wall.x, wall.y, wall.x, wall.y + wall.h);
-      grad.addColorStop(0, '#334155');
-      grad.addColorStop(1, '#1e293b');
-      ctx.fillStyle = grad;
+      ctx.fillStyle = '#1e293b';
       ctx.fillRect(wall.x, wall.y, wall.w, wall.h);
 
       ctx.strokeStyle = '#475569';
@@ -1074,7 +1167,10 @@ export class GhoulDuelLogic {
   renderSpirits(ctx) {
     const time = Date.now() * 0.004;
 
-    this.spirits.forEach((spirit) => {
+    for (let i = 0; i < this.spirits.length; i++) {
+      const spirit = this.spirits[i];
+      if (!this.isInViewport(spirit.x, spirit.y, 40)) continue;
+
       const floatY = Math.sin(time + spirit.floatOffset) * 5;
       const isMega = spirit.type === 'mega';
       const rad = spirit.radius + Math.sin(time * 2 + spirit.floatOffset) * 2;
@@ -1082,53 +1178,52 @@ export class GhoulDuelLogic {
       ctx.save();
       ctx.translate(spirit.x, spirit.y + floatY);
 
-      const grad = ctx.createRadialGradient(0, 0, 2, 0, 0, rad * 2.2);
-      if (isMega) {
-        grad.addColorStop(0, '#fef08a');
-        grad.addColorStop(0.5, '#f59e0b');
-        grad.addColorStop(1, 'transparent');
-      } else {
-        grad.addColorStop(0, '#bae6fd');
-        grad.addColorStop(0.5, '#38bdf8');
-        grad.addColorStop(1, 'transparent');
-      }
-
-      ctx.fillStyle = grad;
+      // Outer Glow
+      ctx.fillStyle = isMega ? 'rgba(250, 204, 21, 0.25)' : 'rgba(56, 189, 248, 0.25)';
       ctx.beginPath();
-      ctx.arc(0, 0, rad * 2.2, 0, Math.PI * 2);
+      ctx.arc(0, 0, rad * 1.9, 0, Math.PI * 2);
       ctx.fill();
 
-      ctx.fillStyle = isMega ? '#ffffff' : '#e0f2fe';
+      // Main Core
+      ctx.fillStyle = isMega ? '#fef08a' : '#38bdf8';
       ctx.beginPath();
       ctx.arc(0, 0, rad, 0, Math.PI * 2);
       ctx.fill();
 
+      // Inner Highlight
+      ctx.fillStyle = '#ffffff';
+      ctx.beginPath();
+      ctx.arc(0, 0, rad * 0.45, 0, Math.PI * 2);
+      ctx.fill();
+
       if (isMega) {
-        ctx.fillStyle = '#fbbf24';
-        ctx.font = 'bold 12px sans-serif';
+        ctx.fillStyle = '#b45309';
+        ctx.font = 'bold 11px sans-serif';
         ctx.textAlign = 'center';
         ctx.fillText('★5', 0, 4);
       }
 
       ctx.restore();
-    });
+    }
   }
 
   renderPowerupDrops(ctx) {
     const time = Date.now() * 0.005;
 
-    this.powerupDrops.forEach((drop) => {
+    for (let i = 0; i < this.powerupDrops.length; i++) {
+      const drop = this.powerupDrops[i];
+      if (!this.isInViewport(drop.x, drop.y, 50)) continue;
+
       const bounce = Math.sin(time) * 4;
       ctx.save();
       ctx.translate(drop.x, drop.y + bounce);
 
-      const grad = ctx.createRadialGradient(0, 0, 5, 0, 0, 28);
-      grad.addColorStop(0, drop.info.color);
-      grad.addColorStop(1, 'transparent');
-      ctx.fillStyle = grad;
+      ctx.fillStyle = drop.info.color;
+      ctx.globalAlpha = 0.25;
       ctx.beginPath();
       ctx.arc(0, 0, 28, 0, Math.PI * 2);
       ctx.fill();
+      ctx.globalAlpha = 1.0;
 
       ctx.fillStyle = '#1e1b4b';
       ctx.strokeStyle = drop.info.color;
@@ -1144,7 +1239,7 @@ export class GhoulDuelLogic {
       ctx.fillText(drop.info.icon, 0, 1);
 
       ctx.restore();
-    });
+    }
   }
 
   renderGhostTail(ctx, ghost) {
@@ -1152,18 +1247,20 @@ export class GhoulDuelLogic {
 
     const isGreen = ghost.team === 'green';
     const color = isGreen ? '#34d399' : '#c084fc';
-    const glowColor = isGreen ? 'rgba(52, 211, 153, 0.4)' : 'rgba(192, 132, 252, 0.4)';
+    const glowColor = isGreen ? 'rgba(52, 211, 153, 0.3)' : 'rgba(192, 132, 252, 0.3)';
 
     ctx.save();
 
     for (let i = 0; i < ghost.tail.length; i++) {
       const node = ghost.tail[i];
+      if (!this.isInViewport(node.x, node.y, 30)) continue;
+
       const scale = Math.max(0.45, 1 - i * 0.025);
       const rad = 11 * scale;
 
       ctx.fillStyle = glowColor;
       ctx.beginPath();
-      ctx.arc(node.x, node.y, rad * 2, 0, Math.PI * 2);
+      ctx.arc(node.x, node.y, rad * 1.8, 0, Math.PI * 2);
       ctx.fill();
 
       ctx.fillStyle = node.isMega ? '#fef08a' : color;
@@ -1176,6 +1273,8 @@ export class GhoulDuelLogic {
   }
 
   renderGhostBody(ctx, ghost) {
+    if (!this.isInViewport(ghost.x, ghost.y, 60)) return;
+
     ctx.save();
 
     if (ghost.invulnerableTimer > 0 && Math.floor(Date.now() / 80) % 2 === 0) {
@@ -1201,12 +1300,7 @@ export class GhoulDuelLogic {
     const floatWobble = Math.sin(Date.now() * 0.006 + ghost.wobbleOffset) * 3;
     ctx.translate(0, floatWobble);
 
-    const grad = ctx.createRadialGradient(-4, -6, 2, 0, 0, ghost.radius);
-    grad.addColorStop(0, '#ffffff');
-    grad.addColorStop(0.35, ghost.color);
-    grad.addColorStop(1, ghost.glow);
-    ctx.fillStyle = grad;
-
+    ctx.fillStyle = ghost.color;
     ctx.beginPath();
     ctx.arc(0, -4, ghost.radius, Math.PI, 0, false);
     ctx.lineTo(ghost.radius, ghost.radius);

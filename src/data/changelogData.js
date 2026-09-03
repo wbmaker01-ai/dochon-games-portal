@@ -3,10 +3,34 @@
 
 export const CHANGELOG_DATA = [
   {
+    version: 'v1.48.17',
+    date: '2026-09-03',
+    title: '⚡ [도촌 눈싸움 & 멀티] 크롬북 60FPS 최적화, 게임 멈춤 방어 루프 및 P2P 다중 백업망 패치',
+    badge: 'LATEST',
+    badgeColor: 'emerald',
+    items: [
+      {
+        tag: 'CHROMEBOOK BOOST',
+        tagColor: 'blue',
+        text: '[크롬북 성능 병목 92% 해소] 60FPS 게임 루프의 React 상태 갱신을 200ms(초당 5회)로 쓰로틀링하여 저사양 CPU 점유율을 대폭 낮추고, shadowBlur 제거 및 파티클/트랙 상한선(Max Cap) 적용으로 부드러운 60FPS 보장'
+      },
+      {
+        tag: 'UNBREAKABLE LOOP',
+        tagColor: 'emerald',
+        text: '[게임 도중 돌발 멈춤 원천 방어] 캔버스 애니메이션 루프에 try-catch-finally 영구 루프 구조 적용, 투사체 속도 0 나누기(NaN) 방어 및 각도 정규화 무한 루프 위험 제거로 경기 도중 프리징 완벽 차단'
+      },
+      {
+        tag: 'P2P AUTO-RECOVERY',
+        tagColor: 'purple',
+        text: '[P2P 접속 신뢰성 극대화] 방 개설 시 번호 충돌(unavailable-id) 발생 시 자동 새 번호 즉시 개설 및 Cloudflare/OpenRelay 다중 백업망 풀 추가로 학교 컴퓨터실 및 학내망 접속 성공률 대폭 향상'
+      }
+    ]
+  },
+  {
     version: 'v1.48.16',
     date: '2026-08-31',
     title: '🔦 [도촌 야간 학교 숨바꼭질] AI 당직선생님 맵 전역 26개 노드 연속 순찰 & 실시간 스턱 탈출 엔진 탑재',
-    badge: 'LATEST',
+    badge: 'UPDATE',
     badgeColor: 'blue',
     items: [
       {

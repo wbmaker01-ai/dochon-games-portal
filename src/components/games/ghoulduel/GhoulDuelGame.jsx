@@ -65,7 +65,7 @@ export default function GhoulDuelGame({ onScoreSubmitted }) {
 
   // --- Start Game Logic (Single / Host / Guest) ---
   const launchGameEngine = useCallback(
-    ({ mode = 'local', players = [], myId = 'local', selectedDiff = difficulty }) => {
+    ({ mode = 'local', players = [], myId = 'local', playerName = '', selectedDiff = difficulty }) => {
       ghoulAudio.init();
 
       const logic = new GhoulDuelLogic({
@@ -73,6 +73,7 @@ export default function GhoulDuelGame({ onScoreSubmitted }) {
         networkMode: mode,
         networkPlayers: players,
         myPeerId: myId,
+        playerName: playerName || p2pName,
         onGameOver: handleGameOver,
         onStateChange: (state) => {
           setTeamScores({ ...state.teamScores });
@@ -90,9 +91,9 @@ export default function GhoulDuelGame({ onScoreSubmitted }) {
             ghoulNet.broadcastGameOver(stats);
           }
         },
-        onSendInput: (vector, angle) => {
+        onSendInput: (data) => {
           if (mode === 'guest') {
-            ghoulNet.sendInput(vector, angle);
+            ghoulNet.sendInput(data);
           }
         }
       });
@@ -195,6 +196,7 @@ export default function GhoulDuelGame({ onScoreSubmitted }) {
         mode: 'guest',
         players: packet.players,
         myId: ghoulNet.myPeerId,
+        playerName: ghoulNet.myName || p2pName,
         selectedDiff: difficulty
       });
     };
@@ -205,9 +207,9 @@ export default function GhoulDuelGame({ onScoreSubmitted }) {
       }
     };
 
-    ghoulNet.onGuestInput = (peerId, vector, angle) => {
+    ghoulNet.onGuestInput = (peerId, data) => {
       if (logicRef.current) {
-        logicRef.current.handleGuestInput(peerId, vector, angle);
+        logicRef.current.handleGuestInput(peerId, data);
       }
     };
 

@@ -1,19 +1,21 @@
 // Dochon Games Portal - The Great Ghoul Duel WebRTC P2P Network Manager (Zero-Cost PeerJS)
 // 4-Digit Numeric Room Code (e.g. '1234', '7788') to 'dochon-ghoul-XXXX' Peer ID
-// v3: 3-Way Handshake (JOIN_LOBBY <-> JOIN_ACK) with 400ms/10-retry protocol & input sanitization
+// v4: High-Reliability P2P Connection (Keep-Alive, Zero-Loss Data Listener, Fallback TURN/STUN, Position Sync)
 
 import { Peer } from 'peerjs';
 
 const PEER_PREFIX = 'dochon-ghoul-';
 
-// ICE Servers: STUN (public IP discovery) + TURN (relay fallback for restrictive NATs)
-// Uses Metered Open Relay on ports 80/443 to bypass restrictive school/corporate firewalls
+// Robust Multi-tier ICE Servers: Google, Cloudflare, Twilio STUN + Metered Ports 80/443 TURN
 const ICE_SERVERS = [
-  // STUN servers for direct NAT traversal
+  // Fast Global STUN servers for direct NAT traversal
   { urls: 'stun:stun.l.google.com:19302' },
+  { urls: 'stun:stun1.l.google.com:19302' },
+  { urls: 'stun:stun2.l.google.com:19302' },
+  { urls: 'stun:stun.cloudflare.com:3478' },
   { urls: 'stun:global.stun.twilio.com:3478' },
   { urls: 'stun:stun.relay.metered.ca:80' },
-  // TURN relay servers (ports 80/443 HTTP/HTTPS bypass)
+  // Primary Metered TURN relay servers (ports 80/443 HTTP/HTTPS bypass)
   {
     urls: 'turn:global.relay.metered.ca:80',
     username: 'e8dd65b92f3b1e1ae3a37c20',
@@ -33,11 +35,27 @@ const ICE_SERVERS = [
     urls: 'turns:global.relay.metered.ca:443?transport=tcp',
     username: 'e8dd65b92f3b1e1ae3a37c20',
     credential: 'gVNgSOl87pwvCYLu'
+  },
+  // OpenRelay Public Fallback TURN
+  {
+    urls: 'turn:openrelay.metered.ca:80',
+    username: 'openrelayproject',
+    credential: 'openrelayproject'
+  },
+  {
+    urls: 'turn:openrelay.metered.ca:443',
+    username: 'openrelayproject',
+    credential: 'openrelayproject'
+  },
+  {
+    urls: 'turns:openrelay.metered.ca:443?transport=tcp',
+    username: 'openrelayproject',
+    credential: 'openrelayproject'
   }
 ];
 
 const CONNECTION_TIMEOUT_MS = 15000; // 15 seconds overall connection timeout
-const MAX_CONNECTION_RETRIES = 2;   // Re-attempt full WebRTC connect up to 2 times
+const MAX_CONNECTION_RETRIES = 3;   // Re-attempt connect up to 3 times
 const HANDSHAKE_INTERVAL_MS = 400;  // Re-send JOIN_LOBBY every 400ms
 const MAX_HANDSHAKE_ATTEMPTS = 10;  // Up to 10 handshake attempts (4.0s total)
 
@@ -62,9 +80,11 @@ export class GhoulDuelNetworkManager {
     this.onError = null;
     this.onDisconnect = null;
     this.onConnectionStatus = null; // Status messages for UI feedback
+    this.onGuestInput = null;
 
-    // Handshake internal state
+    // Handshake & Keep-Alive internal state
     this._handshakeInterval = null;
+    this._keepAliveTimer = null;
   }
 
   // Generate a random 4-digit numeric room code (e.g. 1000 ~ 9999)
@@ -89,6 +109,37 @@ export class GhoulDuelNetworkManager {
     if (this._handshakeInterval) {
       clearInterval(this._handshakeInterval);
       this._handshakeInterval = null;
+    }
+  }
+
+  // Heartbeat keep-alive to keep signaling WebSocket open on Host
+  _startKeepAlive() {
+    this._stopKeepAlive();
+    this._keepAliveTimer = setInterval(() => {
+      if (this.peer && !this.peer.destroyed) {
+        if (this.peer.disconnected) {
+          try {
+            this.peer.reconnect();
+          } catch (e) {
+            console.warn('Keep-alive reconnect attempt failed:', e);
+          }
+        } else if (
+          this.peer.socket &&
+          this.peer.socket._ws &&
+          this.peer.socket._ws.readyState === 1 /* OPEN */
+        ) {
+          try {
+            this.peer.socket._ws.send(JSON.stringify({ type: 'HEARTBEAT' }));
+          } catch (e) {}
+        }
+      }
+    }, 12000);
+  }
+
+  _stopKeepAlive() {
+    if (this._keepAliveTimer) {
+      clearInterval(this._keepAliveTimer);
+      this._keepAliveTimer = null;
     }
   }
 
@@ -120,7 +171,7 @@ export class GhoulDuelNetworkManager {
           debug: 1,
           config: {
             iceServers: ICE_SERVERS,
-            iceCandidatePoolSize: 10
+            iceCandidatePoolSize: 2 // Lean candidate pool to prevent socket exhaustion on low-spec devices
           }
         });
 
@@ -137,6 +188,7 @@ export class GhoulDuelNetworkManager {
               slotIndex: 0
             }
           ];
+          this._startKeepAlive();
           this._emitStatus('✅ 방이 생성되었습니다! 친구들의 접속을 기다리는 중...');
           if (this.onLobbyUpdate) this.onLobbyUpdate(this.lobbyPlayers);
           resolve(cleanCode);
@@ -169,7 +221,7 @@ export class GhoulDuelNetworkManager {
         });
 
         this.peer.on('disconnected', () => {
-          this._emitStatus('⚠️ 시그널링 서버와 연결이 끊겼습니다. 재연결 시도 중...');
+          this._emitStatus('⚠️ 시그널링 서버와 일시적으로 연결이 끊겼습니다. 자동 복구 중...');
           if (this.peer && !this.peer.destroyed) {
             try {
               this.peer.reconnect();
@@ -190,23 +242,26 @@ export class GhoulDuelNetworkManager {
       console.warn('Incoming connection timed out for peer:', conn.peer);
     }, CONNECTION_TIMEOUT_MS);
 
+    // CRITICAL: Attach data and close handlers IMMEDIATELY to prevent missed early packets
+    conn.on('data', (data) => {
+      this.handleHostReceiveData(conn.peer, data, conn);
+    });
+
     conn.on('open', () => {
       clearTimeout(connTimeoutId);
       this.connections.set(conn.peer, conn);
       this._emitStatus(`⚡ 친구와 P2P 터널 연결 수립 완료! 입장 확인 대기 중...`);
+    });
 
-      conn.on('data', (data) => {
-        this.handleHostReceiveData(conn.peer, data, conn);
-      });
+    conn.on('close', () => {
+      clearTimeout(connTimeoutId);
+      this.handlePeerLeave(conn.peer);
+    });
 
-      conn.on('close', () => {
-        this.handlePeerLeave(conn.peer);
-      });
-
-      conn.on('error', (err) => {
-        console.error('Host connection error with peer:', conn.peer, err);
-        this.handlePeerLeave(conn.peer);
-      });
+    conn.on('error', (err) => {
+      clearTimeout(connTimeoutId);
+      console.error('Host connection error with peer:', conn.peer, err);
+      this.handlePeerLeave(conn.peer);
     });
   }
 
@@ -279,8 +334,9 @@ export class GhoulDuelNetworkManager {
         this.broadcastLobbyUpdate();
       }
     } else if (data.type === 'INPUT') {
+      // Forward complete input & position packet to host logic engine
       if (this.onGuestInput) {
-        this.onGuestInput(peerId, data.vector, data.angle);
+        this.onGuestInput(peerId, data);
       }
     }
   }
@@ -346,7 +402,6 @@ export class GhoulDuelNetworkManager {
 
   _joinRoomAttempt(numericCode, playerName, team, attempt) {
     return new Promise((resolve, reject) => {
-      this.disconnect();
       this._clearHandshakeTimer();
 
       const cleanCode = GhoulDuelNetworkManager.sanitizeCode(numericCode);
@@ -372,23 +427,32 @@ export class GhoulDuelNetworkManager {
       };
 
       try {
-        this.peer = new Peer({
-          debug: 1,
-          config: {
-            iceServers: ICE_SERVERS,
-            iceCandidatePoolSize: 10
-          }
-        });
+        // If peer already exists and is open, reuse it instead of reconnecting from scratch!
+        if (!this.peer || this.peer.destroyed) {
+          this.peer = new Peer({
+            debug: 1,
+            config: {
+              iceServers: ICE_SERVERS,
+              iceCandidatePoolSize: 2
+            }
+          });
+        }
 
-        this.peer.on('open', (id) => {
-          this.myPeerId = id;
+        const initiateConnection = () => {
           this._emitStatus(`🔍 방장 찾는 중... (방 번호: [${cleanCode}])${attemptLabel}`);
 
-          // Connect to Host with reliable channel
+          // Close any dangling previous connection
+          if (this.hostConnection) {
+            try {
+              this.hostConnection.close();
+            } catch (e) {}
+            this.hostConnection = null;
+          }
+
           const conn = this.peer.connect(targetHostPeerId, { reliable: true });
           this.hostConnection = conn;
 
-          // Connection timeout for full process
+          // Timeout for handshake completion
           timeoutId = setTimeout(() => {
             if (!settled) {
               this._clearHandshakeTimer();
@@ -396,14 +460,13 @@ export class GhoulDuelNetworkManager {
 
               if (attempt < MAX_CONNECTION_RETRIES) {
                 this._emitStatus(`⏰ 연결 시간 초과. 자동으로 재시도합니다... (${attempt + 1}/${MAX_CONNECTION_RETRIES})`);
-                this.disconnect();
                 setTimeout(() => {
                   this._joinRoomAttempt(numericCode, playerName, team, attempt + 1)
                     .then(resolve)
                     .catch(reject);
-                }, 1500);
+                }, 1200);
               } else {
-                const errorMsg = `방 번호 [${cleanCode}]에 연결할 수 없습니다.\n\n💡 해결 방법:\n1. 방장이 방을 열었는지 확인해 주세요\n2. 방 번호(4자리)를 다시 확인해 주세요\n3. 같은 네트워크(Wi-Fi)인지 확인해 주세요\n4. 방장에게 방을 다시 생성해달라고 요청해 주세요`;
+                const errorMsg = `방 번호 [${cleanCode}]에 연결할 수 없습니다.\n\n💡 해결 방법:\n1. 방장이 방을 열었는지 확인해 주세요\n2. 방 번호(4자리)를 다시 확인해 주세요\n3. 방장에게 방 번호를 확인해 주세요`;
                 this._emitStatus(`❌ 연결 실패. 방 번호와 네트워크를 확인해 주세요.`);
                 if (this.onError) this.onError(errorMsg);
                 settle('reject', new Error(errorMsg));
@@ -412,7 +475,7 @@ export class GhoulDuelNetworkManager {
           }, CONNECTION_TIMEOUT_MS);
 
           conn.on('open', () => {
-            this._emitStatus('⚡ P2P 터널 수립 완료! 입장 요청(JOIN_LOBBY) 전송 중...');
+            this._emitStatus('⚡ P2P 터널 수립 완료! 입장 확인 중...');
 
             // --- 🤝 3-Way Handshake Auto-Retry Protocol ---
             let handshakeCount = 0;
@@ -432,14 +495,10 @@ export class GhoulDuelNetworkManager {
 
               if (handshakeCount >= MAX_HANDSHAKE_ATTEMPTS) {
                 this._clearHandshakeTimer();
-                console.warn('Max handshake attempts reached without ACK');
               }
             };
 
-            // Send immediately on open
             sendJoinPacket();
-
-            // Set up 400ms periodic retry
             this._handshakeInterval = setInterval(sendJoinPacket, HANDSHAKE_INTERVAL_MS);
           });
 
@@ -479,31 +538,39 @@ export class GhoulDuelNetworkManager {
             this._clearHandshakeTimer();
             console.error('Guest Connection Error:', err);
             if (!settled && attempt < MAX_CONNECTION_RETRIES) {
-              this._emitStatus(`⚠️ 연결 오류 발생. 재시도 중... (${attempt + 1}/${MAX_CONNECTION_RETRIES})`);
-              this.disconnect();
+              this._emitStatus(`⚠️ 연결 재시도 중... (${attempt + 1}/${MAX_CONNECTION_RETRIES})`);
               setTimeout(() => {
                 this._joinRoomAttempt(numericCode, playerName, team, attempt + 1)
                   .then(resolve)
                   .catch(reject);
-              }, 1500);
+              }, 1200);
             } else {
               settle('reject', err);
             }
           });
-        });
+        };
+
+        if (this.peer.open) {
+          this.myPeerId = this.peer.id;
+          initiateConnection();
+        } else {
+          this.peer.on('open', (id) => {
+            this.myPeerId = id;
+            initiateConnection();
+          });
+        }
 
         this.peer.on('error', (err) => {
           this._clearHandshakeTimer();
           console.error('PeerJS Guest Error:', err);
           if (err.type === 'peer-unavailable') {
             if (!settled && attempt < MAX_CONNECTION_RETRIES) {
-              this._emitStatus(`⚠️ 방을 찾을 수 없습니다. 재시도 중... (${attempt + 1}/${MAX_CONNECTION_RETRIES})`);
-              this.disconnect();
+              this._emitStatus(`⚠️ 방을 찾는 중... 재시도 (${attempt + 1}/${MAX_CONNECTION_RETRIES})`);
               setTimeout(() => {
                 this._joinRoomAttempt(numericCode, playerName, team, attempt + 1)
                   .then(resolve)
                   .catch(reject);
-              }, 2000);
+              }, 1500);
             } else {
               const errorMsg = `방 번호 [${cleanCode}]을 찾을 수 없습니다. 방장이 방을 열었는지 확인해 주세요.`;
               this._emitStatus(`❌ ${errorMsg}`);
@@ -519,7 +586,7 @@ export class GhoulDuelNetworkManager {
         });
 
         this.peer.on('disconnected', () => {
-          this._emitStatus('⚠️ 시그널링 서버와 연결이 끊겼습니다. 재연결 시도 중...');
+          this._emitStatus('⚠️ 시그널링 서버와 일시적으로 연결이 끊겼습니다. 자동 복구 중...');
           if (this.peer && !this.peer.destroyed) {
             try {
               this.peer.reconnect();
@@ -551,13 +618,12 @@ export class GhoulDuelNetworkManager {
     }
   }
 
-  // Send player input from Guest to Host
-  sendInput(vector, angle) {
+  // Send player input & authoritative position from Guest to Host
+  sendInput(data) {
     if (!this.isHost && this.hostConnection && this.hostConnection.open) {
       this.hostConnection.send({
         type: 'INPUT',
-        vector,
-        angle
+        ...data
       });
     }
   }
@@ -579,6 +645,7 @@ export class GhoulDuelNetworkManager {
   // Disconnect & cleanup
   disconnect() {
     this._clearHandshakeTimer();
+    this._stopKeepAlive();
 
     if (this.connections) {
       this.connections.forEach((conn) => {

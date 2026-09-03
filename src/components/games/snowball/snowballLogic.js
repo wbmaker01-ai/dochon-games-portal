@@ -55,6 +55,7 @@ export class SnowballLogic {
     this.particles = [];
     this.waterSplashes = [];
     this.snowTracks = [];
+    this.hudUpdateTimer = 0; // Throttle React state re-rendering (200ms)
 
     // Local Player Control State
     this.input = {
@@ -383,8 +384,10 @@ export class SnowballLogic {
     // 9. Check Victory Conditions
     this.checkMatchConditions();
 
-    // 10. Update React State
-    if (this.onStateChange) {
+    // 10. Update React State (Throttled to 200ms to prevent Chromebook CPU 100% spikes)
+    this.hudUpdateTimer += dt;
+    if (this.onStateChange && (this.hudUpdateTimer >= 0.2 || this.isGameOver)) {
+      this.hudUpdateTimer = 0;
       const alivePlayers = this.players.filter(p => p.isAlive);
       const me = this.getLocalPlayer();
       this.onStateChange({
@@ -566,7 +569,8 @@ export class SnowballLogic {
 
         // Fire when aligned within range
         if (closestDist >= 110 && closestDist <= 390) {
-          const currentAngleDiff = Math.abs(bot.angle - leadAngle);
+          const angleDelta = Math.atan2(Math.sin(bot.angle - leadAngle), Math.cos(bot.angle - leadAngle));
+          const currentAngleDiff = Math.abs(angleDelta);
           if (currentAngleDiff < 0.40) {
             this.shootSnowball(bot);
             bot.repositionTimer = 1.3;
@@ -584,10 +588,9 @@ export class SnowballLogic {
     this.players.forEach(p => {
       if (!p.isAlive) return;
 
-      // Smooth Angle Interpolation (gentle turning, non-twitchy)
-      let diff = p.inputAngle - p.angle;
-      while (diff < -Math.PI) diff += Math.PI * 2;
-      while (diff > Math.PI) diff -= Math.PI * 2;
+      // Smooth Angle Interpolation (zero risk of infinite loop)
+      const rawDiff = p.inputAngle - p.angle;
+      const diff = Math.atan2(Math.sin(rawDiff), Math.cos(rawDiff));
       p.angle += diff * (p.isBot ? 0.12 : PLAYER_CONFIG.TURN_SPEED);
 
       // Speed penalty based on snowball size (heavier as ball grows)
@@ -623,8 +626,8 @@ export class SnowballLogic {
           snowballAudio.playRoll(sizeRatio);
         }
 
-        // Add snow trail
-        if (Math.random() < 0.25) {
+        // Add snow trail (capped at 35 to maintain 60fps on Chromebooks)
+        if (Math.random() < 0.20 && this.snowTracks.length < 35) {
           this.snowTracks.push({
             x: p.x,
             y: p.y,
@@ -743,9 +746,10 @@ export class SnowballLogic {
 
         const pDist = Math.hypot(player.x - proj.x, player.y - proj.y);
         if (pDist < player.snowballRadius + proj.radius + 10) {
-          // HIT!
-          const nx = proj.vx / Math.hypot(proj.vx, proj.vy);
-          const ny = proj.vy / Math.hypot(proj.vy, proj.vy);
+          // HIT! (Guarded against division by zero to prevent NaN position freeze)
+          const projSpeed = Math.hypot(proj.vx, proj.vy) || 0.001;
+          const nx = proj.vx / projSpeed;
+          const ny = proj.vy / projSpeed;
           const knockbackPower = (proj.radius * 0.52);
 
           player.kvx += nx * knockbackPower;
@@ -953,6 +957,14 @@ export class SnowballLogic {
   }
 
   updateParticles(dt) {
+    // Enforce max limits to maintain 60FPS on low-spec Chromebooks
+    if (this.particles.length > 50) {
+      this.particles.splice(0, this.particles.length - 50);
+    }
+    if (this.snowTracks.length > 35) {
+      this.snowTracks.splice(0, this.snowTracks.length - 35);
+    }
+
     // Regular particles
     for (let i = this.particles.length - 1; i >= 0; i--) {
       const p = this.particles[i];
@@ -1058,19 +1070,14 @@ export class SnowballLogic {
       ctx.stroke();
     }
 
-    // 2. Ice Island (Arena) with Depth & 3D Outer Rim
-    // Outer Water Drop Shadow
-    ctx.shadowColor = 'rgba(2, 132, 199, 0.45)';
-    ctx.shadowBlur = 24;
-
-    // Sub-ice Base Layer (Underwater depth)
+    // 2. Ice Island (Arena) with Depth & 3D Outer Rim (Optimized for Chromebooks, no expensive shadowBlur)
+    // Sub-ice Base Layer (Underwater depth ring)
     ctx.beginPath();
     ctx.arc(this.centerX, this.centerY + 8, this.currentRadius + 6, 0, Math.PI * 2);
     ctx.fillStyle = '#0284C7';
     ctx.fill();
 
     // Main Ice Surface Gradient
-    ctx.shadowBlur = 0;
     const iceGrad = ctx.createRadialGradient(
       this.centerX - 40, this.centerY - 40, 20,
       this.centerX, this.centerY, this.currentRadius
