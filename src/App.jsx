@@ -307,18 +307,23 @@ export default function App() {
               <span>이용수칙</span>
             </button>
 
-            {/* 🔊 Global Sound Mute Toggle Button */}
+            {/* 🔊 Beautiful Global Sound Mute Toggle Button */}
             <button
               onClick={handleToggleGlobalMute}
-              className={`shadow-md flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-bold transition-all ${
-                isMuted
-                  ? 'bg-rose-950/70 text-rose-300 border border-rose-500/40 hover:bg-rose-900/80'
-                  : 'bg-emerald-950/70 text-emerald-300 border border-emerald-500/40 hover:bg-emerald-900/80'
-              }`}
-              title={isMuted ? '전체 효과음 켜기' : '전체 효과음 끄기 (음소거)'}
+              className={`btn-sound-toggle shadow-md ${isMuted ? 'sound-off' : 'sound-on'}`}
+              title={isMuted ? '전체 효과음 켜기 (현재 음소거 상태)' : '전체 효과음 끄기 (현재 사운드 켜짐)'}
+              aria-label={isMuted ? '전체 효과음 켜기' : '전체 효과음 끄기'}
             >
-              {isMuted ? <VolumeX className="w-3.5 h-3.5 text-rose-400" /> : <Volume2 className="w-3.5 h-3.5 text-emerald-400" />}
-              <span>{isMuted ? '사운드 OFF' : '사운드 ON'}</span>
+              <span className={`sound-indicator-dot ${isMuted ? 'muted' : 'active'}`} />
+              {isMuted ? (
+                <VolumeX className="w-3.5 h-3.5" style={{ filter: 'drop-shadow(0 1px 2px rgba(0,0,0,0.3))' }} />
+              ) : (
+                <Volume2 className="w-3.5 h-3.5" style={{ filter: 'drop-shadow(0 1px 2px rgba(0,0,0,0.3))' }} />
+              )}
+              <span>사운드</span>
+              <span className={`sound-status-tag ${isMuted ? 'off' : 'on'}`}>
+                {isMuted ? 'OFF' : 'ON'}
+              </span>
             </button>
           </div>
         </div>
