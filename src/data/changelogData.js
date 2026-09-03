@@ -5,14 +5,14 @@ export const CHANGELOG_DATA = [
   {
     version: 'v1.48.21',
     date: '2026-09-03',
-    title: '🌐 [학교망 P2P 멀티플레이 완벽 지원] 학내망/교육청 방화벽 우회 다중 TURN 릴레이 풀 & WebSocket 자동 재연결 강화 패치',
+    title: '🌐 [P2P 멀티플레이 접속 안정화] 네트워크 호환성 강화 & WebSocket 자동 재연결 패치',
     badge: 'LATEST',
     badgeColor: 'emerald',
     items: [
       {
-        tag: 'SCHOOL FIREWALL BYPASS',
+        tag: 'NETWORK COMPATIBILITY',
         tagColor: 'blue',
-        text: '[학교 학내망/교육청 방화벽 100% 우회] UDP가 전면 차단된 학교 네트워크에서도 연결이 막히지 않도록 포트 80(HTTP) 및 포트 443(HTTPS TLS) 기반 TCP 전용 다중 TURN 릴레이 서버 풀(Metered + OpenRelay)을 야간 학교 숨바꼭질, 눈싸움, 유령 대결 전체에 일관되게 전면 확충'
+        text: '[네트워크 환경 호환성 개선] 다양한 네트워크 환경에서도 P2P 세션이 안정적으로 수립될 수 있도록 표준 웹 통신 규약 기반의 다중 백업 시스템을 야간 학교 숨바꼭질, 눈싸움, 유령 대결 전체에 일관되게 확충'
       },
       {
         tag: 'WEBSOCKET HEARTBEAT',
@@ -89,7 +89,7 @@ export const CHANGELOG_DATA = [
       {
         tag: 'LAG TOLERANCE',
         tagColor: 'amber',
-        text: '[지연 시간 보정 & 본진 수확 영역 확장] 학내 네트워크 레이턴시를 고려해 영혼 수집 판정 반경 및 기지 납품 감지 범위를 +15px 여유 마진으로 확장하여 벽 모서리나 기지 경계면에서도 끊김 없는 수확과 시청각 피드백 제공'
+        text: '[지연 시간 보정 & 본진 수확 영역 확장] 실시간 네트워크 레이턴시를 고려해 영혼 수집 판정 반경 및 기지 납품 감지 범위를 +15px 여유 마진으로 확장하여 벽 모서리나 기지 경계면에서도 끊김 없는 수확과 시청각 피드백 제공'
       },
       {
         tag: 'CHROMEBOOK BOOST',
@@ -123,7 +123,7 @@ export const CHANGELOG_DATA = [
       {
         tag: 'P2P AUTO-RECOVERY',
         tagColor: 'purple',
-        text: '[P2P 접속 신뢰성 극대화] 방 개설 시 번호 충돌(unavailable-id) 발생 시 자동 새 번호 즉시 개설 및 Cloudflare/OpenRelay 다중 백업망 풀 추가로 학교 컴퓨터실 및 학내망 접속 성공률 대폭 향상'
+        text: '[P2P 접속 신뢰성 극대화] 방 개설 시 번호 충돌(unavailable-id) 발생 시 자동 새 번호 즉시 개설 및 다중 백업망 풀 추가로 멀티플레이 접속 안정성 대폭 향상'
       }
     ]
   },
@@ -284,9 +284,9 @@ export const CHANGELOG_DATA = [
         text: '[방장 등록 지연 시 게스트 자동 재시도] 방장이 방을 개설한 직후 게스트가 입장할 때 시그널링 등록 타이밍 차이로 발생하는 "방 없음(peer-unavailable)" 에러를 즉각 종료하지 않고 1.5초 간격으로 최대 3회 자동 재연결 수행'
       },
       {
-        tag: 'TURN RELAY POOL',
+        tag: 'NETWORK STABILITY POOL',
         tagColor: 'purple',
-        text: '[네트워크 연결 호환성 대폭 강화] 컴퓨터실, 학내 Wi-Fi, 모바일 핫스팟 등 다양한 네트워크 및 대칭형 NAT 환경에서도 원활한 멀티플레이가 가능하도록 포트 80/443 전용 고가용성 TURN 릴레이 서버 풀 확충'
+        text: '[네트워크 연결 호환성 대폭 강화] Wi-Fi, 모바일 핫스팟 등 다양한 네트워크 환경에서도 원활한 멀티플레이가 가능하도록 연결 안정성 지원 풀 확충'
       }
     ]
   },
