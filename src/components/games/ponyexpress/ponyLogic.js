@@ -537,11 +537,18 @@ export class PonyGameLogic {
   // Draw Background Sky & Horizon
   drawBackground(ctx) {
     const stage = this.currentStage;
+    const sky = stage.skyGradient || stage.skyColors || ['#F59E0B', '#FDE68A', '#FEF3C7'];
 
     // Sky Gradient
     const skyGrad = ctx.createLinearGradient(0, 0, 0, 180);
-    skyGrad.addColorStop(0, stage.skyColors[0]);
-    skyGrad.addColorStop(1, stage.skyColors[1]);
+    if (sky.length >= 3) {
+      skyGrad.addColorStop(0, sky[0]);
+      skyGrad.addColorStop(0.5, sky[1]);
+      skyGrad.addColorStop(1, sky[2]);
+    } else {
+      skyGrad.addColorStop(0, sky[0]);
+      skyGrad.addColorStop(1, sky[1] || sky[0]);
+    }
     ctx.fillStyle = skyGrad;
     ctx.fillRect(0, 0, CANVAS_WIDTH, 180);
 

@@ -37,7 +37,14 @@ export default function PonyExpressGame({ onScoreSubmitted }) {
 
   // Initialize Game Logic instance
   useEffect(() => {
-    logicRef.current = new PonyGameLogic();
+    const logic = new PonyGameLogic();
+    logicRef.current = logic;
+    if (canvasRef.current) {
+      const ctx = canvasRef.current.getContext('2d');
+      if (ctx) {
+        logic.draw(ctx);
+      }
+    }
   }, []);
 
   const toggleSound = () => {

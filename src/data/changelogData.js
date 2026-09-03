@@ -3,11 +3,30 @@
 
 export const CHANGELOG_DATA = [
   {
+    version: 'v1.48.22',
+    date: '2026-09-03',
+    title: '🐎 [도촌 포니 익스프레스] 캔버스 그래픽 렌더링 엔진 오류 해결 & 화면 미노출 긴급 핫픽스',
+    badge: 'LATEST',
+    badgeColor: 'emerald',
+    items: [
+      {
+        tag: 'BUG FIX',
+        tagColor: 'rose',
+        text: '[캔버스 렌더링 예외 완전 해결] 게임 시작 시 배경 하늘 그라데이션 참조 프로퍼티(skyGradient) 호환성 오류로 인해 캔버스 드로우 루프가 중단되던 버그를 완벽히 수정하여 사막·협곡·설원 그래픽 및 말이 정상 출력되도록 조치'
+      },
+      {
+        tag: 'GRAPHICS & INITIAL DRAW',
+        tagColor: 'amber',
+        text: '[초기 프레임 프리뷰 안정화] 게임 시작 전 대기 화면에서도 서부 황무지 배경 및 캐릭터가 즉시 렌더링되도록 마운트 초기화 렌더 파이프라인 보강'
+      }
+    ]
+  },
+  {
     version: 'v1.48.21',
     date: '2026-09-03',
     title: '🌐 [P2P 멀티플레이 접속 안정화] 네트워크 호환성 강화 & WebSocket 자동 재연결 패치',
-    badge: 'LATEST',
-    badgeColor: 'emerald',
+    badge: 'UPDATE',
+    badgeColor: 'blue',
     items: [
       {
         tag: 'NETWORK COMPATIBILITY',
