@@ -61,6 +61,9 @@ export default function PacManGame({ onScoreSubmitted }) {
 
   useEffect(() => {
     const handleKeyDown = (e) => {
+      if (e.target && (e.target.tagName === 'INPUT' || e.target.tagName === 'TEXTAREA')) {
+        return;
+      }
       if (['ArrowUp', 'KeyW'].includes(e.code)) {
         e.preventDefault(); setDirection(0, -1);
       } else if (['ArrowDown', 'KeyS'].includes(e.code)) {

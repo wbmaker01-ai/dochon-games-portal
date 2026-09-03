@@ -4,17 +4,17 @@
 // 2. [New Release Boost]: Newly released games get a strategic initial boost
 // 3. [User Engagement]: Local play counts & favorite status
 
-export const GAME_RELEASE_METADATA = {
-  popcorn: { releaseOrder: 9, icon: '🍿', isNew: true },
-  colortile: { releaseOrder: 8, icon: '🧩', isNew: true },
-  gnome: { releaseOrder: 7, icon: '🌿', isNew: true },
-  baseball: { releaseOrder: 6, icon: '⚾', isNew: false },
-  minesweeper: { releaseOrder: 5, icon: '💣', isNew: false },
-  solitaire: { releaseOrder: 4, icon: '🃏', isNew: false },
-  snake: { releaseOrder: 3, icon: '🐍', isNew: false },
-  dino: { releaseOrder: 2, icon: '🦖', isNew: false },
-  pacman: { releaseOrder: 1, icon: '🟡', isNew: false },
-};
+import { PLAYABLE_GAMES } from '../data/gamesData';
+
+export const GAME_RELEASE_METADATA = PLAYABLE_GAMES.reduce((acc, game) => {
+  acc[game.id] = {
+    releaseOrder: game.releaseOrder || 1,
+    icon: game.iconEmoji || '🎮',
+    isNew: Boolean(game.isNew)
+  };
+  return acc;
+}, {});
+
 
 /**
  * Calculates the hybrid popularity score for a single game.

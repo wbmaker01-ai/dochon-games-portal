@@ -335,6 +335,9 @@ export default function CricketGame({ onScoreSubmitted }) {
   // =========================================================================
   useEffect(() => {
     const handleKeyDown = (e) => {
+      if (e.target && (e.target.tagName === 'INPUT' || e.target.tagName === 'TEXTAREA')) {
+        return;
+      }
       if (e.code === 'Space' || e.code === 'Enter' || e.code === 'ArrowUp') {
         e.preventDefault();
         handleSwing();

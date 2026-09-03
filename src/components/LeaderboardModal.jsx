@@ -22,25 +22,24 @@ export default function LeaderboardModal({ isOpen, onClose, activeTab = 'pacman'
   useEffect(() => {
     if (isOpen && activeTab) {
       setCurrentTab(activeTab);
-      loadScores(activeTab);
     }
   }, [isOpen, activeTab]);
 
   useEffect(() => {
     if (isOpen && currentTab) {
-      loadScores(currentTab);
+      loadScores(currentTab, true);
       const interval = setInterval(() => {
-        loadScores(currentTab);
-      }, 6000);
+        loadScores(currentTab, false);
+      }, 8000);
       return () => clearInterval(interval);
     }
   }, [isOpen, currentTab]);
 
-  const loadScores = async (tabToFetch = currentTab) => {
-    setLoading(true);
+  const loadScores = async (tabToFetch = currentTab, showLoading = true) => {
+    if (showLoading) setLoading(true);
     const data = await getLeaderboardFromDB(tabToFetch);
     setScores(data);
-    setLoading(false);
+    if (showLoading) setLoading(false);
   };
 
   // Secret Hidden Trigger on Left Trophy Circle (Seamless Graphic)
@@ -268,70 +267,12 @@ export default function LeaderboardModal({ isOpen, onClose, activeTab = 'pacman'
         <div className="leaderboard-tab-container">
           {PLAYABLE_GAMES.map(game => {
             const isActive = currentTab === game.id;
-            let iconEmoji = '🕹️';
-            if (game.id === 'pacman') iconEmoji = '🟡';
-            if (game.id === 'dino') iconEmoji = '🦖';
-            if (game.id === 'snake') iconEmoji = '🐍';
-            if (game.id === 'solitaire') iconEmoji = '🃏';
-            if (game.id === 'minesweeper') iconEmoji = '💣';
-            if (game.id === 'baseball') iconEmoji = '⚾';
-            if (game.id === 'gnome') iconEmoji = '🌿';
-            if (game.id === 'colortile') iconEmoji = '🧩';
-            if (game.id === 'popcorn') iconEmoji = '🍿';
-            if (game.id === 'tictactoe') iconEmoji = '🍩';
-            if (game.id === 'champion') iconEmoji = '🥋';
-            if (game.id === 'cricket') iconEmoji = '🏏';
-            if (game.id === 'ponyexpress') iconEmoji = '🐎';
-            if (game.id === 'jerrylawson') iconEmoji = '🕹️';
-            if (game.id === 'magic') iconEmoji = '🧙';
-            if (game.id === 'fruitmerge') iconEmoji = '🍉';
-            if (game.id === 'brickbreaker') iconEmoji = '🧱';
-            if (game.id === 'skyjumper') iconEmoji = '🚀';
-            if (game.id === 'kidscoding') iconEmoji = '🥕';
-            if (game.id === 'bubbletea') iconEmoji = '🧋';
-            if (game.id === 'pizza') iconEmoji = '🍕';
-            if (game.id === 'earthbee') iconEmoji = '🐝';
-            if (game.id === 'olympics') iconEmoji = '🏅';
-            if (game.id === 'pangolin') iconEmoji = '🦔';
-            if (game.id === 'roswell') iconEmoji = '🛸';
-            if (game.id === 'petanque') iconEmoji = '⚪';
-            if (game.id === 'halfmoon') iconEmoji = '🌓';
-            if (game.id === 'panipuri') iconEmoji = '🫓';
-            if (game.id === 'memory') iconEmoji = '🧠';
-            if (game.id === 'ghoulduel') iconEmoji = '👻';
-            if (game.id === 'snowball') iconEmoji = '☃️';
-
-            // Remove '도촌 ' prefix for compact and clean layout
+            const iconEmoji = game.iconEmoji || '🎮';
             const shortTitle = game.title.replace(/^도촌\s*/, '');
-
-            let activeCustomStyle = {};
-            if (isActive) {
-              if (game.id === 'pacman') activeCustomStyle = { background: 'linear-gradient(135deg, #FBBF24, #F59E0B)', color: '#78350F' };
-              else if (game.id === 'dino') activeCustomStyle = { background: 'linear-gradient(135deg, #34D399, #10B981)', color: '#064E3B' };
-              else if (game.id === 'snake') activeCustomStyle = { background: 'linear-gradient(135deg, #10B981, #059669)', color: '#FFFFFF' };
-              else if (game.id === 'solitaire') activeCustomStyle = { background: 'linear-gradient(135deg, #F59E0B, #D97706)', color: '#0F172A' };
-              else if (game.id === 'minesweeper') activeCustomStyle = { background: 'linear-gradient(135deg, #10B981, #047857)', color: '#FFFFFF' };
-              else if (game.id === 'baseball') activeCustomStyle = { background: 'linear-gradient(135deg, #38BDF8, #0284C7)', color: '#FFFFFF' };
-              else if (game.id === 'gnome') activeCustomStyle = { background: 'linear-gradient(135deg, #48BB78, #2F855A)', color: '#FFFFFF' };
-              else if (game.id === 'colortile') activeCustomStyle = { background: 'linear-gradient(135deg, #EC4899, #8B5CF6)', color: '#FFFFFF' };
-              else if (game.id === 'popcorn') activeCustomStyle = { background: 'linear-gradient(135deg, #F59E0B, #EF4444)', color: '#FFFFFF' };
-              else if (game.id === 'tictactoe') activeCustomStyle = { background: 'linear-gradient(135deg, #F472B6, #FB7185)', color: '#FFFFFF' };
-              else if (game.id === 'champion') activeCustomStyle = { background: 'linear-gradient(135deg, #6366F1, #4F46E5)', color: '#FFFFFF' };
-              else if (game.id === 'cricket') activeCustomStyle = { background: 'linear-gradient(135deg, #10B981, #059669)', color: '#FFFFFF' };
-              else if (game.id === 'ponyexpress') activeCustomStyle = { background: 'linear-gradient(135deg, #D97706, #B45309)', color: '#FFFFFF' };
-              else if (game.id === 'jerrylawson') activeCustomStyle = { background: 'linear-gradient(135deg, #8B5CF6, #6D28D9)', color: '#FFFFFF' };
-              else if (game.id === 'magic') activeCustomStyle = { background: 'linear-gradient(135deg, #9333EA, #4F46E5)', color: '#FFFFFF' };
-              else if (game.id === 'fruitmerge') activeCustomStyle = { background: 'linear-gradient(135deg, #10B981, #EF4444)', color: '#FFFFFF' };
-              else if (game.id === 'brickbreaker') activeCustomStyle = { background: 'linear-gradient(135deg, #0284C7, #0369A1)', color: '#FFFFFF' };
-              else if (game.id === 'skyjumper') activeCustomStyle = { background: 'linear-gradient(135deg, #0EA5E9, #6366F1)', color: '#FFFFFF' };
-              else if (game.id === 'kidscoding') activeCustomStyle = { background: 'linear-gradient(135deg, #10B981, #3B82F6)', color: '#FFFFFF' };
-              else if (game.id === 'bubbletea') activeCustomStyle = { background: 'linear-gradient(135deg, #F59E0B, #8B5CF6)', color: '#FFFFFF' };
-              else if (game.id === 'pizza') activeCustomStyle = { background: 'linear-gradient(135deg, #F59E0B, #EF4444)', color: '#FFFFFF' };
-              else if (game.id === 'earthbee') activeCustomStyle = { background: 'linear-gradient(135deg, #FBBF24, #10B981)', color: '#064E3B' };
-              else if (game.id === 'olympics') activeCustomStyle = { background: 'linear-gradient(135deg, #F59E0B, #D97706)', color: '#FFFFFF' };
-              else if (game.id === 'ghoulduel') activeCustomStyle = { background: 'linear-gradient(135deg, #10B981, #8B5CF6)', color: '#FFFFFF' };
-              else if (game.id === 'snowball') activeCustomStyle = { background: 'linear-gradient(135deg, #0284C7, #38BDF8)', color: '#FFFFFF' };
-            }
+            const textColor = ['pacman', 'dino', 'earthbee'].includes(game.id) ? '#78350F' : '#FFFFFF';
+            const activeCustomStyle = isActive
+              ? { background: game.themeGradient || 'linear-gradient(135deg, #F59E0B, #D97706)', color: textColor }
+              : {};
 
             return (
               <button

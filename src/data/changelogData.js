@@ -3,11 +3,45 @@
 
 export const CHANGELOG_DATA = [
   {
+    version: 'v1.49.0',
+    date: '2026-09-03',
+    title: '⚡ [포털 전면 리팩토링 & 대규모 성능 최적화] 전 게임 점수 입력 보호, 초고속 1회 일괄 조회, 코드 분할, 실시간 검색 및 PWA 지원',
+    badge: 'LATEST',
+    badgeColor: 'emerald',
+    items: [
+      {
+        tag: 'BUG FIX',
+        tagColor: 'rose',
+        text: '[점수 등록 키보드 차단 버그 전면 해결] 게임 종료 후 닉네임 입력 시 스페이스바/WASD/방향키가 게임 조작으로 오작동하여 글자가 지워지거나 게임이 재시작되던 현상을 전체 32개 게임 전수 조사 및 입력 포커스 가드(Input Focus Guard) 적용으로 완벽 해결'
+      },
+      {
+        tag: 'NETWORK SPEEDUP',
+        tagColor: 'emerald',
+        text: '[클라우드 DB 1회 일괄 조회(Batch Fetch) 전환] 포털 진입 시 기존 32회 순차 HTTP 호출을 1회 일괄 조회로 전면 개편하여 초기 로딩 시간을 대폭 단축 (~6초 → ~0.2초)'
+      },
+      {
+        tag: 'CODE SPLITTING',
+        tagColor: 'blue',
+        text: '[React.lazy() 동적 임포트 & GameErrorBoundary 도입] 32개 게임 컴포넌트를 동적 청크로 분할하여 메인 포털 번들 용량을 경량화하고, 게임 런타임 오류 시 포털 전체 붕괴를 방지하는 안전 에러 바운더리 구축'
+      },
+      {
+        tag: 'UX & SEARCH',
+        tagColor: 'purple',
+        text: '[실시간 게임 검색창 & 전체 사운드 토글 추가] 포털 메인에 실시간 검색창을 추가하여 원하는 게임을 즉시 검색할 수 있으며, 헤더에 전역 사운드 음소거(Mute) 스위치를 배치하여 도서관 및 수업 환경 편의성 대폭 강화'
+      },
+      {
+        tag: 'PWA & METADATA',
+        tagColor: 'amber',
+        text: '[PWA Standalone 앱 모드 & 게임 메타데이터 일원화] 홈 화면 추가 시 독립 앱으로 실행되는 Web App Manifest 규격 적용 및 게임 메타데이터(아이콘, 테마, 득점 단위) 통합 관리 체계 구축'
+      }
+    ]
+  },
+  {
     version: 'v1.48.22',
     date: '2026-09-03',
     title: '🐎 [도촌 포니 익스프레스] 캔버스 그래픽 렌더링 엔진 오류 해결 & 화면 미노출 긴급 핫픽스',
-    badge: 'LATEST',
-    badgeColor: 'emerald',
+    badge: 'UPDATE',
+    badgeColor: 'blue',
     items: [
       {
         tag: 'BUG FIX',

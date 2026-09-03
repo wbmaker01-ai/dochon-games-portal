@@ -317,12 +317,18 @@ export default function BubbleTeaGame({ onScoreSubmitted }) {
   // Keyboard Space Bar Controls
   useEffect(() => {
     const handleKeyDown = (e) => {
+      if (e.target && (e.target.tagName === 'INPUT' || e.target.tagName === 'TEXTAREA')) {
+        return;
+      }
       if (e.code === 'Space' && !e.repeat) {
         e.preventDefault();
         startPouring();
       }
     };
     const handleKeyUp = (e) => {
+      if (e.target && (e.target.tagName === 'INPUT' || e.target.tagName === 'TEXTAREA')) {
+        return;
+      }
       if (e.code === 'Space') {
         e.preventDefault();
         stopPouring();

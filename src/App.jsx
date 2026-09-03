@@ -1,47 +1,52 @@
-import React, { useState, useEffect, useMemo } from 'react';
-import PacManGame from './components/games/pacman/PacManGame';
-import DinoGame from './components/games/dino/DinoGame';
-import SnakeGame from './components/games/snake/SnakeGame';
-import SolitaireGame from './components/games/solitaire/SolitaireGame';
-import MinesweeperGame from './components/games/minesweeper/MinesweeperGame';
-import BaseballGame from './components/games/baseball/BaseballGame';
-import GnomeGame from './components/games/gnome/GnomeGame';
-import ColorTileGame from './components/games/colortile/ColorTileGame';
-import PopcornGame from './components/games/popcorn/PopcornGame';
-import DonutTicTacToeGame from './components/games/donut_tictactoe/DonutTicTacToeGame';
-import ChampionGame from './components/games/champion/ChampionGame';
-import CricketGame from './components/games/cricket/CricketGame';
-import PonyExpressGame from './components/games/ponyexpress/PonyExpressGame';
-import JerryLawsonGame from './components/games/jerrylawson/JerryLawsonGame';
-import MagicCatGame from './components/games/magic/MagicCatGame';
-import FruitMergeGame from './components/games/fruitmerge/FruitMergeGame';
-import BrickBreakerGame from './components/games/brickbreaker/BrickBreakerGame';
-import SkyJumperGame from './components/games/skyjumper/SkyJumperGame';
-import KidsCodingGame from './components/games/kidscoding/KidsCodingGame';
-import BubbleTeaGame from './components/games/bubbletea/BubbleTeaGame';
-import PizzaGame from './components/games/pizza/PizzaGame';
-import EarthBeeGame from './components/games/earthbee/EarthBeeGame';
-import OlympicsGame from './components/games/olympics/OlympicsGame';
-import PangolinGame from './components/games/pangolin/PangolinGame';
-import RoswellGame from './components/games/roswell/RoswellGame';
-import PetanqueGame from './components/games/petanque/PetanqueGame';
-import HalfMoonGame from './components/games/halfmoon/HalfMoonGame';
-import PaniPuriGame from './components/games/panipuri/PaniPuriGame';
-import MemoryGame from './components/games/memory/MemoryGame';
-import GhoulDuelGame from './components/games/ghoulduel/GhoulDuelGame';
-import SnowballGame from './components/games/snowball/SnowballGame';
-import SchoolTagGame from './components/games/schooltag/SchoolTagGame';
+import React, { useState, useEffect, useMemo, lazy, Suspense } from 'react';
 import GameCard from './components/GameCard';
 import LeaderboardModal from './components/LeaderboardModal';
 import ChangelogModal from './components/ChangelogModal';
 import GuideModal from './components/GuideModal';
 import RulesNoticeModal from './components/RulesNoticeModal';
+import GameErrorBoundary from './components/GameErrorBoundary';
 import { PLAYABLE_GAMES, COMING_SOON_GAMES, CATEGORY_DEFINITIONS } from './data/gamesData';
 import { getLatestVersion } from './data/changelogData';
-import { getLeaderboardFromDB } from './utils/leaderboardApi';
+import { getAllLeaderboardsFromDB } from './utils/leaderboardApi';
 import { getRankedPlayableGames } from './utils/rankingAlgorithm';
+import { soundFx } from './utils/audio';
 import { haptics } from './utils/haptics';
-import { Trophy, X, Lock, Gamepad2, Dices, Heart, Crown, History, HelpCircle, Smartphone, RotateCcw, ShieldCheck } from 'lucide-react';
+import { Trophy, X, Lock, Gamepad2, Dices, Heart, Crown, History, HelpCircle, Smartphone, RotateCcw, ShieldCheck, Search, Volume2, VolumeX } from 'lucide-react';
+
+const GAME_COMPONENTS = {
+  pacman: lazy(() => import('./components/games/pacman/PacManGame')),
+  dino: lazy(() => import('./components/games/dino/DinoGame')),
+  snake: lazy(() => import('./components/games/snake/SnakeGame')),
+  solitaire: lazy(() => import('./components/games/solitaire/SolitaireGame')),
+  minesweeper: lazy(() => import('./components/games/minesweeper/MinesweeperGame')),
+  baseball: lazy(() => import('./components/games/baseball/BaseballGame')),
+  gnome: lazy(() => import('./components/games/gnome/GnomeGame')),
+  colortile: lazy(() => import('./components/games/colortile/ColorTileGame')),
+  popcorn: lazy(() => import('./components/games/popcorn/PopcornGame')),
+  tictactoe: lazy(() => import('./components/games/donut_tictactoe/DonutTicTacToeGame')),
+  champion: lazy(() => import('./components/games/champion/ChampionGame')),
+  cricket: lazy(() => import('./components/games/cricket/CricketGame')),
+  ponyexpress: lazy(() => import('./components/games/ponyexpress/PonyExpressGame')),
+  jerrylawson: lazy(() => import('./components/games/jerrylawson/JerryLawsonGame')),
+  magic: lazy(() => import('./components/games/magic/MagicCatGame')),
+  fruitmerge: lazy(() => import('./components/games/fruitmerge/FruitMergeGame')),
+  brickbreaker: lazy(() => import('./components/games/brickbreaker/BrickBreakerGame')),
+  skyjumper: lazy(() => import('./components/games/skyjumper/SkyJumperGame')),
+  kidscoding: lazy(() => import('./components/games/kidscoding/KidsCodingGame')),
+  bubbletea: lazy(() => import('./components/games/bubbletea/BubbleTeaGame')),
+  pizza: lazy(() => import('./components/games/pizza/PizzaGame')),
+  earthbee: lazy(() => import('./components/games/earthbee/EarthBeeGame')),
+  olympics: lazy(() => import('./components/games/olympics/OlympicsGame')),
+  pangolin: lazy(() => import('./components/games/pangolin/PangolinGame')),
+  roswell: lazy(() => import('./components/games/roswell/RoswellGame')),
+  petanque: lazy(() => import('./components/games/petanque/PetanqueGame')),
+  halfmoon: lazy(() => import('./components/games/halfmoon/HalfMoonGame')),
+  panipuri: lazy(() => import('./components/games/panipuri/PaniPuriGame')),
+  memory: lazy(() => import('./components/games/memory/MemoryGame')),
+  ghoulduel: lazy(() => import('./components/games/ghoulduel/GhoulDuelGame')),
+  snowball: lazy(() => import('./components/games/snowball/SnowballGame')),
+  schooltag: lazy(() => import('./components/games/schooltag/SchoolTagGame')),
+};
 
 export default function App() {
   const [activeGame, setActiveGame] = useState(null);
@@ -61,6 +66,8 @@ export default function App() {
   const [isGameOrientationDismissed, setIsGameOrientationDismissed] = useState(false);
   const [leaderboardTab, setLeaderboardTab] = useState('pacman');
   const [filterCategory, setFilterCategory] = useState('ALL');
+  const [searchQuery, setSearchQuery] = useState('');
+  const [isMuted, setIsMuted] = useState(() => soundFx.muted);
   const [favorites, setFavorites] = useState(() => {
     try {
       const saved = localStorage.getItem('dochon_favorites');
@@ -85,18 +92,21 @@ export default function App() {
   const [leaderboardCounts, setLeaderboardCounts] = useState({});
 
   useEffect(() => {
-    // Fetch top scores and activity counts directly from Cloud DB
+    // Fetch top scores and activity counts directly from Cloud DB in a single batch request
     async function fetchTopScores() {
       const topResults = {};
       const countResults = {};
-      for (const game of PLAYABLE_GAMES) {
-        try {
-          const list = await getLeaderboardFromDB(game.id);
+      try {
+        const allLeaderboards = await getAllLeaderboardsFromDB();
+        for (const game of PLAYABLE_GAMES) {
+          const list = allLeaderboards[game.id];
           if (list && list.length > 0) {
             topResults[game.id] = list[0];
             countResults[game.id] = list.length;
           }
-        } catch (e) {}
+        }
+      } catch (e) {
+        console.warn('[App] Batch leaderboard fetch error:', e);
       }
       setTopScores(topResults);
       setLeaderboardCounts(countResults);
@@ -159,12 +169,23 @@ export default function App() {
   const allGames = [...rankedPlayableGames, ...COMING_SOON_GAMES];
 
   const filterGame = (game) => {
+    // 1. Category filter
     if (filterCategory === 'FAVORITES') {
-      return favorites.includes(game.id);
+      if (!favorites.includes(game.id)) return false;
+    } else if (filterCategory !== 'ALL') {
+      if (game.category !== filterCategory) return false;
     }
-    if (filterCategory !== 'ALL') {
-      return game.category === filterCategory;
+
+    // 2. Real-time Search Query filter (supports Korean title, English title, description, category)
+    if (searchQuery.trim()) {
+      const q = searchQuery.trim().toLowerCase();
+      const matchTitle = game.title && game.title.toLowerCase().includes(q);
+      const matchEng = game.englishTitle && game.englishTitle.toLowerCase().includes(q);
+      const matchDesc = game.description && game.description.toLowerCase().includes(q);
+      const matchCat = game.category && game.category.toLowerCase().includes(q);
+      if (!matchTitle && !matchEng && !matchDesc && !matchCat) return false;
     }
+
     return true;
   };
 
@@ -176,6 +197,12 @@ export default function App() {
     if (catId === 'ALL') return allGames.length;
     if (catId === 'FAVORITES') return favorites.length;
     return allGames.filter(g => g.category === catId).length;
+  };
+
+  const handleToggleGlobalMute = () => {
+    const nextMuted = soundFx.toggleMute();
+    setIsMuted(nextMuted);
+    try { haptics.light(); } catch (e) {}
   };
 
   const openInPageLeaderboardModal = (gameKey = 'pacman') => {
@@ -197,7 +224,7 @@ export default function App() {
 
   const featuredGame = PLAYABLE_GAMES[featuredGameIndex] || PLAYABLE_GAMES[0];
   const featuredChampion = topScores[featuredGame.id] || { name: '도촌 학생', score: 0 };
-  const featuredScoreUnit = featuredGame.id === 'dino' ? 'm' : '점';
+  const featuredScoreUnit = featuredGame.scoreUnit || (featuredGame.id === 'dino' ? 'm' : '점');
 
   const getChallengeBtnText = (game) => {
     if (game.id === 'pacman') return '🔥 팩맨 챔피언에 도전하기';
@@ -227,7 +254,7 @@ export default function App() {
           </p>
         </div>
 
-        {/* Quick Action Button Toolbar: Random Game, School Leaderboard, Update History, Guide & Rules */}
+        {/* Quick Action Button Toolbar: Random Game, School Leaderboard, Update History, Guide, Rules & Sound Mute */}
         <div className="portal-search-row">
           <div className="portal-header-btn-row">
             {/* 🎲 Lucky Random Pick Button */}
@@ -279,6 +306,20 @@ export default function App() {
               <ShieldCheck className="w-3.5 h-3.5 text-amber-400" />
               <span>이용수칙</span>
             </button>
+
+            {/* 🔊 Global Sound Mute Toggle Button */}
+            <button
+              onClick={handleToggleGlobalMute}
+              className={`shadow-md flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-bold transition-all ${
+                isMuted
+                  ? 'bg-rose-950/70 text-rose-300 border border-rose-500/40 hover:bg-rose-900/80'
+                  : 'bg-emerald-950/70 text-emerald-300 border border-emerald-500/40 hover:bg-emerald-900/80'
+              }`}
+              title={isMuted ? '전체 효과음 켜기' : '전체 효과음 끄기 (음소거)'}
+            >
+              {isMuted ? <VolumeX className="w-3.5 h-3.5 text-rose-400" /> : <Volume2 className="w-3.5 h-3.5 text-emerald-400" />}
+              <span>{isMuted ? '사운드 OFF' : '사운드 ON'}</span>
+            </button>
           </div>
         </div>
       </header>
@@ -322,6 +363,60 @@ export default function App() {
         </div>
       </section>
 
+      {/* 🔍 Realtime Search Input Bar */}
+      <div style={{ maxWidth: '640px', margin: '0 auto 16px auto', padding: '0 16px', width: '100%' }}>
+        <div style={{
+          position: 'relative',
+          display: 'flex',
+          alignItems: 'center',
+          backgroundColor: 'rgba(15, 23, 42, 0.8)',
+          border: '1.5px solid rgba(255, 255, 255, 0.15)',
+          borderRadius: '16px',
+          padding: '8px 14px',
+          backdropFilter: 'blur(10px)',
+          boxShadow: '0 4px 20px rgba(0, 0, 0, 0.35)'
+        }}>
+          <Search style={{ width: '18px', height: '18px', color: '#FBBF24', marginRight: '10px', flexShrink: 0 }} />
+          <input
+            type="text"
+            value={searchQuery}
+            onChange={(e) => setSearchQuery(e.target.value)}
+            placeholder="찾고 싶은 게임을 검색해보세요 (예: 팩맨, 야구, 달리기, 틱택토)..."
+            style={{
+              width: '100%',
+              backgroundColor: 'transparent',
+              border: 'none',
+              outline: 'none',
+              color: '#FFFFFF',
+              fontSize: '13px',
+              fontWeight: 600
+            }}
+          />
+          {searchQuery && (
+            <button
+              onClick={() => setSearchQuery('')}
+              style={{
+                background: 'rgba(255, 255, 255, 0.15)',
+                border: 'none',
+                borderRadius: '50%',
+                width: '22px',
+                height: '22px',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                color: '#CBD5E1',
+                cursor: 'pointer',
+                marginLeft: '8px',
+                flexShrink: 0
+              }}
+              title="검색어 지우기"
+            >
+              <X style={{ width: '13px', height: '13px' }} />
+            </button>
+          )}
+        </div>
+      </div>
+
       {/* 3. Centered Category Filter Chips Bar with Pictograms & Counters */}
       <nav className="portal-nav">
         <div className="portal-categories">
@@ -348,6 +443,42 @@ export default function App() {
 
       {/* 4. Centered Main Grid Container */}
       <main className="portal-main">
+        {/* Search Empty State */}
+        {searchQuery.trim() && filteredPlayable.length === 0 && filteredComingSoon.length === 0 && (
+          <div style={{
+            textAlign: 'center',
+            padding: '48px 20px',
+            backgroundColor: 'rgba(15, 23, 42, 0.6)',
+            borderRadius: '20px',
+            border: '1px dashed rgba(255, 255, 255, 0.15)',
+            margin: '24px auto',
+            maxWidth: '500px'
+          }}>
+            <div style={{ fontSize: '32px', marginBottom: '12px' }}>🔍</div>
+            <h3 style={{ fontSize: '16px', fontWeight: 800, color: '#F8FAFC', marginBottom: '6px' }}>
+              '{searchQuery}' 검색 결과가 없습니다
+            </h3>
+            <p style={{ fontSize: '12px', color: '#94A3B8', marginBottom: '16px' }}>
+              게임 제목, 한글/영문 키워드, 카테고리로 다시 검색해보세요.
+            </p>
+            <button
+              onClick={() => setSearchQuery('')}
+              style={{
+                padding: '8px 16px',
+                borderRadius: '12px',
+                backgroundColor: '#334155',
+                color: '#F8FAFC',
+                fontSize: '12px',
+                fontWeight: 700,
+                border: 'none',
+                cursor: 'pointer'
+              }}
+            >
+              전체 게임 목록 보기
+            </button>
+          </div>
+        )}
+
         {/* SECTION 1: PLAYABLE GAMES */}
         {filteredPlayable.length > 0 && (
           <section className="portal-section">
@@ -450,38 +581,10 @@ export default function App() {
             <div className="game-modal-header">
               <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
                 <span style={{ fontSize: '1.05rem', fontWeight: 900, color: '#FBBF24' }}>
-                  {activeGame === 'pacman' && '🕹️ 도촌 팩맨 (DOCHON PAC-MAN)'}
-                  {activeGame === 'dino' && '🦖 도촌 공룡 달리기 (DOCHON DINO RUN)'}
-                  {activeGame === 'snake' && '🐍 도촌 스네이크 (DOCHON SNAKE MASTER)'}
-                  {activeGame === 'solitaire' && '🃏 도촌 솔리테어 (DOCHON SOLITAIRE)'}
-                  {activeGame === 'minesweeper' && '💣 도촌 지뢰찾기 (DOCHON MINESWEEPER)'}
-                  {activeGame === 'baseball' && '⚾ 도촌 야구왕 (DOCHON BASEBALL KING)'}
-                  {activeGame === 'gnome' && '🌿 도촌 정원 요정 (DOCHON GARDEN GNOMES)'}
-                  {activeGame === 'colortile' && '🧩 도촌 컬러 타일 (DOCHON COLOR TILE)'}
-                  {activeGame === 'popcorn' && '🍿 도촌 팝콘 (DOCHON POPCORN SURVIVAL)'}
-                  {activeGame === 'tictactoe' && '🍩 도촌 도넛 틱택토 (DONUT TIC-TAC-TOE)'}
-                  {activeGame === 'champion' && '🏆 도촌 챔피언 아일랜드 (CHAMPION ISLAND)'}
-                  {activeGame === 'cricket' && '🏏 도촌 크리켓 (DOCHON CRICKET)'}
-                  {activeGame === 'ponyexpress' && '🐎 도촌 포니 익스프레스 (PONY EXPRESS)'}
-                  {activeGame === 'jerrylawson' && '🕹️ 도촌 제리 로슨 (JERRY LAWSON)'}
-                  {activeGame === 'magic' && '🧙 도촌 마법 고양이 (MAGIC CAT ACADEMY)'}
-                  {activeGame === 'fruitmerge' && '🍉 도촌 과일 합치기 (DOCHON FRUIT MERGE)'}
-                  {activeGame === 'brickbreaker' && '🧱 도촌 벽돌 격파왕 (DOCHON BRICK BREAKER)'}
-                  {activeGame === 'skyjumper' && '🚀 도촌 스카이 점퍼 (DOCHON SKY JUMPER)'}
-                  {activeGame === 'kidscoding' && '🐰 도촌 코딩 토끼 (DOCHON KIDS CODING)'}
-                  {activeGame === 'bubbletea' && '🧋 도촌 버블티 카페 (DOCHON BUBBLE TEA CAFE)'}
-                  {activeGame === 'pizza' && '🍕 도촌 피자 마스터 (DOCHON PIZZA MASTER)'}
-                  {activeGame === 'earthbee' && '🐝 도촌 꿀벌의 비행 (DOCHON EARTH BEE)'}
-                  {activeGame === 'olympics' && '🏅 도촌 미니 올림픽 (DOCHON MINI OLYMPICS)'}
-                  {activeGame === 'pangolin' && '🦔 도촌 천산갑의 모험 (PANGOLIN ADVENTURE)'}
-                  {activeGame === 'roswell' && '🛸 도촌 UFO 탈출작전 (DOCHON ROSWELL)'}
-                  {activeGame === 'petanque' && '🎯 도촌 페탕크 (DOCHON PETANQUE)'}
-                  {activeGame === 'halfmoon' && '🌙 도촌 달맞이 (DOCHON HALF MOON)'}
-                  {activeGame === 'panipuri' && '🫓 도촌 파니 푸리 (DOCHON PANI PURI)'}
-                  {activeGame === 'memory' && '🧠 도촌 기억력 마스터 (DOCHON MEMORY MASTER)'}
-                  {activeGame === 'ghoulduel' && '👻 도촌 영혼 대결 (DOCHON GHOUL DUEL)'}
-                  {activeGame === 'snowball' && '☃️ 도촌 눈싸움 서바이벌 (DOCHON SNOWBALL)'}
-                  {activeGame === 'schooltag' && '🔦 도촌 야간 학교 숨바꼭질 (DOCHON SCHOOL TAG)'}
+                  {(() => {
+                    const g = PLAYABLE_GAMES.find(item => item.id === activeGame);
+                    return g ? `${g.iconEmoji || '🎮'} ${g.title} (${g.englishTitle || g.title})` : '도촌 게임';
+                  })()}
                 </span>
                 <span style={{
                   backgroundColor: 'rgba(251, 191, 36, 0.2)',
@@ -510,7 +613,7 @@ export default function App() {
               </button>
             </div>
 
-            {/* Mobile / Tablet In-Game Landscape Orientation Advice Toast (개선안 2) */}
+            {/* Mobile / Tablet In-Game Landscape Orientation Advice Toast */}
             {!isGameOrientationDismissed && (
               <div className="in-game-orientation-toast">
                 <div className="in-game-orientation-toast-content">
@@ -530,104 +633,41 @@ export default function App() {
               </div>
             )}
 
-            {/* Modal Game Content Area */}
+            {/* Modal Game Content Area with Code Splitting Suspense & Error Boundary */}
             <div className="game-modal-body">
-              {activeGame === 'pacman' && (
-                <PacManGame onScoreSubmitted={() => openInPageLeaderboardModal('pacman')} />
-              )}
-              {activeGame === 'dino' && (
-                <DinoGame onScoreSubmitted={() => openInPageLeaderboardModal('dino')} />
-              )}
-              {activeGame === 'snake' && (
-                <SnakeGame onScoreSubmitted={() => openInPageLeaderboardModal('snake')} />
-              )}
-              {activeGame === 'solitaire' && (
-                <SolitaireGame onScoreSubmitted={() => openInPageLeaderboardModal('solitaire')} />
-              )}
-              {activeGame === 'minesweeper' && (
-                <MinesweeperGame onScoreSubmitted={() => openInPageLeaderboardModal('minesweeper')} />
-              )}
-              {activeGame === 'baseball' && (
-                <BaseballGame onScoreSubmitted={() => openInPageLeaderboardModal('baseball')} />
-              )}
-              {activeGame === 'gnome' && (
-                <GnomeGame onScoreSubmitted={() => openInPageLeaderboardModal('gnome')} />
-              )}
-              {activeGame === 'colortile' && (
-                <ColorTileGame onScoreSubmitted={() => openInPageLeaderboardModal('colortile')} />
-              )}
-              {activeGame === 'popcorn' && (
-                <PopcornGame onScoreSubmitted={() => openInPageLeaderboardModal('popcorn')} />
-              )}
-              {activeGame === 'tictactoe' && (
-                <DonutTicTacToeGame onScoreSubmitted={() => openInPageLeaderboardModal('tictactoe')} />
-              )}
-              {activeGame === 'champion' && (
-                <ChampionGame onScoreSubmitted={() => openInPageLeaderboardModal('champion')} />
-              )}
-              {activeGame === 'cricket' && (
-                <CricketGame onScoreSubmitted={() => openInPageLeaderboardModal('cricket')} />
-              )}
-              {activeGame === 'ponyexpress' && (
-                <PonyExpressGame onScoreSubmitted={() => openInPageLeaderboardModal('ponyexpress')} />
-              )}
-              {activeGame === 'jerrylawson' && (
-                <JerryLawsonGame onScoreSubmitted={() => openInPageLeaderboardModal('jerrylawson')} />
-              )}
-              {activeGame === 'magic' && (
-                <MagicCatGame onScoreSubmitted={() => openInPageLeaderboardModal('magic')} />
-              )}
-              {activeGame === 'fruitmerge' && (
-                <FruitMergeGame onScoreSubmitted={() => openInPageLeaderboardModal('fruitmerge')} />
-              )}
-              {activeGame === 'brickbreaker' && (
-                <BrickBreakerGame onScoreSubmitted={() => openInPageLeaderboardModal('brickbreaker')} />
-              )}
-              {activeGame === 'skyjumper' && (
-                <SkyJumperGame onScoreSubmitted={() => openInPageLeaderboardModal('skyjumper')} />
-              )}
-              {activeGame === 'kidscoding' && (
-                <KidsCodingGame onScoreSubmitted={() => openInPageLeaderboardModal('kidscoding')} />
-              )}
-              {activeGame === 'bubbletea' && (
-                <BubbleTeaGame onScoreSubmitted={() => openInPageLeaderboardModal('bubbletea')} />
-              )}
-              {activeGame === 'pizza' && (
-                <PizzaGame onScoreSubmitted={() => openInPageLeaderboardModal('pizza')} />
-              )}
-              {activeGame === 'earthbee' && (
-                <EarthBeeGame onScoreSubmitted={() => openInPageLeaderboardModal('earthbee')} />
-              )}
-              {activeGame === 'olympics' && (
-                <OlympicsGame onScoreSubmitted={() => openInPageLeaderboardModal('olympics')} />
-              )}
-              {activeGame === 'pangolin' && (
-                <PangolinGame onScoreSubmitted={() => openInPageLeaderboardModal('pangolin')} />
-              )}
-              {activeGame === 'roswell' && (
-                <RoswellGame onScoreSubmitted={() => openInPageLeaderboardModal('roswell')} />
-              )}
-              {activeGame === 'petanque' && (
-                <PetanqueGame onScoreSubmitted={() => openInPageLeaderboardModal('petanque')} />
-              )}
-              {activeGame === 'halfmoon' && (
-                <HalfMoonGame onScoreSubmitted={() => openInPageLeaderboardModal('halfmoon')} />
-              )}
-              {activeGame === 'panipuri' && (
-                <PaniPuriGame onScoreSubmitted={() => openInPageLeaderboardModal('panipuri')} />
-              )}
-              {activeGame === 'memory' && (
-                <MemoryGame onScoreSubmitted={() => openInPageLeaderboardModal('memory')} />
-              )}
-              {activeGame === 'ghoulduel' && (
-                <GhoulDuelGame onScoreSubmitted={() => openInPageLeaderboardModal('ghoulduel')} />
-              )}
-              {activeGame === 'snowball' && (
-                <SnowballGame onScoreSubmitted={() => openInPageLeaderboardModal('snowball')} />
-              )}
-              {activeGame === 'schooltag' && (
-                <SchoolTagGame onScoreSubmitted={() => openInPageLeaderboardModal('schooltag')} />
-              )}
+              <GameErrorBoundary onClose={() => setActiveGame(null)} onRetry={() => {}}>
+                <Suspense fallback={
+                  <div style={{
+                    display: 'flex',
+                    flexDirection: 'column',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    minHeight: '340px',
+                    gap: '14px',
+                    color: '#FFD166'
+                  }}>
+                    <div style={{
+                      width: '40px',
+                      height: '40px',
+                      borderRadius: '50%',
+                      border: '3px solid rgba(255, 209, 102, 0.2)',
+                      borderTopColor: '#FFD166',
+                      animation: 'spin 1s linear infinite'
+                    }} />
+                    <span style={{ fontSize: '13px', fontWeight: 800 }}>게임을 불러오는 중...</span>
+                  </div>
+                }>
+                  {(() => {
+                    const SelectedGameComponent = GAME_COMPONENTS[activeGame];
+                    if (!SelectedGameComponent) return null;
+                    return (
+                      <SelectedGameComponent
+                        onScoreSubmitted={() => openInPageLeaderboardModal(activeGame)}
+                      />
+                    );
+                  })()}
+                </Suspense>
+              </GameErrorBoundary>
             </div>
           </div>
         </div>

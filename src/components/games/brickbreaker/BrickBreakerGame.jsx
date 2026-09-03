@@ -212,6 +212,9 @@ export default function BrickBreakerGame({ onScoreSubmitted }) {
   // Keyboard Event Listeners
   useEffect(() => {
     const handleKeyDown = (e) => {
+      if (e.target && (e.target.tagName === 'INPUT' || e.target.tagName === 'TEXTAREA')) {
+        return;
+      }
       if (['Space', 'ArrowLeft', 'ArrowRight', 'ArrowUp', 'ArrowDown'].includes(e.code)) {
         e.preventDefault();
       }
@@ -226,6 +229,9 @@ export default function BrickBreakerGame({ onScoreSubmitted }) {
     };
 
     const handleKeyUp = (e) => {
+      if (e.target && (e.target.tagName === 'INPUT' || e.target.tagName === 'TEXTAREA')) {
+        return;
+      }
       if (engineRef.current) {
         engineRef.current.keys[e.code] = false;
       }

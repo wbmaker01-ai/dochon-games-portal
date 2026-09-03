@@ -274,6 +274,9 @@ export default function GnomeGame({ onScoreSubmitted }) {
   // Keyboard Space / Enter controls
   useEffect(() => {
     const handleKeyDown = (e) => {
+      if (e.target && (e.target.tagName === 'INPUT' || e.target.tagName === 'TEXTAREA')) {
+        return;
+      }
       if (isHowToPlayOpen) return;
       if (e.code === 'Space' || e.code === 'Enter') {
         e.preventDefault();

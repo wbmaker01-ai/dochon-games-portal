@@ -168,7 +168,7 @@ export default function PaniPuriGame({ onScoreSubmitted }) {
   useEffect(() => {
     const handleKeyDown = (e) => {
       // Ignore if typing inside text input or textarea (e.g. Leaderboard form)
-      if (['INPUT', 'TEXTAREA'].includes(e.target.tagName)) return;
+      if (e.target && ['INPUT', 'TEXTAREA'].includes(e.target.tagName)) return;
 
       // Only active during live gameplay and when modals are closed
       if (!gameState.isPlaying || gameState.isGameOver || isHowToPlayOpen) return;

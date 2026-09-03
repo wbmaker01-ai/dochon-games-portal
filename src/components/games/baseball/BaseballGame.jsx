@@ -456,6 +456,9 @@ export default function BaseballGame({ onScoreSubmitted }) {
   // Keyboard Event Listener (Spacebar & Enter)
   useEffect(() => {
     const handleKeyDown = (e) => {
+      if (e.target && (e.target.tagName === 'INPUT' || e.target.tagName === 'TEXTAREA')) {
+        return;
+      }
       if (e.code === 'Space' || e.key === 'Enter') {
         e.preventDefault();
         handleSwing();

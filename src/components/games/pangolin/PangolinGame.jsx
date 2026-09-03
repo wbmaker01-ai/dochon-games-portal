@@ -107,6 +107,9 @@ export default function PangolinGame({ onScoreSubmitted }) {
   // Keyboard Event Listeners
   useEffect(() => {
     const handleKeyDown = (e) => {
+      if (e.target && (e.target.tagName === 'INPUT' || e.target.tagName === 'TEXTAREA')) {
+        return;
+      }
       // 1. STAGE_CLEAR 상태일 때 스페이스바 또는 엔터 입력 시 다음 스테이지 이동
       if (gameState === 'STAGE_CLEAR') {
         if (e.code === 'Space' || e.code === 'Enter') {
@@ -141,6 +144,9 @@ export default function PangolinGame({ onScoreSubmitted }) {
     };
 
     const handleKeyUp = (e) => {
+      if (e.target && (e.target.tagName === 'INPUT' || e.target.tagName === 'TEXTAREA')) {
+        return;
+      }
       keysRef.current[e.code] = false;
     };
 

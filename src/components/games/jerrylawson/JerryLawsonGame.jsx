@@ -85,6 +85,9 @@ export default function JerryLawsonGame({ onScoreSubmitted }) {
   // Keyboard Event Handlers
   useEffect(() => {
     const handleKeyDown = (e) => {
+      if (e.target && (e.target.tagName === 'INPUT' || e.target.tagName === 'TEXTAREA')) {
+        return;
+      }
       if (['Space', 'ArrowUp', 'ArrowDown', 'ArrowLeft', 'ArrowRight'].includes(e.code)) {
         e.preventDefault();
       }
@@ -106,6 +109,9 @@ export default function JerryLawsonGame({ onScoreSubmitted }) {
     };
 
     const handleKeyUp = (e) => {
+      if (e.target && (e.target.tagName === 'INPUT' || e.target.tagName === 'TEXTAREA')) {
+        return;
+      }
       if (e.code === 'ArrowLeft' || e.code === 'KeyA') {
         inputRef.current.left = false;
       }

@@ -173,6 +173,7 @@ export default function PonyExpressGame({ onScoreSubmitted }) {
   // Keyboard Event Handlers
   useEffect(() => {
     const handleKeyDown = (e) => {
+      if (e.target && (e.target.tagName === 'INPUT' || e.target.tagName === 'TEXTAREA')) return;
       if (gameState !== 'PLAYING' || !logicRef.current) return;
 
       if (e.code === 'ArrowUp' || e.code === 'KeyW') {

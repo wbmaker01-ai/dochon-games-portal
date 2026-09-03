@@ -176,6 +176,9 @@ export default function SnakeGame({ onScoreSubmitted }) {
   // Keyboard Event Listeners
   useEffect(() => {
     const handleKeyDown = (e) => {
+      if (e.target && (e.target.tagName === 'INPUT' || e.target.tagName === 'TEXTAREA')) {
+        return;
+      }
       if (['Space'].includes(e.code)) {
         e.preventDefault();
         if (gameState === 'IDLE' || gameState === 'GAMEOVER') {

@@ -301,6 +301,9 @@ export default function GhoulDuelGame({ onScoreSubmitted }) {
   // Keyboard Event Listeners
   useEffect(() => {
     const handleKeyDown = (e) => {
+      if (e.target && (e.target.tagName === 'INPUT' || e.target.tagName === 'TEXTAREA')) {
+        return;
+      }
       if (['ArrowUp', 'ArrowDown', 'ArrowLeft', 'ArrowRight', 'Space'].includes(e.code)) {
         e.preventDefault();
       }
@@ -310,6 +313,9 @@ export default function GhoulDuelGame({ onScoreSubmitted }) {
     };
 
     const handleKeyUp = (e) => {
+      if (e.target && (e.target.tagName === 'INPUT' || e.target.tagName === 'TEXTAREA')) {
+        return;
+      }
       if (logicRef.current) {
         logicRef.current.handleKeyUp(e.code);
       }

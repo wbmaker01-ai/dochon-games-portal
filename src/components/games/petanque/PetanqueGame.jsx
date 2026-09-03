@@ -441,6 +441,7 @@ export default function PetanqueGame({ onScoreSubmitted }) {
   // Keyboard Shortcuts (Arrow keys & WASD to aim/power, Space/Enter to charge/throw)
   useEffect(() => {
     const handleKeyDown = (e) => {
+      if (e.target && (e.target.tagName === 'INPUT' || e.target.tagName === 'TEXTAREA')) return;
       if (gameState !== GAME_STATES.READY_THROW || currentTurnTeam !== TEAMS.PLAYER.id) return;
 
       // Angle Controls: Left / Right, A / D (Expanded 30° ~ 150°)
@@ -473,6 +474,7 @@ export default function PetanqueGame({ onScoreSubmitted }) {
     };
 
     const handleKeyUp = (e) => {
+      if (e.target && (e.target.tagName === 'INPUT' || e.target.tagName === 'TEXTAREA')) return;
       if ((e.key === ' ' || e.key === 'Enter') && isChargingPower) {
         e.preventDefault();
         stopChargingAndThrow();

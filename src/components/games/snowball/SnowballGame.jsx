@@ -154,6 +154,9 @@ export default function SnowballGame({ onScoreSubmitted }) {
 
     const keys = {};
     const handleKeyDown = (e) => {
+      if (e.target && (e.target.tagName === 'INPUT' || e.target.tagName === 'TEXTAREA')) {
+        return;
+      }
       keys[e.key] = true;
       if (e.key === ' ' || e.code === 'Space') {
         e.preventDefault();
@@ -164,6 +167,9 @@ export default function SnowballGame({ onScoreSubmitted }) {
     };
 
     const handleKeyUp = (e) => {
+      if (e.target && (e.target.tagName === 'INPUT' || e.target.tagName === 'TEXTAREA')) {
+        return;
+      }
       keys[e.key] = false;
       if (logicRef.current) {
         logicRef.current.input.shootRequested = false;

@@ -117,6 +117,9 @@ export default function DinoGame({ onScoreSubmitted }) {
 
   useEffect(() => {
     const handleKeyDown = (e) => {
+      if (e.target && (e.target.tagName === 'INPUT' || e.target.tagName === 'TEXTAREA')) {
+        return;
+      }
       if (['Space', 'ArrowUp', 'KeyW'].includes(e.code)) {
         e.preventDefault();
         jump();
@@ -127,6 +130,9 @@ export default function DinoGame({ onScoreSubmitted }) {
     };
 
     const handleKeyUp = (e) => {
+      if (e.target && (e.target.tagName === 'INPUT' || e.target.tagName === 'TEXTAREA')) {
+        return;
+      }
       if (['ArrowDown', 'KeyS'].includes(e.code)) {
         setDuck(false);
       }

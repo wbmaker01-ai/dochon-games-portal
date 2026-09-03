@@ -149,6 +149,9 @@ export default function SkyJumperGame({ onScoreSubmitted }) {
   // Keyboard Event Handlers
   useEffect(() => {
     const handleKeyDown = (e) => {
+      if (e.target && (e.target.tagName === 'INPUT' || e.target.tagName === 'TEXTAREA')) {
+        return;
+      }
       if (['ArrowLeft', 'ArrowRight', 'ArrowUp', 'ArrowDown', ' ', 'Enter'].includes(e.key)) {
         e.preventDefault();
       }
@@ -174,6 +177,9 @@ export default function SkyJumperGame({ onScoreSubmitted }) {
     };
 
     const handleKeyUp = (e) => {
+      if (e.target && (e.target.tagName === 'INPUT' || e.target.tagName === 'TEXTAREA')) {
+        return;
+      }
       const engine = engineRef.current;
       if (!engine) return;
 

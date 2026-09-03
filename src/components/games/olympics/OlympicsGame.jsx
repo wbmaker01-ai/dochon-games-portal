@@ -343,6 +343,9 @@ export default function OlympicsGame({ onScoreSubmitted }) {
   // Keyboard Event Listeners
   useEffect(() => {
     const handleKeyDown = (e) => {
+      if (e.target && (e.target.tagName === 'INPUT' || e.target.tagName === 'TEXTAREA')) {
+        return;
+      }
       if (currentEvent === GAME_EVENTS.HURDLES) {
         if (e.key === 'ArrowLeft' || e.key === 'a' || e.key === 'A') {
           e.preventDefault();

@@ -190,6 +190,9 @@ export default function SchoolTagGame({ onScoreSubmitted }) {
   // Keyboard Event Handlers (Permanent Mount, Supports WASD, Arrow keys, Korean IME)
   useEffect(() => {
     const handleKeyDown = (e) => {
+      if (e.target && (e.target.tagName === 'INPUT' || e.target.tagName === 'TEXTAREA')) {
+        return;
+      }
       keysDownRef.current[e.code] = true;
       if (e.key) {
         keysDownRef.current[e.key] = true;
@@ -204,6 +207,9 @@ export default function SchoolTagGame({ onScoreSubmitted }) {
     };
 
     const handleKeyUp = (e) => {
+      if (e.target && (e.target.tagName === 'INPUT' || e.target.tagName === 'TEXTAREA')) {
+        return;
+      }
       keysDownRef.current[e.code] = false;
       if (e.key) {
         keysDownRef.current[e.key] = false;
