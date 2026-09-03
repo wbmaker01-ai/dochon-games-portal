@@ -90,73 +90,84 @@ export default function BubbleTeaGame({ onScoreSubmitted }) {
     }
   }, [score, highScore]);
 
-  // Main 60FPS Game Loop
+  // Main 30FPS Game Loop (Capped at 30FPS for 50% GPU Reduction)
   useEffect(() => {
-    let lastTime = performance.now();
+    const TARGET_FPS = 30;
+    const FRAME_INTERVAL = 1000 / TARGET_FPS; // 33.33ms
+    let lastRenderTime = performance.now();
     let pearlSpawnTimer = 0;
 
-    const loop = (now) => {
-      const dt = (now - lastTime) / 1000;
-      lastTime = now;
+    const loop = (currentTime) => {
+      try {
+        const elapsed = currentTime - lastRenderTime;
 
-      const engine = engineRef.current;
-      if (engine && canvasRef.current) {
-        // Pouring physics simulation
-        if (isPouringRef.current && currentStepRef.current <= STEP_SYRUP) {
-          const step = currentStepRef.current;
-          const recipe = RECIPES[customerIndexRef.current % RECIPES.length];
+        if (elapsed >= FRAME_INTERVAL) {
+          lastRenderTime = currentTime - (elapsed % FRAME_INTERVAL);
+          const dt = Math.min(elapsed / 1000, 0.08);
 
-          // Pour rate
-          const fillSpeed = step === STEP_PEARLS ? 0.32 : step === STEP_TEA ? 0.38 : 0.30;
-          const newFill = Math.min(fillProgressRef.current + fillSpeed * dt, 0.98);
-          fillProgressRef.current = newFill;
-          setFillProgress(newFill);
+          const engine = engineRef.current;
+          if (engine && canvasRef.current) {
+            // Pouring physics simulation
+            if (isPouringRef.current && currentStepRef.current <= STEP_SYRUP) {
+              const step = currentStepRef.current;
+              const recipe = RECIPES[customerIndexRef.current % RECIPES.length];
 
-          if (step === STEP_SYRUP) {
-            const newSyrup = Math.min(syrupFillRef.current + fillSpeed * dt, 0.25);
-            syrupFillRef.current = newSyrup;
-            setSyrupFill(newSyrup);
-          }
+              // Pour rate
+              const fillSpeed = step === STEP_PEARLS ? 0.32 : step === STEP_TEA ? 0.38 : 0.30;
+              const newFill = Math.min(fillProgressRef.current + fillSpeed * dt, 0.98);
+              fillProgressRef.current = newFill;
+              setFillProgress(newFill);
 
-          // Sound pitch updates
-          bubbleTeaAudio.updatePourPitch(newFill);
+              if (step === STEP_SYRUP) {
+                const newSyrup = Math.min(syrupFillRef.current + fillSpeed * dt, 0.25);
+                syrupFillRef.current = newSyrup;
+                setSyrupFill(newSyrup);
+              }
 
-          // Spawn visual entities
-          if (step === STEP_PEARLS) {
-            pearlSpawnTimer += dt;
-            if (pearlSpawnTimer >= 0.08) {
-              pearlSpawnTimer = 0;
-              engine.spawnPearl(recipe, recipe.line1Pct);
-              bubbleTeaAudio.playBubbleDrop();
+              // Sound pitch updates
+              bubbleTeaAudio.updatePourPitch(newFill);
+
+              // Spawn visual entities
+              if (step === STEP_PEARLS) {
+                pearlSpawnTimer += dt;
+                if (pearlSpawnTimer >= 0.08) {
+                  pearlSpawnTimer = 0;
+                  engine.spawnPearl(recipe, recipe.line1Pct);
+                  bubbleTeaAudio.playBubbleDrop();
+                }
+              } else {
+                engine.spawnLiquidStream(recipe, step);
+              }
             }
-          } else {
-            engine.spawnLiquidStream(recipe, step);
+
+            // Engine physics & rendering
+            engine.update(
+              isPouringRef.current,
+              currentStepRef.current,
+              RECIPES[customerIndexRef.current % RECIPES.length],
+              fillProgressRef.current
+            );
+
+            engine.render({
+              customer: CUSTOMERS[customerIndexRef.current % CUSTOMERS.length],
+              recipe: RECIPES[customerIndexRef.current % RECIPES.length],
+              currentStep: currentStepRef.current,
+              fillProgress: fillProgressRef.current,
+              syrupFill: syrupFillRef.current,
+              isPouring: isPouringRef.current,
+              isServing,
+              customerEmotion
+            });
           }
         }
-
-        // Engine physics & rendering
-        engine.update(
-          isPouringRef.current,
-          currentStepRef.current,
-          RECIPES[customerIndexRef.current % RECIPES.length],
-          fillProgressRef.current
-        );
-
-        engine.render({
-          customer: CUSTOMERS[customerIndexRef.current % CUSTOMERS.length],
-          recipe: RECIPES[customerIndexRef.current % RECIPES.length],
-          currentStep: currentStepRef.current,
-          fillProgress: fillProgressRef.current,
-          syrupFill: syrupFillRef.current,
-          isPouring: isPouringRef.current,
-          isServing,
-          customerEmotion
-        });
+      } catch (err) {
+        console.error('[BubbleTea Loop Error]', err);
+      } finally {
+        animFrameIdRef.current = requestAnimationFrame(loop);
       }
-
-      animFrameIdRef.current = requestAnimationFrame(loop);
     };
 
+    lastRenderTime = performance.now();
     animFrameIdRef.current = requestAnimationFrame(loop);
     return () => {
       if (animFrameIdRef.current) {

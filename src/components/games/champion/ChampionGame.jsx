@@ -74,6 +74,7 @@ export default function ChampionGame({ onScoreSubmitted }) {
   // Canvas & Physics Loop Refs
   const canvasRef = useRef(null);
   const animFrameRef = useRef(null);
+  const lastRenderTimeRef = useRef(0);
   const keysPressed = useRef({});
 
   // Overworld Player Entity
@@ -698,7 +699,7 @@ export default function ChampionGame({ onScoreSubmitted }) {
   };
 
   // ============================================================
-  // MAIN GAME ENGINE LOOP (60 FPS)
+  // MAIN GAME ENGINE LOOP (Capped at 30FPS for 50% GPU Reduction)
   // ============================================================
   const gameLoop = useCallback(() => {
     const canvas = canvasRef.current;
@@ -706,28 +707,38 @@ export default function ChampionGame({ onScoreSubmitted }) {
     const ctx = canvas.getContext('2d');
     if (!ctx) return;
 
-    if (gameMode === 'overworld') {
-      // Update Overworld Player Movement
-      const p = playerRef.current;
-      let dx = 0;
-      let dy = 0;
+    const TARGET_FPS = 30;
+    const FRAME_INTERVAL = 1000 / TARGET_FPS; // 33.33ms
+    const currentTime = performance.now();
+    const elapsed = currentTime - lastRenderTimeRef.current;
 
-      if (keysPressed.current.ArrowLeft || keysPressed.current.KeyA) {
-        dx -= p.speed;
-        p.direction = 'left';
-      }
-      if (keysPressed.current.ArrowRight || keysPressed.current.KeyD) {
-        dx += p.speed;
-        p.direction = 'right';
-      }
-      if (keysPressed.current.ArrowUp || keysPressed.current.KeyW) {
-        dy -= p.speed;
-        p.direction = 'up';
-      }
-      if (keysPressed.current.ArrowDown || keysPressed.current.KeyS) {
-        dy += p.speed;
-        p.direction = 'down';
-      }
+    if (elapsed >= FRAME_INTERVAL) {
+      lastRenderTimeRef.current = currentTime - (elapsed % FRAME_INTERVAL);
+      const timeScale = Math.min(2.5, Math.max(0.5, elapsed / 16.666));
+
+      if (gameMode === 'overworld') {
+        // Update Overworld Player Movement
+        const p = playerRef.current;
+        const moveStep = p.speed * timeScale;
+        let dx = 0;
+        let dy = 0;
+
+        if (keysPressed.current.ArrowLeft || keysPressed.current.KeyA) {
+          dx -= moveStep;
+          p.direction = 'left';
+        }
+        if (keysPressed.current.ArrowRight || keysPressed.current.KeyD) {
+          dx += moveStep;
+          p.direction = 'right';
+        }
+        if (keysPressed.current.ArrowUp || keysPressed.current.KeyW) {
+          dy -= moveStep;
+          p.direction = 'up';
+        }
+        if (keysPressed.current.ArrowDown || keysPressed.current.KeyS) {
+          dy += moveStep;
+          p.direction = 'down';
+        }
 
       if (dx !== 0 || dy !== 0) {
         // Step audio
@@ -906,9 +917,10 @@ export default function ChampionGame({ onScoreSubmitted }) {
         }
       }
     }
+  }
 
-    animFrameRef.current = requestAnimationFrame(gameLoop);
-  }, [gameMode, activeSport, selectedTeam]);
+  animFrameRef.current = requestAnimationFrame(gameLoop);
+}, [gameMode, activeSport, selectedTeam]);
 
   useEffect(() => {
     animFrameRef.current = requestAnimationFrame(gameLoop);

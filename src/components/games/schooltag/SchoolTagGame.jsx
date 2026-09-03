@@ -109,6 +109,10 @@ export default function SchoolTagGame({ onScoreSubmitted }) {
       setConnectionStatus(statusMsg);
     };
 
+    networkRef.current.onRoomCodeChanged = (newCode) => {
+      setCurrentRoomCode(newCode);
+    };
+
     networkRef.current.onError = (err) => {
       setNetworkError(err);
       setIsConnecting(false);
@@ -407,18 +411,30 @@ export default function SchoolTagGame({ onScoreSubmitted }) {
     };
   };
 
-  // --- Main Animation & Simulation Loop ---
+  // --- Main Animation & Simulation Loop (Capped at 30FPS for 50% GPU Reduction) ---
+  const TARGET_FPS = 30;
+  const FRAME_INTERVAL = 1000 / TARGET_FPS; // 33.33ms
+  const lastRenderTimeRef = useRef(0);
+
   const gameLoop = (timestamp) => {
     if (!isPlayingRef.current) return;
 
-    const dt = Math.min(0.1, (timestamp - lastTimeRef.current) / 1000);
-    lastTimeRef.current = timestamp;
+    try {
+      const elapsed = timestamp - lastRenderTimeRef.current;
 
-    updateGame(dt);
-    renderGame();
+      if (elapsed >= FRAME_INTERVAL) {
+        lastRenderTimeRef.current = timestamp - (elapsed % FRAME_INTERVAL);
+        const dt = Math.min(0.08, elapsed / 1000);
 
-    if (isPlayingRef.current) {
-      animFrameIdRef.current = requestAnimationFrame(gameLoop);
+        updateGame(dt);
+        renderGame();
+      }
+    } catch (err) {
+      console.error('[SchoolTag Loop Error]', err);
+    } finally {
+      if (isPlayingRef.current) {
+        animFrameIdRef.current = requestAnimationFrame(gameLoop);
+      }
     }
   };
 

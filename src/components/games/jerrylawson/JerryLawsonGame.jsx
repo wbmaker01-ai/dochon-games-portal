@@ -126,54 +126,65 @@ export default function JerryLawsonGame({ onScoreSubmitted }) {
     };
   }, [gameState]);
 
-  // Main 60FPS Game Loop
+  // Main 30FPS Game Loop (Capped at 30FPS for 50% GPU Reduction)
   useEffect(() => {
-    let lastTime = performance.now();
+    const TARGET_FPS = 30;
+    const FRAME_INTERVAL = 1000 / TARGET_FPS; // 33.33ms
+    let lastRenderTime = performance.now();
 
     const loop = (currentTime) => {
-      const deltaTime = Math.min((currentTime - lastTime) / 1000, 0.05);
-      lastTime = currentTime;
+      try {
+        const elapsed = currentTime - lastRenderTime;
 
-      const logic = logicRef.current;
-      const canvas = canvasRef.current;
+        if (elapsed >= FRAME_INTERVAL) {
+          lastRenderTime = currentTime - (elapsed % FRAME_INTERVAL);
+          const deltaTime = Math.min(elapsed / 1000, 0.08);
 
-      if (logic && canvas) {
-        const ctx = canvas.getContext('2d');
+          const logic = logicRef.current;
+          const canvas = canvasRef.current;
 
-        if (gameState === 'PLAYING') {
-          logic.handleInput(inputRef.current);
-          logic.update(deltaTime);
-          logic.render(ctx);
+          if (logic && canvas) {
+            const ctx = canvas.getContext('2d');
 
-          // Sync HUD
-          const currentStage = STAGE_PRESETS[logic.stageIndex % STAGE_PRESETS.length];
-          setHudData({
-            score: logic.score,
-            lives: logic.lives,
-            timeLeft: logic.timeLeft,
-            coins: logic.coinsCollected,
-            totalCoins: logic.totalCoinsInLevel,
-            stageIndex: logic.stageIndex,
-            stageName: logic.currentMode === 'ADVENTURE' ? currentStage.name : '커스텀 스테이지',
-            mode: logic.currentMode
-          });
+            if (gameState === 'PLAYING') {
+              logic.handleInput(inputRef.current);
+              logic.update(deltaTime);
+              logic.render(ctx);
 
-          // Check Game State Changes
-          if (logic.isGameOver && gameState !== 'GAMEOVER') {
-            setGameState('GAMEOVER');
-          } else if (logic.isVictory && gameState !== 'VICTORY') {
-            setGameState('VICTORY');
+              // Sync HUD
+              const currentStage = STAGE_PRESETS[logic.stageIndex % STAGE_PRESETS.length];
+              setHudData({
+                score: logic.score,
+                lives: logic.lives,
+                timeLeft: logic.timeLeft,
+                coins: logic.coinsCollected,
+                totalCoins: logic.totalCoinsInLevel,
+                stageIndex: logic.stageIndex,
+                stageName: logic.currentMode === 'ADVENTURE' ? currentStage.name : '커스텀 스테이지',
+                mode: logic.currentMode
+              });
+
+              // Check Game State Changes
+              if (logic.isGameOver && gameState !== 'GAMEOVER') {
+                setGameState('GAMEOVER');
+              } else if (logic.isVictory && gameState !== 'VICTORY') {
+                setGameState('VICTORY');
+              }
+            } else if (gameState === 'EDITOR') {
+              renderEditorGrid(ctx);
+            } else if (gameState === 'START' || gameState === 'PAUSED' || gameState === 'GAMEOVER' || gameState === 'VICTORY') {
+              logic.render(ctx);
+            }
           }
-        } else if (gameState === 'EDITOR') {
-          renderEditorGrid(ctx);
-        } else if (gameState === 'START' || gameState === 'PAUSED' || gameState === 'GAMEOVER' || gameState === 'VICTORY') {
-          logic.render(ctx);
         }
+      } catch (err) {
+        console.error('[JerryLawson Loop Error]', err);
+      } finally {
+        reqIdRef.current = requestAnimationFrame(loop);
       }
-
-      reqIdRef.current = requestAnimationFrame(loop);
     };
 
+    lastRenderTime = performance.now();
     reqIdRef.current = requestAnimationFrame(loop);
 
     return () => {

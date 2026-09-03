@@ -180,59 +180,70 @@ export default function EarthBeeGame({ onScoreSubmitted }) {
     }
   }, []);
 
-  // Main 60FPS Game Loop & Timer
+  // Main 30FPS Game Loop & Timer (50% GPU Reduction)
   useEffect(() => {
-    let lastTime = performance.now();
+    const TARGET_FPS = 30;
+    const FRAME_INTERVAL = 1000 / TARGET_FPS; // 33.33ms
+    let lastRenderTime = performance.now();
     let secAccumulator = 0;
 
-    const loop = (now) => {
-      const dt = Math.min((now - lastTime) / 1000, 0.1);
-      lastTime = now;
+    const loop = (currentTime) => {
+      try {
+        const elapsed = currentTime - lastRenderTime;
 
-      if (isPlaying && !isGameOver) {
-        // Countdown Timer
-        secAccumulator += dt;
-        if (secAccumulator >= 1.0) {
-          secAccumulator = 0;
-          setTimeLeft(prev => {
-            if (prev <= 1) {
-              handleGameOver();
-              return 0;
+        if (elapsed >= FRAME_INTERVAL) {
+          lastRenderTime = currentTime - (elapsed % FRAME_INTERVAL);
+          const dt = Math.min(elapsed / 1000, 0.08);
+
+          if (isPlaying && !isGameOver) {
+            // Countdown Timer
+            secAccumulator += dt;
+            if (secAccumulator >= 1.0) {
+              secAccumulator = 0;
+              setTimeLeft(prev => {
+                if (prev <= 1) {
+                  handleGameOver();
+                  return 0;
+                }
+                return prev - 1;
+              });
             }
-            return prev - 1;
-          });
+
+            // Directional Keyboard & D-Pad Steering
+            const kp = keysPressedRef.current;
+            let dx = 0;
+            let dy = 0;
+            if (kp.left) dx -= 1;
+            if (kp.right) dx += 1;
+            if (kp.up) dy -= 1;
+            if (kp.down) dy += 1;
+
+            if (engineRef.current) {
+              engineRef.current.setKeyboardInput(dx, dy);
+              engineRef.current.update(dt);
+              engineRef.current.render();
+
+              const currentPollen = engineRef.current.bee.pollenCount;
+              const currentCombo = engineRef.current.combo;
+
+              // Throttled / Change-based state synchronization to eliminate React lag
+              setPollenPct((prev) => (prev !== currentPollen ? currentPollen : prev));
+              setCombo((prev) => (prev !== currentCombo ? currentCombo : prev));
+
+              // Audio hum
+              const speed = Math.hypot(engineRef.current.bee.vx, engineRef.current.bee.vy) / 260;
+              earthBeeAudio.updateFlightHum(speed);
+            }
+          }
         }
-
-        // Directional Keyboard & D-Pad Steering
-        const kp = keysPressedRef.current;
-        let dx = 0;
-        let dy = 0;
-        if (kp.left) dx -= 1;
-        if (kp.right) dx += 1;
-        if (kp.up) dy -= 1;
-        if (kp.down) dy += 1;
-
-        if (engineRef.current) {
-          engineRef.current.setKeyboardInput(dx, dy);
-          engineRef.current.update(dt);
-          engineRef.current.render();
-
-          const currentPollen = engineRef.current.bee.pollenCount;
-          const currentCombo = engineRef.current.combo;
-
-          // Throttled / Change-based state synchronization to eliminate React lag
-          setPollenPct((prev) => (prev !== currentPollen ? currentPollen : prev));
-          setCombo((prev) => (prev !== currentCombo ? currentCombo : prev));
-
-          // Audio hum
-          const speed = Math.hypot(engineRef.current.bee.vx, engineRef.current.bee.vy) / 260;
-          earthBeeAudio.updateFlightHum(speed);
-        }
+      } catch (err) {
+        console.error('[EarthBee Loop Error]', err);
+      } finally {
+        animFrameIdRef.current = requestAnimationFrame(loop);
       }
-
-      animFrameIdRef.current = requestAnimationFrame(loop);
     };
 
+    lastRenderTime = performance.now();
     animFrameIdRef.current = requestAnimationFrame(loop);
 
     return () => {

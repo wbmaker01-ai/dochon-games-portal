@@ -58,19 +58,32 @@ export default function RoswellGame({ onScoreSubmitted }) {
 
     let lastTime = performance.now();
 
+    const TARGET_FPS = 30;
+    const FRAME_INTERVAL = 1000 / TARGET_FPS; // 33.33ms
+    let lastRenderTime = performance.now();
+
     const loop = (currentTime) => {
-      const deltaTime = Math.min((currentTime - lastTime) / 1000, 0.1);
-      lastTime = currentTime;
+      try {
+        const elapsed = currentTime - lastRenderTime;
 
-      if (logicRef.current && canvasRef.current) {
-        const ctx = canvasRef.current.getContext('2d');
-        logicRef.current.update(deltaTime);
-        logicRef.current.render(ctx);
+        if (elapsed >= FRAME_INTERVAL) {
+          lastRenderTime = currentTime - (elapsed % FRAME_INTERVAL);
+          const deltaTime = Math.min(elapsed / 1000, 0.08);
+
+          if (logicRef.current && canvasRef.current) {
+            const ctx = canvasRef.current.getContext('2d');
+            logicRef.current.update(deltaTime);
+            logicRef.current.render(ctx);
+          }
+        }
+      } catch (err) {
+        console.error('[Roswell Loop Error]', err);
+      } finally {
+        reqIdRef.current = requestAnimationFrame(loop);
       }
-
-      reqIdRef.current = requestAnimationFrame(loop);
     };
 
+    lastRenderTime = performance.now();
     reqIdRef.current = requestAnimationFrame(loop);
 
     return () => {

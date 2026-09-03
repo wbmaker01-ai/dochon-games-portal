@@ -43,6 +43,11 @@ const ICE_SERVERS = [
     credential: 'openrelayproject'
   },
   {
+    urls: 'turn:openrelay.metered.ca:80?transport=tcp',
+    username: 'openrelayproject',
+    credential: 'openrelayproject'
+  },
+  {
     urls: 'turn:openrelay.metered.ca:443',
     username: 'openrelayproject',
     credential: 'openrelayproject'
@@ -54,7 +59,7 @@ const ICE_SERVERS = [
   }
 ];
 
-const CONNECTION_TIMEOUT_MS = 15000; // 15 seconds overall connection timeout
+const CONNECTION_TIMEOUT_MS = 18000; // 18 seconds overall connection timeout
 const MAX_CONNECTION_RETRIES = 3;   // Re-attempt connect up to 3 times
 const HANDSHAKE_INTERVAL_MS = 400;  // Re-send JOIN_LOBBY every 400ms
 const MAX_HANDSHAKE_ATTEMPTS = 10;  // Up to 10 handshake attempts (4.0s total)

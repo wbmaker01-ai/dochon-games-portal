@@ -139,36 +139,47 @@ export default function BrickBreakerGame({ onScoreSubmitted }) {
     setGameState('READY');
   }, []);
 
-  // Main 60FPS Game Loop with Delta-Time Normalization
+  // Main 30FPS Game Loop with Delta-Time Normalization (50% GPU Reduction)
   useEffect(() => {
     const canvas = canvasRef.current;
     if (!canvas) return;
     const ctx = canvas.getContext('2d');
     const engine = engineRef.current;
-    let lastTime = performance.now();
 
-    const render = (timestamp) => {
-      const elapsed = timestamp ? (timestamp - lastTime) : 16.666;
-      lastTime = timestamp || performance.now();
-      // Bound dt to prevent huge jumps on tab switch while ensuring smooth 30~60 FPS
-      const dt = Math.min(48, Math.max(1, elapsed));
-      const timeScale = dt / 16.666;
+    const TARGET_FPS = 30;
+    const FRAME_INTERVAL = 1000 / TARGET_FPS; // 33.33ms
+    let lastRenderTime = performance.now();
 
-      if (engine && ctx) {
-        if (gameState === 'PLAYING') {
-          engine.update(
-            handleScoreAdd,
-            handleExtraLife,
-            handleLifeLost,
-            handleStageClear,
-            timeScale
-          );
+    const render = (currentTime) => {
+      try {
+        const elapsed = currentTime - lastRenderTime;
+
+        if (elapsed >= FRAME_INTERVAL) {
+          lastRenderTime = currentTime - (elapsed % FRAME_INTERVAL);
+          const dt = Math.min(64, Math.max(1, elapsed));
+          const timeScale = dt / 16.666;
+
+          if (engine && ctx) {
+            if (gameState === 'PLAYING') {
+              engine.update(
+                handleScoreAdd,
+                handleExtraLife,
+                handleLifeLost,
+                handleStageClear,
+                timeScale
+              );
+            }
+            engine.draw(ctx);
+          }
         }
-        engine.draw(ctx);
+      } catch (err) {
+        console.error('[BrickBreaker Loop Error]', err);
+      } finally {
+        reqIdRef.current = requestAnimationFrame(render);
       }
-      reqIdRef.current = requestAnimationFrame(render);
     };
 
+    lastRenderTime = performance.now();
     reqIdRef.current = requestAnimationFrame(render);
 
     return () => {

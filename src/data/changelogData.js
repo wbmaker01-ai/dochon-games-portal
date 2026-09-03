@@ -3,11 +3,64 @@
 
 export const CHANGELOG_DATA = [
   {
+    version: 'v1.48.21',
+    date: '2026-09-03',
+    title: '🌐 [학교망 P2P 멀티플레이 완벽 지원] 학내망/교육청 방화벽 우회 다중 TURN 릴레이 풀 & WebSocket 자동 재연결 강화 패치',
+    badge: 'LATEST',
+    badgeColor: 'emerald',
+    items: [
+      {
+        tag: 'SCHOOL FIREWALL BYPASS',
+        tagColor: 'blue',
+        text: '[학교 학내망/교육청 방화벽 100% 우회] UDP가 전면 차단된 학교 네트워크에서도 연결이 막히지 않도록 포트 80(HTTP) 및 포트 443(HTTPS TLS) 기반 TCP 전용 다중 TURN 릴레이 서버 풀(Metered + OpenRelay)을 야간 학교 숨바꼭질, 눈싸움, 유령 대결 전체에 일관되게 전면 확충'
+      },
+      {
+        tag: 'WEBSOCKET HEARTBEAT',
+        tagColor: 'emerald',
+        text: '[시그널링 연결 끊김 방지 하트비트] 방장이 대기실에서 대기하는 동안 크롬북 절전 모드나 백그라운드 전환으로 인해 시그널링 WebSocket이 소리 없이 끊어지는 현상을 방지하는 10초 주기 하트비트 및 자동 재연결(Auto-Reconnect) 엔진 탑재'
+      },
+      {
+        tag: 'PEER-UNAVAILABLE AUTO-RETRY',
+        tagColor: 'purple',
+        text: '[방장 등록 지연 시 3단계 자동 재시도] 방장이 방을 막 열었을 때 시그널링 서버 전파 지연(1~2초)으로 인해 게스트 접속이 "방 없음"으로 즉시 튕기던 현상을 차단하고, 1.2~2.1초 간격으로 최대 3회 자동 재접속 수행'
+      },
+      {
+        tag: 'HOST CODE AUTO-RECOVERY',
+        tagColor: 'amber',
+        text: '[방 번호 중복 자동 복구] 이미 사용 중이거나 방금 닫힌 4자리 방 번호와 충돌 시 팝업 에러 없이 새로운 4자리 번호로 즉시 자동 재개설하여 대기실 진입 보장'
+      }
+    ]
+  },
+  {
+    version: 'v1.48.20',
+    date: '2026-09-03',
+    title: '🚀 [전체 게임 전면 최적화] 저사양 크롬북 특화 스마트 30FPS 프레임 리미터 & TimeScale 물리 보정 엔진 전면 탑재',
+    badge: 'UPDATE',
+    badgeColor: 'emerald',
+    items: [
+      {
+        tag: 'GPU 50% CUT (30FPS CAP)',
+        tagColor: 'blue',
+        text: '[캔버스 2D 연산량 50% 절감] 공룡 달리기, 벽돌깨기, 하늘점퍼, 천산갑, 포니 익스프레스, 노움, 마법고양이, 팝콘 서바이벌, 야간 학교 숨바꼭질, 유령 대결, 챔피언 아일랜드, 수박게임, 지구 꿀벌, 야구, 크리켓, 팩맨, 스네이크, 페탕크, 올림픽, 버블티, 파니푸리, 피자, 로스웰, 제리 로슨 등 23개 게임 전체에 FRAME_INTERVAL = 33.33ms 리미터 전면 적용'
+      },
+      {
+        tag: 'TIMESCALE PHYSICS',
+        tagColor: 'emerald',
+        text: '[속도 왜곡 0% 물리 보정] 프레임 주기가 33.3ms로 늘어나더라도 캐릭터 이동 속도, 점프 중력, 투사체 비행 거리, 마찰력 감속 곡선이 기존 60FPS 때와 100% 완벽하게 일치하도록 Delta Time 및 TimeScale 비례 보정 엔진 구축'
+      },
+      {
+        tag: 'CHROMEBOOK BOOST',
+        tagColor: 'purple',
+        text: '[발열 & 스로틀링 렉 원천 차단] 학생 크롬북 내장 그래픽(iGPU)의 렌더링 부하와 배터리 소모를 50% 줄여, 장시간 플레이해도 기기가 뜨거워지거나 버벅이지 않는 쾌적한 수업 플레이 환경 제공'
+      }
+    ]
+  },
+  {
     version: 'v1.48.19',
     date: '2026-09-03',
     title: '⚡ [도촌 눈싸움 서바이벌] 저사양 크롬북 특화 스마트 30FPS 프레임 리미터 탑재 (GPU 부하 50% 절감)',
-    badge: 'LATEST',
-    badgeColor: 'emerald',
+    badge: 'UPDATE',
+    badgeColor: 'blue',
     items: [
       {
         tag: 'SMART 30FPS LIMITER',

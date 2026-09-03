@@ -552,19 +552,31 @@ export default function DinoGame({ onScoreSubmitted }) {
       ctx.restore();
     };
 
-    const gameLoop = (currentTime) => {
-      // Calculate normalized delta time (dt = 1.0 at 60 FPS)
-      const elapsed = currentTime - lastTime;
-      lastTime = currentTime;
-      // Clamp dt to avoid physics jumping if tab is inactive or frame drops suddenly
-      const dt = Math.min(Math.max(elapsed / (1000 / 60), 0.1), 2.5);
+    // Smart 30FPS Frame Limiter (Reduces GPU draw calls by 50% for Chromebooks)
+    const TARGET_FPS = 30;
+    const FRAME_INTERVAL = 1000 / TARGET_FPS; // 33.33ms
+    let lastRenderTime = performance.now();
 
-      update(dt);
-      draw();
-      animationFrameId = requestAnimationFrame(gameLoop);
+    const gameLoop = (currentTime) => {
+      try {
+        const elapsed = currentTime - lastRenderTime;
+
+        if (elapsed >= FRAME_INTERVAL) {
+          lastRenderTime = currentTime - (elapsed % FRAME_INTERVAL);
+          // Calculate normalized delta time (dt = 1.0 at 60 FPS basis, ~2.0 at 30 FPS)
+          const dt = Math.min(Math.max(elapsed / (1000 / 60), 0.1), 3.0);
+
+          update(dt);
+          draw();
+        }
+      } catch (err) {
+        console.error('[Dino Loop Error]', err);
+      } finally {
+        animationFrameId = requestAnimationFrame(gameLoop);
+      }
     };
 
-    lastTime = performance.now();
+    lastRenderTime = performance.now();
     animationFrameId = requestAnimationFrame(gameLoop);
     return () => cancelAnimationFrame(animationFrameId);
   }, [gameState, highScore]);

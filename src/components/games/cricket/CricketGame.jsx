@@ -346,21 +346,32 @@ export default function CricketGame({ onScoreSubmitted }) {
   }, [handleSwing]);
 
   // =========================================================================
-  // 60FPS Pure Timestamp-Driven Main Canvas Render & Physics Loop
+  // 30FPS Pure Timestamp-Driven Main Canvas Render & Physics Loop (50% GPU Reduction)
   // =========================================================================
   useEffect(() => {
     const canvas = canvasRef.current;
     if (!canvas) return;
     const ctx = canvas.getContext('2d');
 
-    const render = () => {
-      const now = performance.now();
-      const stateElapsed = now - stateStartTimeRef.current;
+    const TARGET_FPS = 30;
+    const FRAME_INTERVAL = 1000 / TARGET_FPS; // 33.33ms
+    let lastRenderTime = performance.now();
 
-      // =====================================================================
-      // State Machine Frame Transitions (Frame-Perfect, 100% Stutter/Freeze Free)
-      // =====================================================================
-      if (assetsLoadedRef.current) {
+    const render = (currentTime) => {
+      try {
+        const elapsed = currentTime - lastRenderTime;
+
+        if (elapsed >= FRAME_INTERVAL) {
+          lastRenderTime = currentTime - (elapsed % FRAME_INTERVAL);
+          const timeScale = Math.min(2.5, Math.max(0.5, elapsed / 16.666));
+
+          const now = currentTime || performance.now();
+          const stateElapsed = now - stateStartTimeRef.current;
+
+          // =====================================================================
+          // State Machine Frame Transitions (Frame-Perfect, 100% Stutter/Freeze Free)
+          // =====================================================================
+          if (assetsLoadedRef.current) {
         // 1. IDLE State -> Advance to BOWLER_WINDUP
         if (gameStateRef.current === 'IDLE') {
           if (stateElapsed >= idleDurationRef.current) {
@@ -649,10 +660,10 @@ export default function CricketGame({ onScoreSubmitted }) {
       // 8. Hit Ball Flight Animation in 'HIT_ANIMATION' state
       if (gameStateRef.current === 'HIT_ANIMATION') {
         const hitBall = hitBallTrajectoryRef.current;
-        hitBall.x += hitBall.vx;
-        hitBall.y += hitBall.vy;
-        hitBall.vy += 0.45; // Gravity
-        hitBall.scale = Math.max(0.2, hitBall.scale * 0.985);
+        hitBall.x += hitBall.vx * timeScale;
+        hitBall.y += hitBall.vy * timeScale;
+        hitBall.vy += 0.45 * timeScale; // Gravity
+        hitBall.scale = Math.max(0.2, hitBall.scale * Math.pow(0.985, timeScale));
 
         ctx.save();
         ctx.beginPath();
@@ -665,10 +676,15 @@ export default function CricketGame({ onScoreSubmitted }) {
       // 9. Update and Draw Particle System
       particleSystemRef.current.update();
       particleSystemRef.current.draw(ctx);
-
-      animFrameRef.current = requestAnimationFrame(render);
+        }
+      } catch (err) {
+        console.error('[Cricket Render Error]', err);
+      } finally {
+        animFrameRef.current = requestAnimationFrame(render);
+      }
     };
 
+    lastRenderTime = performance.now();
     animFrameRef.current = requestAnimationFrame(render);
 
     return () => {

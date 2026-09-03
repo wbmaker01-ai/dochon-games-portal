@@ -258,25 +258,37 @@ export default function GhoulDuelGame({ onScoreSubmitted }) {
     };
   }, [difficulty, gameState, handleGameOver, launchGameEngine]);
 
-  // Main Render Animation Loop
+  // Main Render Animation Loop (Capped at 30FPS for 50% GPU Reduction)
   useEffect(() => {
     const canvas = canvasRef.current;
     if (!canvas) return;
     const ctx = canvas.getContext('2d');
 
-    const loop = (timestamp) => {
-      if (!lastTimeRef.current) lastTimeRef.current = timestamp;
-      const deltaTime = Math.min(0.1, (timestamp - lastTimeRef.current) / 1000);
-      lastTimeRef.current = timestamp;
+    const TARGET_FPS = 30;
+    const FRAME_INTERVAL = 1000 / TARGET_FPS; // 33.33ms
+    let lastRenderTime = performance.now();
 
-      if (logicRef.current && gameState === 'PLAYING') {
-        logicRef.current.update(deltaTime);
-        logicRef.current.render(ctx);
+    const loop = (currentTime) => {
+      try {
+        const elapsed = currentTime - lastRenderTime;
+
+        if (elapsed >= FRAME_INTERVAL) {
+          lastRenderTime = currentTime - (elapsed % FRAME_INTERVAL);
+          const deltaTime = Math.min(0.08, elapsed / 1000);
+
+          if (logicRef.current && gameState === 'PLAYING') {
+            logicRef.current.update(deltaTime);
+            logicRef.current.render(ctx);
+          }
+        }
+      } catch (err) {
+        console.error('[GhoulDuel Loop Error]', err);
+      } finally {
+        reqAnimRef.current = requestAnimationFrame(loop);
       }
-
-      reqAnimRef.current = requestAnimationFrame(loop);
     };
 
+    lastRenderTime = performance.now();
     reqAnimRef.current = requestAnimationFrame(loop);
 
     return () => {

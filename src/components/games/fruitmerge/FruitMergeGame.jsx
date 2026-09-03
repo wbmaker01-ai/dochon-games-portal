@@ -292,34 +292,52 @@ export default function FruitMergeGame({ onScoreSubmitted }) {
     const ctx = canvas.getContext('2d');
     let isRunning = true;
 
-    const gameLoop = () => {
+    const TARGET_FPS = 30;
+    const FRAME_INTERVAL = 1000 / TARGET_FPS; // 33.33ms
+    let lastRenderTime = performance.now();
+
+    const gameLoop = (currentTime) => {
       if (!isRunning) return;
 
-      // Keyboard Smooth Movement
-      if (keysPressed.current['ArrowLeft'] || keysPressed.current['KeyA']) {
-        const curRadius = FRUITS[currentLevel]?.radius || 17;
-        aimXRef.current = Math.max(BOX_LEFT + curRadius, aimXRef.current - 7.5);
-      }
-      if (keysPressed.current['ArrowRight'] || keysPressed.current['KeyD']) {
-        const curRadius = FRUITS[currentLevel]?.radius || 17;
-        aimXRef.current = Math.min(BOX_RIGHT - curRadius, aimXRef.current + 7.5);
-      }
+      try {
+        const elapsed = currentTime - lastRenderTime;
 
-      if (!isGameOverRef.current) {
-        engineRef.current.update(
-          handleFruitMerge,
-          handleScoreAdd,
-          handleGameOver
-        );
+        if (elapsed >= FRAME_INTERVAL) {
+          lastRenderTime = currentTime - (elapsed % FRAME_INTERVAL);
+
+          // Keyboard Smooth Movement (scaled to 30fps)
+          if (keysPressed.current['ArrowLeft'] || keysPressed.current['KeyA']) {
+            const curRadius = FRUITS[currentLevel]?.radius || 17;
+            aimXRef.current = Math.max(BOX_LEFT + curRadius, aimXRef.current - 15);
+          }
+          if (keysPressed.current['ArrowRight'] || keysPressed.current['KeyD']) {
+            const curRadius = FRUITS[currentLevel]?.radius || 17;
+            aimXRef.current = Math.min(BOX_RIGHT - curRadius, aimXRef.current + 15);
+          }
+
+          if (!isGameOverRef.current) {
+            // Run 2 physics steps per 30FPS frame to guarantee 100% physics speed preservation
+            for (let step = 0; step < 2; step++) {
+              engineRef.current.update(
+                handleFruitMerge,
+                handleScoreAdd,
+                handleGameOver
+              );
+            }
+          }
+
+          // Draw World (Only 30 times per sec - 50% GPU load reduction)
+          const currentFruitData = canDrop && !isGameOverRef.current ? FRUITS[currentLevel] : null;
+          engineRef.current.draw(ctx, aimXRef.current, currentFruitData);
+        }
+      } catch (err) {
+        console.error('[FruitMerge Loop Error]', err);
+      } finally {
+        animFrameRef.current = requestAnimationFrame(gameLoop);
       }
-
-      // Draw World
-      const currentFruitData = canDrop && !isGameOverRef.current ? FRUITS[currentLevel] : null;
-      engineRef.current.draw(ctx, aimXRef.current, currentFruitData);
-
-      animFrameRef.current = requestAnimationFrame(gameLoop);
     };
 
+    lastRenderTime = performance.now();
     animFrameRef.current = requestAnimationFrame(gameLoop);
 
     return () => {

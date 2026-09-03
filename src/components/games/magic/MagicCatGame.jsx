@@ -51,46 +51,57 @@ export default function MagicCatGame({ onScoreSubmitted }) {
     const ctx = canvas.getContext('2d');
 
     let lastStageIdx = 0;
-    let lastTime = performance.now();
+    const TARGET_FPS = 30;
+    const FRAME_INTERVAL = 1000 / TARGET_FPS; // 33.33ms
+    let lastRenderTime = performance.now();
     let lastHudUpdate = 0;
 
-    const loop = (timestamp) => {
-      if (logicRef.current) {
-        const elapsed = timestamp ? (timestamp - lastTime) : 16.666;
-        lastTime = timestamp || performance.now();
-        const dt = Math.min(48, Math.max(1, elapsed));
+    const loop = (currentTime) => {
+      try {
+        const elapsed = currentTime - lastRenderTime;
 
-        logicRef.current.update(dt);
-        logicRef.current.render(ctx);
+        if (elapsed >= FRAME_INTERVAL) {
+          lastRenderTime = currentTime - (elapsed % FRAME_INTERVAL);
+          const dt = Math.min(64, Math.max(1, elapsed));
 
-        // Synchronize React states (Throttled to 75ms to eliminate React re-render lag)
-        const now = performance.now();
-        if (now - lastHudUpdate > 75) {
-          lastHudUpdate = now;
-          setScore(logicRef.current.score);
-          setCombo(logicRef.current.combo);
-          setMaxCombo(logicRef.current.maxCombo);
-          setPlayerHp(logicRef.current.player.hp);
-          setGameState(logicRef.current.gameState);
-        } else if (logicRef.current.gameState === 'GAME_OVER' || logicRef.current.gameState === 'VICTORY') {
-          // Immediately sync terminal states
-          setGameState(logicRef.current.gameState);
-          setScore(logicRef.current.score);
+          if (logicRef.current) {
+            logicRef.current.update(dt);
+            logicRef.current.render(ctx);
+
+            // Synchronize React states (Throttled to 75ms to eliminate React re-render lag)
+            const now = performance.now();
+            if (now - lastHudUpdate > 75) {
+              lastHudUpdate = now;
+              setScore(logicRef.current.score);
+              setCombo(logicRef.current.combo);
+              setMaxCombo(logicRef.current.maxCombo);
+              setPlayerHp(logicRef.current.player.hp);
+              setGameState(logicRef.current.gameState);
+            } else if (logicRef.current.gameState === 'GAME_OVER' || logicRef.current.gameState === 'VICTORY') {
+              // Immediately sync terminal states
+              setGameState(logicRef.current.gameState);
+              setScore(logicRef.current.score);
+            }
+
+            // Stage change announcement
+            if (logicRef.current.stageIndex !== lastStageIdx) {
+              lastStageIdx = logicRef.current.stageIndex;
+              setStageIndex(lastStageIdx);
+              setStageAnnouncement(logicRef.current.currentStage.title);
+              setTimeout(() => {
+                setStageAnnouncement(null);
+              }, 2800);
+            }
+          }
         }
-
-        // Stage change announcement
-        if (logicRef.current.stageIndex !== lastStageIdx) {
-          lastStageIdx = logicRef.current.stageIndex;
-          setStageIndex(lastStageIdx);
-          setStageAnnouncement(logicRef.current.currentStage.title);
-          setTimeout(() => {
-            setStageAnnouncement(null);
-          }, 2800);
-        }
+      } catch (err) {
+        console.error('[MagicCat Loop Error]', err);
+      } finally {
+        reqAnimRef.current = requestAnimationFrame(loop);
       }
-      reqAnimRef.current = requestAnimationFrame(loop);
     };
 
+    lastRenderTime = performance.now();
     reqAnimRef.current = requestAnimationFrame(loop);
 
     return () => {

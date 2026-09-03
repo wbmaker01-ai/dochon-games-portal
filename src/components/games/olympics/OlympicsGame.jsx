@@ -60,6 +60,7 @@ export default function OlympicsGame({ onScoreSubmitted }) {
   const canvasRef = useRef(null);
   const engineRef = useRef(null);
   const requestRef = useRef(null);
+  const lastRenderTimeRef = useRef(0);
 
   // Game Engine Mutable States
   const gameStateRef = useRef({
@@ -377,22 +378,32 @@ export default function OlympicsGame({ onScoreSubmitted }) {
   }, [currentEvent]);
 
   // -------------------------------------------------------------
-  // MAIN GAME LOOP (Canvas 2D Engine Update)
+  // MAIN GAME LOOP (Capped at 30FPS for 50% GPU Reduction)
   // -------------------------------------------------------------
+  const TARGET_FPS = 30;
+  const FRAME_INTERVAL = 1000 / TARGET_FPS; // 33.33ms
+
   const gameLoop = useCallback(() => {
     const canvas = canvasRef.current;
     if (!canvas) return;
     const engine = engineRef.current;
     if (!engine) return;
 
-    const width = canvas.width;
-    const height = canvas.height;
-    const s = gameStateRef.current;
+    const currentTime = performance.now();
+    const elapsed = currentTime - lastRenderTimeRef.current;
 
-    s.time += 0.016;
+    if (elapsed >= FRAME_INTERVAL) {
+      lastRenderTimeRef.current = currentTime - (elapsed % FRAME_INTERVAL);
+      const timeScale = Math.min(2.5, Math.max(0.5, elapsed / 16.666));
 
-    // 1. Hurdles Event Logic
-    if (currentEvent === GAME_EVENTS.HURDLES) {
+      const width = canvas.width;
+      const height = canvas.height;
+      const s = gameStateRef.current;
+
+      s.time += 0.016 * timeScale;
+
+      // 1. Hurdles Event Logic
+      if (currentEvent === GAME_EVENTS.HURDLES) {
       if (s.isRunning) {
         s.hurdles.elapsedTime += 0.016;
 
@@ -617,9 +628,10 @@ export default function OlympicsGame({ onScoreSubmitted }) {
         distanceTraveled: s.canoe.distanceTraveled
       });
     }
+  }
 
-    requestRef.current = requestAnimationFrame(gameLoop);
-  }, [currentEvent, selectedTeam]);
+  requestRef.current = requestAnimationFrame(gameLoop);
+}, [currentEvent, selectedTeam]);
 
   // Canvas Initialization and Loop Start
   useEffect(() => {

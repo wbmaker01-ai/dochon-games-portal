@@ -153,7 +153,7 @@ export default function PangolinGame({ onScoreSubmitted }) {
     };
   }, [gameState]);
 
-  // Main 60FPS Game Loop with Delta Time Normalization & React Throttling
+  // Main 30FPS Game Loop with Delta Time Normalization & React Throttling (50% GPU Reduction)
   useEffect(() => {
     if (gameState !== 'PLAYING') {
       if (reqIdRef.current) cancelAnimationFrame(reqIdRef.current);
@@ -161,72 +161,82 @@ export default function PangolinGame({ onScoreSubmitted }) {
     }
 
     let isRunning = true;
-    let lastTime = performance.now();
+    const TARGET_FPS = 30;
+    const FRAME_INTERVAL = 1000 / TARGET_FPS; // 33.33ms
+    let lastRenderTime = performance.now();
     let lastHudUpdate = 0;
 
-    const gameLoop = (timestamp) => {
+    const gameLoop = (currentTime) => {
       if (!isRunning) return;
 
-      const elapsed = timestamp ? (timestamp - lastTime) : 16.666;
-      lastTime = timestamp || performance.now();
-      const dt = Math.min(48, Math.max(1, elapsed));
+      try {
+        const elapsed = currentTime - lastRenderTime;
 
-      const canvas = canvasRef.current;
-      const logic = logicRef.current;
+        if (elapsed >= FRAME_INTERVAL) {
+          lastRenderTime = currentTime - (elapsed % FRAME_INTERVAL);
+          const dt = Math.min(64, Math.max(1, elapsed));
 
-      if (canvas && logic) {
-        const ctx = canvas.getContext('2d');
+          const canvas = canvasRef.current;
+          const logic = logicRef.current;
 
-        // Update Physics with Delta-Time Normalization
-        logic.update(
-          keysRef.current,
-          mobileInputRef.current.left,
-          mobileInputRef.current.right,
-          mobileInputRef.current.jump,
-          mobileInputRef.current.roll,
-          dt
-        );
+          if (canvas && logic) {
+            const ctx = canvas.getContext('2d');
 
-        // Render Canvas
-        logic.draw(ctx);
+            // Update Physics with Delta-Time Normalization
+            logic.update(
+              keysRef.current,
+              mobileInputRef.current.left,
+              mobileInputRef.current.right,
+              mobileInputRef.current.jump,
+              mobileInputRef.current.roll,
+              dt
+            );
 
-        // Update HUD (Throttled to 75ms to eliminate React re-render lag on Chromebooks)
-        const now = performance.now();
-        if (now - lastHudUpdate > 75) {
-          lastHudUpdate = now;
-          const targetDist = logic.currentStage.targetDistance;
-          const currentDist = Math.max(0, logic.player.worldX);
-          const progress = Math.min(100, Math.floor((currentDist / targetDist) * 100));
+            // Render Canvas
+            logic.draw(ctx);
 
-          setHudData({
-            score: logic.score,
-            stageIndex: logic.stageIndex,
-            stageName: logic.currentStage.name,
-            country: logic.currentStage.country,
-            itemEmoji: logic.currentStage.itemEmoji,
-            collected: logic.totalCollected,
-            combo: logic.combo,
-            timeLeft: Math.ceil(logic.timeLeft),
-            distanceProgress: progress
-          });
+            // Update HUD (Throttled to 75ms to eliminate React re-render lag on Chromebooks)
+            const now = performance.now();
+            if (now - lastHudUpdate > 75) {
+              lastHudUpdate = now;
+              const targetDist = logic.currentStage.targetDistance;
+              const currentDist = Math.max(0, logic.player.worldX);
+              const progress = Math.min(100, Math.floor((currentDist / targetDist) * 100));
+
+              setHudData({
+                score: logic.score,
+                stageIndex: logic.stageIndex,
+                stageName: logic.currentStage.name,
+                country: logic.currentStage.country,
+                itemEmoji: logic.currentStage.itemEmoji,
+                collected: logic.totalCollected,
+                combo: logic.combo,
+                timeLeft: Math.ceil(logic.timeLeft),
+                distanceProgress: progress
+              });
+            }
+
+            // Check State Transitions
+            if (logic.isGameWon) {
+              setGameState('VICTORY_ENDING');
+              pangolinAudio.stopBGM();
+            } else if (logic.isStageCleared) {
+              setGameState('STAGE_CLEAR');
+              pangolinAudio.stopBGM();
+            } else if (logic.isGameOver) {
+              setGameState('GAMEOVER');
+              pangolinAudio.stopBGM();
+            }
+          }
         }
-
-        // Check State Transitions
-        if (logic.isGameWon) {
-          setGameState('VICTORY_ENDING');
-          pangolinAudio.stopBGM();
-        } else if (logic.isStageCleared) {
-          setGameState('STAGE_CLEAR');
-          pangolinAudio.stopBGM();
-        } else if (logic.isGameOver) {
-          setGameState('GAMEOVER');
-          pangolinAudio.stopBGM();
-        }
+      } catch (err) {
+        console.error('[Pangolin Loop Error]', err);
+      } finally {
+        reqIdRef.current = requestAnimationFrame(gameLoop);
       }
-
-      reqIdRef.current = requestAnimationFrame(gameLoop);
     };
 
+    lastRenderTime = performance.now();
     reqIdRef.current = requestAnimationFrame(gameLoop);
 
     return () => {

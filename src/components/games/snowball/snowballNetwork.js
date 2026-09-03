@@ -43,7 +43,17 @@ const ICE_SERVERS = [
     credential: 'openrelaypublic'
   },
   {
+    urls: 'turn:openrelay.metered.ca:80?transport=tcp',
+    username: 'openrelaypublic',
+    credential: 'openrelaypublic'
+  },
+  {
     urls: 'turn:openrelay.metered.ca:443',
+    username: 'openrelaypublic',
+    credential: 'openrelaypublic'
+  },
+  {
+    urls: 'turns:openrelay.metered.ca:443?transport=tcp',
     username: 'openrelaypublic',
     credential: 'openrelaypublic'
   }

@@ -286,22 +286,28 @@ export default function GnomeGame({ onScoreSubmitted }) {
   }, [handleActionInput, isHowToPlayOpen]);
 
   // =========================================================================
-  // 60FPS Game Loop
+  // 30FPS Game Loop with TimeScale Normalization (50% GPU Reduction)
   // =========================================================================
   useEffect(() => {
     const canvas = canvasRef.current;
     if (!canvas) return;
     const ctx = canvas.getContext('2d');
 
-    let lastTime = performance.now();
+    const TARGET_FPS = 30;
+    const FRAME_INTERVAL = 1000 / TARGET_FPS; // 33.33ms
+    let lastRenderTime = performance.now();
 
     const loop = (currentTime) => {
-      const dt = Math.min((currentTime - lastTime) / 1000, 0.1);
-      lastTime = currentTime;
+      try {
+        const elapsed = currentTime - lastRenderTime;
 
-      const state = gameStateRef.current;
-      const gnome = gnomeRef.current;
-      const particles = particleSystemRef.current;
+        if (elapsed >= FRAME_INTERVAL) {
+          lastRenderTime = currentTime - (elapsed % FRAME_INTERVAL);
+          const dt = Math.min(elapsed / 1000, 0.08);
+
+          const state = gameStateRef.current;
+          const gnome = gnomeRef.current;
+          const particles = particleSystemRef.current;
 
       // 1. AIM_ANGLE Update
       if (state === 'AIM_ANGLE') {
@@ -581,10 +587,15 @@ export default function GnomeGame({ onScoreSubmitted }) {
       );
 
       ctx.restore();
-
-      animFrameRef.current = requestAnimationFrame(loop);
+        }
+      } catch (err) {
+        console.error('[Gnome Loop Error]', err);
+      } finally {
+        animFrameRef.current = requestAnimationFrame(loop);
+      }
     };
 
+    lastRenderTime = performance.now();
     animFrameRef.current = requestAnimationFrame(loop);
 
     return () => {

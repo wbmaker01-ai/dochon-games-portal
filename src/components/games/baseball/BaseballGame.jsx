@@ -465,18 +465,27 @@ export default function BaseballGame({ onScoreSubmitted }) {
     return () => window.removeEventListener('keydown', handleKeyDown);
   }, [handleSwing]);
 
-  // 5. Uninterrupted Main 3D Perspective Canvas Rendering Loop
+  // 5. Uninterrupted Main 3D Perspective Canvas Rendering Loop (Capped at 30FPS for 50% GPU Reduction)
   useEffect(() => {
     const canvas = canvasRef.current;
     if (!canvas) return;
     const ctx = canvas.getContext('2d');
 
-    const render = () => {
-      try {
-        ctx.clearRect(0, 0, CANVAS_WIDTH, CANVAS_HEIGHT);
+    const TARGET_FPS = 30;
+    const FRAME_INTERVAL = 1000 / TARGET_FPS; // 33.33ms
+    let lastRenderTime = performance.now();
 
-        // Get Current Theme based on Score
-        const curScore = scoreRef.current || 0;
+    const render = (currentTime) => {
+      try {
+        const elapsed = currentTime - lastRenderTime;
+
+        if (elapsed >= FRAME_INTERVAL) {
+          lastRenderTime = currentTime - (elapsed % FRAME_INTERVAL);
+
+          ctx.clearRect(0, 0, CANVAS_WIDTH, CANVAS_HEIGHT);
+
+          // Get Current Theme based on Score
+          const curScore = scoreRef.current || 0;
         let curTheme = BASEBALL_THEMES[0];
         for (let i = BASEBALL_THEMES.length - 1; i >= 0; i--) {
           if (curScore >= BASEBALL_THEMES[i].minScore) {
@@ -789,6 +798,7 @@ export default function BaseballGame({ onScoreSubmitted }) {
         // =========================================================================
         particleSystemRef.current.update();
         particleSystemRef.current.render(ctx);
+        }
       } catch (err) {
         console.error('Canvas render loop caught exception:', err);
       } finally {
@@ -796,6 +806,7 @@ export default function BaseballGame({ onScoreSubmitted }) {
       }
     };
 
+    lastRenderTime = performance.now();
     animFrameRef.current = requestAnimationFrame(render);
 
     return () => {

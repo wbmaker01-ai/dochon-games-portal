@@ -442,15 +442,30 @@ export default function PacManGame({ onScoreSubmitted }) {
       });
     };
 
+    const TARGET_FPS = 30;
+    const FRAME_INTERVAL = 1000 / TARGET_FPS; // 33.33ms
+    let lastRenderTime = performance.now();
+
     const gameLoop = (time) => {
-      if (time - lastTime > 140) {
-        updateGame();
-        lastTime = time;
+      try {
+        if (time - lastTime > 140) {
+          updateGame();
+          lastTime = time;
+        }
+
+        const elapsed = time - lastRenderTime;
+        if (elapsed >= FRAME_INTERVAL) {
+          lastRenderTime = time - (elapsed % FRAME_INTERVAL);
+          draw();
+        }
+      } catch (err) {
+        console.error('[PacMan Loop Error]', err);
+      } finally {
+        animationFrameId = requestAnimationFrame(gameLoop);
       }
-      draw();
-      animationFrameId = requestAnimationFrame(gameLoop);
     };
 
+    lastRenderTime = performance.now();
     animationFrameId = requestAnimationFrame(gameLoop);
     return () => cancelAnimationFrame(animationFrameId);
   }, [gameState]);

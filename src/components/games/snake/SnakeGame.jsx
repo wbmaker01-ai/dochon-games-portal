@@ -719,43 +719,56 @@ export default function SnakeGame({ onScoreSubmitted }) {
     };
 
     let frameCount = 0;
+    const TARGET_FPS = 30;
+    const FRAME_INTERVAL = 1000 / TARGET_FPS; // 33.33ms
+    let lastRenderTime = performance.now();
 
     const gameLoop = (timestamp) => {
-      frameCount++;
-      const s = stateRef.current;
+      try {
+        const s = stateRef.current;
 
-      // Fixed tick step for accurate grid movements
-      if (gameState === 'PLAYING') {
-        if (!s.lastTick) s.lastTick = timestamp;
-        const elapsed = timestamp - s.lastTick;
+        // Fixed tick step for accurate grid movements
+        if (gameState === 'PLAYING') {
+          if (!s.lastTick) s.lastTick = timestamp;
+          const elapsed = timestamp - s.lastTick;
 
-        if (elapsed >= s.speed) {
-          updateGame();
-          s.lastTick = timestamp;
+          if (elapsed >= s.speed) {
+            updateGame();
+            s.lastTick = timestamp;
+          }
         }
+
+        const renderElapsed = timestamp - lastRenderTime;
+        if (renderElapsed >= FRAME_INTERVAL) {
+          lastRenderTime = timestamp - (renderElapsed % FRAME_INTERVAL);
+          frameCount++;
+
+          const curTheme = getCurrentTheme(s.applesCount);
+
+          // Draw Everything (Capped at 30FPS for 50% GPU Reduction)
+          ctx.clearRect(0, 0, CANVAS_WIDTH, CANVAS_HEIGHT);
+          drawGrid(curTheme);
+          drawObstacles(s.obstacles);
+          drawParticles();
+
+          if (s.food) {
+            drawFood(s.food, frameCount);
+          }
+
+          if (s.specialItem) {
+            drawSpecialItem(s.specialItem, frameCount);
+          }
+
+          drawSnake(s.snake, s.dir, frameCount, curTheme);
+        }
+      } catch (err) {
+        console.error('[Snake Loop Error]', err);
+      } finally {
+        animationFrameId = requestAnimationFrame(gameLoop);
       }
-
-      const curTheme = getCurrentTheme(s.applesCount);
-
-      // Draw Everything
-      ctx.clearRect(0, 0, CANVAS_WIDTH, CANVAS_HEIGHT);
-      drawGrid(curTheme);
-      drawObstacles(s.obstacles);
-      drawParticles();
-
-      if (s.food) {
-        drawFood(s.food, frameCount);
-      }
-
-      if (s.specialItem) {
-        drawSpecialItem(s.specialItem, frameCount);
-      }
-
-      drawSnake(s.snake, s.dir, frameCount, curTheme);
-
-      animationFrameId = requestAnimationFrame(gameLoop);
     };
 
+    lastRenderTime = performance.now();
     animationFrameId = requestAnimationFrame(gameLoop);
     return () => cancelAnimationFrame(animationFrameId);
   }, [gameState, highScore, spawnFood, spawnSpecialItem, spawnObstacle, triggerBadge]);

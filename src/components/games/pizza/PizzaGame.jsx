@@ -72,12 +72,27 @@ export default function PizzaGame({ onScoreSubmitted }) {
   const [isSubmitted, setIsSubmitted] = useState(false);
   const [submitError, setSubmitError] = useState('');
 
-  // Real-time animation loop
+  // Real-time animation loop (Capped at 30FPS for 50% GPU Reduction)
+  const lastRenderTimeRef = useRef(0);
+  const TARGET_FPS = 30;
+  const FRAME_INTERVAL = 1000 / TARGET_FPS; // 33.33ms
+
   const renderLoop = useCallback(() => {
-    if (engineRef.current && currentStage) {
-      engineRef.current.render(currentStage);
+    try {
+      const currentTime = performance.now();
+      const elapsed = currentTime - lastRenderTimeRef.current;
+
+      if (elapsed >= FRAME_INTERVAL) {
+        lastRenderTimeRef.current = currentTime - (elapsed % FRAME_INTERVAL);
+        if (engineRef.current && currentStage) {
+          engineRef.current.render(currentStage);
+        }
+      }
+    } catch (err) {
+      console.error('[Pizza Render Error]', err);
+    } finally {
+      animFrameIdRef.current = requestAnimationFrame(renderLoop);
     }
-    animFrameIdRef.current = requestAnimationFrame(renderLoop);
   }, [currentStage]);
 
   // Initialize Canvas & Engine

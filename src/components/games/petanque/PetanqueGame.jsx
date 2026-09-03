@@ -98,36 +98,47 @@ export default function PetanqueGame({ onScoreSubmitted }) {
     };
   }, []);
 
-  // Main Render & Physics Loop
+  // Main Render & Physics Loop (Capped at 30FPS for 50% GPU Reduction)
   useEffect(() => {
-    let lastTime = performance.now();
+    const TARGET_FPS = 30;
+    const FRAME_INTERVAL = 1000 / TARGET_FPS; // 33.33ms
+    let lastRenderTime = performance.now();
 
-    const loop = (time) => {
-      const dt = Math.min(0.05, (time - lastTime) / 1000);
-      lastTime = time;
+    const loop = (currentTime) => {
+      try {
+        const elapsed = currentTime - lastRenderTime;
 
-      if (engineRef.current) {
-        const isMoving = engineRef.current.updatePhysics(dt);
+        if (elapsed >= FRAME_INTERVAL) {
+          lastRenderTime = currentTime - (elapsed % FRAME_INTERVAL);
+          const dt = Math.min(0.08, elapsed / 1000);
 
-        // Transition from BALLS_MOVING to either next throw or MEASURING
-        if (gameState === GAME_STATES.BALLS_MOVING && !isMoving && !isHandlingStopRef.current) {
-          handleBallsStopped();
+          if (engineRef.current) {
+            const isMoving = engineRef.current.updatePhysics(dt);
+
+            // Transition from BALLS_MOVING to either next throw or MEASURING
+            if (gameState === GAME_STATES.BALLS_MOVING && !isMoving && !isHandlingStopRef.current) {
+              handleBallsStopped();
+            }
+
+            // Render scene
+            engineRef.current.render({
+              isAiming: gameState === GAME_STATES.READY_THROW && currentTurnTeam === TEAMS.PLAYER.id,
+              aimAngle,
+              aimPower,
+              shotType,
+              currentTeam: currentTurnTeam,
+              isMeasuring: gameState === GAME_STATES.MEASURING || gameState === GAME_STATES.END_ROUND
+            });
+          }
         }
-
-        // Render scene
-        engineRef.current.render({
-          isAiming: gameState === GAME_STATES.READY_THROW && currentTurnTeam === TEAMS.PLAYER.id,
-          aimAngle,
-          aimPower,
-          shotType,
-          currentTeam: currentTurnTeam,
-          isMeasuring: gameState === GAME_STATES.MEASURING || gameState === GAME_STATES.END_ROUND
-        });
+      } catch (err) {
+        console.error('[Petanque Loop Error]', err);
+      } finally {
+        animationFrameRef.current = requestAnimationFrame(loop);
       }
-
-      animationFrameRef.current = requestAnimationFrame(loop);
     };
 
+    lastRenderTime = performance.now();
     animationFrameRef.current = requestAnimationFrame(loop);
     return () => cancelAnimationFrame(animationFrameRef.current);
   }, [gameState, aimAngle, aimPower, shotType, currentTurnTeam]);

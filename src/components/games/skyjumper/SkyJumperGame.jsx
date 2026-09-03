@@ -102,32 +102,42 @@ export default function SkyJumperGame({ onScoreSubmitted }) {
     };
   }, []);
 
-  // Main Render & Game Loop
+  // Main 30FPS Game Loop with Delta-Time Normalization (50% GPU Reduction)
   useEffect(() => {
     let animationFrameId;
+    const TARGET_FPS = 30;
+    const FRAME_INTERVAL = 1000 / TARGET_FPS; // 33.33ms
+    let lastRenderTime = performance.now();
 
-    const loop = (timestamp) => {
-      if (!lastTimeRef.current) lastTimeRef.current = timestamp;
-      const elapsed = timestamp - lastTimeRef.current;
-      const dt = Math.min(48, Math.max(1, elapsed));
-      lastTimeRef.current = timestamp;
+    const loop = (currentTime) => {
+      try {
+        const elapsed = currentTime - lastRenderTime;
 
-      const engine = engineRef.current;
-      const canvas = canvasRef.current;
+        if (elapsed >= FRAME_INTERVAL) {
+          lastRenderTime = currentTime - (elapsed % FRAME_INTERVAL);
+          const dt = Math.min(64, Math.max(1, elapsed));
 
-      if (engine && canvas) {
-        const ctx = canvas.getContext('2d');
+          const engine = engineRef.current;
+          const canvas = canvasRef.current;
 
-        if (gameState === 'PLAYING') {
-          engine.update(timestamp, dt);
+          if (engine && canvas) {
+            const ctx = canvas.getContext('2d');
+
+            if (gameState === 'PLAYING') {
+              engine.update(currentTime, dt);
+            }
+
+            engine.render(ctx);
+          }
         }
-
-        engine.render(ctx);
+      } catch (err) {
+        console.error('[SkyJumper Loop Error]', err);
+      } finally {
+        animationFrameId = requestAnimationFrame(loop);
       }
-
-      animationFrameId = requestAnimationFrame(loop);
     };
 
+    lastRenderTime = performance.now();
     animationFrameId = requestAnimationFrame(loop);
     reqIdRef.current = animationFrameId;
 

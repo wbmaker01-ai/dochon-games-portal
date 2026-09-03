@@ -96,13 +96,29 @@ export default function PaniPuriGame({ onScoreSubmitted }) {
     engineRef.current = engine;
     canvas.__panipuriEngine = engine;
 
-    // Continuous 60fps Loop using performance.now()
-    const loop = (timestamp) => {
-      if (engineRef.current) {
-        engineRef.current.tick(timestamp);
+    // Continuous 30fps Loop with 50% GPU Reduction
+    const TARGET_FPS = 30;
+    const FRAME_INTERVAL = 1000 / TARGET_FPS; // 33.33ms
+    let lastRenderTime = performance.now();
+
+    const loop = (currentTime) => {
+      try {
+        const elapsed = currentTime - lastRenderTime;
+
+        if (elapsed >= FRAME_INTERVAL) {
+          lastRenderTime = currentTime - (elapsed % FRAME_INTERVAL);
+          if (engineRef.current) {
+            engineRef.current.tick(currentTime);
+          }
+        }
+      } catch (err) {
+        console.error('[PaniPuri Loop Error]', err);
+      } finally {
+        animFrameIdRef.current = requestAnimationFrame(loop);
       }
-      animFrameIdRef.current = requestAnimationFrame(loop);
     };
+
+    lastRenderTime = performance.now();
     animFrameIdRef.current = requestAnimationFrame(loop);
 
     return () => {

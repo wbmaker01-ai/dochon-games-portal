@@ -316,7 +316,7 @@ export default function PopcornGame({ onScoreSubmitted }) {
     }
   };
 
-  // Main 60FPS Game Loop
+  // Main 30FPS Game Loop with Delta-Time Normalization (50% GPU Reduction)
   useEffect(() => {
     if (gameState !== 'playing') {
       if (animFrameRef.current) cancelAnimationFrame(animFrameRef.current);
@@ -327,71 +327,78 @@ export default function PopcornGame({ onScoreSubmitted }) {
     if (!canvas) return;
     const ctx = canvas.getContext('2d');
 
-    let lastTime = performance.now();
+    const TARGET_FPS = 30;
+    const FRAME_INTERVAL = 1000 / TARGET_FPS; // 33.33ms
+    let lastRenderTime = performance.now();
     let secondAcc = 0;
 
     const loop = (currentTime) => {
-      const dt = (currentTime - lastTime) / 1000;
-      lastTime = currentTime;
+      try {
+        const elapsed = currentTime - lastRenderTime;
 
-      // Update seconds & Survival Score
-      secondAcc += dt;
-      if (secondAcc >= 1.0) {
-        secondAcc -= 1.0;
-        setSurvivalSeconds(s => s + 1);
-        setScore(sc => sc + 25);
-        stageTimerRef.current += 1;
-      }
+        if (elapsed >= FRAME_INTERVAL) {
+          lastRenderTime = currentTime - (elapsed % FRAME_INTERVAL);
+          const dt = Math.min(elapsed / 1000, 0.08);
+          const timeScale = Math.min(3.0, Math.max(0.5, dt * 60));
 
-      // Update Skill Cooldown HUD
-      const now = Date.now();
-      const timeSinceSkill = now - playerRef.current.lastSkillUsed;
-      const cdRemaining = Math.max(0, selectedClass.skillCooldown - timeSinceSkill);
-      setSkillCooldownRemaining(cdRemaining);
-      setIsSkillActive(playerRef.current.skillActiveTimer > 0);
+          // Update seconds & Survival Score
+          secondAcc += dt;
+          if (secondAcc >= 1.0) {
+            secondAcc -= 1.0;
+            setSurvivalSeconds(s => s + 1);
+            setScore(sc => sc + 25);
+            stageTimerRef.current += 1;
+          }
 
-      // 1. Process Freeze / Speed Multiplier
-      let bulletSpeedMult = 1.0;
-      if (freezeTimerRef.current > 0) {
-        freezeTimerRef.current -= dt * 1000;
-        bulletSpeedMult = 0.5;
-      }
+          // Update Skill Cooldown HUD
+          const now = Date.now();
+          const timeSinceSkill = now - playerRef.current.lastSkillUsed;
+          const cdRemaining = Math.max(0, selectedClass.skillCooldown - timeSinceSkill);
+          setSkillCooldownRemaining(cdRemaining);
+          setIsSkillActive(playerRef.current.skillActiveTimer > 0);
 
-      // 2. Update Player Keyboard Movement (if not touch dragging)
-      if (!isTouchDragging.current) {
-        const player = playerRef.current;
-        let moveSpeed = selectedClass.speed;
-        if (selectedClass.id === 'runner' && player.skillActiveTimer > 0) {
-          moveSpeed *= 1.7;
-        }
+          // 1. Process Freeze / Speed Multiplier
+          let bulletSpeedMult = 1.0;
+          if (freezeTimerRef.current > 0) {
+            freezeTimerRef.current -= dt * 1000;
+            bulletSpeedMult = 0.5;
+          }
 
-        let dx = 0;
-        let dy = 0;
-        if (keysPressed.current['ArrowUp'] || keysPressed.current['KeyW']) dy -= 1;
-        if (keysPressed.current['ArrowDown'] || keysPressed.current['KeyS']) dy += 1;
-        if (keysPressed.current['ArrowLeft'] || keysPressed.current['KeyA']) dx -= 1;
-        if (keysPressed.current['ArrowRight'] || keysPressed.current['KeyD']) dx += 1;
+          // 2. Update Player Keyboard Movement (if not touch dragging)
+          if (!isTouchDragging.current) {
+            const player = playerRef.current;
+            let moveSpeed = selectedClass.speed;
+            if (selectedClass.id === 'runner' && player.skillActiveTimer > 0) {
+              moveSpeed *= 1.7;
+            }
 
-        if (dx !== 0 && dy !== 0) {
-          dx *= 0.7071;
-          dy *= 0.7071;
-        }
+            let dx = 0;
+            let dy = 0;
+            if (keysPressed.current['ArrowUp'] || keysPressed.current['KeyW']) dy -= 1;
+            if (keysPressed.current['ArrowDown'] || keysPressed.current['KeyS']) dy += 1;
+            if (keysPressed.current['ArrowLeft'] || keysPressed.current['KeyA']) dx -= 1;
+            if (keysPressed.current['ArrowRight'] || keysPressed.current['KeyD']) dx += 1;
 
-        player.x += dx * moveSpeed;
-        player.y += dy * moveSpeed;
+            if (dx !== 0 && dy !== 0) {
+              dx *= 0.7071;
+              dy *= 0.7071;
+            }
 
-        const clamped = clampToPanArena(player.x, player.y, player.radius);
-        player.x = clamped.x;
-        player.y = clamped.y;
-      }
+            player.x += dx * moveSpeed * timeScale;
+            player.y += dy * moveSpeed * timeScale;
 
-      const player = playerRef.current;
-      if (player.invincibleTimer > 0) player.invincibleTimer--;
-      if (player.skillActiveTimer > 0) player.skillActiveTimer--;
+            const clamped = clampToPanArena(player.x, player.y, player.radius);
+            player.x = clamped.x;
+            player.y = clamped.y;
+          }
 
-      // 3. Stage & Boss Logic
-      const currentStageCfg = STAGE_CONFIGS[stageIndex];
-      const stageDuration = currentStageCfg.duration;
+          const player = playerRef.current;
+          if (player.invincibleTimer > 0) player.invincibleTimer -= timeScale;
+          if (player.skillActiveTimer > 0) player.skillActiveTimer -= timeScale;
+
+          // 3. Stage & Boss Logic
+          const currentStageCfg = STAGE_CONFIGS[stageIndex];
+          const stageDuration = currentStageCfg.duration;
 
       // Check Stage Progression
       if (stageTimerRef.current >= stageDuration) {
@@ -467,7 +474,7 @@ export default function PopcornGame({ onScoreSubmitted }) {
 
       // 6. Update Bullets & Collisions
       bulletsRef.current = bulletsRef.current.filter(b => {
-        b.update(bulletSpeedMult);
+        b.update(bulletSpeedMult * timeScale);
         if (b.isOutOfBounds()) return false;
 
         const dist = Math.hypot(b.x - player.x, b.y - player.y);
@@ -479,45 +486,50 @@ export default function PopcornGame({ onScoreSubmitted }) {
             setScore(sc => sc + 50);
             b.vx = -b.vx * 1.2;
             b.vy = -b.vy * 1.2;
-            b.color = '#38BDF8';
+            b.type = 'reflect';
             return true;
           }
         }
 
-        // Check Graze (Near Miss)
-        if (!b.grazed && dist < player.radius + b.radius + GRAZE_DISTANCE && dist >= player.radius + b.radius) {
+        // Check Player Hit
+        if (dist < player.radius + b.radius - 2) {
+          if (b.type === 'reflect') return false; // Reflected bullets don't hurt
+          if (player.invincibleTimer <= 0) {
+            soundManager.playHit();
+            setHp(h => {
+              const next = h - b.damage;
+              if (next <= 0) {
+                setGameState('gameover');
+                soundManager.playVictory();
+              }
+              return Math.max(0, next);
+            });
+            player.invincibleTimer = 60; // 1 second invulnerability
+
+            // Screen shake
+            shakeRef.current = 14;
+
+            // Damage Particles
+            for (let i = 0; i < 12; i++) {
+              particlesRef.current.push(
+                new Particle(player.x, player.y, (Math.random() - 0.5) * 8, (Math.random() - 0.5) * 8, '#EF4444', 5, 25)
+              );
+            }
+          }
+          return false;
+        }
+
+        // Graze Detection
+        if (!b.grazed && dist < player.radius + b.radius + GRAZE_DISTANCE) {
           b.grazed = true;
           setGrazeCount(g => g + 1);
           setScore(sc => sc + GRAZE_SCORE);
           soundManager.playGraze();
+
+          // Graze sparkle
           particlesRef.current.push(
-            new Particle(player.x, player.y, 0, -1, '#FBBF24', 3, 20, 20, 'circle')
+            new Particle(b.x, b.y, (Math.random() - 0.5) * 2, (Math.random() - 0.5) * 2, '#38BDF8', 3, 15)
           );
-        }
-
-        // Check Hit with Player
-        if (dist < player.radius + b.radius) {
-          if (player.invincibleTimer <= 0) {
-            soundManager.playHit();
-            setHp(currHp => {
-              const newHp = currHp - b.damage;
-              if (newHp <= 0) {
-                soundManager.playGameOver();
-                setGameState('gameover');
-              }
-              return Math.max(0, newHp);
-            });
-            player.invincibleTimer = 45;
-
-            for (let i = 0; i < 15; i++) {
-              const angle = Math.random() * Math.PI * 2;
-              const spd = 2 + Math.random() * 3;
-              particlesRef.current.push(
-                new Particle(player.x, player.y, Math.cos(angle) * spd, Math.sin(angle) * spd, '#EF4444', 4, 25, 25)
-              );
-            }
-            return false;
-          }
         }
 
         return true;
@@ -526,17 +538,25 @@ export default function PopcornGame({ onScoreSubmitted }) {
       // 7. Update Particles
       particlesRef.current = particlesRef.current.filter(p => {
         p.update();
-        return p.life > 0;
+        return !p.isDead();
       });
 
-      // 8. RENDER CANVAS SCENE
+      // 8. Render Scene
       ctx.clearRect(0, 0, CANVAS_WIDTH, CANVAS_HEIGHT);
 
-      // Render Pan Background
-      if (imagesRef.current.bgPan && imagesRef.current.bgPan.complete) {
-        ctx.drawImage(imagesRef.current.bgPan, 0, 0, CANVAS_WIDTH, CANVAS_HEIGHT);
+      ctx.save();
+      if (shakeRef.current > 0) {
+        ctx.translate((Math.random() - 0.5) * shakeRef.current, (Math.random() - 0.5) * shakeRef.current);
+        shakeRef.current *= 0.88;
+        if (shakeRef.current < 0.5) shakeRef.current = 0;
+      }
+
+      // Draw Heated Pan Background
+      let panImg = imagesRef.current.pan;
+      if (panImg && panImg.complete) {
+        ctx.drawImage(panImg, PAN_CENTER_X - PAN_RADIUS - 20, PAN_CENTER_Y - PAN_RADIUS - 20, (PAN_RADIUS + 20) * 2, (PAN_RADIUS + 20) * 2);
       } else {
-        ctx.fillStyle = '#1E1B4B';
+        ctx.fillStyle = '#1E293B';
         ctx.fillRect(0, 0, CANVAS_WIDTH, CANVAS_HEIGHT);
         ctx.beginPath();
         ctx.arc(PAN_CENTER_X, PAN_CENTER_Y, PAN_RADIUS, 0, Math.PI * 2);
@@ -620,10 +640,15 @@ export default function PopcornGame({ onScoreSubmitted }) {
         ctx.stroke();
       }
       ctx.restore();
-
-      animFrameRef.current = requestAnimationFrame(loop);
+        }
+      } catch (err) {
+        console.error('[Popcorn Loop Error]', err);
+      } finally {
+        animFrameRef.current = requestAnimationFrame(loop);
+      }
     };
 
+    lastRenderTime = performance.now();
     animFrameRef.current = requestAnimationFrame(loop);
 
     return () => {
