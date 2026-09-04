@@ -13,11 +13,7 @@ import {
 } from './microKartConstants.js';
 
 import {
-  TRACK_WAYPOINTS,
-  DESK_OBSTACLES,
-  PAINT_SPILLS,
-  BOOST_PADS,
-  ITEM_BOX_SPAWNS,
+  getTrackConfig,
   isPointOnTrack
 } from './microKartTrack.js';
 
@@ -28,6 +24,15 @@ export class MicroKartLogic {
     this.playerSkin = options.playerSkin || 'eraser';
     this.playerName = options.playerName || '나';
     this.audio = options.audio || null;
+
+    // Track Configuration
+    this.trackId = options.trackId || 1;
+    this.trackConfig = getTrackConfig(this.trackId);
+    this.waypoints = this.trackConfig.waypoints;
+    this.obstacles = this.trackConfig.obstacles;
+    this.spills = this.trackConfig.spills;
+    this.boostPads = this.trackConfig.boostPads;
+    this.itemBoxSpawns = this.trackConfig.itemBoxSpawns;
 
     // Callbacks
     this.onLapComplete = options.onLapComplete || null;
@@ -63,14 +68,14 @@ export class MicroKartLogic {
 
   initWorld(options) {
     // 1. Initialize Item Mystery Boxes
-    this.itemBoxes = ITEM_BOX_SPAWNS.map(spawn => ({
+    this.itemBoxes = this.itemBoxSpawns.map(spawn => ({
       ...spawn,
       active: true,
       respawnTimer: 0
     }));
 
     // 2. Initialize Starting Grid at Waypoint 0
-    const startWp = TRACK_WAYPOINTS[0];
+    const startWp = this.waypoints[0];
     const gridRows = 5;
     const initialKarts = [];
 
@@ -105,11 +110,14 @@ export class MicroKartLogic {
   }
 
   createKart({ id, name, isPlayer, skinId, gridIndex }) {
-    const p0 = TRACK_WAYPOINTS[0];
-    // Staggered grid starting positions along track angle
-    const angle = 0; // Pointing East along waypoint 0 to 1
+    const startPos = this.trackConfig.startPos || { x: this.waypoints[0].x, y: this.waypoints[0].y, angle: 0 };
+    const angle = startPos.angle || 0;
     const rowOffset = Math.floor(gridIndex / 2) * 80;
     const sideOffset = (gridIndex % 2 === 0 ? -1 : 1) * 38;
+    const cosA = Math.cos(angle);
+    const sinA = Math.sin(angle);
+    const startX = startPos.x - cosA * rowOffset - sinA * sideOffset;
+    const startY = startPos.y - sinA * rowOffset + cosA * sideOffset;
 
     const skin = KART_SKINS.find(s => s.id === skinId) || KART_SKINS[0];
 
@@ -118,8 +126,8 @@ export class MicroKartLogic {
       name,
       isPlayer,
       skin,
-      x: p0.x - rowOffset,
-      y: p0.y + sideOffset,
+      x: startX,
+      y: startY,
       vx: 0,
       vy: 0,
       angle: angle,
@@ -326,10 +334,10 @@ export class MicroKartLogic {
     }
 
     // Check Surface: Offroad or Paint Spill
-    const onTrack = isPointOnTrack(kart.x, kart.y);
+    const onTrack = isPointOnTrack(kart.x, kart.y, this.trackId);
     let currentFriction = onTrack ? KART_PHYSICS.NATURAL_FRICTION : KART_PHYSICS.OFFROAD_FRICTION;
 
-    PAINT_SPILLS.forEach(spill => {
+    this.spills.forEach(spill => {
       const d = Math.hypot(kart.x - spill.x, kart.y - spill.y);
       if (d < spill.radius + KART_PHYSICS.KART_RADIUS) {
         currentFriction = 0.88; // Sticky paint slowdown
@@ -418,7 +426,7 @@ export class MicroKartLogic {
     kart.y = Math.max(80, Math.min(WORLD_HEIGHT - 80, kart.y));
 
     // Check Boost Pads
-    BOOST_PADS.forEach(pad => {
+    this.boostPads.forEach(pad => {
       const d = Math.hypot(kart.x - pad.x, kart.y - pad.y);
       if (d < 50) {
         kart.boostTimer = 2.0;
@@ -432,7 +440,7 @@ export class MicroKartLogic {
   // --- AI NAVIGATION & DECISION MAKING ---
   computeAIControl(kart) {
     const diff = DIFFICULTY_PRESETS[this.difficulty] || DIFFICULTY_PRESETS.normal;
-    const targetWp = TRACK_WAYPOINTS[kart.nextWaypoint];
+    const targetWp = this.waypoints[kart.nextWaypoint];
 
     // Angle to target waypoint
     const dx = targetWp.x - kart.x;
@@ -478,13 +486,13 @@ export class MicroKartLogic {
     }
 
     const currentTargetIdx = kart.nextWaypoint;
-    const targetWp = TRACK_WAYPOINTS[currentTargetIdx];
+    const targetWp = this.waypoints[currentTargetIdx];
     const d = Math.hypot(kart.x - targetWp.x, kart.y - targetWp.y);
     const hitRadius = Math.max((targetWp.width || 220) * 1.25, 275);
 
     // Fallback: If a racer drifts wide or cuts a corner, also check next+1 waypoint
-    const nextPlusOneIdx = (currentTargetIdx + 1) % TRACK_WAYPOINTS.length;
-    const nextPlusOneWp = TRACK_WAYPOINTS[nextPlusOneIdx];
+    const nextPlusOneIdx = (currentTargetIdx + 1) % this.waypoints.length;
+    const nextPlusOneWp = this.waypoints[nextPlusOneIdx];
     const dNextPlusOne = Math.hypot(kart.x - nextPlusOneWp.x, kart.y - nextPlusOneWp.y);
     const hitRadiusPlusOne = Math.max((nextPlusOneWp.width || 220) * 1.25, 275);
 
@@ -498,8 +506,9 @@ export class MicroKartLogic {
 
     // Finish Line Crossing Gate check (Waypoint 0 is Start/Finish line at x: 500, y: 1950)
     // Checkered line spans y: 1800~2100 across x: 500
-    if (currentTargetIdx === 0 || reachedWaypoint === 0 || currentTargetIdx === TRACK_WAYPOINTS.length - 1) {
-      const isCrossingFinishGate = Math.abs(kart.x - 500) < 70 && Math.abs(kart.y - 1950) < 170;
+    const p0 = this.waypoints[0];
+    if (currentTargetIdx === 0 || reachedWaypoint === 0 || currentTargetIdx === this.waypoints.length - 1) {
+      const isCrossingFinishGate = Math.abs(kart.x - p0.x) < 80 && Math.abs(kart.y - p0.y) < 180;
       if (isCrossingFinishGate && kart.checkpointsPassedInLap.size >= 8) {
         reachedWaypoint = 0;
       }
@@ -542,7 +551,7 @@ export class MicroKartLogic {
         }
       } else {
         // Advance to next waypoint along circuit
-        kart.nextWaypoint = (reachedWaypoint + 1) % TRACK_WAYPOINTS.length;
+        kart.nextWaypoint = (reachedWaypoint + 1) % this.waypoints.length;
       }
     }
   }
@@ -552,7 +561,7 @@ export class MicroKartLogic {
     const r = KART_PHYSICS.KART_RADIUS;
 
     // 1. Kart vs Desk Obstacles
-    DESK_OBSTACLES.forEach(obs => {
+    this.obstacles.forEach(obs => {
       if (obs.type === 'circle') {
         const d = Math.hypot(kart.x - obs.x, kart.y - obs.y);
         const minDist = r + obs.radius;
@@ -806,19 +815,19 @@ export class MicroKartLogic {
       if (b.isFinished) return 1;
 
       // Waypoint 0 is the finish line of the current lap (after waypoint 15)
-      const wpOrderA = a.nextWaypoint === 0 ? TRACK_WAYPOINTS.length : a.nextWaypoint;
-      const wpOrderB = b.nextWaypoint === 0 ? TRACK_WAYPOINTS.length : b.nextWaypoint;
+      const wpOrderA = a.nextWaypoint === 0 ? this.waypoints.length : a.nextWaypoint;
+      const wpOrderB = b.nextWaypoint === 0 ? this.waypoints.length : b.nextWaypoint;
 
-      const progressA = (a.currentLap - 1) * TRACK_WAYPOINTS.length + wpOrderA;
-      const progressB = (b.currentLap - 1) * TRACK_WAYPOINTS.length + wpOrderB;
+      const progressA = (a.currentLap - 1) * this.waypoints.length + wpOrderA;
+      const progressB = (b.currentLap - 1) * this.waypoints.length + wpOrderB;
 
       if (progressA !== progressB) {
         return progressB - progressA;
       }
 
       // Proximity to target waypoint (closer is better)
-      const targetWpA = TRACK_WAYPOINTS[a.nextWaypoint];
-      const targetWpB = TRACK_WAYPOINTS[b.nextWaypoint];
+      const targetWpA = this.waypoints[a.nextWaypoint];
+      const targetWpB = this.waypoints[b.nextWaypoint];
       const distA = Math.hypot(a.x - targetWpA.x, a.y - targetWpA.y);
       const distB = Math.hypot(b.x - targetWpB.x, b.y - targetWpB.y);
       return distA - distB;
@@ -845,6 +854,8 @@ export class MicroKartLogic {
     const totalScore = rankBasePoints + timeBonus + driftBonus + itemBonus;
 
     return {
+      trackId: this.trackId,
+      trackName: this.trackConfig.name,
       playerRank,
       totalScore,
       rankBasePoints,

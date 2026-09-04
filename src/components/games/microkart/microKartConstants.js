@@ -8,6 +8,41 @@ export const WORLD_WIDTH = 3200;
 export const WORLD_HEIGHT = 2400;
 
 export const TOTAL_LAPS = 3;
+export const TOTAL_STAGES = 3;
+
+// 3 Unique School Circuit Tracks
+export const TRACK_LIST = [
+  {
+    id: 1,
+    level: 1,
+    name: '교실 책상 서킷',
+    englishName: 'Classroom Wood Speedway',
+    theme: 'wood',
+    difficulty: '초급 (★☆☆)',
+    icon: '🏫',
+    description: '긴 직선 코스와 완만한 와이드 코너로 구성된 기본 책상 트랙!'
+  },
+  {
+    id: 2,
+    level: 2,
+    name: '과학실 실험대 서킷',
+    englishName: 'Science Lab Circuit',
+    theme: 'lab',
+    difficulty: '중급 (★★☆)',
+    icon: '🧪',
+    description: '연속 S자 시케인과 플라스크, 화학 액체 슬로우존이 배치된 테크니컬 트랙!'
+  },
+  {
+    id: 3,
+    level: 3,
+    name: '미술실 스케치북 서킷',
+    englishName: 'Art Room Neon Circuit',
+    theme: 'art',
+    difficulty: '마스터 (★★★)',
+    icon: '🎨',
+    description: '현란한 컬러 물감 웅덩이와 급격한 지그재그 헤어핀이 도사리는 최고난도 트랙!'
+  }
+];
 
 // 4 Cute Desk Stationary Themed Kart Skins
 export const KART_SKINS = [

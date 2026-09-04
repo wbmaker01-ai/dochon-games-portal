@@ -27,8 +27,11 @@ export default function MicroKartHowToPlayModal({ isOpen, onClose }) {
 
         {/* Story & Overview */}
         <div style={{ background: 'rgba(15, 23, 42, 0.6)', padding: '12px', borderRadius: '10px', fontSize: '0.85rem', color: '#CBD5E1', lineHeight: '1.5' }}>
-          🏫 <strong>도촌초등학교 교실 책상 서킷에 오신 것을 환영합니다!</strong><br />
-          지우개, 연필, 삼각자로 만들어진 아기자기한 트랙을 <strong>총 3바퀴(3 Laps)</strong> 먼저 완주하여 챔피언에 등극하세요!
+          🏫 <strong>도촌 마이크로 카트 레이싱 3대 서킷 그랑프리!</strong><br />
+          1) <strong>교실 책상 서킷</strong> (초급 와이드 스피드웨이)<br />
+          2) <strong>과학실 실험대 서킷</strong> (연속 S자 시케인 & 화학 플라스크)<br />
+          3) <strong>미술실 스케치북 서킷</strong> (아크릴 물감 슬로우존 & 지그재그 헤어핀)<br />
+          솔로 모드에서는 3개 스테이지를 연속 제패하여 <strong>전관왕 보너스(+2,000점)</strong>를 획득하고, P2P 모드에서는 원하는 맵을 골라 친구와 1:1 진검승부를 펼쳐보세요!
         </div>
 
         {/* Controls Section */}

@@ -3,11 +3,40 @@
 
 export const CHANGELOG_DATA = [
   {
+    version: 'v1.51.0',
+    date: '2026-09-04',
+    title: '🏎️ [도촌 마이크로 카트 레이싱] 3대 서킷 그랑프리 시스템 & P2P 실시간 맵 선택 기능 대규모 업데이트',
+    badge: 'LATEST',
+    badgeColor: 'emerald',
+    items: [
+      {
+        tag: '3 RACING TRACKS',
+        tagColor: 'rose',
+        text: '[3대 학교 테마 레이싱 서킷 전격 추가] 기존 1번 《교실 책상 서킷(초급 와이드 스피드웨이)》에 더해, 연속 S자 시케인과 플라스크·시험관대·자석 장애물이 도사리는 2번 《과학실 실험대 서킷(중급 테크니컬)》, 아크릴 물감 슬로우존과 지그재그 헤어핀이 배치된 3번 《미술실 스케치북 서킷(마스터 네온)》 신규 트랙 구축'
+      },
+      {
+        tag: 'SOLO GRAND PRIX',
+        tagColor: 'amber',
+        text: '[솔로 모드 3연전 그랑프리 캠페인 시스템] Level 1 ➔ Level 2 ➔ Level 3를 연속으로 정복하는 그랑프리 모드 도입, 스테이지 클리어 중간 정산 모달 탑재, 3연전 전 코스 완주 시 특별 보너스(+2,000점) 지급 및 명예의 전당 점수 등록 지원'
+      },
+      {
+        tag: 'P2P MAP SELECT',
+        tagColor: 'purple',
+        text: '[P2P 친구 대전 실시간 맵 선택 지원] P2P 멀티플레이 대기실에서 방장이 3개 서킷(교실·과학실·미술실) 중 플레이할 맵을 자유롭게 선택하고 실시간 동기화하여 친구들과 함께 맞춤형 대전을 즐길 수 있도록 네트워크 프로토콜 확장'
+      },
+      {
+        tag: 'PERFORMANCE',
+        tagColor: 'emerald',
+        text: '[트랙별 0-Cost 2D 절차적 렌더링 최적화] 각 트랙 고유의 과학실 비커, 미술실 크레파스 상자, 물감 등의 장애물과 노면을 저사양 기기 환경에서도 안정적으로 30FPS로 매끄럽게 처리하도록 최적화 렌더러 적용'
+      }
+    ]
+  },
+  {
     version: 'v1.50.2',
     date: '2026-09-04',
     title: '🏁 [도촌 마이크로 카트 레이싱] 3바퀴 완주 체크포인트 판정 및 결승선 통과 감지 엔진 긴급 패치',
-    badge: 'LATEST',
-    badgeColor: 'emerald',
+    badge: 'UPDATE',
+    badgeColor: 'blue',
     items: [
       {
         tag: 'LAP FINISH FIX',

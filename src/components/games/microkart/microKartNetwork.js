@@ -75,9 +75,11 @@ export class MicroKartNetworkManager {
     this.heartbeatTimer = null;
 
     this.lobbyPlayers = [];
+    this.selectedTrackId = 1;
 
     // Callbacks
     this.onLobbyUpdate = null;
+    this.onTrackChange = null;
     this.onGameStart = null;
     this.onSnapshot = null;
     this.onClientInput = null;
@@ -277,8 +279,8 @@ export class MicroKartNetworkManager {
       }
 
       // Immediately respond with lobby state ACK
-      conn.send({ type: 'LOBBY_UPDATE', players: this.lobbyPlayers });
-      this._broadcastToGuests({ type: 'LOBBY_UPDATE', players: this.lobbyPlayers });
+      conn.send({ type: 'LOBBY_UPDATE', players: this.lobbyPlayers, trackId: this.selectedTrackId });
+      this._broadcastToGuests({ type: 'LOBBY_UPDATE', players: this.lobbyPlayers, trackId: this.selectedTrackId });
       if (this.onLobbyUpdate) this.onLobbyUpdate(this.lobbyPlayers);
     } else if (data.type === 'CLIENT_INPUT') {
       if (this.onClientInput) {
@@ -440,9 +442,18 @@ export class MicroKartNetworkManager {
 
     if (data.type === 'LOBBY_UPDATE') {
       this.lobbyPlayers = data.players || [];
+      if (data.trackId) {
+        this.selectedTrackId = data.trackId;
+        if (this.onTrackChange) this.onTrackChange(data.trackId);
+      }
       if (this.onLobbyUpdate) this.onLobbyUpdate(this.lobbyPlayers);
+    } else if (data.type === 'TRACK_CHANGE') {
+      this.selectedTrackId = data.trackId;
+      if (this.onTrackChange) this.onTrackChange(data.trackId);
     } else if (data.type === 'GAME_START') {
-      if (this.onGameStart) this.onGameStart(data);
+      const trackId = data.trackId || (data.config && data.config.trackId) || this.selectedTrackId || 1;
+      this.selectedTrackId = trackId;
+      if (this.onGameStart) this.onGameStart({ trackId, ...(data.config || {}) });
     } else if (data.type === 'SNAPSHOT') {
       if (this.onSnapshot) this.onSnapshot(data);
     } else if (data.type === 'GAME_OVER') {
@@ -450,9 +461,16 @@ export class MicroKartNetworkManager {
     }
   }
 
-  broadcastGameStart(config) {
+  broadcastTrackChange(trackId) {
+    this.selectedTrackId = trackId;
     if (!this.isHost) return;
-    this._broadcastToGuests({ type: 'GAME_START', config });
+    this._broadcastToGuests({ type: 'TRACK_CHANGE', trackId });
+  }
+
+  broadcastGameStart(config = {}) {
+    if (!this.isHost) return;
+    const fullConfig = { trackId: this.selectedTrackId || 1, ...config };
+    this._broadcastToGuests({ type: 'GAME_START', config: fullConfig, trackId: this.selectedTrackId || 1 });
   }
 
   broadcastSnapshot(snapshot) {
@@ -497,6 +515,7 @@ export class MicroKartNetworkManager {
     this.isHost = false;
     this.roomCode = '';
     this.lobbyPlayers = [];
+    this.selectedTrackId = 1;
   }
 }
 

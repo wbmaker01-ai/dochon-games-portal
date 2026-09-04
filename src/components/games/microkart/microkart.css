@@ -527,3 +527,137 @@
   opacity: 0.5;
   cursor: not-allowed;
 }
+
+/* Track Selection Grid & Cards */
+.microkart-track-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 8px;
+}
+
+.microkart-track-card {
+  background: rgba(30, 41, 59, 0.7);
+  border: 1.5px solid rgba(255, 255, 255, 0.12);
+  border-radius: 10px;
+  padding: 10px 8px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+  gap: 4px;
+  cursor: pointer;
+  transition: all 0.15s ease;
+  position: relative;
+}
+
+.microkart-track-card:hover {
+  background: rgba(51, 65, 85, 0.85);
+  border-color: rgba(255, 255, 255, 0.3);
+  transform: translateY(-2px);
+}
+
+.microkart-track-card.selected {
+  background: rgba(245, 158, 11, 0.15);
+  border-color: #F59E0B;
+  box-shadow: 0 0 12px rgba(245, 158, 11, 0.35);
+}
+
+.microkart-track-card.guest-view {
+  cursor: default;
+  background: rgba(14, 165, 233, 0.15);
+  border-color: #0EA5E9;
+}
+
+.microkart-track-badge-tag {
+  font-size: 0.65rem;
+  font-weight: 800;
+  padding: 2px 6px;
+  border-radius: 4px;
+  background: rgba(0, 0, 0, 0.4);
+  color: #94A3B8;
+}
+
+.microkart-track-card.selected .microkart-track-badge-tag {
+  background: #F59E0B;
+  color: #000000;
+}
+
+.microkart-track-name {
+  font-size: 0.8rem;
+  font-weight: 800;
+  color: #F8FAFC;
+  line-height: 1.2;
+}
+
+.microkart-track-diff {
+  font-size: 0.68rem;
+  color: #CBD5E1;
+}
+
+/* Solo Grand Prix Campaign Roadmap */
+.microkart-gp-roadmap {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  background: rgba(15, 23, 42, 0.6);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 10px;
+  padding: 10px 12px;
+  margin-bottom: 8px;
+}
+
+.microkart-gp-step {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 2px;
+  flex: 1;
+}
+
+.microkart-gp-step-icon {
+  font-size: 20px;
+}
+
+.microkart-gp-step-title {
+  font-size: 0.72rem;
+  font-weight: 700;
+  color: #E2E8F0;
+}
+
+.microkart-gp-step-sub {
+  font-size: 0.65rem;
+  color: #94A3B8;
+}
+
+.microkart-gp-arrow {
+  font-size: 14px;
+  color: #64748B;
+  font-weight: 900;
+}
+
+/* Stage Clear Modal Overlays */
+.microkart-stage-clear-box {
+  background: rgba(16, 185, 129, 0.12);
+  border: 1.5px solid #10B981;
+  border-radius: 12px;
+  padding: 14px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  text-align: center;
+}
+
+.microkart-grandslam-card {
+  background: linear-gradient(135deg, rgba(245, 158, 11, 0.2), rgba(239, 68, 68, 0.2));
+  border: 2px solid #F59E0B;
+  border-radius: 12px;
+  padding: 12px;
+  text-align: center;
+  animation: pulseGlow 2s infinite alternate;
+}
+
+@keyframes pulseGlow {
+  0% { box-shadow: 0 0 10px rgba(245, 158, 11, 0.2); }
+  100% { box-shadow: 0 0 20px rgba(245, 158, 11, 0.6); }
+}
+

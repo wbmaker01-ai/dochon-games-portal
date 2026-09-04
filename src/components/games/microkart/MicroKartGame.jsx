@@ -1,5 +1,6 @@
 // Dochon Games Portal - Micro Kart Racing React Component
 // 100% Zero-Asset Procedural Graphics, Web Audio API & WebRTC P2P Support
+// 3 Unique School Circuits: 1) 교실 책상 서킷, 2) 과학실 실험대 서킷, 3) 미술실 스케치북 서킷
 
 import React, { useRef, useState, useEffect, useCallback } from 'react';
 import { MicroKartLogic } from './microKartLogic';
@@ -11,11 +12,13 @@ import {
   WORLD_WIDTH,
   WORLD_HEIGHT,
   TOTAL_LAPS,
+  TOTAL_STAGES,
+  TRACK_LIST,
   KART_SKINS,
   ITEM_CONFIGS,
   DIFFICULTY_PRESETS
 } from './microKartConstants';
-import { renderTrack, TRACK_WAYPOINTS } from './microKartTrack';
+import { renderTrack, getTrackConfig } from './microKartTrack';
 import MicroKartHowToPlayModal from './MicroKartHowToPlayModal';
 import { submitScoreToDB } from '../../../utils/leaderboardApi';
 import { haptics } from '../../../utils/haptics';
@@ -35,13 +38,23 @@ export default function MicroKartGame({ onScoreSubmitted }) {
   const lastTimeRef = useRef(0);
   const cameraRef = useRef({ x: 500, y: 1950 });
 
-  // High-Level Game State
-  const [gameState, setGameState] = useState('LOBBY'); // 'LOBBY' | 'PLAYING' | 'GAME_OVER'
+  // High-Level Game State: 'LOBBY' | 'PLAYING' | 'STAGE_CLEAR' | 'GAME_OVER'
+  const [gameState, setGameState] = useState('LOBBY');
   const [playMode, setPlayMode] = useState('SOLO');    // 'SOLO' | 'P2P'
   const [selectedSkin, setSelectedSkin] = useState('eraser');
   const [difficulty, setDifficulty] = useState('normal');
   const [isMuted, setIsMuted] = useState(false);
   const [showHowToPlay, setShowHowToPlay] = useState(false);
+
+  // Solo Mode Grand Prix (3-Stage Campaign) States
+  const [soloLevel, setSoloLevel] = useState(1); // 1 -> 2 -> 3
+  const [soloAccumulatedScore, setSoloAccumulatedScore] = useState(0);
+  const [soloStageHistory, setSoloStageHistory] = useState([]);
+  const [lastStageResult, setLastStageResult] = useState(null);
+
+  // Active Running Track & P2P Selected Track
+  const [activeTrackId, setActiveTrackId] = useState(1);
+  const [p2pSelectedTrackId, setP2pSelectedTrackId] = useState(1);
 
   // In-Game Live HUD Stats
   const [hudStats, setHudStats] = useState({
@@ -162,16 +175,60 @@ export default function MicroKartGame({ onScoreSubmitted }) {
   };
 
   // Launch Local Engine
-  const startMatch = useCallback(() => {
+  const startMatch = useCallback((trackIdToUse) => {
+    const trackToLoad = trackIdToUse || (playMode === 'SOLO' ? soloLevel : p2pSelectedTrackId) || 1;
+    setActiveTrackId(trackToLoad);
+
     const logic = new MicroKartLogic({
       mode: playMode,
       difficulty,
+      trackId: trackToLoad,
       playerSkin: selectedSkin,
       playerName: p2pName.trim() || '나',
       audio: microKartAudio,
       onRaceFinish: (results) => {
-        setGameResult(results);
-        setGameState('GAME_OVER');
+        if (playMode === 'SOLO') {
+          const stageScore = results.totalScore;
+          const stageData = {
+            level: trackToLoad,
+            trackId: trackToLoad,
+            trackName: results.trackName,
+            rank: results.playerRank,
+            stageScore,
+            finalTime: results.finalTime
+          };
+
+          setSoloStageHistory(prev => {
+            const updatedHistory = [...prev, stageData];
+            setSoloAccumulatedScore(prevScore => {
+              const newTotal = prevScore + stageScore;
+              setLastStageResult(stageData);
+
+              if (trackToLoad < TOTAL_STAGES) {
+                // Level 1 or 2 cleared -> STAGE_CLEAR screen
+                setGameState('STAGE_CLEAR');
+              } else {
+                // Level 3 cleared -> Grand Slam Completion!
+                const grandSlamBonus = 2000;
+                const grandTotal = newTotal + grandSlamBonus;
+                setGameResult({
+                  ...results,
+                  isGrandSlam: true,
+                  grandSlamBonus,
+                  totalScore: grandTotal,
+                  history: updatedHistory
+                });
+                setGameState('GAME_OVER');
+              }
+              return newTotal;
+            });
+            return updatedHistory;
+          });
+        } else {
+          // P2P Match Finished
+          setGameResult(results);
+          setGameState('GAME_OVER');
+        }
       }
     });
 
@@ -179,7 +236,39 @@ export default function MicroKartGame({ onScoreSubmitted }) {
     lastTimeRef.current = performance.now();
     setGameState('PLAYING');
     setIsScoreSubmitted(false);
-  }, [playMode, difficulty, selectedSkin, p2pName]);
+  }, [playMode, difficulty, selectedSkin, p2pName, soloLevel, p2pSelectedTrackId]);
+
+  // Handle Advancing to Next Stage in Solo Mode
+  const handleNextStage = () => {
+    const nextLvl = soloLevel + 1;
+    setSoloLevel(nextLvl);
+    startMatch(nextLvl);
+  };
+
+  // Handle Finishing Early in Solo Mode
+  const handleFinishEarly = () => {
+    setGameResult({
+      playerRank: lastStageResult ? lastStageResult.rank : 1,
+      totalScore: soloAccumulatedScore,
+      rankBasePoints: soloAccumulatedScore,
+      timeBonus: 0,
+      driftBonus: 0,
+      itemBonus: 0,
+      finalTime: soloStageHistory.reduce((acc, s) => acc + (s.finalTime || 0), 0),
+      isEarlyFinish: true,
+      history: soloStageHistory
+    });
+    setGameState('GAME_OVER');
+  };
+
+  // Reset Solo Campaign from Level 1
+  const handleStartSoloFresh = () => {
+    setSoloLevel(1);
+    setSoloAccumulatedScore(0);
+    setSoloStageHistory([]);
+    setLastStageResult(null);
+    startMatch(1);
+  };
 
   // --- P2P NETWORK EVENT BINDINGS ---
   useEffect(() => {
@@ -192,8 +281,15 @@ export default function MicroKartGame({ onScoreSubmitted }) {
       setP2pPlayers(players);
       setP2pConnecting(false);
     };
+    microKartNet.onTrackChange = (newTrackId) => {
+      setP2pSelectedTrackId(newTrackId);
+    };
     microKartNet.onRoomCodeChanged = (newCode) => setP2pCode(newCode);
-    microKartNet.onGameStart = () => startMatch();
+    microKartNet.onGameStart = (data) => {
+      const tId = data && data.trackId ? data.trackId : 1;
+      setP2pSelectedTrackId(tId);
+      startMatch(tId);
+    };
 
     return () => {
       microKartNet.disconnect();
@@ -230,11 +326,18 @@ export default function MicroKartGame({ onScoreSubmitted }) {
     }
   };
 
+  // Host Selects P2P Track
+  const handleHostSelectTrack = (trackId) => {
+    if (!p2pIsHost) return;
+    setP2pSelectedTrackId(trackId);
+    microKartNet.broadcastTrackChange(trackId);
+  };
+
   // Host Starts P2P Match
   const handleHostStartMatch = () => {
     if (!p2pIsHost) return;
-    microKartNet.broadcastGameStart();
-    startMatch();
+    microKartNet.broadcastGameStart({ trackId: p2pSelectedTrackId });
+    startMatch(p2pSelectedTrackId);
   };
 
   // Copy Room Code Helper
@@ -305,7 +408,6 @@ export default function MicroKartGame({ onScoreSubmitted }) {
             const ctx = canvas.getContext('2d');
             if (ctx) {
               ctx.save();
-              // Camera Translation
               ctx.translate(-cameraRef.current.x, -cameraRef.current.y);
 
               const viewport = {
@@ -315,8 +417,8 @@ export default function MicroKartGame({ onScoreSubmitted }) {
                 height: CANVAS_HEIGHT
               };
 
-              // Render Track & Desk Environment
-              renderTrack(ctx, viewport, logic.animTick, logic.itemBoxes);
+              // Render Track dynamically according to logic.trackId
+              renderTrack(ctx, viewport, logic.animTick, logic.itemBoxes, logic.trackId);
 
               // Render Skidmarks
               ctx.strokeStyle = 'rgba(15, 23, 42, 0.45)';
@@ -350,7 +452,7 @@ export default function MicroKartGame({ onScoreSubmitted }) {
                 if (proj.type === 'WATER_BALLOON') {
                   ctx.fillText('💧', 0, 0);
                 } else if (proj.type === 'ROCKET') {
-                  ctx.rotate(proj.angle || 0);
+                  ctx.rotate(proj.angle);
                   ctx.fillText('🚀', 0, 0);
                 }
                 ctx.restore();
@@ -362,31 +464,24 @@ export default function MicroKartGame({ onScoreSubmitted }) {
                 ctx.translate(kart.x, kart.y);
                 ctx.rotate(kart.angle);
 
-                // Shadow
-                ctx.fillStyle = 'rgba(0, 0, 0, 0.35)';
-                ctx.beginPath();
-                ctx.ellipse(3, 4, 24, 16, 0, 0, Math.PI * 2);
-                ctx.fill();
-
-                // Kart Body (Chassis)
                 const skin = kart.skin || KART_SKINS[0];
-                ctx.fillStyle = skin.bodyColor || '#38BDF8';
+
+                // Kart Body (Stylized Micro Toy Racer)
+                ctx.fillStyle = skin.bodyColor;
                 ctx.beginPath();
-                ctx.roundRect(-22, -14, 44, 28, 6);
+                ctx.roundRect(-22, -14, 44, 28, 8);
                 ctx.fill();
 
-                // Kart Nose / Hood Accent
-                ctx.fillStyle = skin.accentColor || '#0284C7';
+                // Nose cone
+                ctx.fillStyle = skin.subColor;
                 ctx.beginPath();
                 ctx.roundRect(4, -10, 16, 20, 4);
                 ctx.fill();
 
                 // Wheels (4 black rubber tires)
                 ctx.fillStyle = '#0F172A';
-                // Front tires
                 ctx.fillRect(8, -17, 10, 6);
                 ctx.fillRect(8, 11, 10, 6);
-                // Rear tires
                 ctx.fillRect(-18, -17, 12, 6);
                 ctx.fillRect(-18, 11, 12, 6);
 
@@ -452,16 +547,19 @@ export default function MicroKartGame({ onScoreSubmitted }) {
                   const scaleX = mCanvas.width / WORLD_WIDTH;
                   const scaleY = mCanvas.height / WORLD_HEIGHT;
 
-                  // Draw miniature track path
-                  mCtx.strokeStyle = 'rgba(255, 255, 255, 0.35)';
-                  mCtx.lineWidth = 5;
-                  mCtx.beginPath();
-                  mCtx.moveTo(TRACK_WAYPOINTS[0].x * scaleX, TRACK_WAYPOINTS[0].y * scaleY);
-                  TRACK_WAYPOINTS.forEach(wp => {
-                    mCtx.lineTo(wp.x * scaleX, wp.y * scaleY);
-                  });
-                  mCtx.closePath();
-                  mCtx.stroke();
+                  // Draw miniature track path from logic.waypoints
+                  const pts = logic.waypoints;
+                  if (pts && pts.length > 0) {
+                    mCtx.strokeStyle = 'rgba(255, 255, 255, 0.35)';
+                    mCtx.lineWidth = 5;
+                    mCtx.beginPath();
+                    mCtx.moveTo(pts[0].x * scaleX, pts[0].y * scaleY);
+                    pts.forEach(wp => {
+                      mCtx.lineTo(wp.x * scaleX, wp.y * scaleY);
+                    });
+                    mCtx.closePath();
+                    mCtx.stroke();
+                  }
 
                   // Draw Kart Blips
                   logic.karts.forEach(k => {
@@ -526,7 +624,13 @@ export default function MicroKartGame({ onScoreSubmitted }) {
     setP2pIsHost(false);
     setGameState('LOBBY');
     setGameResult(null);
+    setSoloStageHistory([]);
+    setSoloAccumulatedScore(0);
+    setSoloLevel(1);
+    setLastStageResult(null);
   };
+
+  const currentTrackMeta = TRACK_LIST.find(t => t.id === activeTrackId) || TRACK_LIST[0];
 
   return (
     <div className="microkart-container">
@@ -576,11 +680,17 @@ export default function MicroKartGame({ onScoreSubmitted }) {
         {/* In-Game HUD (Only during PLAYING) */}
         {gameState === 'PLAYING' && (
           <>
-            {/* Top Left: Lap & Speed */}
+            {/* Top Left: Track, Lap & Speed */}
             <div className="microkart-hud-top-left">
               <div className="microkart-badge microkart-lap-badge">
                 <Flag size={14} />
-                <span>LAP {hudStats.currentLap} / {hudStats.totalLaps}</span>
+                <span>
+                  {playMode === 'SOLO' ? `Lv.${soloLevel} · ` : ''}
+                  LAP {hudStats.currentLap} / {hudStats.totalLaps}
+                </span>
+              </div>
+              <div className="microkart-badge">
+                <span>{currentTrackMeta.icon} {currentTrackMeta.name}</span>
               </div>
               <div className="microkart-badge">
                 <Zap size={14} color="#FBBF24" />
@@ -682,7 +792,7 @@ export default function MicroKartGame({ onScoreSubmitted }) {
                   onClick={() => setPlayMode('SOLO')}
                 >
                   <User size={16} />
-                  솔로 모드 (vs AI)
+                  솔로 모드 (그랑프리 3연전)
                 </button>
                 <button
                   className={`microkart-tab ${playMode === 'P2P' ? 'active' : ''}`}
@@ -731,38 +841,91 @@ export default function MicroKartGame({ onScoreSubmitted }) {
                 </div>
               </div>
 
-              {/* Solo Mode Settings */}
+              {/* Solo Mode: 3-Stage Grand Prix Campaign Settings & Roadmap */}
               {playMode === 'SOLO' && (
-                <div>
-                  <label style={{ fontSize: '0.8rem', color: '#94A3B8', fontWeight: 700, marginBottom: '4px', display: 'block' }}>
-                    난이도 설정
-                  </label>
-                  <div className="microkart-tabs">
-                    {Object.keys(DIFFICULTY_PRESETS).map(key => (
-                      <button
-                        key={key}
-                        className={`microkart-tab ${difficulty === key ? 'active' : ''}`}
-                        onClick={() => setDifficulty(key)}
-                      >
-                        {DIFFICULTY_PRESETS[key].name}
-                      </button>
-                    ))}
+                <div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
+                  {/* Campaign Roadmap Preview */}
+                  <div>
+                    <label style={{ fontSize: '0.8rem', color: '#94A3B8', fontWeight: 700, marginBottom: '4px', display: 'block' }}>
+                      🏆 그랑프리 3연전 코스 안내
+                    </label>
+                    <div className="microkart-gp-roadmap">
+                      <div className="microkart-gp-step">
+                        <span className="microkart-gp-step-icon">🏫</span>
+                        <span className="microkart-gp-step-title">Level 1</span>
+                        <span className="microkart-gp-step-sub">교실 책상</span>
+                      </div>
+                      <span className="microkart-gp-arrow">➔</span>
+                      <div className="microkart-gp-step">
+                        <span className="microkart-gp-step-icon">🧪</span>
+                        <span className="microkart-gp-step-title">Level 2</span>
+                        <span className="microkart-gp-step-sub">과학실</span>
+                      </div>
+                      <span className="microkart-gp-arrow">➔</span>
+                      <div className="microkart-gp-step">
+                        <span className="microkart-gp-step-icon">🎨</span>
+                        <span className="microkart-gp-step-title">Level 3</span>
+                        <span className="microkart-gp-step-sub">미술실</span>
+                      </div>
+                    </div>
+                  </div>
+
+                  <div>
+                    <label style={{ fontSize: '0.8rem', color: '#94A3B8', fontWeight: 700, marginBottom: '4px', display: 'block' }}>
+                      라이벌 난이도
+                    </label>
+                    <div className="microkart-tabs">
+                      {Object.keys(DIFFICULTY_PRESETS).map(key => (
+                        <button
+                          key={key}
+                          className={`microkart-tab ${difficulty === key ? 'active' : ''}`}
+                          onClick={() => setDifficulty(key)}
+                        >
+                          {DIFFICULTY_PRESETS[key].name}
+                        </button>
+                      ))}
+                    </div>
                   </div>
 
                   <button
-                    onClick={startMatch}
+                    onClick={handleStartSoloFresh}
                     className="microkart-btn-primary"
-                    style={{ marginTop: '14px' }}
+                    style={{ marginTop: '6px' }}
                   >
                     <Play size={18} />
-                    경기 시작 (3 Laps)
+                    그랑프리 시작 (Level 1: 교실 책상 서킷)
                   </button>
                 </div>
               )}
 
-              {/* P2P Multiplayer Room Management */}
+              {/* P2P Multiplayer Room Management & Track Selector */}
               {playMode === 'P2P' && (
                 <div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
+                  {/* Track Selector for P2P Mode */}
+                  <div>
+                    <label style={{ fontSize: '0.8rem', color: '#94A3B8', fontWeight: 700, marginBottom: '6px', display: 'block' }}>
+                      {p2pIsHost ? '🏁 레이싱 트랙 선택 (방장 전용)' : '🏁 대전 레이싱 트랙'}
+                    </label>
+                    <div className="microkart-track-grid">
+                      {TRACK_LIST.map(track => (
+                        <div
+                          key={track.id}
+                          className={`microkart-track-card ${p2pSelectedTrackId === track.id ? 'selected' : ''} ${!p2pIsHost ? 'guest-view' : ''}`}
+                          onClick={() => {
+                            if (p2pIsHost) handleHostSelectTrack(track.id);
+                          }}
+                        >
+                          <span style={{ fontSize: '24px' }}>{track.icon}</span>
+                          <span className="microkart-track-name">{track.name}</span>
+                          <span className="microkart-track-diff">{track.difficulty}</span>
+                          <span className="microkart-track-badge-tag">
+                            {p2pSelectedTrackId === track.id ? (p2pIsHost ? '선택됨' : '방장 지정') : `Level ${track.level}`}
+                          </span>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+
                   <div className="microkart-tabs">
                     <button
                       className={`microkart-tab ${p2pSubtab === 'CREATE' ? 'active' : ''}`}
@@ -854,37 +1017,117 @@ export default function MicroKartGame({ onScoreSubmitted }) {
           </div>
         )}
 
+        {/* STAGE CLEAR MODAL (Between Level 1->2 and Level 2->3 in Solo Mode) */}
+        {gameState === 'STAGE_CLEAR' && lastStageResult && (
+          <div className="microkart-overlay">
+            <div className="microkart-card" style={{ maxWidth: '440px' }}>
+              <div style={{ textAlign: 'center' }}>
+                <span style={{ fontSize: '42px' }}>🏁</span>
+                <h2 className="microkart-card-title" style={{ marginTop: '4px', color: '#10B981' }}>
+                  Level {lastStageResult.level} 클리어!
+                </h2>
+                <p style={{ color: '#94A3B8', fontSize: '0.84rem', margin: '4px 0 10px' }}>
+                  {lastStageResult.trackName} 서킷을 완주했습니다!
+                </p>
+              </div>
+
+              {/* Stage Score Breakdown Box */}
+              <div className="microkart-stage-clear-box">
+                <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '0.88rem' }}>
+                  <span style={{ color: '#94A3B8' }}>스테이지 완주 순위</span>
+                  <span style={{ color: '#FBBF24', fontWeight: 800 }}>{lastStageResult.rank}위</span>
+                </div>
+                <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '0.88rem' }}>
+                  <span style={{ color: '#94A3B8' }}>스테이지 획득 점수</span>
+                  <span style={{ color: '#FFFFFF', fontWeight: 700 }}>+{lastStageResult.stageScore.toLocaleString()}점</span>
+                </div>
+                <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '1.05rem', fontWeight: 900, borderTop: '1px solid rgba(16, 185, 129, 0.3)', paddingTop: '8px', color: '#10B981' }}>
+                  <span>누적 그랑프리 총점</span>
+                  <span>{soloAccumulatedScore.toLocaleString()}점</span>
+                </div>
+              </div>
+
+              {/* Next Stage Roadmap Preview */}
+              {soloLevel < TOTAL_STAGES && (
+                <div style={{ background: 'rgba(15, 23, 42, 0.6)', padding: '10px 12px', borderRadius: '10px', fontSize: '0.84rem' }}>
+                  <div style={{ color: '#94A3B8', fontSize: '0.74rem', marginBottom: '4px' }}>다음 도전 트랙</div>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '8px', fontWeight: 800, color: '#F8FAFC' }}>
+                    <span style={{ fontSize: '20px' }}>{TRACK_LIST.find(t => t.id === soloLevel + 1)?.icon}</span>
+                    <span>Level {soloLevel + 1}: {TRACK_LIST.find(t => t.id === soloLevel + 1)?.name}</span>
+                    <span style={{ fontSize: '0.72rem', color: '#F59E0B', marginLeft: 'auto' }}>
+                      {TRACK_LIST.find(t => t.id === soloLevel + 1)?.difficulty}
+                    </span>
+                  </div>
+                </div>
+              )}
+
+              {/* Progression Action Buttons */}
+              <div style={{ display: 'flex', flexDirection: 'column', gap: '8px', marginTop: '4px' }}>
+                <button
+                  onClick={handleNextStage}
+                  className="microkart-btn-primary"
+                >
+                  <Play size={18} />
+                  다음 단계 도전 (Level {soloLevel + 1} ➔)
+                </button>
+                <button
+                  onClick={handleFinishEarly}
+                  className="microkart-btn-secondary"
+                >
+                  <Award size={16} />
+                  여기서 종료하고 점수 등록
+                </button>
+              </div>
+            </div>
+          </div>
+        )}
+
         {/* RESULTS & HALL OF FAME MODAL */}
         {gameState === 'GAME_OVER' && gameResult && (
           <div className="microkart-overlay">
-            <div className="microkart-card">
+            <div className="microkart-card" style={{ maxWidth: '460px' }}>
               <div style={{ textAlign: 'center' }}>
                 <span style={{ fontSize: '38px' }}>
-                  {gameResult.playerRank === 1 ? '🏆' : gameResult.playerRank === 2 ? '🥈' : '🥉'}
+                  {gameResult.isGrandSlam ? '👑' : gameResult.playerRank === 1 ? '🏆' : gameResult.playerRank === 2 ? '🥈' : '🥉'}
                 </span>
                 <h2 className="microkart-card-title" style={{ marginTop: '4px' }}>
-                  {gameResult.playerRank}위 완주!
+                  {gameResult.isGrandSlam ? '그랑프리 전관왕 달성!' : `${gameResult.playerRank}위 완주!`}
                 </h2>
               </div>
 
-              {/* Score Breakdown Box */}
+              {/* Grand Slam Special Achievement Banner */}
+              {gameResult.isGrandSlam && (
+                <div className="microkart-grandslam-card">
+                  <div style={{ fontSize: '1.05rem', fontWeight: 900, color: '#FBBF24' }}>
+                    🏆 3스테이지 전관왕 완주 보너스 달성!
+                  </div>
+                  <div style={{ fontSize: '0.8rem', color: '#FEF08A', marginTop: '2px' }}>
+                    교실·과학실·미술실 3개 트랙 전 코스를 정복하여 특별 보너스 +2,000점 획득!
+                  </div>
+                </div>
+              )}
+
+              {/* Multi-Stage Breakdown if Solo Grand Prix was played */}
+              {gameResult.history && gameResult.history.length > 0 && (
+                <div style={{ display: 'flex', flexDirection: 'column', gap: '4px', background: 'rgba(15, 23, 42, 0.6)', padding: '8px 12px', borderRadius: '10px' }}>
+                  <div style={{ fontSize: '0.75rem', color: '#94A3B8', fontWeight: 700 }}>그랑프리 스테이지별 성적</div>
+                  {gameResult.history.map(s => (
+                    <div key={s.level} style={{ display: 'flex', justifyContent: 'space-between', fontSize: '0.82rem' }}>
+                      <span>Level {s.level} ({s.trackName})</span>
+                      <span style={{ color: '#FBBF24', fontWeight: 700 }}>{s.rank}위 (+{s.stageScore.toLocaleString()}점)</span>
+                    </div>
+                  ))}
+                  {gameResult.isGrandSlam && (
+                    <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '0.82rem', color: '#10B981', fontWeight: 800 }}>
+                      <span>전관왕 완주 특별 보너스</span>
+                      <span>+2,000점</span>
+                    </div>
+                  )}
+                </div>
+              )}
+
+              {/* Final Score Row */}
               <div className="microkart-result-score-box">
-                <div className="microkart-result-row">
-                  <span>완주 순위 배점 ({gameResult.playerRank}위)</span>
-                  <span style={{ color: '#FFFFFF' }}>+{gameResult.rankBasePoints}점</span>
-                </div>
-                <div className="microkart-result-row">
-                  <span>기록 시간 보너스 ({Math.floor(gameResult.finalTime)}초)</span>
-                  <span style={{ color: '#FFFFFF' }}>+{gameResult.timeBonus}점</span>
-                </div>
-                <div className="microkart-result-row">
-                  <span>드리프트 성공 보너스</span>
-                  <span style={{ color: '#FFFFFF' }}>+{gameResult.driftBonus}점</span>
-                </div>
-                <div className="microkart-result-row">
-                  <span>아이템 적중 보너스</span>
-                  <span style={{ color: '#FFFFFF' }}>+{gameResult.itemBonus}점</span>
-                </div>
                 <div className="microkart-result-row total">
                   <span>최종 획득 점수</span>
                   <span>{gameResult.totalScore.toLocaleString()}점</span>
@@ -929,11 +1172,11 @@ export default function MicroKartGame({ onScoreSubmitted }) {
               {/* Action Buttons */}
               <div style={{ display: 'flex', gap: '8px' }}>
                 <button
-                  onClick={startMatch}
+                  onClick={playMode === 'SOLO' ? handleStartSoloFresh : () => startMatch(p2pSelectedTrackId)}
                   className="microkart-btn-primary"
                 >
                   <RotateCcw size={16} />
-                  다시 달리기
+                  {playMode === 'SOLO' ? '그랑프리 재도전' : '다시 달리기'}
                 </button>
                 <button
                   onClick={handleBackToLobby}
