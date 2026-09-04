@@ -3,11 +3,35 @@
 
 export const CHANGELOG_DATA = [
   {
+    version: 'v1.50.2',
+    date: '2026-09-04',
+    title: '🏁 [도촌 마이크로 카트 레이싱] 3바퀴 완주 체크포인트 판정 및 결승선 통과 감지 엔진 긴급 패치',
+    badge: 'LATEST',
+    badgeColor: 'emerald',
+    items: [
+      {
+        tag: 'LAP FINISH FIX',
+        tagColor: 'rose',
+        text: '[3랩 완주 시 결승선 통과 및 경기 종료 판정 정상화] 마지막 코너(WP 15)에서 랩 카운트가 조기 증가하거나 결승선(WP 0) 직전에서 코너 라인을 탈 때 웨이포인트를 건너뛰어 게임이 종료되지 않던 버그 수정 및 결승선 통과 게이트(Finish Gate) 직접 판정 엔진 적용'
+      },
+      {
+        tag: 'CHECKPOINT LOGIC',
+        tagColor: 'blue',
+        text: '[체크포인트 판정 반경 확장 & 다중 감지 Fallback 탑재] 드리프트 및 급선회 시에도 체크포인트를 놓치지 않도록 감지 반경을 275px로 확대하고, 연속 웨이포인트 스킵 감지 및 역주행 방지 유효 랩 검증(최소 8개 이상 통과) 시스템 구축'
+      },
+      {
+        tag: 'RANK ENGINE',
+        tagColor: 'amber',
+        text: '[실시간 순위 연속 진행도 계산 엔진 개선] 결승선 진입 시점 순위 역전 현상을 방지하기 위해 랩 수와 트랙 웨이포인트 인덱스를 통합한 연속 레이스 진행도 산출 알고리즘 적용'
+      }
+    ]
+  },
+  {
     version: 'v1.50.1',
     date: '2026-09-04',
     title: '🏎️ [도촌 마이크로 카트 레이싱] 학교 네트워크 P2P 접속 강화 & 크롬북 30FPS 스마트 렌더링 최적화',
-    badge: 'LATEST',
-    badgeColor: 'emerald',
+    badge: 'UPDATE',
+    badgeColor: 'blue',
     items: [
       {
         tag: 'P2P HARDENING',

@@ -1,7 +1,7 @@
 // Dochon Games Portal - Micro Kart Desk Track & Stationery Circuit
 // Procedural Canvas 2D Graphics for School Desk Theme
 
-import { WORLD_WIDTH, WORLD_HEIGHT } from './microKartConstants';
+import { WORLD_WIDTH, WORLD_HEIGHT } from './microKartConstants.js';
 
 // 16 Sequential Waypoints for Track Path & AI Navigation
 export const TRACK_WAYPOINTS = [

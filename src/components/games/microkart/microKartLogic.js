@@ -10,7 +10,7 @@ import {
   ITEM_TYPES,
   RANK_POINTS,
   DIFFICULTY_PRESETS
-} from './microKartConstants';
+} from './microKartConstants.js';
 
 import {
   TRACK_WAYPOINTS,
@@ -19,7 +19,7 @@ import {
   BOOST_PADS,
   ITEM_BOX_SPAWNS,
   isPointOnTrack
-} from './microKartTrack';
+} from './microKartTrack.js';
 
 export class MicroKartLogic {
   constructor(options = {}) {
@@ -140,6 +140,7 @@ export class MicroKartLogic {
       // Race Progression
       currentLap: 1,
       nextWaypoint: 1,
+      checkpointsPassedInLap: new Set([0]),
       lapStartTime: 0,
       lapTimes: [],
       isFinished: false,
@@ -470,35 +471,78 @@ export class MicroKartLogic {
 
   // --- WAYPOINT & CHECKPOINTS ---
   updateKartCheckpoints(kart, dt) {
-    const targetWp = TRACK_WAYPOINTS[kart.nextWaypoint];
+    if (kart.isFinished) return;
+
+    if (!kart.checkpointsPassedInLap) {
+      kart.checkpointsPassedInLap = new Set([0]);
+    }
+
+    const currentTargetIdx = kart.nextWaypoint;
+    const targetWp = TRACK_WAYPOINTS[currentTargetIdx];
     const d = Math.hypot(kart.x - targetWp.x, kart.y - targetWp.y);
+    const hitRadius = Math.max((targetWp.width || 220) * 1.25, 275);
 
-    if (d < targetWp.width * 0.75) {
-      const prevWaypoint = kart.nextWaypoint;
-      kart.nextWaypoint = (kart.nextWaypoint + 1) % TRACK_WAYPOINTS.length;
+    // Fallback: If a racer drifts wide or cuts a corner, also check next+1 waypoint
+    const nextPlusOneIdx = (currentTargetIdx + 1) % TRACK_WAYPOINTS.length;
+    const nextPlusOneWp = TRACK_WAYPOINTS[nextPlusOneIdx];
+    const dNextPlusOne = Math.hypot(kart.x - nextPlusOneWp.x, kart.y - nextPlusOneWp.y);
+    const hitRadiusPlusOne = Math.max((nextPlusOneWp.width || 220) * 1.25, 275);
 
-      // Completed a full lap!
-      if (prevWaypoint === TRACK_WAYPOINTS.length - 1 && kart.nextWaypoint === 0) {
-        const lapTime = this.totalRaceTime - kart.lapStartTime;
-        kart.lapTimes.push(lapTime);
-        kart.lapStartTime = this.totalRaceTime;
-        kart.currentLap += 1;
+    let reachedWaypoint = -1;
+    if (d < hitRadius) {
+      reachedWaypoint = currentTargetIdx;
+    } else if (dNextPlusOne < hitRadiusPlusOne && dNextPlusOne < d) {
+      // Advance past skipped corner waypoint
+      reachedWaypoint = nextPlusOneIdx;
+    }
 
-        if (kart.isPlayer && this.audio) {
-          this.audio.playLapPass();
-        }
+    // Finish Line Crossing Gate check (Waypoint 0 is Start/Finish line at x: 500, y: 1950)
+    // Checkered line spans y: 1800~2100 across x: 500
+    if (currentTargetIdx === 0 || reachedWaypoint === 0 || currentTargetIdx === TRACK_WAYPOINTS.length - 1) {
+      const isCrossingFinishGate = Math.abs(kart.x - 500) < 70 && Math.abs(kart.y - 1950) < 170;
+      if (isCrossingFinishGate && kart.checkpointsPassedInLap.size >= 8) {
+        reachedWaypoint = 0;
+      }
+    }
 
-        if (kart.currentLap > TOTAL_LAPS) {
-          // Finished Race!
-          kart.isFinished = true;
-          kart.finishRank = this.finishedKarts.length + 1;
-          kart.finalTime = this.totalRaceTime;
-          this.finishedKarts.push(kart);
+    if (reachedWaypoint !== -1) {
+      kart.checkpointsPassedInLap.add(currentTargetIdx);
+      kart.checkpointsPassedInLap.add(reachedWaypoint);
 
-          if (kart.isPlayer && this.audio) {
-            this.audio.playVictory();
+      if (reachedWaypoint === 0) {
+        // Crossing the START/FINISH LINE!
+        // Prevent reverse cheats: verify at least 8 waypoints were hit during this lap
+        const validLap = kart.checkpointsPassedInLap.size >= 8;
+
+        if (validLap) {
+          const lapTime = this.totalRaceTime - kart.lapStartTime;
+          kart.lapTimes.push(lapTime);
+          kart.lapStartTime = this.totalRaceTime;
+
+          if (kart.currentLap >= TOTAL_LAPS) {
+            // Race Complete!
+            kart.isFinished = true;
+            kart.finishRank = this.finishedKarts.length + 1;
+            kart.finalTime = this.totalRaceTime;
+            this.finishedKarts.push(kart);
+
+            if (kart.isPlayer && this.audio) {
+              this.audio.playVictory();
+            }
+          } else {
+            // Start next lap
+            kart.currentLap += 1;
+            kart.nextWaypoint = 1;
+            kart.checkpointsPassedInLap = new Set([0]);
+
+            if (kart.isPlayer && this.audio) {
+              this.audio.playLapPass();
+            }
           }
         }
+      } else {
+        // Advance to next waypoint along circuit
+        kart.nextWaypoint = (reachedWaypoint + 1) % TRACK_WAYPOINTS.length;
       }
     }
   }
@@ -761,20 +805,22 @@ export class MicroKartLogic {
       if (a.isFinished) return -1;
       if (b.isFinished) return 1;
 
-      // Higher lap first
-      if (a.currentLap !== b.currentLap) {
-        return b.currentLap - a.currentLap;
+      // Waypoint 0 is the finish line of the current lap (after waypoint 15)
+      const wpOrderA = a.nextWaypoint === 0 ? TRACK_WAYPOINTS.length : a.nextWaypoint;
+      const wpOrderB = b.nextWaypoint === 0 ? TRACK_WAYPOINTS.length : b.nextWaypoint;
+
+      const progressA = (a.currentLap - 1) * TRACK_WAYPOINTS.length + wpOrderA;
+      const progressB = (b.currentLap - 1) * TRACK_WAYPOINTS.length + wpOrderB;
+
+      if (progressA !== progressB) {
+        return progressB - progressA;
       }
 
-      // Next waypoint advancement
-      if (a.nextWaypoint !== b.nextWaypoint) {
-        return b.nextWaypoint - a.nextWaypoint;
-      }
-
-      // Proximity to next waypoint
-      const targetWp = TRACK_WAYPOINTS[a.nextWaypoint];
-      const distA = Math.hypot(a.x - targetWp.x, a.y - targetWp.y);
-      const distB = Math.hypot(b.x - targetWp.x, b.y - targetWp.y);
+      // Proximity to target waypoint (closer is better)
+      const targetWpA = TRACK_WAYPOINTS[a.nextWaypoint];
+      const targetWpB = TRACK_WAYPOINTS[b.nextWaypoint];
+      const distA = Math.hypot(a.x - targetWpA.x, a.y - targetWpA.y);
+      const distB = Math.hypot(b.x - targetWpB.x, b.y - targetWpB.y);
       return distA - distB;
     });
 
