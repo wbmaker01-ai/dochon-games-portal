@@ -805,7 +805,7 @@ export default function MicroKartGame({ onScoreSubmitted }) {
 
               {/* Racer Name Input */}
               <div>
-                <label style={{ fontSize: '0.8rem', color: '#94A3B8', fontWeight: 700, marginBottom: '4px', display: 'block' }}>
+                <label style={{ fontSize: '0.75rem', color: '#94A3B8', fontWeight: 700, marginBottom: '2px', display: 'block' }}>
                   레이서 닉네임
                 </label>
                 <input
@@ -815,13 +815,13 @@ export default function MicroKartGame({ onScoreSubmitted }) {
                   placeholder="예: 김도촌 (6A)"
                   maxLength={10}
                   className="microkart-input"
-                  style={{ width: '100%', boxSizing: 'border-box' }}
+                  style={{ width: '100%', boxSizing: 'border-box', padding: '6px 10px', fontSize: '0.85rem' }}
                 />
               </div>
 
               {/* Kart Skin Selector */}
               <div>
-                <label style={{ fontSize: '0.8rem', color: '#94A3B8', fontWeight: 700, marginBottom: '4px', display: 'block' }}>
+                <label style={{ fontSize: '0.75rem', color: '#94A3B8', fontWeight: 700, marginBottom: '2px', display: 'block' }}>
                   머신 선택
                 </label>
                 <div className="microkart-skin-grid">
@@ -831,7 +831,7 @@ export default function MicroKartGame({ onScoreSubmitted }) {
                       className={`microkart-skin-card ${selectedSkin === skin.id ? 'selected' : ''}`}
                       onClick={() => setSelectedSkin(skin.id)}
                     >
-                      <span style={{ fontSize: '24px' }}>{skin.avatarEmoji}</span>
+                      <span style={{ fontSize: '20px' }}>{skin.avatarEmoji}</span>
                       <div className="microkart-skin-info">
                         <span className="microkart-skin-name" style={{ color: skin.color }}>{skin.name}</span>
                         <span className="microkart-skin-type">{skin.type}</span>
@@ -843,27 +843,24 @@ export default function MicroKartGame({ onScoreSubmitted }) {
 
               {/* Solo Mode: 3-Stage Grand Prix Campaign Settings & Roadmap */}
               {playMode === 'SOLO' && (
-                <div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
+                <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
                   {/* Campaign Roadmap Preview */}
                   <div>
-                    <label style={{ fontSize: '0.8rem', color: '#94A3B8', fontWeight: 700, marginBottom: '4px', display: 'block' }}>
+                    <label style={{ fontSize: '0.75rem', color: '#94A3B8', fontWeight: 700, marginBottom: '3px', display: 'block' }}>
                       🏆 그랑프리 3연전 코스 안내
                     </label>
-                    <div className="microkart-gp-roadmap">
+                    <div className="microkart-gp-roadmap" style={{ padding: '6px 10px', marginBottom: '0px' }}>
                       <div className="microkart-gp-step">
-                        <span className="microkart-gp-step-icon">🏫</span>
                         <span className="microkart-gp-step-title">Level 1</span>
                         <span className="microkart-gp-step-sub">교실 책상</span>
                       </div>
                       <span className="microkart-gp-arrow">➔</span>
                       <div className="microkart-gp-step">
-                        <span className="microkart-gp-step-icon">🧪</span>
                         <span className="microkart-gp-step-title">Level 2</span>
                         <span className="microkart-gp-step-sub">과학실</span>
                       </div>
                       <span className="microkart-gp-arrow">➔</span>
                       <div className="microkart-gp-step">
-                        <span className="microkart-gp-step-icon">🎨</span>
                         <span className="microkart-gp-step-title">Level 3</span>
                         <span className="microkart-gp-step-sub">미술실</span>
                       </div>
@@ -871,7 +868,7 @@ export default function MicroKartGame({ onScoreSubmitted }) {
                   </div>
 
                   <div>
-                    <label style={{ fontSize: '0.8rem', color: '#94A3B8', fontWeight: 700, marginBottom: '4px', display: 'block' }}>
+                    <label style={{ fontSize: '0.75rem', color: '#94A3B8', fontWeight: 700, marginBottom: '3px', display: 'block' }}>
                       라이벌 난이도
                     </label>
                     <div className="microkart-tabs">
@@ -890,9 +887,9 @@ export default function MicroKartGame({ onScoreSubmitted }) {
                   <button
                     onClick={handleStartSoloFresh}
                     className="microkart-btn-primary"
-                    style={{ marginTop: '6px' }}
+                    style={{ marginTop: '2px' }}
                   >
-                    <Play size={18} />
+                    <Play size={16} />
                     그랑프리 시작 (Level 1: 교실 책상 서킷)
                   </button>
                 </div>
@@ -900,28 +897,30 @@ export default function MicroKartGame({ onScoreSubmitted }) {
 
               {/* P2P Multiplayer Room Management & Track Selector */}
               {playMode === 'P2P' && (
-                <div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
-                  {/* Track Selector for P2P Mode */}
+                <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
+                  {/* Track Selector for P2P Mode (Icon-free, ultra-compact text only) */}
                   <div>
-                    <label style={{ fontSize: '0.8rem', color: '#94A3B8', fontWeight: 700, marginBottom: '6px', display: 'block' }}>
-                      {p2pIsHost ? '🏁 레이싱 트랙 선택 (방장 전용)' : '🏁 대전 레이싱 트랙'}
-                    </label>
-                    <div className="microkart-track-grid">
+                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '3px' }}>
+                      <label style={{ fontSize: '0.74rem', color: '#94A3B8', fontWeight: 700 }}>
+                        {p2pIsHost ? '레이싱 트랙 선택 (방장 전용)' : '선택된 레이싱 트랙'}
+                      </label>
+                      <span style={{ fontSize: '0.7rem', color: p2pIsHost ? '#F59E0B' : '#38BDF8', fontWeight: 700 }}>
+                        {p2pIsHost ? '클릭하여 맵 변경' : '방장이 지정함'}
+                      </span>
+                    </div>
+                    <div className="microkart-track-compact-row">
                       {TRACK_LIST.map(track => (
-                        <div
+                        <button
                           key={track.id}
-                          className={`microkart-track-card ${p2pSelectedTrackId === track.id ? 'selected' : ''} ${!p2pIsHost ? 'guest-view' : ''}`}
+                          type="button"
+                          className={`microkart-track-compact-btn ${p2pSelectedTrackId === track.id ? 'selected' : ''} ${!p2pIsHost ? 'guest-view' : ''}`}
                           onClick={() => {
                             if (p2pIsHost) handleHostSelectTrack(track.id);
                           }}
                         >
-                          <span style={{ fontSize: '24px' }}>{track.icon}</span>
-                          <span className="microkart-track-name">{track.name}</span>
-                          <span className="microkart-track-diff">{track.difficulty}</span>
-                          <span className="microkart-track-badge-tag">
-                            {p2pSelectedTrackId === track.id ? (p2pIsHost ? '선택됨' : '방장 지정') : `Level ${track.level}`}
-                          </span>
-                        </div>
+                          <span>{track.name}</span>
+                          <span className="microkart-track-compact-sub">{track.difficulty.split(' ')[0]}</span>
+                        </button>
                       ))}
                     </div>
                   </div>
@@ -942,16 +941,16 @@ export default function MicroKartGame({ onScoreSubmitted }) {
                   </div>
 
                   {p2pSubtab === 'CREATE' && (
-                    <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
-                      <div style={{ background: 'rgba(15, 23, 42, 0.5)', padding: '10px', borderRadius: '10px', display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+                    <div style={{ display: 'flex', flexDirection: 'column', gap: '6px' }}>
+                      <div style={{ background: 'rgba(15, 23, 42, 0.5)', padding: '6px 10px', borderRadius: '8px', display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
                         <div>
-                          <span style={{ fontSize: '0.75rem', color: '#94A3B8' }}>내 방 번호</span>
-                          <div style={{ fontSize: '1.4rem', fontWeight: 900, letterSpacing: '2px', color: '#FBBF24' }}>
+                          <span style={{ fontSize: '0.7rem', color: '#94A3B8' }}>내 방 번호</span>
+                          <div style={{ fontSize: '1.2rem', fontWeight: 900, letterSpacing: '2px', color: '#FBBF24' }}>
                             {p2pCode}
                           </div>
                         </div>
-                        <button onClick={handleCopyCode} className="microkart-icon-btn">
-                          {copiedCode ? <Check size={16} color="#10B981" /> : <Copy size={16} />}
+                        <button onClick={handleCopyCode} className="microkart-icon-btn" style={{ padding: '4px 8px' }}>
+                          {copiedCode ? <Check size={14} color="#10B981" /> : <Copy size={14} />}
                         </button>
                       </div>
 
@@ -965,12 +964,12 @@ export default function MicroKartGame({ onScoreSubmitted }) {
                         </button>
                       ) : (
                         <div>
-                          <div style={{ fontSize: '0.82rem', color: '#10B981', fontWeight: 700, marginBottom: '6px' }}>
+                          <div style={{ fontSize: '0.78rem', color: '#10B981', fontWeight: 700, marginBottom: '4px' }}>
                             참여 인원 ({p2pPlayers.length}/4)
                           </div>
-                          <div style={{ display: 'flex', flexDirection: 'column', gap: '4px', marginBottom: '10px' }}>
+                          <div style={{ display: 'flex', flexDirection: 'column', gap: '3px', marginBottom: '6px' }}>
                             {p2pPlayers.map((p, i) => (
-                              <div key={p.id || i} style={{ background: 'rgba(15, 23, 42, 0.5)', padding: '6px 10px', borderRadius: '6px', fontSize: '0.8rem', display: 'flex', justifyContent: 'space-between' }}>
+                              <div key={p.id || i} style={{ background: 'rgba(15, 23, 42, 0.5)', padding: '4px 8px', borderRadius: '6px', fontSize: '0.78rem', display: 'flex', justifyContent: 'space-between' }}>
                                 <span>{p.name} {p.isHost && '👑'}</span>
                                 <span style={{ color: '#94A3B8' }}>Ready</span>
                               </div>
@@ -980,7 +979,7 @@ export default function MicroKartGame({ onScoreSubmitted }) {
                             onClick={handleHostStartMatch}
                             className="microkart-btn-primary"
                           >
-                            <Play size={18} />
+                            <Play size={16} />
                             참가자들과 레이스 시작!
                           </button>
                         </div>
@@ -989,7 +988,7 @@ export default function MicroKartGame({ onScoreSubmitted }) {
                   )}
 
                   {p2pSubtab === 'JOIN' && (
-                    <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
+                    <div style={{ display: 'flex', flexDirection: 'column', gap: '6px' }}>
                       <input
                         type="text"
                         value={joinCodeInput}
@@ -997,7 +996,7 @@ export default function MicroKartGame({ onScoreSubmitted }) {
                         placeholder="친구의 4자리 방 번호 입력"
                         maxLength={4}
                         className="microkart-input"
-                        style={{ textAlign: 'center', fontSize: '1.2rem', letterSpacing: '3px' }}
+                        style={{ textAlign: 'center', fontSize: '1.1rem', letterSpacing: '3px', padding: '6px 10px' }}
                       />
                       <button
                         onClick={handleJoinRoom}
@@ -1009,8 +1008,8 @@ export default function MicroKartGame({ onScoreSubmitted }) {
                     </div>
                   )}
 
-                  {p2pStatus && <div style={{ fontSize: '0.75rem', color: '#38BDF8', textAlign: 'center' }}>{p2pStatus}</div>}
-                  {p2pError && <div style={{ fontSize: '0.75rem', color: '#EF4444', textAlign: 'center' }}>{p2pError}</div>}
+                  {p2pStatus && <div style={{ fontSize: '0.72rem', color: '#38BDF8', textAlign: 'center' }}>{p2pStatus}</div>}
+                  {p2pError && <div style={{ fontSize: '0.72rem', color: '#EF4444', textAlign: 'center' }}>{p2pError}</div>}
                 </div>
               )}
             </div>

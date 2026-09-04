@@ -310,24 +310,25 @@
 
 .microkart-card {
   width: 100%;
-  max-width: 520px;
+  max-width: 480px;
   background: #1E293B;
   border: 1px solid rgba(255, 255, 255, 0.15);
-  border-radius: 18px;
-  padding: 22px;
-  box-shadow: 0 20px 45px rgba(0, 0, 0, 0.6);
+  border-radius: 14px;
+  padding: 14px 18px;
+  box-shadow: 0 16px 40px rgba(0, 0, 0, 0.6);
   display: flex;
   flex-direction: column;
-  gap: 16px;
-  max-height: 90vh;
+  gap: 8px;
+  max-height: calc(100% - 16px);
   overflow-y: auto;
+  box-sizing: border-box;
 }
 
 .microkart-card-title {
-  font-size: 1.35rem;
+  font-size: 1.15rem;
   font-weight: 800;
   text-align: center;
-  margin: 0;
+  margin: 0 0 2px 0;
   background: linear-gradient(135deg, #F59E0B, #EF4444);
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
@@ -335,27 +336,27 @@
 
 .microkart-tabs {
   display: flex;
-  gap: 8px;
+  gap: 6px;
   background: rgba(15, 23, 42, 0.6);
-  padding: 4px;
-  border-radius: 10px;
+  padding: 3px;
+  border-radius: 8px;
 }
 
 .microkart-tab {
   flex: 1;
-  padding: 8px 12px;
+  padding: 6px 10px;
   border: none;
   background: transparent;
   color: #94A3B8;
   font-weight: 700;
-  font-size: 0.86rem;
-  border-radius: 8px;
+  font-size: 0.82rem;
+  border-radius: 6px;
   cursor: pointer;
   transition: all 0.15s ease;
   display: flex;
   align-items: center;
   justify-content: center;
-  gap: 6px;
+  gap: 5px;
 }
 
 .microkart-tab.active {
@@ -368,18 +369,18 @@
 .microkart-skin-grid {
   display: grid;
   grid-template-columns: repeat(2, 1fr);
-  gap: 8px;
+  gap: 6px;
 }
 
 .microkart-skin-card {
   background: rgba(15, 23, 42, 0.6);
-  border: 2px solid rgba(255, 255, 255, 0.1);
-  border-radius: 12px;
-  padding: 10px;
+  border: 1.5px solid rgba(255, 255, 255, 0.1);
+  border-radius: 8px;
+  padding: 6px 10px;
   cursor: pointer;
   display: flex;
   align-items: center;
-  gap: 10px;
+  gap: 8px;
   transition: all 0.15s ease;
 }
 
@@ -399,37 +400,37 @@
 }
 
 .microkart-skin-name {
-  font-size: 0.84rem;
+  font-size: 0.8rem;
   font-weight: 800;
 }
 
 .microkart-skin-type {
-  font-size: 0.72rem;
+  font-size: 0.68rem;
   color: #94A3B8;
 }
 
 /* Primary Action Buttons */
 .microkart-btn-primary {
   width: 100%;
-  padding: 12px;
+  padding: 9px 12px;
   border: none;
-  border-radius: 12px;
+  border-radius: 10px;
   background: linear-gradient(135deg, #F59E0B, #D97706);
   color: #FFFFFF;
-  font-size: 1rem;
+  font-size: 0.95rem;
   font-weight: 800;
   cursor: pointer;
-  box-shadow: 0 4px 14px rgba(245, 158, 11, 0.4);
+  box-shadow: 0 3px 10px rgba(245, 158, 11, 0.4);
   transition: all 0.15s ease;
   display: flex;
   align-items: center;
   justify-content: center;
-  gap: 8px;
+  gap: 6px;
 }
 
 .microkart-btn-primary:hover {
-  transform: translateY(-2px);
-  box-shadow: 0 6px 18px rgba(245, 158, 11, 0.55);
+  transform: translateY(-1px);
+  box-shadow: 0 5px 14px rgba(245, 158, 11, 0.55);
 }
 
 .microkart-btn-secondary {
@@ -528,70 +529,63 @@
   cursor: not-allowed;
 }
 
-/* Track Selection Grid & Cards */
-.microkart-track-grid {
+/* Compact Text-Only Track Selector */
+.microkart-track-compact-row {
   display: grid;
   grid-template-columns: repeat(3, 1fr);
-  gap: 8px;
+  gap: 6px;
 }
 
-.microkart-track-card {
+.microkart-track-compact-btn {
   background: rgba(30, 41, 59, 0.7);
-  border: 1.5px solid rgba(255, 255, 255, 0.12);
-  border-radius: 10px;
-  padding: 10px 8px;
+  border: 1px solid rgba(255, 255, 255, 0.15);
+  border-radius: 8px;
+  padding: 6px 4px;
+  color: #CBD5E1;
+  font-size: 0.76rem;
+  font-weight: 700;
+  cursor: pointer;
+  transition: all 0.15s ease;
   display: flex;
   flex-direction: column;
   align-items: center;
-  text-align: center;
-  gap: 4px;
-  cursor: pointer;
-  transition: all 0.15s ease;
-  position: relative;
-}
-
-.microkart-track-card:hover {
-  background: rgba(51, 65, 85, 0.85);
-  border-color: rgba(255, 255, 255, 0.3);
-  transform: translateY(-2px);
-}
-
-.microkart-track-card.selected {
-  background: rgba(245, 158, 11, 0.15);
-  border-color: #F59E0B;
-  box-shadow: 0 0 12px rgba(245, 158, 11, 0.35);
-}
-
-.microkart-track-card.guest-view {
-  cursor: default;
-  background: rgba(14, 165, 233, 0.15);
-  border-color: #0EA5E9;
-}
-
-.microkart-track-badge-tag {
-  font-size: 0.65rem;
-  font-weight: 800;
-  padding: 2px 6px;
-  border-radius: 4px;
-  background: rgba(0, 0, 0, 0.4);
-  color: #94A3B8;
-}
-
-.microkart-track-card.selected .microkart-track-badge-tag {
-  background: #F59E0B;
-  color: #000000;
-}
-
-.microkart-track-name {
-  font-size: 0.8rem;
-  font-weight: 800;
-  color: #F8FAFC;
+  justify-content: center;
+  gap: 1px;
   line-height: 1.2;
 }
 
-.microkart-track-diff {
-  font-size: 0.68rem;
-  color: #CBD5E1;
+.microkart-track-compact-btn:hover {
+  background: rgba(51, 65, 85, 0.85);
+  border-color: rgba(255, 255, 255, 0.3);
+  color: #FFFFFF;
+}
+
+.microkart-track-compact-btn.selected {
+  background: rgba(245, 158, 11, 0.18);
+  border-color: #F59E0B;
+  color: #FDE047;
+  font-weight: 800;
+  box-shadow: 0 0 8px rgba(245, 158, 11, 0.3);
+}
+
+.microkart-track-compact-btn.guest-view {
+  cursor: default;
+}
+
+.microkart-track-compact-btn.guest-view.selected {
+  background: rgba(14, 165, 233, 0.18);
+  border-color: #0EA5E9;
+  color: #7DD3FC;
+}
+
+.microkart-track-compact-sub {
+  font-size: 0.65rem;
+  color: #94A3B8;
+  font-weight: 500;
+}
+
+.microkart-track-compact-btn.selected .microkart-track-compact-sub {
+  color: #FCD34D;
 }
 
 /* Solo Grand Prix Campaign Roadmap */
