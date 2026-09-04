@@ -481,19 +481,27 @@ export const PLAYABLE_GAMES = [
     releaseOrder: 32,
     isNew: true,
     isPlayable: true,
-    badgeText: '🔦 NEW 32위',
+    badgeText: '🔦 32위',
     description: '불 꺼진 학교에서 손전등 빛과 발자국 소리만 감지하며 황금 열쇠 3개를 모아 비상구로 탈출하는 실시간 숨바꼭질!'
+  },
+  {
+    id: 'microkart',
+    title: '도촌 마이크로 카트 레이싱',
+    englishTitle: 'DOCHON MICRO KART',
+    category: '멀티',
+    imageSrc: getThumb('microkart.jpg'),
+    iconEmoji: '🏎️',
+    themeGradient: 'linear-gradient(135deg, #EF4444, #F59E0B)',
+    scoreUnit: '점',
+    releaseOrder: 33,
+    isNew: true,
+    isPlayable: true,
+    badgeText: '🏎️ NEW 33위',
+    description: '학용품과 책상 트랙에서 바나나와 물풍선을 쏘며 치열하게 순위를 다투는 3랩 실시간 캐주얼 카트 레이싱!'
   }
 ];
 
 export const COMING_SOON_GAMES = [
-  {
-    id: 'microkart',
-    title: '도촌 마이크로 카트 레이싱',
-    category: '멀티',
-    imageSrc: getThumb('microkart.jpg'),
-    isPlayable: false
-  },
   {
     id: 'piratecoin',
     title: '도촌 해적선 코인 쟁탈전',

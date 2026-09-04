@@ -513,6 +513,13 @@ function getLocalLeaderboardFallback(gameKey) {
       { id: 'mem3', name: '이기억 (5B)', score: 3100, date: '2026-08-23' },
       { id: 'mem4', name: '박퍼즐 (4C)', score: 2250, date: '2026-08-22' },
       { id: 'mem5', name: '최집중 (3A)', score: 1600, date: '2026-08-22' }
+    ],
+    microkart: [
+      { id: 'mk1', name: '김홍년선생님', score: 5400, date: '2026-09-04' },
+      { id: 'mk2', name: '김드리프트 (6A)', score: 4850, date: '2026-09-04' },
+      { id: 'mk3', name: '이부스터 (5B)', score: 4100, date: '2026-09-03' },
+      { id: 'mk4', name: '박바나나 (4C)', score: 3200, date: '2026-09-03' },
+      { id: 'mk5', name: '최스피드 (3A)', score: 2450, date: '2026-09-02' }
     ]
   };
 

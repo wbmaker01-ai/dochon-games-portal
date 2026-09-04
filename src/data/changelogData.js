@@ -3,11 +3,59 @@
 
 export const CHANGELOG_DATA = [
   {
+    version: 'v1.50.1',
+    date: '2026-09-04',
+    title: '🏎️ [도촌 마이크로 카트 레이싱] 학교 네트워크 P2P 접속 강화 & 크롬북 30FPS 스마트 렌더링 최적화',
+    badge: 'LATEST',
+    badgeColor: 'emerald',
+    items: [
+      {
+        tag: 'P2P HARDENING',
+        tagColor: 'purple',
+        text: '[학교 네트워크 P2P 다중 재연결 & 핸드셰이크 패킷 강화] 학교 방화벽 및 대칭형 NAT 환경 대응을 위한 3단계 연결 재시도, 10초 주기 WebSocket 하트비트 자동 복구, 핸드셰이크 패킷 유실 방지 Keep-Alive(최대 12회) 및 방 번호 중복 자동 감지 회피 엔진 탑재'
+      },
+      {
+        tag: 'CHROMEBOOK OPTIMIZE',
+        tagColor: 'emerald',
+        text: '[크롬북 30FPS 스마트 렌더링 & GPU 부하 50% 절감] 학교 저사양 크롬북 환경에서도 렉 없이 부드럽게 구동되도록 30FPS 스마트 프레임 리미터 도입, 고비용 shadowBlur 연산을 제로 코스트 2D 오프셋 렌더러로 전면 교체 및 레이더 미니맵 갱신 스로틀링 적용'
+      }
+    ]
+  },
+  {
+    version: 'v1.50.0',
+    date: '2026-09-04',
+    title: '🏎️ [도촌 마이크로 카트 레이싱] 33호 신작 정식 오픈! 학용품 책상 서킷 & 실시간 P2P 아이템 카트 배틀',
+    badge: 'UPDATE',
+    badgeColor: 'blue',
+    items: [
+      {
+        tag: 'NEW RELEASE',
+        tagColor: 'rose',
+        text: '[33번째 공식 플레이어블 게임 정식 오픈] 교실 책상과 학용품(연필, 지우개, 자, 모눈종이, 물감 등)을 서킷으로 활용한 실시간 탑뷰(Top-Down) 아케이드 카트 레이싱 게임 《도촌 마이크로 카트 레이싱》 정식 출시'
+      },
+      {
+        tag: 'P2P MULTIPLAYER',
+        tagColor: 'blue',
+        text: '[실시간 P2P 멀티플레이 & 3단계 난이도 AI 솔로 모드] PeerJS 4자리 방 번호로 친구들과 룸을 생성하여 함께 질주하는 멀티플레이 대전 및 초급/중급/마스터 3단계 AI 봇 레이서 배틀 지원'
+      },
+      {
+        tag: 'PHYSICS & ITEMS',
+        tagColor: 'amber',
+        text: '[드리프트 2단계 미니 터보 & 5종 배틀 아이템] 코너링 드리프트로 충전하는 미니 터보 물리 및 바나나 껍질, 조준 물풍선, 로켓 연필, 슈퍼 부스터, 자석 쉴드 등 박진감 넘치는 학용품 배틀 시스템 탑재'
+      },
+      {
+        tag: 'AUDIO & LEADERBOARD',
+        tagColor: 'emerald',
+        text: '[무에셋 Web Audio 사운드 & 명예의 전당 연동] 가속 엔진음/드리프트 스키드/아이템 효과음 절차적 합성 사운드 지원 및 3랩 완주 순위/시간 기반 명예의 전당 실시간 랭킹 등록 시스템 구축'
+      }
+    ]
+  },
+  {
     version: 'v1.49.0',
     date: '2026-09-03',
     title: '⚡ [포털 전면 리팩토링 & 대규모 성능 최적화] 전 게임 점수 입력 보호, 초고속 1회 일괄 조회, 코드 분할, 실시간 검색 및 PWA 지원',
-    badge: 'LATEST',
-    badgeColor: 'emerald',
+    badge: 'UPDATE',
+    badgeColor: 'blue',
     items: [
       {
         tag: 'BUG FIX',

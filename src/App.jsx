@@ -46,6 +46,7 @@ const GAME_COMPONENTS = {
   ghoulduel: lazy(() => import('./components/games/ghoulduel/GhoulDuelGame')),
   snowball: lazy(() => import('./components/games/snowball/SnowballGame')),
   schooltag: lazy(() => import('./components/games/schooltag/SchoolTagGame')),
+  microkart: lazy(() => import('./components/games/microkart/MicroKartGame')),
 };
 
 export default function App() {
