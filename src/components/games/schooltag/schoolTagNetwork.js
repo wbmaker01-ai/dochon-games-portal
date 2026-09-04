@@ -350,7 +350,7 @@ export class SchoolTagNetworkManager {
       this.mySkinId = skinId;
       const targetHostPeerId = `${SCHOOL_TAG_CONSTANTS.PEER_PREFIX}${cleanCode}`;
 
-      this._emitStatus(`🔍 방(${cleanCode}) 찾는 중... 학교 방화벽/TURN 우회 탐색`);
+      this._emitStatus(`🔍 방(${cleanCode}) 찾는 중... P2P 릴레이 경로 탐색`);
 
       let handshakeTimer = null;
       let isResolved = false;
@@ -464,7 +464,7 @@ export class SchoolTagNetworkManager {
           console.warn('[SchoolTag P2P Guest Peer Error]', err.type, err);
           if (!isResolved && retryAttempts < MAX_CONNECT_RETRIES) {
             retryAttempts++;
-            const reason = err.type === 'peer-unavailable' ? '방장이 준비 중입니다' : '방화벽/네트워크 탐색 중';
+            const reason = err.type === 'peer-unavailable' ? '방장이 준비 중입니다' : '네트워크 경로 탐색 중';
             this._emitStatus(`⏳ ${reason}... 재시도 중 (${retryAttempts}/${MAX_CONNECT_RETRIES})`);
             setTimeout(() => {
               if (this.peer && !this.peer.destroyed && !isResolved) {

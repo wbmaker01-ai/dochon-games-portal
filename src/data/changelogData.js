@@ -29,14 +29,14 @@ export const CHANGELOG_DATA = [
   {
     version: 'v1.50.1',
     date: '2026-09-04',
-    title: '🏎️ [도촌 마이크로 카트 레이싱] 학교 네트워크 P2P 접속 강화 & 크롬북 30FPS 스마트 렌더링 최적화',
+    title: '🏎️ [도촌 마이크로 카트 레이싱] P2P 멀티플레이 연결 안정성 강화 & 크롬북 30FPS 스마트 렌더링 최적화',
     badge: 'UPDATE',
     badgeColor: 'blue',
     items: [
       {
         tag: 'P2P HARDENING',
         tagColor: 'purple',
-        text: '[학교 네트워크 P2P 다중 재연결 & 핸드셰이크 패킷 강화] 학교 방화벽 및 대칭형 NAT 환경 대응을 위한 3단계 연결 재시도, 10초 주기 WebSocket 하트비트 자동 복구, 핸드셰이크 패킷 유실 방지 Keep-Alive(최대 12회) 및 방 번호 중복 자동 감지 회피 엔진 탑재'
+        text: '[P2P 다중 재연결 & 핸드셰이크 패킷 강화] 안정적인 연결 유지를 위한 3단계 다중 재시도, 10초 주기 WebSocket 하트비트 자동 복구, 핸드셰이크 패킷 유실 방지 Keep-Alive(최대 12회) 및 방 번호 중복 자동 감지 최적화 엔진 탑재'
       },
       {
         tag: 'CHROMEBOOK OPTIMIZE',
