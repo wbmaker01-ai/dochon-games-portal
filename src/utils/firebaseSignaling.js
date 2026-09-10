@@ -421,21 +421,41 @@ export class FirebaseSignaling {
     } catch (e) {}
   }
 
-  // --- Cleanup Entire Room (When Host Leaves or Match Ends) ---
-  async cleanupRoom(roomCode) {
-    this.stopHeartbeat();
+  // --- Update Room Status (e.g. 'playing') ---
+  async updateRoomStatus(roomCode, status = 'playing') {
     const cleanCode = String(roomCode || '').trim();
+    const url = this._getRoomUrl(cleanCode);
+    try {
+      await fetch(url, {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ status })
+      });
+    } catch (e) {}
+  }
 
-    // Close all EventSources & poll intervals
+  // --- Close Room Alias ---
+  async closeRoom(roomCode) {
+    return this.cleanupRoom(roomCode);
+  }
+
+  // --- General Cleanup for Listeners ---
+  cleanup() {
+    this.stopHeartbeat();
     this.eventSources.forEach((es) => {
       try { es.close(); } catch (e) {}
     });
     this.eventSources.clear();
-
     this.pollTimers.forEach((timer) => {
       clearInterval(timer);
     });
     this.pollTimers.clear();
+  }
+
+  // --- Cleanup Entire Room (When Host Leaves or Match Ends) ---
+  async cleanupRoom(roomCode) {
+    this.cleanup();
+    const cleanCode = String(roomCode || '').trim();
 
     // Delete room node from Firebase
     const url = this._getRoomUrl(cleanCode);

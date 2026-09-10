@@ -3,11 +3,35 @@
 
 export const CHANGELOG_DATA = [
   {
+    version: 'v1.52.1',
+    date: '2026-09-10',
+    title: '☃️ [도촌 눈싸움 서바이벌] Firebase RTDB 기반 WebRTC 하이브리드 P2P 시그널링 전면 전환 & W3C 네이티브 엔진 탑재',
+    badge: 'LATEST',
+    badgeColor: 'emerald',
+    items: [
+      {
+        tag: 'FIREBASE SIGNALING',
+        tagColor: 'emerald',
+        text: '[전용 하이브리드 시그널링 브로커 전환] 외부 공개 시그널링 서버 의존성을 완전히 제거하고, 도촌초 전용 Firebase Realtime Database를 4자리 룸코드 검색 및 WebRTC 핸드셰이크(SDP 교환) 전용 브로커로 전면 교체하여 다양한 접속 환경 지원 및 연결 안정성 극대화'
+      },
+      {
+        tag: 'ZERO COST & ZERO LATENCY',
+        tagColor: 'blue',
+        text: '[무료 한도 영구 보존 & 초저지연 유지] 방 접속 단계(수 KB)에만 시그널링을 수행하고 P2P 터널 수립 즉시 시그널링 데이터를 0바이트로 자동 정리하며, 인게임 좌표·투사체·팽이 스모 넉백 데이터는 직결 P2P(10~20ms 초저지연, 대역폭 0원)로 전송'
+      },
+      {
+        tag: 'W3C DATACHANNEL',
+        tagColor: 'purple',
+        text: '[브라우저 표준 고신뢰성 채널] W3C 표준 RTCPeerConnection 및 RTCDataChannel을 직접 채택하고 다중 ICE 릴레이 풀을 연동하여 지연 없는 부드러운 8인 난투 액션 플레이 구현'
+      }
+    ]
+  },
+  {
     version: 'v1.52.0',
     date: '2026-09-10',
     title: '👻 [도촌 영혼 대결] Firebase RTDB 기반 WebRTC 하이브리드 P2P 시그널링 엔진 탑재 & 외부 서버 의존성 완전 배제',
-    badge: 'LATEST',
-    badgeColor: 'emerald',
+    badge: 'UPDATE',
+    badgeColor: 'blue',
     items: [
       {
         tag: 'FIREBASE SIGNALING',
