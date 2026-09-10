@@ -494,21 +494,29 @@ export const PLAYABLE_GAMES = [
     themeGradient: 'linear-gradient(135deg, #EF4444, #F59E0B)',
     scoreUnit: '점',
     releaseOrder: 33,
+    isNew: false,
+    isPlayable: true,
+    badgeText: '🏎️ 33위',
+    description: '학용품과 책상 트랙에서 바나나와 물풍선을 쏘며 치열하게 순위를 다투는 3랩 실시간 캐주얼 카트 레이싱!'
+  },
+  {
+    id: 'piratecoin',
+    title: '도촌 해적선 코인 쟁탈전',
+    englishTitle: 'DOCHON PIRATE COIN HEIST',
+    category: '멀티',
+    imageSrc: getThumb('piratecoin.jpg'),
+    iconEmoji: '🏴‍☠️',
+    themeGradient: 'linear-gradient(135deg, #0284C7, #F59E0B)',
+    scoreUnit: '점',
+    releaseOrder: 34,
     isNew: true,
     isPlayable: true,
-    badgeText: '🏎️ NEW 33위',
-    description: '학용품과 책상 트랙에서 바나나와 물풍선을 쏘며 치열하게 순위를 다투는 3랩 실시간 캐주얼 카트 레이싱!'
+    badgeText: '🏴‍☠️ NEW 34위',
+    description: '황금 보물섬에서 금화를 모아 자기 배로 나르고, 상대를 들이받아 코인을 강탈하는 4인 실시간 해적선 코인 쟁탈전!'
   }
 ];
 
 export const COMING_SOON_GAMES = [
-  {
-    id: 'piratecoin',
-    title: '도촌 해적선 코인 쟁탈전',
-    category: '멀티',
-    imageSrc: getThumb('piratecoin.jpg'),
-    isPlayable: false
-  },
   {
     id: 'bachai',
     title: '도촌 바흐 AI 작곡기',

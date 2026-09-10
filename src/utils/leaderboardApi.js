@@ -520,6 +520,13 @@ function getLocalLeaderboardFallback(gameKey) {
       { id: 'mk3', name: '이부스터 (5B)', score: 4100, date: '2026-09-03' },
       { id: 'mk4', name: '박바나나 (4C)', score: 3200, date: '2026-09-03' },
       { id: 'mk5', name: '최스피드 (3A)', score: 2450, date: '2026-09-02' }
+    ],
+    piratecoin: [
+      { id: 'pc1', name: '김홍년선생님', score: 3800, date: '2026-09-10' },
+      { id: 'pc2', name: '이황금해적 (6A)', score: 3200, date: '2026-09-10' },
+      { id: 'pc3', name: '박보물선장 (5B)', score: 2650, date: '2026-09-09' },
+      { id: 'pc4', name: '최코인도둑 (4C)', score: 1950, date: '2026-09-09' },
+      { id: 'pc5', name: '강쾌속앵커 (3A)', score: 1400, date: '2026-09-08' }
     ]
   };
 

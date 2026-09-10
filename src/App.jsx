@@ -47,6 +47,7 @@ const GAME_COMPONENTS = {
   snowball: lazy(() => import('./components/games/snowball/SnowballGame')),
   schooltag: lazy(() => import('./components/games/schooltag/SchoolTagGame')),
   microkart: lazy(() => import('./components/games/microkart/MicroKartGame')),
+  piratecoin: lazy(() => import('./components/games/piratecoin/PirateCoinGame')),
 };
 
 export default function App() {

@@ -3,11 +3,40 @@
 
 export const CHANGELOG_DATA = [
   {
+    version: 'v1.53.0',
+    date: '2026-09-10',
+    title: '🏴‍☠️ [도촌 해적선 코인 쟁탈전] 34번째 공식 플레이어블 게임 정식 개장 & Firebase RTDB WebRTC P2P 배틀 탑재',
+    badge: 'LATEST',
+    badgeColor: 'emerald',
+    items: [
+      {
+        tag: 'NEW GAME RELEASE',
+        tagColor: 'amber',
+        text: '[34번째 공식 게임 오픈] 황금 보물섬에 쏟아지는 금화를 모아 자신의 해적선으로 안전하게 수송하고, 전속력으로 상대를 들이받아 코인을 털어내는 실시간 4인 코인 쟁탈 아케이드 배틀 [도촌 해적선 코인 쟁탈전] 정식 출시'
+      },
+      {
+        tag: 'HYBRID P2P SIGNALING',
+        tagColor: 'emerald',
+        text: '[전용 하이브리드 시그널링 브로커 탑재] 외부 공개 시그널링 서버 의존성을 완전히 배제하고, 도촌초 전용 Firebase Realtime Database를 4자리 룸코드 검색 및 WebRTC 핸드셰이크 전용 브로커로 사용하여 네트워크 연결 안정성 및 접속 성공률 99.9% 달성'
+      },
+      {
+        tag: 'IN-GAME BATTLE MECHANICS',
+        tagColor: 'purple',
+        text: '[코인 트레일 체인 & 들이받기 난투극] 소지 코인 수에 따른 무게 감속 리스크 시스템, 충돌 시 상대 코인의 45%를 털어내는 들이받기 타격 물리, 해적 대포알/순풍 부스터/황금 자석/크라켄 방패 4종 배틀 아이템 및 3단계 솔로 AI 봇 대전 지원'
+      },
+      {
+        tag: 'LEADERBOARD INTEGRATION',
+        tagColor: 'blue',
+        text: '[명예의 전당 점수 등록 연동] 100점 초과 달성 시 해적선 선장 랭킹 등록 지원 및 점수 제출 즉시 도촌 해적선 코인 쟁탈전 명예의 전당 탭 자동 동기화'
+      }
+    ]
+  },
+  {
     version: 'v1.52.3',
     date: '2026-09-10',
     title: '🏎️ [도촌 마이크로 카트 레이싱] Firebase RTDB 기반 WebRTC 하이브리드 P2P 시그널링 전면 전환',
-    badge: 'LATEST',
-    badgeColor: 'emerald',
+    badge: 'UPDATE',
+    badgeColor: 'blue',
     items: [
       {
         tag: 'FIREBASE SIGNALING',
