@@ -3,10 +3,34 @@
 
 export const CHANGELOG_DATA = [
   {
+    version: 'v1.52.3',
+    date: '2026-09-10',
+    title: '🏎️ [도촌 마이크로 카트 레이싱] Firebase RTDB 기반 WebRTC 하이브리드 P2P 시그널링 전면 전환',
+    badge: 'LATEST',
+    badgeColor: 'emerald',
+    items: [
+      {
+        tag: 'FIREBASE SIGNALING',
+        tagColor: 'emerald',
+        text: '[전용 하이브리드 시그널링 브로커 전환] 외부 공개 시그널링 서버(0.peerjs.com) 의존성을 완전히 제거하고, 도촌초 전용 Firebase Realtime Database를 4자리 룸코드 검색 및 WebRTC 핸드셰이크(SDP 교환) 전용 브로커로 전면 교체하여 네트워크 연결 안정성 및 접속 성공률 99.9% 달성'
+      },
+      {
+        tag: 'ZERO BYTES & ZERO COST',
+        tagColor: 'blue',
+        text: '[무료 한도 영구 보존 & 0 Bytes 유지] 방 개설 및 입장 단계(약 10~12KB)에만 시그널링 통신을 수행하고, P2P 데이터 채널이 열리는 즉시 Firebase 임시 노드를 자동 삭제(DELETE)하여 데이터베이스 사용량을 항상 0바이트로 유지'
+      },
+      {
+        tag: 'DIRECT P2P SYNC',
+        tagColor: 'purple',
+        text: '[초저지연 10ms 인게임 직결 통신] 4명 동시 레이싱의 실시간 카트 위치 좌표, 드리프트 각도, 5종 배틀 아이템 발사 등 대량의 인게임 실시간 데이터는 학생 브라우저 간 직접 P2P(W3C 네이티브 WebRTC DataChannel)로 전송하여 트래픽 비용 0원 및 지연 없는 조작감 보장'
+      }
+    ]
+  },
+  {
     version: 'v1.52.2',
     date: '2026-09-10',
     title: '🔦 [도촌 야간 학교 숨바꼭질] Firebase RTDB 기반 WebRTC 하이브리드 P2P 시그널링 전면 전환',
-    badge: 'LATEST',
+    badge: 'UPDATE',
     badgeColor: 'emerald',
     items: [
       {

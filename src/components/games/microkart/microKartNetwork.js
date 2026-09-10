@@ -1,13 +1,11 @@
-// Dochon Games Portal - Micro Kart Racing WebRTC P2P Network Manager (Zero-Cost PeerJS)
-// 4-Digit Numeric Room Code (e.g. '1234', '7788') to 'dochon-mkart-XXXX' Peer ID
-// v3: Multi-Tier Metered TURN Relays (Ports 80/443), WebSocket Heartbeat & Handshake Retries for School Networks
+// Dochon Games Portal - Micro Kart Racing WebRTC P2P Network Manager
+// Dedicated Firebase RTDB WebRTC Signaling (Zero external PeerJS dependencies)
+// 4-Digit Numeric Room Code (e.g. '1234', '7788') to Firebase RTDB Room Broker
+// Native W3C RTCPeerConnection + RTCDataChannel with High-Reliability STUN/TURN Pool
 
-import { Peer } from 'peerjs';
+import { FirebaseSignaling } from '../../../utils/firebaseSignaling';
 
-export const MICROKART_PEER_PREFIX = 'dochon-mkart-';
-
-// Multi-tier ICE Servers: High-availability STUN + Port 80/443 TURN Relays
-// Bypasses restrictive school firewalls, symmetric NATs, and carrier-grade NATs
+// Multi-tier ICE Servers: Google, Cloudflare, Twilio STUN + Metered Ports 80/443 TURN
 const ICE_SERVERS = [
   { urls: 'stun:stun.l.google.com:19302' },
   { urls: 'stun:stun1.l.google.com:19302' },
@@ -43,41 +41,38 @@ const ICE_SERVERS = [
     credential: 'openrelaypublic'
   },
   {
-    urls: 'turn:openrelay.metered.ca:80?transport=tcp',
-    username: 'openrelaypublic',
-    credential: 'openrelaypublic'
-  },
-  {
     urls: 'turn:openrelay.metered.ca:443',
-    username: 'openrelaypublic',
-    credential: 'openrelaypublic'
-  },
-  {
-    urls: 'turns:openrelay.metered.ca:443?transport=tcp',
     username: 'openrelaypublic',
     credential: 'openrelaypublic'
   }
 ];
 
 const CONNECTION_TIMEOUT_MS = 18000;
-const MAX_CONNECT_RETRIES = 3;
+const RTC_CONFIG = {
+  iceServers: ICE_SERVERS,
+  iceCandidatePoolSize: 2
+};
 
 export class MicroKartNetworkManager {
   constructor() {
-    this.peer = null;
+    this.signaling = new FirebaseSignaling('microkart');
+
     this.isHost = false;
     this.roomCode = '';
     this.myPeerId = '';
     this.myName = '';
     this.mySkinId = 'eraser';
-    this.connections = new Map();
-    this.hostConnection = null;
-    this.heartbeatTimer = null;
 
-    this.lobbyPlayers = [];
+    // Host State: Map of guestId -> { pc, dc, player }
+    this.connections = new Map();
+
+    // Guest State: { pc, dc }
+    this.hostConnection = null;
+
+    this.lobbyPlayers = []; // [{ id, name, skinId, isHost, isReady, slotIndex }]
     this.selectedTrackId = 1;
 
-    // Callbacks
+    // Event Callbacks
     this.onLobbyUpdate = null;
     this.onTrackChange = null;
     this.onGameStart = null;
@@ -87,357 +82,378 @@ export class MicroKartNetworkManager {
     this.onGameOver = null;
     this.onError = null;
     this.onDisconnect = null;
-    this.onConnectionStatus = null;
-    this.onRoomCodeChanged = null;
+    this.onConnectionStatus = null; // Status message callback for UI feedback
+    this.onRoomCodeChanged = null;  // Notifies UI if host code had to be auto-regenerated
   }
 
+  // Generate random 4-digit numeric code
   static generateRandomCode() {
     return String(Math.floor(1000 + Math.random() * 9000));
   }
 
-  _emitStatus(message) {
-    if (this.onConnectionStatus) this.onConnectionStatus(message);
-  }
-
+  // Clean numeric code string
   static cleanCode(code) {
     const digits = String(code || '').replace(/[^0-9]/g, '');
     return digits.padStart(4, '0').slice(0, 4);
   }
 
-  // 10-Second WebSocket Keep-Alive Heartbeat for School Network Firewalls
-  _startHeartbeat() {
-    if (this.heartbeatTimer) clearInterval(this.heartbeatTimer);
-    this.heartbeatTimer = setInterval(() => {
-      if (this.peer && !this.peer.destroyed) {
-        if (this.peer.disconnected) {
-          console.warn('[MicroKart P2P] Peer disconnected from signaling server, reconnecting...');
-          try {
-            this.peer.reconnect();
-          } catch (err) {
-            console.error('[MicroKart P2P] Reconnect failed:', err);
+  // Emit status message for user UI feedback
+  _emitStatus(message) {
+    if (this.onConnectionStatus) this.onConnectionStatus(message);
+  }
+
+  // --- HOST: Create a P2P Room via Firebase RTDB Signaling ---
+  async createRoom(numericCode, playerName, skinId = 'eraser') {
+    this.disconnect();
+
+    const cleanCode = MicroKartNetworkManager.cleanCode(numericCode);
+    this.roomCode = cleanCode;
+    this.isHost = true;
+    this.myPeerId = 'host';
+    this.myName = (playerName || '방장').trim();
+    this.mySkinId = skinId;
+
+    this._emitStatus('🔗 도촌초 전용 시그널링 서버 연결 중...');
+
+    let autoRetryCount = 0;
+
+    const attemptHostInit = async (codeToTry) => {
+      this.roomCode = codeToTry;
+      try {
+        await this.signaling.createRoom(codeToTry, {
+          name: this.myName,
+          skinId: this.mySkinId
+        });
+
+        this.lobbyPlayers = [
+          {
+            id: 'host',
+            name: this.myName,
+            skinId: this.mySkinId,
+            isHost: true,
+            isReady: true,
+            slotIndex: 0
           }
+        ];
+
+        this._emitStatus(`✅ 방(${codeToTry}) 개설 완료! 참가자를 기다리는 중...`);
+        if (this.onLobbyUpdate) this.onLobbyUpdate([...this.lobbyPlayers]);
+
+        // Listen for incoming guest join offers in Firebase RTDB
+        this.signaling.listenForGuests(codeToTry, (guestId, guestData) => {
+          this.handleIncomingGuest(guestId, guestData);
+        });
+
+        return codeToTry;
+      } catch (err) {
+        if (err.message && err.message.includes('이미 다른 방장이 사용 중') && autoRetryCount < 2) {
+          autoRetryCount++;
+          const newCode = MicroKartNetworkManager.generateRandomCode();
+          this._emitStatus(`🔄 방 번호 중복 감지: 새 번호(${newCode})로 자동 개설 중...`);
+          if (this.onRoomCodeChanged) this.onRoomCodeChanged(newCode);
+          return attemptHostInit(newCode);
         }
-      }
-    }, 10000);
-  }
-
-  _stopHeartbeat() {
-    if (this.heartbeatTimer) {
-      clearInterval(this.heartbeatTimer);
-      this.heartbeatTimer = null;
-    }
-  }
-
-  // --- HOST: Create a P2P Room with Auto-Retry & Duplicate Avoidance ---
-  createRoom(roomCode, playerName, skinId) {
-    return new Promise((resolve, reject) => {
-      this.disconnect();
-      this.isHost = true;
-      const cleanCode = MicroKartNetworkManager.cleanCode(roomCode);
-      this.roomCode = cleanCode;
-      this.myName = (playerName || '호스트').trim();
-      this.mySkinId = skinId || 'eraser';
-      let autoRetryCount = 0;
-
-      const timeoutId = setTimeout(() => {
-        this._emitStatus('⏰ 시그널링 서버 연결 시간 초과');
-        const err = new Error('시그널링 서버 연결 시간 초과 (18초). 인터넷 네트워크 연결 상태를 확인해주세요.');
-        if (this.onError) this.onError(err.message);
+        const errorMsg = err.message || '방 생성 중 오류가 발생했습니다.';
+        this._emitStatus(`❌ ${errorMsg}`);
+        if (this.onError) this.onError(errorMsg);
         this.disconnect();
-        reject(err);
-      }, CONNECTION_TIMEOUT_MS);
+        throw err;
+      }
+    };
 
-      const attemptHostInit = (codeToTry) => {
-        const fullPeerId = `${MICROKART_PEER_PREFIX}${codeToTry}`;
-        this.roomCode = codeToTry;
-        this.myPeerId = fullPeerId;
-        this._emitStatus(`🔗 P2P 시그널링 서버에 방(${codeToTry}) 등록 중...`);
+    return attemptHostInit(cleanCode);
+  }
 
-        try {
-          this.peer = new Peer(fullPeerId, {
-            config: {
-              iceServers: ICE_SERVERS,
-              iceCandidatePoolSize: 10
-            },
-            debug: 0
-          });
+  // --- HOST: Handle Incoming Guest WebRTC Offer ---
+  async handleIncomingGuest(guestId, guestData) {
+    if (this.connections.has(guestId)) return;
+    if (this.lobbyPlayers.length >= 4) return; // Max 4 players in Micro Kart
 
-          this.peer.on('open', (id) => {
-            clearTimeout(timeoutId);
-            this.myPeerId = id;
-            this._startHeartbeat();
-            this.lobbyPlayers = [
-              {
-                id: this.myPeerId,
-                name: this.myName,
-                skinId: this.mySkinId,
-                isHost: true,
-                isReady: true,
-                slotIndex: 0
-              }
-            ];
+    this._emitStatus(`👋 ${guestData.name || '친구'}님이 입장을 시도합니다...`);
 
-            this._emitStatus(`✅ 방(${codeToTry}) 개설 완료! 참가자를 기다리는 중...`);
-            if (this.onLobbyUpdate) this.onLobbyUpdate([...this.lobbyPlayers]);
-            resolve(this.roomCode);
-          });
+    const pc = new RTCPeerConnection(RTC_CONFIG);
+    let dc = null;
 
-          this.peer.on('connection', (conn) => {
-            this._emitStatus(`👋 새로운 친구가 접속을 시도합니다...`);
-            this._setupHostIncomingConnection(conn);
-          });
+    const candidateQueue = [];
+    let isRemoteDescSet = false;
 
-          this.peer.on('disconnected', () => {
-            console.warn('[MicroKart P2P Host] Disconnected from signaling server. Reconnecting...');
-            if (this.peer && !this.peer.destroyed) {
-              try {
-                this.peer.reconnect();
-              } catch (e) {
-                console.error('[MicroKart P2P Host] Reconnect failed:', e);
-              }
-            }
-          });
+    // Stream host ICE candidates to Firebase RTDB for this guest
+    pc.onicecandidate = (event) => {
+      if (event.candidate) {
+        this.signaling.sendHostCandidate(this.roomCode, guestId, event.candidate);
+      }
+    };
 
-          this.peer.on('error', (err) => {
-            console.warn('[MicroKart P2P Host Error]', err.type, err);
-            if (err.type === 'unavailable-id') {
-              if (autoRetryCount < 2) {
-                autoRetryCount++;
-                const newCode = MicroKartNetworkManager.generateRandomCode();
-                this._emitStatus(`🔄 방 번호 중복 감지: 새 번호(${newCode})로 자동 개설 중...`);
-                if (this.onRoomCodeChanged) this.onRoomCodeChanged(newCode);
-                this.disconnect();
-                setTimeout(() => attemptHostInit(newCode), 500);
-                return;
-              }
-              clearTimeout(timeoutId);
-              const msg = `방 번호(${codeToTry})가 이미 사용 중입니다. 다른 번호로 다시 시도해주세요.`;
-              this._emitStatus(`❌ ${msg}`);
-              reject(new Error(msg));
-            } else {
-              clearTimeout(timeoutId);
-              const msg = `P2P 네트워크 오류: ${err.message || err.type}`;
-              this._emitStatus(`❌ ${msg}`);
-              reject(new Error(msg));
-            }
-          });
-        } catch (err) {
-          clearTimeout(timeoutId);
-          reject(err);
+    // Listen for incoming RTCDataChannel from guest
+    pc.ondatachannel = (event) => {
+      dc = event.channel;
+      this.setupHostDataChannel(guestId, pc, dc, guestData);
+    };
+
+    try {
+      // Set Guest's SDP Offer
+      await pc.setRemoteDescription(new RTCSessionDescription(guestData.offer));
+      isRemoteDescSet = true;
+
+      // Drain queued ICE candidates
+      for (const cand of candidateQueue) {
+        try { await pc.addIceCandidate(new RTCIceCandidate(cand)); } catch (e) {}
+      }
+
+      // Create Host's SDP Answer
+      const answer = await pc.createAnswer();
+      await pc.setLocalDescription(answer);
+
+      // Send Answer to Firebase RTDB
+      await this.signaling.sendAnswer(this.roomCode, guestId, answer);
+
+      // Listen for Guest's ICE candidates from Firebase RTDB
+      this.signaling.listenForGuestCandidates(this.roomCode, guestId, (cand) => {
+        if (!isRemoteDescSet) {
+          candidateQueue.push(cand);
+        } else {
+          pc.addIceCandidate(new RTCIceCandidate(cand)).catch(() => {});
         }
-      };
-
-      attemptHostInit(cleanCode);
-    });
-  }
-
-  _setupHostIncomingConnection(conn) {
-    if (this.connections.size >= 3) {
-      // Max 4 players in a race
-      conn.on('open', () => {
-        conn.send({ type: 'ROOM_FULL', message: '방 정원(4명)이 가득 찼습니다.' });
-        setTimeout(() => conn.close(), 500);
       });
-      return;
+    } catch (err) {
+      console.error('[MicroKart Host Handshake Error]', err);
+      pc.close();
     }
-
-    conn.on('open', () => {
-      this.connections.set(conn.peer, conn);
-    });
-
-    conn.on('data', (data) => {
-      this._handleHostReceivedData(conn, data);
-    });
-
-    conn.on('close', () => {
-      this.connections.delete(conn.peer);
-      this.lobbyPlayers = this.lobbyPlayers.filter(p => p.id !== conn.peer);
-      this._broadcastToGuests({ type: 'LOBBY_UPDATE', players: this.lobbyPlayers });
-      if (this.onLobbyUpdate) this.onLobbyUpdate(this.lobbyPlayers);
-    });
   }
 
-  _handleHostReceivedData(conn, data) {
-    if (!data || !data.type) return;
-
-    if (data.type === 'JOIN_LOBBY') {
-      const existingIdx = this.lobbyPlayers.findIndex(p => p.id === conn.peer);
-      const slotIndex = existingIdx >= 0 ? existingIdx : this.lobbyPlayers.length;
-      const playerObj = {
-        id: conn.peer,
-        name: (data.name || '게스트').trim(),
-        skinId: data.skinId || 'pencil',
+  // --- HOST: Setup DataChannel for Connected Guest ---
+  setupHostDataChannel(guestId, pc, dc, guestData) {
+    dc.onopen = () => {
+      const newPlayer = {
+        id: guestId,
+        name: (guestData.name || `참가자-${this.lobbyPlayers.length + 1}`).trim(),
+        skinId: guestData.skinId || 'pencil',
         isHost: false,
         isReady: true,
-        slotIndex
+        slotIndex: this.lobbyPlayers.length
       };
 
-      if (existingIdx >= 0) {
-        this.lobbyPlayers[existingIdx] = playerObj;
-      } else {
-        this.lobbyPlayers.push(playerObj);
-      }
+      this.lobbyPlayers.push(newPlayer);
+      this.connections.set(guestId, { pc, dc, player: newPlayer });
 
-      // Immediately respond with lobby state ACK
-      conn.send({ type: 'LOBBY_UPDATE', players: this.lobbyPlayers, trackId: this.selectedTrackId });
-      this._broadcastToGuests({ type: 'LOBBY_UPDATE', players: this.lobbyPlayers, trackId: this.selectedTrackId });
-      if (this.onLobbyUpdate) this.onLobbyUpdate(this.lobbyPlayers);
-    } else if (data.type === 'CLIENT_INPUT') {
+      // Send 3-Way Handshake ACK over P2P DataChannel
+      try {
+        dc.send(
+          JSON.stringify({
+            type: 'JOIN_ACK',
+            accepted: true,
+            players: this.lobbyPlayers,
+            trackId: this.selectedTrackId,
+            slotIndex: newPlayer.slotIndex
+          })
+        );
+      } catch (e) {}
+
+      // Clean up guest signaling node in Firebase RTDB (Zero bytes left!)
+      this.signaling.cleanupGuestSignaling(this.roomCode, guestId);
+
+      this._emitStatus(`⚡ ${newPlayer.name}님과 P2P 연결 완료! (${this.lobbyPlayers.length}/4명)`);
+      this.broadcastLobbyUpdate();
+    };
+
+    dc.onmessage = (event) => {
+      try {
+        const data = typeof event.data === 'string' ? JSON.parse(event.data) : event.data;
+        this.handleHostReceiveData(guestId, data);
+      } catch (err) {
+        console.error('[MicroKart Host Data Parsing Error]', err);
+      }
+    };
+
+    dc.onclose = () => {
+      this.connections.delete(guestId);
+      this.lobbyPlayers = this.lobbyPlayers.filter((p) => p.id !== guestId);
+      this._emitStatus(`👋 친구 한 명이 퇴장했습니다. (${this.lobbyPlayers.length}/4명)`);
+      this.broadcastLobbyUpdate();
+    };
+
+    dc.onerror = (err) => {
+      console.warn(`[MicroKart Host Guest DC Error: ${guestId}]`, err);
+    };
+  }
+
+  // --- HOST: Handle Incoming In-game Data from Guest ---
+  handleHostReceiveData(guestId, data) {
+    if (!data || !data.type) return;
+
+    if (data.type === 'CLIENT_INPUT') {
       if (this.onClientInput) {
-        this.onClientInput(conn.peer, data.input);
+        this.onClientInput(guestId, data.input);
       }
     }
   }
 
-  // --- GUEST: Join a P2P Room with Multi-Tier Retries & Keep-Alive Handshake ---
-  joinRoom(roomCode, playerName, skinId) {
-    return new Promise((resolve, reject) => {
+  // --- HOST: Broadcast Lobby State to All Guests ---
+  broadcastLobbyUpdate() {
+    this.broadcastToGuests({
+      type: 'LOBBY_UPDATE',
+      players: this.lobbyPlayers,
+      trackId: this.selectedTrackId
+    });
+    if (this.onLobbyUpdate) this.onLobbyUpdate([...this.lobbyPlayers]);
+  }
+
+  // --- GUEST: Join Room via Firebase RTDB Signaling ---
+  joinRoom(numericCode, playerName, skinId = 'pencil') {
+    return new Promise(async (resolve, reject) => {
       this.disconnect();
-      this.isHost = false;
-      const cleanCode = MicroKartNetworkManager.cleanCode(roomCode);
+
+      const cleanCode = MicroKartNetworkManager.cleanCode(numericCode);
       this.roomCode = cleanCode;
+      this.isHost = false;
       this.myName = (playerName || '게스트').trim();
-      this.mySkinId = skinId || 'pencil';
+      this.mySkinId = skinId;
+      const guestId = `g_${Math.random().toString(36).slice(2, 9)}`;
+      this.myPeerId = guestId;
 
-      const targetHostPeerId = `${MICROKART_PEER_PREFIX}${cleanCode}`;
-      this._emitStatus(`🔍 방(${cleanCode}) 찾는 중... P2P 릴레이 경로 탐색`);
+      this._emitStatus(`🔍 방 찾는 중... (방 번호: [${cleanCode}])`);
 
-      let handshakeTimer = null;
-      let isResolved = false;
-      let retryAttempts = 0;
-      let activeConn = null;
-
-      const connectionTimeout = setTimeout(() => {
-        if (handshakeTimer) clearInterval(handshakeTimer);
-        if (!isResolved) {
-          this._emitStatus(`⏰ 방(${cleanCode}) 연결 시간 초과`);
+      let settled = false;
+      const timeoutId = setTimeout(() => {
+        if (!settled) {
+          settled = true;
           this.disconnect();
-          reject(new Error(`방(${cleanCode})을 찾을 수 없거나 방장이 아직 방을 개설하지 않았습니다. 번호를 확인해주세요.`));
+          const errorMsg = `방 번호 [${cleanCode}]에 연결할 수 없습니다. 방장이 대기 중인지 확인해 주세요.`;
+          this._emitStatus(`❌ ${errorMsg}`);
+          if (this.onError) this.onError(errorMsg);
+          reject(new Error(errorMsg));
         }
       }, CONNECTION_TIMEOUT_MS);
 
-      const attemptConnect = (peerInstance) => {
-        if (isResolved || !peerInstance || peerInstance.destroyed) return;
-
-        try {
-          if (activeConn) {
-            try { activeConn.close(); } catch { /* ignore */ }
-            activeConn = null;
-          }
-
-          this._emitStatus(`🤝 방장과 P2P 터널 연결 시도 중... (${retryAttempts + 1}/${MAX_CONNECT_RETRIES + 1})`);
-
-          const conn = peerInstance.connect(targetHostPeerId, {
-            reliable: true
-          });
-          activeConn = conn;
-          this.hostConnection = conn;
-
-          conn.on('open', () => {
-            this._emitStatus(`⚡ P2P 채널 연결 성공! 대기실 입장 요청 전송 중...`);
-
-            // Send JOIN_LOBBY payload
-            const sendJoin = () => {
-              if (conn.open) {
-                conn.send({
-                  type: 'JOIN_LOBBY',
-                  name: this.myName,
-                  skinId: this.mySkinId
-                });
-              }
-            };
-            sendJoin();
-
-            // Handshake Keep-Alive Retry: repeat every 350ms until ACK / LOBBY_UPDATE received
-            if (handshakeTimer) clearInterval(handshakeTimer);
-            let ackRetries = 0;
-            handshakeTimer = setInterval(() => {
-              if (isResolved || !conn.open || ackRetries >= 12) {
-                clearInterval(handshakeTimer);
-                return;
-              }
-              ackRetries++;
-              sendJoin();
-            }, 350);
-          });
-
-          conn.on('data', (data) => {
-            if (data.type === 'LOBBY_UPDATE' && !isResolved) {
-              isResolved = true;
-              clearTimeout(connectionTimeout);
-              if (handshakeTimer) clearInterval(handshakeTimer);
-              this._emitStatus(`✅ 대기실 입장 완료!`);
-              resolve(cleanCode);
-            }
-            this._handleGuestReceivedData(data);
-          });
-
-          conn.on('close', () => {
-            if (handshakeTimer) clearInterval(handshakeTimer);
-            if (this.onDisconnect) this.onDisconnect('방장과의 연결이 종료되었습니다.');
-          });
-
-          conn.on('error', (err) => {
-            console.warn('[MicroKart P2P Guest Conn Error]', err);
-            if (!isResolved && retryAttempts < MAX_CONNECT_RETRIES) {
-              retryAttempts++;
-              setTimeout(() => attemptConnect(peerInstance), 1200);
-            }
-          });
-        } catch (err) {
-          console.error('[MicroKart P2P Connect Exception]', err);
-        }
+      const settle = (type, val) => {
+        if (settled) return;
+        settled = true;
+        clearTimeout(timeoutId);
+        if (type === 'resolve') resolve(val);
+        else reject(val);
       };
 
       try {
-        this.peer = new Peer({
-          debug: 0,
-          config: {
-            iceServers: ICE_SERVERS,
-            iceCandidatePoolSize: 10
+        // 1. Verify room in Firebase RTDB
+        await this.signaling.checkRoom(cleanCode);
+
+        this._emitStatus('⚡ P2P 터널 수립 준비 중 (WebRTC 핸드셰이크)...');
+
+        // 2. Create RTCPeerConnection & DataChannel
+        const pc = new RTCPeerConnection(RTC_CONFIG);
+        const dc = pc.createDataChannel('microKartDataChannel', { ordered: true });
+        this.hostConnection = { pc, dc };
+
+        const candidateQueue = [];
+        let isRemoteDescSet = false;
+
+        // Stream guest ICE candidates to Firebase RTDB
+        pc.onicecandidate = (event) => {
+          if (event.candidate) {
+            this.signaling.sendGuestCandidate(cleanCode, guestId, event.candidate);
           }
-        });
+        };
 
-        this.peer.on('open', (id) => {
-          this.myPeerId = id;
-          this._startHeartbeat();
-          attemptConnect(this.peer);
-        });
+        // DataChannel event handlers
+        dc.onopen = () => {
+          this._emitStatus('⚡ P2P 터널 수립 완료! 대기실 입장 확인 중...');
+        };
 
-        this.peer.on('disconnected', () => {
-          if (this.peer && !this.peer.destroyed) {
-            try { this.peer.reconnect(); } catch { /* ignore */ }
-          }
-        });
+        dc.onmessage = (event) => {
+          try {
+            const data = typeof event.data === 'string' ? JSON.parse(event.data) : event.data;
 
-        this.peer.on('error', (err) => {
-          console.warn('[MicroKart P2P Guest Peer Error]', err.type, err);
-          if (!isResolved && retryAttempts < MAX_CONNECT_RETRIES) {
-            retryAttempts++;
-            const reason = err.type === 'peer-unavailable' ? '방장이 준비 중입니다' : '네트워크 경로 탐색 중';
-            this._emitStatus(`⏳ ${reason}... 재시도 중 (${retryAttempts}/${MAX_CONNECT_RETRIES})`);
-            setTimeout(() => {
-              if (this.peer && !this.peer.destroyed && !isResolved) {
-                attemptConnect(this.peer);
+            // Handle Handshake ACK from Host
+            if (data.type === 'JOIN_ACK') {
+              if (data.accepted) {
+                this.lobbyPlayers = data.players || [];
+                if (data.trackId) {
+                  this.selectedTrackId = data.trackId;
+                  if (this.onTrackChange) this.onTrackChange(data.trackId);
+                }
+                this._emitStatus('🎉 대기실 입장 완료!');
+                if (this.onLobbyUpdate) this.onLobbyUpdate([...this.lobbyPlayers]);
+
+                // Clean up guest signaling data from Firebase RTDB (Zero bytes left!)
+                this.signaling.cleanupGuestSignaling(cleanCode, guestId);
+
+                settle('resolve', cleanCode);
+              } else {
+                const errorMsg = data.message || '방 입장이 거부되었습니다.';
+                this._emitStatus(`❌ ${errorMsg}`);
+                if (this.onError) this.onError(errorMsg);
+                settle('reject', new Error(errorMsg));
               }
-            }, 1200 + retryAttempts * 300);
-            return;
-          }
+              return;
+            }
 
-          if (!isResolved && retryAttempts >= MAX_CONNECT_RETRIES) {
-            clearTimeout(connectionTimeout);
-            if (handshakeTimer) clearInterval(handshakeTimer);
-            reject(new Error(`방(${cleanCode})에 접속할 수 없습니다. 방 번호를 확인하거나 방장이 열려있는지 확인해주세요.`));
+            this.handleGuestReceiveData(data);
+          } catch (err) {
+            console.error('[MicroKart Guest Data Parsing Error]', err);
+          }
+        };
+
+        dc.onclose = () => {
+          this._emitStatus('❌ 방장과의 연결이 종료되었습니다.');
+          if (this.onDisconnect) this.onDisconnect('방장과의 연결이 끊어졌습니다.');
+        };
+
+        dc.onerror = (err) => {
+          console.warn('[MicroKart Guest DataChannel Error]', err);
+        };
+
+        // 3. Create SDP Offer & send to Firebase RTDB
+        const offer = await pc.createOffer();
+        await pc.setLocalDescription(offer);
+
+        await this.signaling.joinRoomWithOffer(
+          cleanCode,
+          guestId,
+          {
+            name: this.myName,
+            skinId: this.mySkinId
+          },
+          offer
+        );
+
+        this._emitStatus('⏳ 방장의 수락을 기다리는 중...');
+
+        // 4. Listen for SDP Answer from Host
+        this.signaling.listenForAnswer(cleanCode, guestId, async (answer) => {
+          try {
+            if (!pc.currentRemoteDescription) {
+              await pc.setRemoteDescription(new RTCSessionDescription(answer));
+              isRemoteDescSet = true;
+
+              // Drain queued candidates
+              for (const cand of candidateQueue) {
+                try { await pc.addIceCandidate(new RTCIceCandidate(cand)); } catch (e) {}
+              }
+            }
+          } catch (err) {
+            console.error('[MicroKart Guest Set Remote Answer Error]', err);
+          }
+        });
+
+        // 5. Listen for Host's ICE candidates
+        this.signaling.listenForHostCandidates(cleanCode, guestId, (cand) => {
+          if (!isRemoteDescSet) {
+            candidateQueue.push(cand);
+          } else {
+            pc.addIceCandidate(new RTCIceCandidate(cand)).catch(() => {});
           }
         });
       } catch (err) {
-        clearTimeout(connectionTimeout);
-        reject(err);
+        const errorMsg = err.message || '방 참여 중 오류가 발생했습니다.';
+        this._emitStatus(`❌ ${errorMsg}`);
+        if (this.onError) this.onError(errorMsg);
+        settle('reject', err);
       }
     });
   }
 
-  _handleGuestReceivedData(data) {
+  // --- GUEST: Handle Incoming In-game Data from Host ---
+  handleGuestReceiveData(data) {
     if (!data || !data.type) return;
 
     if (data.type === 'LOBBY_UPDATE') {
@@ -446,7 +462,7 @@ export class MicroKartNetworkManager {
         this.selectedTrackId = data.trackId;
         if (this.onTrackChange) this.onTrackChange(data.trackId);
       }
-      if (this.onLobbyUpdate) this.onLobbyUpdate(this.lobbyPlayers);
+      if (this.onLobbyUpdate) this.onLobbyUpdate([...this.lobbyPlayers]);
     } else if (data.type === 'TRACK_CHANGE') {
       this.selectedTrackId = data.trackId;
       if (this.onTrackChange) this.onTrackChange(data.trackId);
@@ -455,65 +471,87 @@ export class MicroKartNetworkManager {
       this.selectedTrackId = trackId;
       if (this.onGameStart) this.onGameStart({ trackId, ...(data.config || {}) });
     } else if (data.type === 'SNAPSHOT') {
-      if (this.onSnapshot) this.onSnapshot(data);
+      if (this.onSnapshot) this.onSnapshot(data.snapshot || data);
     } else if (data.type === 'GAME_OVER') {
       if (this.onGameOver) this.onGameOver(data.results);
     }
   }
 
+  // --- Track Change Broadcast (Host -> Guests) ---
   broadcastTrackChange(trackId) {
     this.selectedTrackId = trackId;
     if (!this.isHost) return;
-    this._broadcastToGuests({ type: 'TRACK_CHANGE', trackId });
+    this.broadcastToGuests({ type: 'TRACK_CHANGE', trackId });
   }
 
+  // --- Game Start Broadcast (Host -> Guests) ---
   broadcastGameStart(config = {}) {
     if (!this.isHost) return;
     const fullConfig = { trackId: this.selectedTrackId || 1, ...config };
-    this._broadcastToGuests({ type: 'GAME_START', config: fullConfig, trackId: this.selectedTrackId || 1 });
+    this.broadcastToGuests({ type: 'GAME_START', config: fullConfig, trackId: this.selectedTrackId || 1 });
   }
 
+  // --- Snapshot Broadcast (Host -> Guests) ---
   broadcastSnapshot(snapshot) {
     if (!this.isHost) return;
-    this._broadcastToGuests({ type: 'SNAPSHOT', snapshot });
+    this.broadcastToGuests({ type: 'SNAPSHOT', snapshot });
   }
 
+  // --- Client Input Send (Guest -> Host) ---
   sendClientInput(input) {
-    if (this.isHost || !this.hostConnection || !this.hostConnection.open) return;
-    this.hostConnection.send({ type: 'CLIENT_INPUT', input });
+    if (this.isHost || !this.hostConnection || !this.hostConnection.dc) return;
+    if (this.hostConnection.dc.readyState === 'open') {
+      try {
+        this.hostConnection.dc.send(JSON.stringify({ type: 'CLIENT_INPUT', input }));
+      } catch (e) {}
+    }
   }
 
+  // --- Game Over Broadcast (Host -> Guests) ---
   broadcastGameOver(results) {
     if (!this.isHost) return;
-    this._broadcastToGuests({ type: 'GAME_OVER', results });
+    this.broadcastToGuests({ type: 'GAME_OVER', results });
   }
 
-  _broadcastToGuests(msg) {
-    this.connections.forEach(conn => {
-      if (conn && conn.open) {
-        conn.send(msg);
+  // --- Send Payload to All Connected Guests ---
+  broadcastToGuests(msg) {
+    const payload = typeof msg === 'string' ? msg : JSON.stringify(msg);
+    this.connections.forEach(({ dc }) => {
+      if (dc && dc.readyState === 'open') {
+        try {
+          dc.send(payload);
+        } catch (e) {}
       }
     });
   }
 
+  // --- Disconnect & Complete Resource Cleanup ---
   disconnect() {
-    this._stopHeartbeat();
+    if (this.isHost && this.roomCode) {
+      this.signaling.cleanupRoom(this.roomCode).catch(() => {});
+    } else {
+      this.signaling.cleanup();
+    }
+
     if (this.hostConnection) {
-      try { this.hostConnection.close(); } catch (e) {}
+      try {
+        if (this.hostConnection.dc) this.hostConnection.dc.close();
+        if (this.hostConnection.pc) this.hostConnection.pc.close();
+      } catch (e) {}
       this.hostConnection = null;
     }
-    this.connections.forEach(conn => {
-      try { conn.close(); } catch (e) {}
+
+    this.connections.forEach(({ pc, dc }) => {
+      try {
+        if (dc) dc.close();
+        if (pc) pc.close();
+      } catch (e) {}
     });
     this.connections.clear();
 
-    if (this.peer && !this.peer.destroyed) {
-      try { this.peer.destroy(); } catch (e) {}
-      this.peer = null;
-    }
-
     this.isHost = false;
     this.roomCode = '';
+    this.myPeerId = '';
     this.lobbyPlayers = [];
     this.selectedTrackId = 1;
   }
