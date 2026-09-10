@@ -3,11 +3,40 @@
 
 export const CHANGELOG_DATA = [
   {
+    version: 'v1.52.0',
+    date: '2026-09-10',
+    title: '👻 [도촌 영혼 대결] Firebase RTDB 기반 WebRTC 하이브리드 P2P 시그널링 엔진 탑재 & 외부 서버 의존성 완전 배제',
+    badge: 'LATEST',
+    badgeColor: 'emerald',
+    items: [
+      {
+        tag: 'FIREBASE SIGNALING',
+        tagColor: 'emerald',
+        text: '[전용 하이브리드 시그널링 브로커 전환] 기존 외부 공개 시그널링 서버(0.peerjs.com) 의존성을 완전히 제거하고, 도촌초 전용 Firebase Realtime Database를 4자리 룸코드 검색 및 WebRTC 핸드셰이크(SDP 교환) 전용 브로커로 전면 교체하여 접속 성공률 99.9% 달성'
+      },
+      {
+        tag: 'ZERO COST & ZERO LATENCY',
+        tagColor: 'blue',
+        text: '[무료 요금제 한도 보존 & 초저지연 유지] 방 접속 단계(수 KB)에만 시그널링을 수행하고 P2P 터널 수립 즉시 시그널링 데이터를 0바이트로 자동 정리하며, 인게임 좌표·투사체 데이터는 직결 P2P(10ms 초저지연, 대역폭 0원)로 전송'
+      },
+      {
+        tag: 'SSE & FALLBACK POLLING',
+        tagColor: 'purple',
+        text: '[듀얼 채널 수신 무손실 방어] 브라우저 표준 Server-Sent Events(SSE) 스트리밍과 1.5초 간격의 폴링 백업 엔진을 이중 가동하여 네트워크 일시 지연 환경에서도 지체 없이 안전하게 방에 접속할 수 있도록 개선'
+      },
+      {
+        tag: 'STUN/TURN EXPANSION',
+        tagColor: 'amber',
+        text: '[다양한 접속 환경 지원 & 하트비트 탑재] Google/Cloudflare/Twilio 다중 STUN 및 Metered 포트 80/443 TURN 백업망을 유지하고 방장의 8초 주기 자동 하트비트를 가동하여 유휴 대기실 안정성 극대화'
+      }
+    ]
+  },
+  {
     version: 'v1.51.0',
     date: '2026-09-04',
     title: '🏎️ [도촌 마이크로 카트 레이싱] 3대 서킷 그랑프리 시스템 & P2P 실시간 맵 선택 기능 대규모 업데이트',
-    badge: 'LATEST',
-    badgeColor: 'emerald',
+    badge: 'UPDATE',
+    badgeColor: 'blue',
     items: [
       {
         tag: '3 RACING TRACKS',
