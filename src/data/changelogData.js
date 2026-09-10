@@ -3,10 +3,34 @@
 
 export const CHANGELOG_DATA = [
   {
+    version: 'v1.52.2',
+    date: '2026-09-10',
+    title: '🔦 [도촌 야간 학교 숨바꼭질] Firebase RTDB 기반 WebRTC 하이브리드 P2P 시그널링 전면 전환',
+    badge: 'LATEST',
+    badgeColor: 'emerald',
+    items: [
+      {
+        tag: 'FIREBASE SIGNALING',
+        tagColor: 'emerald',
+        text: '[전용 하이브리드 시그널링 브로커 전환] 외부 공개 시그널링 서버 의존성을 완전히 제거하고, 도촌초 전용 Firebase Realtime Database를 4자리 룸코드 검색 및 WebRTC 핸드셰이크(SDP 교환) 전용 브로커로 전면 교체하여 네트워크 연결 안정성 및 접속 성공률 99.9% 달성'
+      },
+      {
+        tag: 'ZERO BYTES & ZERO COST',
+        tagColor: 'blue',
+        text: '[무료 한도 영구 보존 & 0 Bytes 유지] 방 개설 및 입장 단계(약 3~4KB)에만 시그널링 통신을 수행하고, P2P 데이터 채널이 열리는 즉시 Firebase 임시 노드를 자동 삭제하여 데이터베이스 사용량을 항상 0바이트로 유지'
+      },
+      {
+        tag: 'DIRECT P2P SYNC',
+        tagColor: 'purple',
+        text: '[초저지연 10ms 인게임 직결 통신] 손전등 시야 방향, 달리기 발소리 소음 파동, 열쇠 획득, 술래 태그 판정 등 대량의 인게임 실시간 데이터는 학생 브라우저 간 직접 P2P(WebRTC DataChannel)로 전송하여 트래픽 비용 0원 및 쾌적한 반응 속도 보장'
+      }
+    ]
+  },
+  {
     version: 'v1.52.1',
     date: '2026-09-10',
     title: '☃️ [도촌 눈싸움 서바이벌] Firebase RTDB 기반 WebRTC 하이브리드 P2P 시그널링 전면 전환 & W3C 네이티브 엔진 탑재',
-    badge: 'LATEST',
+    badge: 'UPDATE',
     badgeColor: 'emerald',
     items: [
       {

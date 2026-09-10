@@ -151,6 +151,26 @@ export default function SchoolTagGame({ onScoreSubmitted }) {
       }
     };
 
+    networkRef.current.onPlayerInput = (senderPeerId, payload) => {
+      if (!payload) return;
+      if (otherPlayersRef.current.has(senderPeerId)) {
+        const p = otherPlayersRef.current.get(senderPeerId);
+        p.x = payload.x;
+        p.y = payload.y;
+        p.facingAngle = payload.facingAngle;
+        p.isHiding = payload.isHiding;
+      } else {
+        otherPlayersRef.current.set(senderPeerId, {
+          id: senderPeerId,
+          ...payload
+        });
+      }
+    };
+
+    networkRef.current.onPlayerAction = (senderPeerId, payload) => {
+      // Remote client interactions handled by host
+    };
+
     networkRef.current.onTagEvent = (tagData) => {
       schoolTagAudio.playTagJumpscare();
       if (tagData.targetId === networkRef.current.myPeerId) {
