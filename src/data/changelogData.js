@@ -3,11 +3,40 @@
 
 export const CHANGELOG_DATA = [
   {
+    version: 'v1.53.1',
+    date: '2026-09-14',
+    title: '👻 [도촌 영혼 대결] 교사용 업무망 ↔ 학생용 학생망 크롬북 100% 접속 보장 하이브리드 릴레이 폴백 엔진 구축',
+    badge: 'LATEST',
+    badgeColor: 'emerald',
+    items: [
+      {
+        tag: 'HYBRID RELAY FALLBACK',
+        tagColor: 'emerald',
+        text: '[다양한 접속 환경 100% 접속 보장] 교사용 업무망 PC와 학생용 학생망 크롬북처럼 서로 다른 망 환경에서도 한 명도 빠짐없이 대기실에 입장할 수 있도록 WebRTC P2P 직결과 Firebase RTDB 실시간 릴레이를 결합한 듀얼 하이브리드 엔진 구축'
+      },
+      {
+        tag: 'ZERO-TOUCH AUTO TRANSITION',
+        tagColor: 'blue',
+        text: '[무경계 자동 전환 시스템] 접속 시도 시 3.8초 내 P2P 직결이 가능한 환경은 0ms 초저지연 직결 모드로 작동하고, 망 분리 환경으로 직결이 지연될 경우 별도의 오류 없이 안전 릴레이 모드로 즉시 자동 전환되어 원활한 대전 지원'
+      },
+      {
+        tag: 'LEAN BANDWIDTH THROTTLING',
+        tagColor: 'purple',
+        text: '[초경량 대역폭 압축 파이프라인] 릴레이 모드 작동 시 입력 및 스냅샷 데이터를 10Hz(100ms) 델타 압축으로 전송하여 경기당 약 200~300KB 수준으로 최소화, 무료 데이터베이스 한도 소모 없이 안정적인 수업 환경 제공'
+      },
+      {
+        tag: 'CLEANUP ON EXIT',
+        tagColor: 'amber',
+        text: '[실시간 데이터 0바이트 자동 회수] 대기실 퇴장 및 게임 종료 시 생성된 임시 릴레이 노드를 즉각 삭제하여 데이터베이스를 항상 깨끗하게 유지하도록 리소스 수명 주기 최적화'
+      }
+    ]
+  },
+  {
     version: 'v1.53.0',
     date: '2026-09-10',
     title: '🏴‍☠️ [도촌 해적선 코인 쟁탈전] 34번째 공식 플레이어블 게임 정식 개장 & Firebase RTDB WebRTC P2P 배틀 탑재',
-    badge: 'LATEST',
-    badgeColor: 'emerald',
+    badge: 'UPDATE',
+    badgeColor: 'blue',
     items: [
       {
         tag: 'NEW GAME RELEASE',

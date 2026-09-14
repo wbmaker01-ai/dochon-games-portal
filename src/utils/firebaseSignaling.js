@@ -421,6 +421,185 @@ export class FirebaseSignaling {
     } catch (e) {}
   }
 
+  // ==========================================
+  // --- REAL-TIME RELAY FALLBACK SUBSYSTEM ---
+  // ==========================================
+
+  // --- Guest: Send Relay Message to Host ---
+  async sendRelayGuestMessage(roomCode, guestId, msg) {
+    const cleanCode = String(roomCode || '').trim();
+    const url = this._getRoomUrl(cleanCode, `relays/${guestId}/guest_msg`);
+    try {
+      await fetch(url, {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ ...msg, _ts: Date.now() })
+      });
+    } catch (e) {}
+  }
+
+  // --- Host: Send Relay Message to Guest ---
+  async sendRelayHostMessage(roomCode, guestId, msg) {
+    const cleanCode = String(roomCode || '').trim();
+    const url = this._getRoomUrl(cleanCode, `relays/${guestId}/host_msg`);
+    try {
+      await fetch(url, {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ ...msg, _ts: Date.now() })
+      });
+    } catch (e) {}
+  }
+
+  // --- Guest: Listen to Relay Messages from Host ---
+  listenRelayHostMessages(roomCode, guestId, onMessage) {
+    const cleanCode = String(roomCode || '').trim();
+    const sseUrl = `${DB_BASE_URL}/${this.gameId}/${cleanCode}/relays/${guestId}/host_msg.json`;
+    let lastTs = 0;
+
+    const handleMsg = (data) => {
+      if (!data || typeof data !== 'object') return;
+      if (data._ts && data._ts !== lastTs) {
+        lastTs = data._ts;
+        onMessage(data);
+      }
+    };
+
+    let es = null;
+    try {
+      es = new EventSource(sseUrl);
+      es.addEventListener('put', (e) => {
+        try {
+          const parsed = JSON.parse(e.data);
+          if (parsed && parsed.data) handleMsg(parsed.data);
+        } catch (err) {}
+      });
+      this.eventSources.set(`relay_host_${guestId}`, es);
+    } catch (e) {}
+
+    const poll = setInterval(async () => {
+      try {
+        const res = await fetch(sseUrl);
+        if (res.ok) {
+          const data = await res.json();
+          handleMsg(data);
+        }
+      } catch (e) {}
+    }, 250);
+
+    this.pollTimers.set(`relay_host_${guestId}`, poll);
+  }
+
+  // --- Host: Listen to Relay Messages from Specific Guest ---
+  listenRelayGuestMessages(roomCode, guestId, onMessage) {
+    const cleanCode = String(roomCode || '').trim();
+    const sseUrl = `${DB_BASE_URL}/${this.gameId}/${cleanCode}/relays/${guestId}/guest_msg.json`;
+    let lastTs = 0;
+
+    const handleMsg = (data) => {
+      if (!data || typeof data !== 'object') return;
+      if (data._ts && data._ts !== lastTs) {
+        lastTs = data._ts;
+        onMessage(data);
+      }
+    };
+
+    let es = null;
+    try {
+      es = new EventSource(sseUrl);
+      es.addEventListener('put', (e) => {
+        try {
+          const parsed = JSON.parse(e.data);
+          if (parsed && parsed.data) handleMsg(parsed.data);
+        } catch (err) {}
+      });
+      this.eventSources.set(`relay_guest_${guestId}`, es);
+    } catch (e) {}
+
+    const poll = setInterval(async () => {
+      try {
+        const res = await fetch(sseUrl);
+        if (res.ok) {
+          const data = await res.json();
+          handleMsg(data);
+        }
+      } catch (e) {}
+    }, 250);
+
+    this.pollTimers.set(`relay_guest_${guestId}`, poll);
+  }
+
+  // --- Host: Listen to Any Guest Entering Relay Mode ---
+  listenAllRelays(roomCode, onGuestRelayJoin) {
+    const cleanCode = String(roomCode || '').trim();
+    const sseUrl = `${DB_BASE_URL}/${this.gameId}/${cleanCode}/relays.json`;
+    const knownRelays = new Set();
+
+    const checkRelays = (relaysObj) => {
+      if (!relaysObj || typeof relaysObj !== 'object') return;
+      Object.keys(relaysObj).forEach((guestId) => {
+        const entry = relaysObj[guestId];
+        if (!entry) return;
+        const msg = entry.guest_msg || (entry.type ? entry : null);
+        if (msg && msg.type === 'JOIN_LOBBY' && !knownRelays.has(guestId)) {
+          knownRelays.add(guestId);
+          onGuestRelayJoin(guestId, msg);
+        }
+      });
+    };
+
+    let es = null;
+    try {
+      es = new EventSource(sseUrl);
+      es.addEventListener('put', (e) => {
+        try {
+          const parsed = JSON.parse(e.data);
+          if (parsed && parsed.data) {
+            if (parsed.path === '/') checkRelays(parsed.data);
+            else {
+              const gid = parsed.path.replace(/^\//, '').split('/')[0];
+              if (gid) checkRelays({ [gid]: parsed.data });
+            }
+          }
+        } catch (err) {}
+      });
+      this.eventSources.set(`relays_${cleanCode}`, es);
+    } catch (e) {}
+
+    const poll = setInterval(async () => {
+      try {
+        const res = await fetch(sseUrl);
+        if (res.ok) {
+          const data = await res.json();
+          checkRelays(data);
+        }
+      } catch (e) {}
+    }, 1000);
+
+    this.pollTimers.set(`relays_${cleanCode}`, poll);
+  }
+
+  // --- Cleanup Specific Relay Node ---
+  async cleanupRelay(roomCode, guestId) {
+    const cleanCode = String(roomCode || '').trim();
+    const keys = [`relay_host_${guestId}`, `relay_guest_${guestId}`];
+    keys.forEach((k) => {
+      if (this.eventSources.has(k)) {
+        try { this.eventSources.get(k).close(); } catch (e) {}
+        this.eventSources.delete(k);
+      }
+      if (this.pollTimers.has(k)) {
+        clearInterval(this.pollTimers.get(k));
+        this.pollTimers.delete(k);
+      }
+    });
+
+    const url = this._getRoomUrl(cleanCode, `relays/${guestId}`);
+    try {
+      await fetch(url, { method: 'DELETE' });
+    } catch (e) {}
+  }
+
   // --- Update Room Status (e.g. 'playing') ---
   async updateRoomStatus(roomCode, status = 'playing') {
     const cleanCode = String(roomCode || '').trim();
