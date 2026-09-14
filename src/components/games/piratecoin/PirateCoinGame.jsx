@@ -931,6 +931,20 @@ export default function PirateCoinGame({ onScoreSubmitted, onBackToLobby, isMute
                       <div className="text-xs text-slate-300">
                         선원 접속 현황: {lobbyPlayers.length} / 4명
                       </div>
+                      {lobbyPlayers.length > 0 && (
+                        <div className="flex flex-wrap justify-center gap-1.5 mt-2">
+                          {lobbyPlayers.map((p) => (
+                            <span key={p.id} className="text-[11px] px-2 py-0.5 rounded-full bg-slate-900/90 border border-slate-700 text-slate-300 flex items-center gap-1">
+                              {p.isHost ? '👑 ' : ''}{p.name}
+                              {p.isRelay ? (
+                                <span className="text-[10px] text-amber-400 font-bold bg-amber-950/80 px-1 py-0.2 rounded border border-amber-500/40">안전 릴레이</span>
+                              ) : (
+                                <span className="text-[10px] text-emerald-400 font-bold bg-emerald-950/80 px-1 py-0.2 rounded border border-emerald-500/40">초저지연 P2P</span>
+                              )}
+                            </span>
+                          ))}
+                        </div>
+                      )}
                     </div>
                   )}
 

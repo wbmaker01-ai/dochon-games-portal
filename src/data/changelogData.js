@@ -3,10 +3,39 @@
 
 export const CHANGELOG_DATA = [
   {
+    version: 'v1.53.4',
+    date: '2026-09-14',
+    title: '🏴‍☠️ [도촌 해적선 코인 쟁탈전] WebRTC P2P + Firebase RTDB 하이브리드 실시간 릴레이 자동 폴백 엔진 탑재 (포털 5대 멀티 100% 구축 완성)',
+    badge: 'LATEST',
+    badgeColor: 'emerald',
+    items: [
+      {
+        tag: 'HYBRID RELAY FALLBACK',
+        tagColor: 'emerald',
+        text: '[다양한 접속 환경 100% 접속 보장] 교사용 PC와 학생용 크롬북 간 상이한 접속 환경에서도 한 명도 빠짐없이 대기실에 입장할 수 있도록 1차 WebRTC P2P 직결(4초 타임아웃) 및 2차 Firebase RTDB 실시간 릴레이 자동 폴백 파이프라인 전면 구축'
+      },
+      {
+        tag: 'ZERO-TOUCH AUTO TRANSITION',
+        tagColor: 'blue',
+        text: '[4초 무중단 자동 전환 시스템] 4초 내 P2P 직결이 가능한 환경은 0ms 초저지연 직결 모드로 작동하고, 직결이 지연될 경우 별도의 오류 없이 안전 릴레이 모드로 즉시 자동 전환되어 대기실 즉시 탑승 완료'
+      },
+      {
+        tag: 'LEAN BANDWIDTH THROTTLING',
+        tagColor: 'purple',
+        text: '[초경량 100ms 델타 압축 파이프라인] 릴레이 모드 작동 시 입력 및 전장 스냅샷 데이터를 10Hz(100ms) 델타 압축으로 전송하여 경기당 약 150~200KB 수준으로 최소화, 무료 데이터베이스 한도 소모 없이 안정적인 수업 플레이 환경 보장'
+      },
+      {
+        tag: 'PORTAL 100% COVERAGE',
+        tagColor: 'amber',
+        text: '[포털 5대 멀티플레이 전면 완성] 영혼 대결, 눈싸움 서바이벌, 야간 학교 숨바꼭질, 마이크로 카트, 해적선 코인 쟁탈전까지 포털 내 모든 멀티플레이 게임의 하이브리드 릴레이 폴백 100% 구축 완료'
+      }
+    ]
+  },
+  {
     version: 'v1.53.3',
     date: '2026-09-14',
     title: '🔦🏎️ [야간 학교 숨바꼭질 & 마이크로 카트] 교사 업무망 ↔ 학생망 100% 접속 보장 WebRTC P2P + Firebase RTDB 하이브리드 릴레이 폴백 엔진 전면 탑재',
-    badge: 'LATEST',
+    badge: 'UPDATE',
     badgeColor: 'emerald',
     items: [
       {
