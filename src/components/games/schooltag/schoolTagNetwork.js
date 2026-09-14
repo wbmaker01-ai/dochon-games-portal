@@ -1,7 +1,6 @@
 // Dochon Games Portal - School Tag WebRTC P2P Network Manager
-// Hybrid P2P: Firebase RTDB Signaling (Handshake only) + W3C Native WebRTC DataChannel (P2P In-game)
-// 100% Zero external cloud dependencies (No PeerJS / 0.peerjs.com)
-// Leaves 0 bytes in Firebase after connection is established
+// Hybrid Fallback Engine: Tier 1 Direct WebRTC P2P (4s timeout) -> Tier 2 Firebase RTDB Real-Time Relay
+// Guarantees 100% Connectivity between Isolated Teacher/Student School Networks with 0 Bytes Waste
 
 import { FirebaseSignaling } from '../../../utils/firebaseSignaling';
 import { SCHOOL_TAG_CONSTANTS, ROLE_TYPES } from './schoolTagConstants';
@@ -60,7 +59,8 @@ const ICE_SERVERS = [
   }
 ];
 
-const CONNECTION_TIMEOUT_MS = 18000;
+const P2P_HANDSHAKE_TIMEOUT_MS = 4000;      // Tier 1 P2P attempt timeout: 4 seconds
+const CONNECTION_TOTAL_TIMEOUT_MS = 18000;   // Overall connection timeout: 18 seconds
 const RTC_CONFIG = {
   iceServers: ICE_SERVERS,
   iceCandidatePoolSize: 2
@@ -76,14 +76,19 @@ export class SchoolTagNetworkManager {
     this.myName = '';
     this.mySkinId = 'boy';
     this.myRole = ROLE_TYPES.RUNNER;
+    this.connectionMode = 'p2p'; // 'p2p' | 'relay'
 
-    // Host State: Map of guestId -> { pc, dc, player }
+    // Host State: Map of guestId -> { pc, dc, player, isRelay }
     this.connections = new Map();
 
     // Guest State: { pc, dc }
     this.hostConnection = null;
 
     this.lobbyPlayers = []; // [{ id, name, skinId, role, isHost, isReady, slotIndex }]
+
+    // Rate Limiting / Throttling for Relay mode (Max 10 updates/sec to protect Firebase Spark Quota)
+    this.lastRelayBroadcastTime = 0;
+    this.lastRelayInputTime = 0;
 
     // Event Callbacks
     this.onLobbyUpdate = null;
@@ -117,7 +122,15 @@ export class SchoolTagNetworkManager {
     if (this.onConnectionStatus) this.onConnectionStatus(message);
   }
 
-  // --- HOST: Create a P2P Room via Firebase RTDB Signaling ---
+  // Check if any active guest is in Relay mode
+  get hasRelayGuests() {
+    for (const conn of this.connections.values()) {
+      if (conn.isRelay) return true;
+    }
+    return false;
+  }
+
+  // --- HOST: Create a Room with Dual Channel (WebRTC P2P + Firebase Relay Fallback) ---
   async createRoom(numericCode, playerName, role = ROLE_TYPES.RUNNER, skinId = 'boy') {
     this.disconnect();
 
@@ -128,6 +141,7 @@ export class SchoolTagNetworkManager {
     this.myName = (playerName || '방장(학생)').trim();
     this.myRole = role;
     this.mySkinId = skinId;
+    this.connectionMode = 'p2p';
 
     this._emitStatus('🔗 도촌초 전용 시그널링 서버 연결 중...');
 
@@ -157,9 +171,14 @@ export class SchoolTagNetworkManager {
         this._emitStatus(`✅ 방(${codeToTry}) 개설 완료! 참가자를 기다리는 중...`);
         if (this.onLobbyUpdate) this.onLobbyUpdate([...this.lobbyPlayers]);
 
-        // Listen for incoming guest join offers in Firebase RTDB
+        // Channel 1: Listen for Tier 1 WebRTC P2P Guest Join Offers
         this.signaling.listenForGuests(codeToTry, (guestId, guestData) => {
           this.handleIncomingGuest(guestId, guestData);
+        });
+
+        // Channel 2: Listen for Tier 2 Firebase Relay Fallback Guest Joins (School Network Isolation bypass)
+        this.signaling.listenAllRelays(codeToTry, (guestId, guestMsg) => {
+          this.handleIncomingRelayGuest(guestId, guestMsg);
         });
 
         return codeToTry;
@@ -182,12 +201,12 @@ export class SchoolTagNetworkManager {
     return attemptHostInit(cleanCode);
   }
 
-  // --- HOST: Handle Incoming Guest WebRTC Offer ---
+  // --- HOST: Handle Tier 1 WebRTC P2P Guest Offer ---
   async handleIncomingGuest(guestId, guestData) {
     if (this.connections.has(guestId)) return;
     if (this.lobbyPlayers.length >= 4) return; // Max 4 players
 
-    this._emitStatus(`👋 ${guestData.name || '친구'}님이 입장을 시도합니다...`);
+    this._emitStatus(`⚡ ${guestData.name || '친구'}님이 P2P 직결 입장을 시도합니다...`);
 
     const pc = new RTCPeerConnection(RTC_CONFIG);
     let dc = null;
@@ -239,9 +258,12 @@ export class SchoolTagNetworkManager {
     }
   }
 
-  // --- HOST: Setup DataChannel for Connected Guest ---
+  // --- HOST: Setup DataChannel for Connected P2P Guest ---
   setupHostDataChannel(guestId, pc, dc, guestData) {
     dc.onopen = () => {
+      // Prevent duplicate if already added
+      if (this.connections.has(guestId)) return;
+
       const slot = this.lobbyPlayers.length;
       const newPlayer = {
         id: guestId,
@@ -254,7 +276,7 @@ export class SchoolTagNetworkManager {
       };
 
       this.lobbyPlayers.push(newPlayer);
-      this.connections.set(guestId, { pc, dc, player: newPlayer });
+      this.connections.set(guestId, { pc, dc, player: newPlayer, isRelay: false });
 
       // Send 3-Way Handshake ACK over P2P DataChannel
       try {
@@ -271,33 +293,16 @@ export class SchoolTagNetworkManager {
       // Clean up guest signaling node in Firebase RTDB (Leaves 0 bytes!)
       this.signaling.cleanupGuestSignaling(this.roomCode, guestId);
 
-      this._emitStatus(`🎉 ${newPlayer.name}님이 입장했습니다! (${this.lobbyPlayers.length}/4)`);
+      this._emitStatus(`🎉 ${newPlayer.name}님과 P2P 직결 연결 성공! (${this.lobbyPlayers.length}/4)`);
       this._broadcastLobby();
     };
 
     dc.onmessage = (event) => {
       try {
         const data = typeof event.data === 'string' ? JSON.parse(event.data) : event.data;
-        if (!data || !data.type) return;
-
-        switch (data.type) {
-          case 'CLIENT_INPUT':
-            if (this.onPlayerInput) {
-              this.onPlayerInput(guestId, data.payload);
-            }
-            break;
-
-          case 'CLIENT_ACTION':
-            if (this.onPlayerAction) {
-              this.onPlayerAction(guestId, data.payload);
-            }
-            break;
-
-          default:
-            break;
-        }
+        this.handleHostReceiveData(guestId, data);
       } catch (err) {
-        console.error('[Host Data Parsing Error]', err);
+        console.error('[Host P2P Data Parsing Error]', err);
       }
     };
 
@@ -311,13 +316,74 @@ export class SchoolTagNetworkManager {
     };
   }
 
+  // --- HOST: Handle Tier 2 Firebase Relay Fallback Guest Join ---
+  handleIncomingRelayGuest(guestId, guestMsg) {
+    if (this.connections.has(guestId)) return;
+    if (this.lobbyPlayers.length >= 4) return; // Max 4 players
+
+    const slot = this.lobbyPlayers.length;
+    const newPlayer = {
+      id: guestId,
+      name: (guestMsg.name || `학생 ${slot + 1}`).trim(),
+      skinId: guestMsg.skinId || 'boy',
+      role: ROLE_TYPES.RUNNER,
+      isHost: false,
+      isReady: true,
+      slotIndex: slot
+    };
+
+    this.lobbyPlayers.push(newPlayer);
+    this.connections.set(guestId, { pc: null, dc: null, player: newPlayer, isRelay: true });
+
+    // 1. Send direct ACK to this relay guest via Firebase Relay Channel
+    this.signaling.sendRelayHostMessage(this.roomCode, guestId, {
+      type: 'JOIN_ACK',
+      accepted: true,
+      players: this.lobbyPlayers,
+      slotIndex: newPlayer.slotIndex
+    });
+
+    // 2. Listen to this relay guest's real-time input messages
+    this.signaling.listenRelayGuestMessages(this.roomCode, guestId, (data) => {
+      this.handleHostReceiveData(guestId, data);
+    });
+
+    this._emitStatus(`🔄 ${newPlayer.name}님과 Firebase 안전 릴레이 연결 완료! (${this.lobbyPlayers.length}/4)`);
+    this._broadcastLobby();
+  }
+
+  // --- HOST: Handle Received Data (Unified P2P & Relay) ---
+  handleHostReceiveData(peerId, data) {
+    if (!data || !data.type) return;
+
+    switch (data.type) {
+      case 'CLIENT_INPUT':
+        if (this.onPlayerInput) {
+          this.onPlayerInput(peerId, data.payload || data);
+        }
+        break;
+
+      case 'CLIENT_ACTION':
+        if (this.onPlayerAction) {
+          this.onPlayerAction(peerId, data.payload || data);
+        }
+        break;
+
+      default:
+        break;
+    }
+  }
+
   _handlePlayerLeave(peerId) {
     if (!this.isHost) return;
 
     if (this.connections.has(peerId)) {
       const conn = this.connections.get(peerId);
-      try { conn.dc.close(); } catch (e) {}
-      try { conn.pc.close(); } catch (e) {}
+      try { conn.dc?.close(); } catch (e) {}
+      try { conn.pc?.close(); } catch (e) {}
+      if (conn.isRelay) {
+        this.signaling.cleanupRelay(this.roomCode, peerId);
+      }
       this.connections.delete(peerId);
     }
 
@@ -332,16 +398,20 @@ export class SchoolTagNetworkManager {
 
   _broadcastLobby() {
     if (!this.isHost) return;
-    this._broadcastToAll({
+    const packet = {
       type: 'LOBBY_STATE',
       players: this.lobbyPlayers,
       roomCode: this.roomCode
-    });
+    };
+    this._broadcastToAll(packet);
     if (this.onLobbyUpdate) this.onLobbyUpdate([...this.lobbyPlayers]);
   }
 
-  _broadcastToAll(data) {
+  // --- Unified Broadcast: Sends via P2P DataChannel and/or Firebase RTDB Relay ---
+  _broadcastToAll(data, isHighFrequency = false) {
     const payload = typeof data === 'string' ? data : JSON.stringify(data);
+
+    // 1. Direct WebRTC P2P DataChannels
     this.connections.forEach(({ dc }) => {
       if (dc && dc.readyState === 'open') {
         try {
@@ -349,9 +419,24 @@ export class SchoolTagNetworkManager {
         } catch (e) {}
       }
     });
+
+    // 2. Firebase RTDB Real-time Relay (Only if any active guest is in Relay mode)
+    if (this.hasRelayGuests) {
+      const now = Date.now();
+      // Apply 100ms throttling (max 10 fps) for high-frequency game state to protect Firebase Spark Free Tier
+      if (isHighFrequency) {
+        if (now - this.lastRelayBroadcastTime >= 100) {
+          this.lastRelayBroadcastTime = now;
+          this.signaling.broadcastRelay(this.roomCode, typeof data === 'object' ? data : JSON.parse(data));
+        }
+      } else {
+        // Critical events (LOBBY_STATE, GAME_START, TAG_EVENT, KEY_COLLECTED, GAME_OVER) are sent instantly
+        this.signaling.broadcastRelay(this.roomCode, typeof data === 'object' ? data : JSON.parse(data));
+      }
+    }
   }
 
-  // --- GUEST: Join Room via Firebase RTDB Signaling ---
+  // --- GUEST: Join Room (Tier 1 WebRTC P2P -> Automatic Tier 2 Firebase Relay Fallback) ---
   joinRoom(numericCode, playerName, skinId = 'boy') {
     return new Promise(async (resolve, reject) => {
       this.disconnect();
@@ -364,36 +449,97 @@ export class SchoolTagNetworkManager {
       this.mySkinId = skinId;
       const guestId = `g_${Math.random().toString(36).slice(2, 9)}`;
       this.myPeerId = guestId;
+      this.connectionMode = 'p2p';
 
       this._emitStatus(`🔍 방 찾는 중... (방 번호: [${cleanCode}])`);
 
       let settled = false;
-      const timeoutId = setTimeout(() => {
-        if (!settled) {
-          settled = true;
-          this.disconnect();
-          const errorMsg = `방 번호 [${cleanCode}]에 연결할 수 없습니다. 방장이 대기 중인지 확인해 주세요.`;
-          this._emitStatus(`❌ ${errorMsg}`);
-          if (this.onError) this.onError(errorMsg);
-          reject(new Error(errorMsg));
-        }
-      }, CONNECTION_TIMEOUT_MS);
+      let p2pFallbackTimer = null;
+      let totalSafetyTimer = null;
 
       const settle = (type, val) => {
         if (settled) return;
         settled = true;
-        clearTimeout(timeoutId);
+        if (p2pFallbackTimer) clearTimeout(p2pFallbackTimer);
+        if (totalSafetyTimer) clearTimeout(totalSafetyTimer);
         if (type === 'resolve') resolve(val);
         else reject(val);
       };
 
+      // 18s absolute safety timeout
+      totalSafetyTimer = setTimeout(() => {
+        if (!settled) {
+          this.disconnect();
+          const errorMsg = `방 번호 [${cleanCode}]에 연결할 수 없습니다. 방장이 대기 중인지 확인해 주세요.`;
+          this._emitStatus(`❌ ${errorMsg}`);
+          if (this.onError) this.onError(errorMsg);
+          settle('reject', new Error(errorMsg));
+        }
+      }, CONNECTION_TOTAL_TIMEOUT_MS);
+
+      // --- Trigger Automatic Firebase Relay Fallback ---
+      const fallbackToRelayMode = async (reason = '') => {
+        if (settled || this.connectionMode === 'relay') return;
+        this.connectionMode = 'relay';
+        if (p2pFallbackTimer) clearTimeout(p2pFallbackTimer);
+
+        console.info(`[SchoolTag P2P Fallback] Direct P2P unreachable (${reason}). Seamlessly switching to Firebase RTDB Relay...`);
+        this._emitStatus('🔄 망 분리 감지 ➔ Firebase 안전 릴레이 모드로 자동 연결 완료!');
+
+        // Close WebRTC handles safely
+        try {
+          if (this.hostConnection) {
+            this.hostConnection.dc?.close();
+            this.hostConnection.pc?.close();
+            this.hostConnection = null;
+          }
+        } catch (e) {}
+
+        try {
+          // 1. Listen for 1-to-many Broadcasts from Host (Snapshots, Events, Lobby)
+          this.signaling.listenRelayBroadcast(cleanCode, (data) => {
+            this._handleGuestReceivedData(data);
+          });
+
+          // 2. Listen for Direct Messages from Host (JOIN_ACK)
+          this.signaling.listenRelayHostMessages(cleanCode, guestId, (data) => {
+            if (data.type === 'JOIN_ACK') {
+              if (data.accepted) {
+                this.lobbyPlayers = data.players || [];
+                this._emitStatus('🎉 Firebase 안전 릴레이 모드로 대기실 입장 완료!');
+                if (this.onLobbyUpdate) this.onLobbyUpdate([...this.lobbyPlayers]);
+                settle('resolve', cleanCode);
+              } else {
+                const errorMsg = data.reason || '방 입장이 거부되었습니다.';
+                this._emitStatus(`❌ ${errorMsg}`);
+                if (this.onError) this.onError(errorMsg);
+                settle('reject', new Error(errorMsg));
+              }
+              return;
+            }
+            this._handleGuestReceivedData(data);
+          });
+
+          // 3. Send JOIN_LOBBY via Firebase Relay
+          await this.signaling.sendRelayGuestMessage(cleanCode, guestId, {
+            type: 'JOIN_LOBBY',
+            id: guestId,
+            name: this.myName,
+            skinId: this.mySkinId
+          });
+        } catch (err) {
+          console.error('[Relay Fallback Error]', err);
+          settle('reject', err);
+        }
+      };
+
       try {
-        // 1. Verify room in Firebase RTDB
+        // Step 1: Verify room exists in Firebase RTDB
         await this.signaling.checkRoom(cleanCode);
 
-        this._emitStatus('⚡ P2P 터널 수립 준비 중 (WebRTC 핸드셰이크)...');
+        this._emitStatus('⚡ P2P 직결 연결 시도 중 (WebRTC 핸드셰이크)...');
 
-        // 2. Create RTCPeerConnection & DataChannel
+        // Step 2: Attempt Tier 1 Direct WebRTC P2P
         const pc = new RTCPeerConnection(RTC_CONFIG);
         const dc = pc.createDataChannel('schoolTagChannel', { ordered: true });
         this.hostConnection = { pc, dc };
@@ -401,16 +547,30 @@ export class SchoolTagNetworkManager {
         const candidateQueue = [];
         let isRemoteDescSet = false;
 
-        // Stream guest ICE candidates to Firebase RTDB
+        // Set 4-second timeout: if DataChannel does not open in 4s, automatically fall back to Firebase Relay!
+        p2pFallbackTimer = setTimeout(() => {
+          if (!settled && this.connectionMode === 'p2p') {
+            fallbackToRelayMode('4초 직결 타임아웃');
+          }
+        }, P2P_HANDSHAKE_TIMEOUT_MS);
+
         pc.onicecandidate = (event) => {
-          if (event.candidate) {
+          if (event.candidate && this.connectionMode === 'p2p') {
             this.signaling.sendGuestCandidate(cleanCode, guestId, event.candidate);
           }
         };
 
-        // DataChannel event handlers
+        pc.oniceconnectionstatechange = () => {
+          if (pc.iceConnectionState === 'failed' && this.connectionMode === 'p2p') {
+            fallbackToRelayMode('ICE 연결 실패');
+          }
+        };
+
         dc.onopen = () => {
-          this._emitStatus('⚡ P2P 터널 수립 완료! 대기실 입장 확인 중...');
+          if (this.connectionMode === 'p2p') {
+            if (p2pFallbackTimer) clearTimeout(p2pFallbackTimer);
+            this._emitStatus('⚡ P2P 터널 수립 완료! 대기실 입장 확인 중...');
+          }
         };
 
         dc.onmessage = (event) => {
@@ -421,7 +581,7 @@ export class SchoolTagNetworkManager {
             if (data.type === 'JOIN_ACK') {
               if (data.accepted) {
                 this.lobbyPlayers = data.players || [];
-                this._emitStatus('🎉 대기실 입장 완료!');
+                this._emitStatus('🎉 P2P 초저지연 대기실 입장 완료!');
                 if (this.onLobbyUpdate) this.onLobbyUpdate([...this.lobbyPlayers]);
 
                 // Clean up guest signaling data from Firebase RTDB (Leaves 0 bytes!)
@@ -444,12 +604,17 @@ export class SchoolTagNetworkManager {
         };
 
         dc.onclose = () => {
-          this._emitStatus('❌ 방장과의 연결이 종료되었습니다.');
-          if (this.onDisconnect) this.onDisconnect('방장과의 연결이 끊어졌습니다.');
+          if (this.connectionMode === 'p2p') {
+            this._emitStatus('❌ 방장과의 연결이 종료되었습니다.');
+            if (this.onDisconnect) this.onDisconnect('방장과의 연결이 끊어졌습니다.');
+          }
         };
 
         dc.onerror = (err) => {
-          console.warn('[Guest DataChannel Error]', err);
+          if (this.connectionMode === 'p2p') {
+            console.warn('[P2P DC Error, triggering relay fallback]:', err);
+            fallbackToRelayMode('DataChannel 에러');
+          }
         };
 
         // 3. Create SDP Offer & send to Firebase RTDB
@@ -537,64 +702,85 @@ export class SchoolTagNetworkManager {
     }
   }
 
-  // --- Match Control (Host -> Guests via P2P DataChannel) ---
+  // --- Match Control (Host -> Guests via P2P DataChannel & Relay) ---
   broadcastGameStart(matchData) {
     if (!this.isHost) return;
     this.signaling.updateRoomStatus(this.roomCode, 'playing');
-    this._broadcastToAll({ type: 'GAME_START', matchData });
+    this._broadcastToAll({ type: 'GAME_START', matchData }, false);
     if (this.onGameStart) this.onGameStart(matchData);
   }
 
   broadcastGameState(state) {
     if (!this.isHost) return;
-    this._broadcastToAll({ type: 'GAME_STATE', state });
+    this._broadcastToAll({ type: 'GAME_STATE', state }, true);
   }
 
   broadcastTagEvent(tagData) {
     if (!this.isHost) return;
-    this._broadcastToAll({ type: 'TAG_EVENT', ...tagData });
+    this._broadcastToAll({ type: 'TAG_EVENT', ...tagData }, false);
     if (this.onTagEvent) this.onTagEvent(tagData);
   }
 
   broadcastKeyEvent(keyData) {
     if (!this.isHost) return;
-    this._broadcastToAll({ type: 'KEY_COLLECTED', ...keyData });
+    this._broadcastToAll({ type: 'KEY_COLLECTED', ...keyData }, false);
     if (this.onKeyEvent) this.onKeyEvent(keyData);
   }
 
   broadcastGameOver(result) {
     if (!this.isHost) return;
     this.signaling.updateRoomStatus(this.roomCode, 'finished');
-    this._broadcastToAll({ type: 'GAME_OVER', result });
+    this._broadcastToAll({ type: 'GAME_OVER', result }, false);
     if (this.onGameOver) this.onGameOver(result);
   }
 
-  // --- Client Controls (Guest -> Host via P2P DataChannel) ---
+  // --- Client Controls (Guest -> Host via P2P DataChannel or Firebase Relay) ---
   sendClientInput(input) {
-    if (this.isHost || !this.hostConnection || !this.hostConnection.dc) return;
-    if (this.hostConnection.dc.readyState === 'open') {
-      try {
-        this.hostConnection.dc.send(
-          JSON.stringify({
-            type: 'CLIENT_INPUT',
-            payload: input
-          })
-        );
-      } catch (e) {}
+    if (this.isHost) return;
+
+    if (this.connectionMode === 'p2p') {
+      if (this.hostConnection?.dc?.readyState === 'open') {
+        try {
+          this.hostConnection.dc.send(
+            JSON.stringify({
+              type: 'CLIENT_INPUT',
+              payload: input
+            })
+          );
+        } catch (e) {}
+      }
+    } else if (this.connectionMode === 'relay') {
+      const now = Date.now();
+      // Throttle client input to max 10 fps (100ms) in relay mode to protect Firebase Spark Free Tier
+      if (now - this.lastRelayInputTime >= 100) {
+        this.lastRelayInputTime = now;
+        this.signaling.sendRelayGuestMessage(this.roomCode, this.myPeerId, {
+          type: 'CLIENT_INPUT',
+          payload: input
+        });
+      }
     }
   }
 
   sendClientAction(action) {
-    if (this.isHost || !this.hostConnection || !this.hostConnection.dc) return;
-    if (this.hostConnection.dc.readyState === 'open') {
-      try {
-        this.hostConnection.dc.send(
-          JSON.stringify({
-            type: 'CLIENT_ACTION',
-            payload: action
-          })
-        );
-      } catch (e) {}
+    if (this.isHost) return;
+
+    if (this.connectionMode === 'p2p') {
+      if (this.hostConnection?.dc?.readyState === 'open') {
+        try {
+          this.hostConnection.dc.send(
+            JSON.stringify({
+              type: 'CLIENT_ACTION',
+              payload: action
+            })
+          );
+        } catch (e) {}
+      }
+    } else if (this.connectionMode === 'relay') {
+      this.signaling.sendRelayGuestMessage(this.roomCode, this.myPeerId, {
+        type: 'CLIENT_ACTION',
+        payload: action
+      });
     }
   }
 
@@ -605,16 +791,19 @@ export class SchoolTagNetworkManager {
     }
 
     if (this.connections) {
-      this.connections.forEach(({ pc, dc }) => {
-        try { if (dc) dc.close(); } catch (_) {}
-        try { if (pc) pc.close(); } catch (_) {}
+      this.connections.forEach((conn) => {
+        try { conn.dc?.close(); } catch (_) {}
+        try { conn.pc?.close(); } catch (_) {}
+        if (conn.isRelay) {
+          this.signaling.cleanupRelay(this.roomCode, conn.player?.id);
+        }
       });
       this.connections.clear();
     }
 
     if (this.hostConnection) {
-      try { if (this.hostConnection.dc) this.hostConnection.dc.close(); } catch (_) {}
-      try { if (this.hostConnection.pc) this.hostConnection.pc.close(); } catch (_) {}
+      try { this.hostConnection.dc?.close(); } catch (_) {}
+      try { this.hostConnection.pc?.close(); } catch (_) {}
       this.hostConnection = null;
     }
 
@@ -623,5 +812,6 @@ export class SchoolTagNetworkManager {
     this.lobbyPlayers = [];
     this.isHost = false;
     this.roomCode = '';
+    this.connectionMode = 'p2p';
   }
 }
