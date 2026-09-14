@@ -586,8 +586,13 @@ export default function SnowballGame({ onScoreSubmitted }) {
                         <div className="snowball-p2p-players-list">
                           {p2pPlayers.map((pl) => (
                             <div key={pl.id} className="snowball-p2p-player-chip">
-                              <span>{pl.isHost ? '👑' : '⛄'}</span>
+                              <span>{pl.isHost ? '👑' : pl.isRelay ? '🔄' : '⛄'}</span>
                               <span>{pl.name}</span>
+                              {pl.isRelay && (
+                                <span style={{ fontSize: '10px', background: 'rgba(59, 130, 246, 0.3)', color: '#93C5FD', padding: '1px 5px', borderRadius: '4px', marginLeft: '4px' }}>
+                                  릴레이
+                                </span>
+                              )}
                             </div>
                           ))}
                         </div>

@@ -579,6 +579,58 @@ export class FirebaseSignaling {
     this.pollTimers.set(`relays_${cleanCode}`, poll);
   }
 
+  // --- Host: Broadcast Message to All Relay Guests (Snapshot, Events, Lobby) ---
+  async broadcastRelay(roomCode, msg) {
+    const cleanCode = String(roomCode || '').trim();
+    const url = this._getRoomUrl(cleanCode, 'relays/broadcast');
+    try {
+      await fetch(url, {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ ...msg, _ts: Date.now() })
+      });
+    } catch (e) {}
+  }
+
+  // --- Guest: Listen to Host Broadcasts (Snapshot, Events, Lobby) ---
+  listenRelayBroadcast(roomCode, onMessage) {
+    const cleanCode = String(roomCode || '').trim();
+    const sseUrl = `${DB_BASE_URL}/${this.gameId}/${cleanCode}/relays/broadcast.json`;
+    let lastTs = 0;
+
+    const handleMsg = (data) => {
+      if (!data || typeof data !== 'object') return;
+      if (data._ts && data._ts !== lastTs) {
+        lastTs = data._ts;
+        onMessage(data);
+      }
+    };
+
+    let es = null;
+    try {
+      es = new EventSource(sseUrl);
+      es.addEventListener('put', (e) => {
+        try {
+          const parsed = JSON.parse(e.data);
+          if (parsed && parsed.data) handleMsg(parsed.data);
+        } catch (err) {}
+      });
+      this.eventSources.set(`relay_bcast_${cleanCode}`, es);
+    } catch (e) {}
+
+    const poll = setInterval(async () => {
+      try {
+        const res = await fetch(sseUrl);
+        if (res.ok) {
+          const data = await res.json();
+          handleMsg(data);
+        }
+      } catch (e) {}
+    }, 150);
+
+    this.pollTimers.set(`relay_bcast_${cleanCode}`, poll);
+  }
+
   // --- Cleanup Specific Relay Node ---
   async cleanupRelay(roomCode, guestId) {
     const cleanCode = String(roomCode || '').trim();
